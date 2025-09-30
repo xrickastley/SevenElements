@@ -1,0 +1,27 @@
+{
+	"parent": "seven-elements:root/elemental_awakening",
+	"display": {
+		"icon": {
+			"id": "seven-elements:infusion_table",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.seven-elements.root.power_of_the_elements"
+		},
+		"description": {
+			"translate": "advancements.seven-elements.root.power_of_the_elements.description"
+		},
+		"frame": "task"
+	},
+	"criteria": {
+		"infusion": {
+			"trigger": "seven-elements:elemental_infusion"
+		}
+	},
+	"requirements": [
+		[
+			"infusion"
+		]
+	],
+	"sends_telemetry_event": true
+}

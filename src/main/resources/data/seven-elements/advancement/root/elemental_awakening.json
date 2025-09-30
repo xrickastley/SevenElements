@@ -1,0 +1,44 @@
+{
+	"display": {
+		"icon": {
+			"id": "seven-elements:infusion_table",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.seven-elements.root.elemental_awakening"
+		},
+		"description": {
+			"translate": "advancements.seven-elements.root.elemental_awakening.description"
+		},
+		"frame": "task",
+		"background": "minecraft:textures/gui/advancements/backgrounds/stone.png"
+	},
+	"criteria": {
+		"craft": {
+			"trigger": "minecraft:recipe_crafted",
+			"conditions": {
+				"recipe_id": "seven-elements:infusion_table"
+			}
+		},
+		"place": {
+			"trigger": "minecraft:placed_block",
+			"conditions": {
+				"location": [
+					{
+						"condition": "minecraft:block_state_property",
+						"block": "seven-elements:infusion_table"
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"craft"
+		],
+		[
+			"place"
+		]
+	],
+	"sends_telemetry_event": true
+}

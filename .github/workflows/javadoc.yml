@@ -1,0 +1,34 @@
+
+name: javadoc
+on: push
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  javadoc:
+    if: github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+    runs-on: ubuntu-24.04
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+
+      - name: setup jdk
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'microsoft'
+
+      - name: make gradle wrapper executable
+        run: chmod +x ./gradlew
+
+      - name: generate javadoc
+        run: ./gradlew javadoc
+
+      - name: deploy javadoc to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: build/docs/javadoc

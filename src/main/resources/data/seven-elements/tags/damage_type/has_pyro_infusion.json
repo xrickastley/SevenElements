@@ -1,0 +1,9 @@
+{
+	"values": [
+		"#minecraft:is_fire",
+		"minecraft:explosion",
+		"minecraft:player_explosion",
+		"seven-elements:burning",
+		"seven-elements:overloaded"
+	]
+}

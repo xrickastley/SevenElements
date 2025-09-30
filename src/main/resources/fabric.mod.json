@@ -1,0 +1,68 @@
+{
+	"schemaVersion": 1,
+	"id": "seven-elements",
+	"version": "${version}",
+	"name": "Seven Elements",
+	"description": "A Minecraft mod that brings a faithful implementation of Genshin Impact's Elemental Combat system in Minecraft",
+	"authors": [
+		"_xRickAstley"
+	],
+	"contact": {
+		"sources": "https://github.com/xrickastley/seven-elements",
+		"issues": "https://github.com/xrickastley/seven-elements/issues"
+	},
+	"license": "ARR",
+	"icon": "assets/seven-elements/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"io.github.xrickastley.sevenelements.SevenElements"
+		],
+		"client": [
+			"io.github.xrickastley.sevenelements.SevenElementsClient"
+		],
+		"modmenu": [
+			"io.github.xrickastley.sevenelements.SevenElementsModMenu"
+		],
+		"cardinal-components": [
+			"io.github.xrickastley.sevenelements.SevenElementsCCAComponents"
+		]
+	},
+	"mixins": [
+		"seven-elements.mixins.json",
+		{
+			"config": "seven-elements.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.0",
+		"minecraft": ">=1.21 <=1.21.1",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"custom": {
+		"loom:injected_interfaces": {
+			"net/minecraft/class_1291": [
+				"io/github/xrickastley/sevenelements/interfaces/EntityAwareEffect"
+			],
+			"net/minecraft/class_1309": [
+				"io/github/xrickastley/sevenelements/interfaces/ILivingEntity"
+			],
+			"net/minecraft/class_1282": [
+				"io/github/xrickastley/sevenelements/interfaces/IDamageSource"
+			],
+			"net/minecraft/class_1259": [
+				"io/github/xrickastley/sevenelements/interfaces/IBossBar"
+			],
+			"net/minecraft/class_1676": [
+				"io/github/xrickastley/sevenelements/interfaces/InfusableProjectile"
+			]
+		},
+		"cardinal-components": [
+			"seven-elements:elements",
+			"seven-elements:elemental_infusion",
+			"seven-elements:frozen_effect"
+		]
+	}
+}

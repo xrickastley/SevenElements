@@ -1,0 +1,22 @@
+{
+	"variants": {
+		"half=lower": {
+			"model": "seven-elements:block/infusion_table"
+		},
+	    "facing=east,half=upper": {
+	    	"model": "seven-elements:block/infusion_table_top",
+	    	"y": 90
+	    },
+	    "facing=north,half=upper": {
+	    	"model": "seven-elements:block/infusion_table_top"
+	    },
+	    "facing=south,half=upper": {
+	    	"model": "seven-elements:block/infusion_table_top",
+	    	"y": 180
+	    },
+	    "facing=west,half=upper": {
+	    	"model": "seven-elements:block/infusion_table_top",
+	    	"y": 270
+	    }
+	}
+}

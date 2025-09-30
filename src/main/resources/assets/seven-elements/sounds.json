@@ -1,0 +1,60 @@
+{
+	"reaction": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "seven-elements:reaction"
+			}
+		]
+	},
+	"dendro_core_explosion": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "seven-elements:dendro_core_explosion"
+			}
+		]
+	},
+	"sprawling_shot_hit": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "seven-elements:sprawling_shot_hit"
+			}
+		]
+	},
+	"crystallize_shield": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "seven-elements:crystallize_shield"
+			}
+		]
+	},
+	"crystallize_shield.hit": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "seven-elements:crystallize_shield_hit"
+			}
+		]
+	},
+	"crystallize_shield.break": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "seven-elements:crystallize_shield_break"
+			}
+		]
+	},
+	"item_infusion": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "seven-elements:item_infusion"
+			}
+		],
+		"volume": 1.0,
+		"pitch": 1.0
+	}
+}
