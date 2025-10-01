@@ -1,0 +1,125 @@
+@font-face {
+	font-family: "Genshin";
+	src: url("Genshin.ttf") format("truetype");
+	font-weight: 900;
+	font-display: swap;
+}
+
+:root {
+	--vp-c-brand-1: var(--vp-c-green-1);
+	--vp-c-brand-2: var(--vp-c-green-2);
+	--vp-c-brand-3: var(--vp-c-green-3);
+	--vp-c-brand-soft: var(--vp-c-green-soft);
+	--vp-home-hero-image-background-image: none;
+	--vp-home-hero-image-filter: none;      
+}
+
+:root {
+	--vp-home-hero-name-color: #000000;
+}
+
+:root.dark {
+	--vp-home-hero-name-color: #ffffff;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	font-family: "Genshin", var(--vp-font-family-base);
+}
+
+.pyro {
+	color: #fda96f;
+}
+
+.hydro {
+	color: #0ae5ff;
+}
+
+.anemo {
+	color: #a7f4ce;
+}
+
+.electro {
+	color: #e2b9ff;
+}
+
+.dendro {
+	color: #b2ec2b;
+}
+
+.quicken {
+	color: #01e858;
+}
+
+.cryo {
+	color: #d0fdfe;
+}
+
+.geo {
+	color: #f3d862;
+}
+
+.physical {
+	color: #ffffff;
+}
+
+.nbt-sprite {
+	background-image: url(https://minecraft.wiki/images/Nbtsheet.png);
+}
+
+.nbt-sprite .root {
+	background-position: -48px -16px;
+	background-size: 64px auto;
+	height: 16px;
+	width: 16px;
+}
+
+.sprite {
+    display: inline-block;
+    vertical-align: text-top;
+    height: 16px;
+    width: 16px;
+    background-repeat: no-repeat;
+}
+
+.treeview {
+	margin-top: 0.3em;
+    display: flow-root;
+	font-size: 16px;
+}
+
+.treeview ul, .treeview li {
+    margin: 0 !important;
+    padding: 0;
+    list-style-type: none;
+    list-style-image: none;
+}
+
+.treeview li li {
+    position: relative;
+    padding-left: 13px;
+    margin-left: 7px !important;
+    border-left: 1px solid #636363;
+}
+
+.treeview li li::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -1px;
+    width: 11px;
+    height: 11px;
+    border-bottom: 1px solid #636363;
+}
+
+.treeview li li:last-child:not(.treeview-continue)::before {
+    border-left: 1px solid #636363;
+    width: 10px;
+}
+
+.treeview li li:last-child:not(.treeview-continue) {
+    border-color: transparent;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+	overflow: visible !important;
+}
