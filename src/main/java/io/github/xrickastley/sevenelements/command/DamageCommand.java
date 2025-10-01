@@ -98,7 +98,7 @@ public class DamageCommand {
 		if (target.damage(eds, amount)) {
 			context
 				.getSource()
-				.sendFeedback(() -> Text.translatable("commands.seven-elements.damage.success", amount, eds.getElementalApplication().getText(), icdText, target.getDisplayName()), true);
+				.sendFeedback(() -> Text.translatable("commands.seven-elements.damage.success", amount, ElementalApplications.gaugeUnits(livingTarget, element, gaugeUnits, false).getText(), icdText, target.getDisplayName()), true);
 
 			return 1;
 		} else {

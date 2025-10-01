@@ -162,8 +162,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 			final ElementComponent component = ElementComponent.KEY.get(livingEntity);
 
 			if (component.hasElementalApplication(Element.QUICKEN)) this.renderQuickenAura(context, livingEntity);
-
-			if (component.hasElementalApplication(Element.ELECTRO)) this.renderElectroAura(context, livingEntity);
+			else if (component.hasElementalApplication(Element.ELECTRO)) this.renderElectroAura(context, livingEntity);
 		}
 	}
 

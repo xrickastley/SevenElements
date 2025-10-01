@@ -34,7 +34,7 @@ public abstract sealed class AbstractSuperconductElementalReaction
 			).shouldApplyDMGBonus(false);
 
 			target.damage(source, damage);
-			target.addStatusEffect(new StatusEffectInstance(SevenElementsStatusEffects.SUPERCONDUCT, 240, 0, true, true), origin);
+			target.addStatusEffect(new StatusEffectInstance(SevenElementsStatusEffects.SUPERCONDUCT, 240, 0, false, true), origin);
 		}
 	}
 }

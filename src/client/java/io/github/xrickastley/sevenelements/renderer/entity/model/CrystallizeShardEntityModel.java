@@ -87,7 +87,9 @@ public class CrystallizeShardEntityModel extends SinglePartEntityModelWithChildT
 
 	@Override
 	public void setAngles(CrystallizeShardEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
-		this.updateAnimation(entity.idleAnimationState, IDLE_ANIMATION, ageInTicks, 0.35f);
+		this.getPart().traverse().forEach(ModelPart::resetTransform);
+		
+		this.updateAnimation(entity.idleAnimationState, IDLE_ANIMATION, ageInTicks, 1.5f);
 	}
 
 	@Override
