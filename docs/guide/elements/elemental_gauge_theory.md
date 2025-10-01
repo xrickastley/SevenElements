@@ -111,7 +111,7 @@ The Frozen state created by the [Frozen](./elemental_reactions/frozen.md) Elemen
 
 The <span class="cryo">**Freeze**</span> aura, while being a *sibling* element to <span class="cryo">**Cryo**</span>:
 - Cannot react with <span class="hydro">**Hydro**</span> to trigger <span class="cryo">**Frozen**</span> again. 
-- Triggers [Shatter](./elemental_reactions/frozen.md#shatter) upon being hit with a <span class="geo">**Geo**</span> attack or a [Heavy Weapon](../../../developer/data_pack/item_type_tag.md#heavy_weapon).
+- Triggers [Shatter](./elemental_reactions/frozen.md#shatter) upon being hit with a <span class="geo">**Geo**</span> attack or a [Heavy Weapon](../../../developer/data_pack/item_tag.md#heavy_weapon).
 
 #### Freeze Aura Gauge
 $$

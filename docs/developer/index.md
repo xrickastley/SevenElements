@@ -12,7 +12,7 @@ next: false
 
 This part of the wiki is for data pack or mod developers looking to extend or integrate with Seven Elements.
 
-If you just want to know how to **play** with the Seven Elements mod, click [here](../guide) instead.
+If you just want to know how to **play** with the Seven Elements mod, click [here](../guide/index.md) instead.
 
 To start, you may look at the sidebar for the documentation page you may need. Most, if not all the information you need should be in its corresponding documentation page.
 

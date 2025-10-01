@@ -13,7 +13,7 @@ Frozen is the [Elemental Reaction](../elemental_reactions.md) triggered when <sp
 
 Frozen by itself deals **no damage**. Instead, it applies a <span class="cryo">**Freeze**</span> aura and the "Frozen" Status Effect onto the target for a certain period of time.
 
-When an entity with the <span class="cryo">**Freeze**</span> aura receives <span class="geo">**Geo DMG**</span> or is hit by a [Heavy Weapon](../../../developer/data_pack/item_type_tag.md#heavy_weapon), the [**Shatter**](#shatter) reaction is triggered.
+When an entity with the <span class="cryo">**Freeze**</span> aura receives <span class="geo">**Geo DMG**</span> or is hit by a [Heavy Weapon](../../../developer/data_pack/item_tag.md#heavy_weapon), the [**Shatter**](#shatter) reaction is triggered.
 
 Inflicting <span class="pyro">**Pyro**</span>/<span class="electro">**Electro**</span>/<span class="hydro">**Anemo**</span> on a Freeze aura will consume it to trigger [Melt](./melt.md)/[Superconduct](./superconduct.md)/[Swirl](./swirl.md) respectively.
 
@@ -33,7 +33,7 @@ Reaction ID: `seven-elements:frozen`
 # Shatter
 <sup>&nbsp; &nbsp; < [Elemental Reactions](../elemental_reactions.md)</sup>
 
-Shatter is the [Elemental Reaction](../elemental_reactions.md) triggered when an entity inflicted with the <span class="cryo">**Freeze**</span> aura receives <span class="geo">**Geo DMG**</span> or is **directly** hit by a [Heavy Weapon](../../../developer/data_pack/item_type_tag.md#heavy_weapon).
+Shatter is the [Elemental Reaction](../elemental_reactions.md) triggered when an entity inflicted with the <span class="cryo">**Freeze**</span> aura receives <span class="geo">**Geo DMG**</span> or is **directly** hit by a [Heavy Weapon](../../../developer/data_pack/item_tag.md#heavy_weapon).
 
 Upon triggering Shatter, the <span class="cryo">**Freeze**</span> aura is removed. If Shatter was triggered by dealing <span class="geo">**Geo DMG**</span>, the <span class="geo">**Geo**</span> attack that dealt the damage will sustain no gauge deduction.	
 
