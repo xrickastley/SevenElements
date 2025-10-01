@@ -41,3 +41,13 @@ An infusion table requires an [iron pickaxe](https://minecraft.wiki/w/Pickaxe) o
 The infusion table's main purpose is to infuse items with the elements. The table can infuse **all** items with the elements.
 
 If an item is already infused with an element, it is replaced with another random elemental infusion.
+
+The elemental infusion on the item will also have a random selected amount of corresponding [Elemental Gauge Units](../elements/elemental_gauge_theory.md) from either 1.0, 1.5 or 2.0.
+
+### Removing Elemental Infusions
+
+With a [Grindstone](https://minecraft.wiki/w/Grindstone), an item with an Elemental Infusion may be stripped of it's Elemental Infusion.
+
+Like [enchanted](https://minecraft.wiki/w/Enchanted) items, placing an infused item in either input slot of the Grindstone makes an "un-infused" item appear in the output slot. This works regardless if the item is enchanted or not.
+
+Removing the "un-infused" item from the output slot deletes the input item and causes the Grindstone to drop some [experience](https://minecraft.wiki/w/Experience). The experience dropped is proportional to the [Gauge Units](../elements/elemental_gauge_theory.md) the Elemental Infusion would've applied.
