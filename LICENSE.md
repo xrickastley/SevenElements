@@ -7,7 +7,7 @@
 
 **Copyright © 2025 xrickastley (_xRickAstley). All Rights Reserved.**
 
-This license governs only the original code and modifications created by xrickastley (_xRickAstley). Materials owned by HoYoverse remain under their respective rights.
+This license governs only the original code and modifications created by xrickastley (_xRickAstley). Materials owned by HoYoverse and Mojang remain under their respective rights.
 
 <hr>
 
@@ -43,7 +43,7 @@ You may make modifications to the Software for **purely private, non-distributed
 
 ### 3. Limited Modification for Pull Requests
 
-You are granted limited permission to make modifications to the Software **solely for the purpose of submitting changes via a pull request to the official repository at** https://github.com/xrickastley/seven-elements.
+You are granted limited permission to make modifications to the Software **solely for the purpose of submitting changes via a pull request to the official repository at** https://github.com/xrickastley/SevenElements.
 
 1. Any modifications to the existing codebase, once submitted, shall become the property of xrickastley .
 2. If your contribution is accepted, you grant xrickastley full rights to integrate, use, reproduce, modify, adapt, publish, translate, distribute, display in whole or in part, in any form, medium, or technology now known or later developed, modify, and maintain those changes as part of the project.
