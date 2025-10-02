@@ -37,7 +37,7 @@ You may download and use this software for personal, non-commercial purposes onl
 
 For clarity, viewing and studying the source code as published in the official repository does not constitute reverse engineering.
 
-You may make modifications to the Software for **purely private, non-distributed use**. Such private modifications must not be shared, redistributed, or otherwise made available to third parties. If you wish to share modifications, they must be submitted as a Pull Request in accordance with Section 3.
+You may make modifications to the Software for **purely private, non-distributed use**. Such private modifications must not be shared, redistributed, in any form except by submitting them as a Pull Request in accordance with Section 3.
 
 <hr>
 
@@ -48,7 +48,7 @@ You are granted limited permission to make modifications to the Software **solel
 1. Any modifications to the existing codebase, once submitted, shall become the property of xrickastley .
 2. If your contribution is accepted, you grant xrickastley full rights to integrate, use, reproduce, modify, adapt, publish, translate, distribute, display in whole or in part, in any form, medium, or technology now known or later developed, modify, and maintain those changes as part of the project.
 3. By submitting a Pull Request, you grant xrickastley a **perpetual, worldwide, royalty-free license** to **review, test, and evaluate** the contribution, regardless of whether the Pull Request is merged.
-4. If the contribution is merged, the additional rights described in Sections 3–5 shall apply.
+4. If the contribution is merged, the additional rights described in Sections 3–7 shall apply.
 Independent Modules remain the property of the Contributor, but the Contributor may not impose licensing terms on such Modules that conflict with the rights granted to the Maintainer under this License.
 
 <hr>
