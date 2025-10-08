@@ -17,18 +17,17 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
 
 public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScreenHandler> {
 	private static final Identifier TEXTURE = SevenElements.identifier("textures/gui/container/infusion_table.png");
 
-	private static final Identifier SLOT_DISABLED_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot_disabled");
-	private static final Identifier SLOT_HIGHLIGHTED_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot_highlighted");
-	private static final Identifier SLOT_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot");
+	private static final Identifier SLOT_DISABLED_TEXTURE = Identifier.of("minecraft", "textures/gui/sprites/container/enchanting_table/enchantment_slot_disabled.png");
+	private static final Identifier SLOT_HIGHLIGHTED_TEXTURE = Identifier.of("minecraft", "textures/gui/sprites/container/enchanting_table/enchantment_slot_highlighted.png");
+	private static final Identifier SLOT_TEXTURE = Identifier.of("minecraft", "textures/gui/sprites/container/enchanting_table/enchantment_slot.png");
 
-	private static final Identifier LEVEL_DISABLED_TEXTURE = SevenElements.identifier("container/infusion_table/level_disabled");
-	private static final Identifier LEVEL_ENABLED_TEXTURE = SevenElements.identifier("container/infusion_table/level_enabled");
+	private static final Identifier LEVEL_DISABLED_TEXTURE = SevenElements.identifier("textures/gui/sprites/container/infusion_table/level_disabled.png");
+	private static final Identifier LEVEL_ENABLED_TEXTURE = SevenElements.identifier("textures/gui/sprites/container/infusion_table/level_enabled.png");
 
 	private static final int LOCK_TICKS = 10;
 	private final PlayerEntity player;
@@ -102,19 +101,19 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 			: LEVEL_DISABLED_TEXTURE;
 
 		final int color = MathHelper2.inRange(mouseX, x1, x2) && MathHelper2.inRange(mouseY, y1, y2) && this.isEnabled()
-			? Colors.YELLOW
+			? -256 // Colors.YELLOW in later versions.
 			: 0x685E4A;
 
 		RenderSystem.enableBlend();
-		context.drawGuiTexture(texture, x1, y1, 90, 19);
-		context.drawGuiTexture(expTexture, x2 - 24, y2 - 16, 24, 16);
+		context.drawTexture(texture, x1, y1, 0, 0, 90, 19, 90, 19);
+		context.drawTexture(expTexture, x2 - 24, y2 - 16, 0, 0, 24, 16, 24, 16);
 		context.drawText(this.textRenderer, Text.translatable("container.seven-elements.infusion_table.infuse"), x1 + 6, y1 + 6, color, false);
 		RenderSystem.disableBlend();
 	}
 
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderBackground(context, mouseX, mouseY, delta);
+		this.renderBackground(context);
 		super.render(context, mouseX, mouseY, delta);
 		this.drawMouseoverTooltip(context, mouseX, mouseY);
 	}

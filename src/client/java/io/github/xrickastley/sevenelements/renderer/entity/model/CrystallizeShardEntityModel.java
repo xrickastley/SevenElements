@@ -10,20 +10,17 @@ import net.minecraft.client.model.ModelPartBuilder;
 import net.minecraft.client.model.ModelPartData;
 import net.minecraft.client.model.ModelTransform;
 import net.minecraft.client.model.TexturedModelData;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.animation.Animation;
 import net.minecraft.client.render.entity.animation.AnimationHelper;
 import net.minecraft.client.render.entity.animation.Keyframe;
 import net.minecraft.client.render.entity.animation.Transformation;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
 import net.minecraft.client.render.entity.model.SinglePartEntityModelWithChildTransform;
-import net.minecraft.client.util.math.MatrixStack;
 
 public class CrystallizeShardEntityModel extends SinglePartEntityModelWithChildTransform<CrystallizeShardEntity> {
 	public static final EntityModelLayer MODEL_LAYER = new EntityModelLayer(SevenElements.identifier("crystallize_shard"), "crystal");
 
 	private final ModelPart root;
-	private final ModelPart crystal;
 
 	private static final Animation IDLE_ANIMATION = Animation.Builder.create(3.0F).looping()
 		.addBoneAnimation("crystal", new Transformation(Transformation.Targets.ROTATE,
@@ -52,7 +49,6 @@ public class CrystallizeShardEntityModel extends SinglePartEntityModelWithChildT
 		super(1f, 1f);
 
 		this.root = root;
-		this.crystal = root.getChild("crystal");
 	}
 
 	@Override
@@ -88,12 +84,7 @@ public class CrystallizeShardEntityModel extends SinglePartEntityModelWithChildT
 	@Override
 	public void setAngles(CrystallizeShardEntity entity, float limbSwing, float limbSwingAmount, float ageInTicks, float netHeadYaw, float headPitch) {
 		this.getPart().traverse().forEach(ModelPart::resetTransform);
-		
-		this.updateAnimation(entity.idleAnimationState, IDLE_ANIMATION, ageInTicks, 1.5f);
-	}
 
-	@Override
-	public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-		crystal.render(matrices, vertexConsumer, light, overlay, color);
+		this.updateAnimation(entity.idleAnimationState, IDLE_ANIMATION, ageInTicks, 1.5f);
 	}
 }

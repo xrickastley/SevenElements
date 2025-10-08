@@ -51,5 +51,5 @@ public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEnt
 	}
 
 	@Override
-	protected void renderLabelIfPresent(DendroCoreEntity entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float tickDelta) {}
+	protected void renderLabelIfPresent(DendroCoreEntity entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {}
 }

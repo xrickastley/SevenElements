@@ -31,9 +31,9 @@ public abstract class PrioritizedPlayerEntityMixin extends LivingEntity {
 	@Inject(
 		method = "isBlockBreakingRestricted",
 		at = @At("HEAD"),
-		cancellable = true,
-		order = Integer.MIN_VALUE // Prioritized since Frozen **MUST** disable movements and actions.
+		cancellable = true
 	)
+	// Prioritized since Frozen **MUST** disable movements and actions.
 	private void frozenPreventsBreakingBlocks(CallbackInfoReturnable<Boolean> info) {
 		if (this.hasStatusEffect(SevenElementsStatusEffects.FROZEN)) info.setReturnValue(true);
 	}

@@ -13,12 +13,14 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
+import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.networking.PayloadHandler;
+import io.github.xrickastley.sevenelements.networking.SevenElementsPayload;
 import io.github.xrickastley.sevenelements.networking.ShowElectroChargeS2CPayload;
 import io.github.xrickastley.sevenelements.util.BoxUtil;
 import io.github.xrickastley.sevenelements.util.ClientConfig;
@@ -28,12 +30,11 @@ import io.github.xrickastley.sevenelements.util.Ease;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.Context;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -43,7 +44,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
@@ -71,20 +71,19 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 	}
 
 	@Override
-	public CustomPayload.Id<ShowElectroChargeS2CPayload> getPayloadId() {
+	public SevenElementsPayload.Id<ShowElectroChargeS2CPayload> getPayloadId() {
 		return ShowElectroChargeS2CPayload.ID;
 	}
 
 	@Override
-	public void receive(ShowElectroChargeS2CPayload payload, Context context) {
-		final ClientPlayerEntity player = context.player();
+	public void receive(ShowElectroChargeS2CPayload payload, ClientPlayerEntity player, PacketSender sender) {
 		final World world = player.getWorld();
 		final Entity mainEntity = world.getEntityById(payload.mainEntity());
 
 		if (mainEntity == null) {
 			SevenElements.sublogger().warn("Received packet for unknown main Electro-Charged entity, ignoring!");
 
-            return;
+			return;
 		}
 
 		entries.add(
@@ -191,64 +190,74 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 	}
 
 	private void renderChargeLine(WorldRenderContext context, Vec3d origin, List<Vec3d> positions, Color outerColor, Color innerColor) {
-	    final Camera camera = context.camera();
-	    final Vec3d camPos = camera.getPos();
+		final Camera camera = context.camera();
+		final Vec3d camPos = camera.getPos();
 
-	    final MatrixStack matrices = new MatrixStack();
-	    matrices.push();
+		final MatrixStack matrices = new MatrixStack();
+		matrices.push();
 		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
-	    matrices.translate(origin.x - camPos.x, origin.y - camPos.y, origin.z - camPos.z);
+		matrices.translate(origin.x - camPos.x, origin.y - camPos.y, origin.z - camPos.z);
 
-	    final Tessellator tesselator = Tessellator.getInstance();
-	    final Matrix4f posMat = matrices.peek().getPositionMatrix();
-	    final MatrixStack.Entry entry = matrices.peek();
+		final Tessellator tesselator = Tessellator.getInstance();
+		final Matrix4f posMat = matrices.peek().getPositionMatrix();
+		final Matrix3f normMat = matrices.peek().getNormalMatrix();
 
-		BufferBuilder buffer = tesselator.begin(DrawMode.LINES, VertexFormats.LINES);
+		BufferBuilder buffer = tesselator.getBuffer();
+
+		buffer.begin(DrawMode.LINES, VertexFormats.LINES);
+		for (int i = 1; i < positions.size(); i++) {
+			final Vec3d start = positions.get(i - 1);
+			final Vec3d end = positions.get(i);
+			Vec3d normal = end.normalize();
+
+			buffer
+				.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
+				.color(outerColor.asARGB())
+				.normal(normMat, (float) normal.x, (float) normal.y, (float) normal.z)
+				.next();
+
+			buffer
+				.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
+				.color(outerColor.asARGB())
+				.normal(normMat, (float) normal.x, (float) normal.y, (float) normal.z)
+				.next();
+		}
+
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.disableCull();
+		RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
+		RenderSystem.setShaderColor(1, 1, 1, 1);
+
+		RenderSystem.lineWidth(6.0f);
+
+		tesselator.draw();
+
+		buffer.begin(DrawMode.LINES, VertexFormats.LINES);
 
 		for (int i = 1; i < positions.size(); i++) {
 			final Vec3d start = positions.get(i - 1);
 			final Vec3d end = positions.get(i);
 			Vec3d normal = end.normalize();
 
-		    buffer.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
-		       .color(outerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
+			buffer
+				.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
+				.color(innerColor.asARGB())
+				.normal(normMat, (float) normal.x, (float) normal.y, (float) normal.z)
+				.next();
 
-		    buffer.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
-		       .color(outerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
+			buffer
+				.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
+				.color(innerColor.asARGB())
+				.normal(normMat, (float) normal.x, (float) normal.y, (float) normal.z)
+				.next();
 		}
 
-	    RenderSystem.enableBlend();
-	    RenderSystem.defaultBlendFunc();
-	    RenderSystem.disableCull();
-	    RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
-	    RenderSystem.setShaderColor(1, 1, 1, 1);
+		RenderSystem.lineWidth(2.0f);
+		tesselator.draw();
 
-	    RenderSystem.lineWidth(6.0f);
-		BufferRenderer.drawWithGlobalProgram(buffer.end());
-
-	    buffer = tesselator.begin(DrawMode.LINES, VertexFormats.LINES);
-
-		for (int i = 1; i < positions.size(); i++) {
-			final Vec3d start = positions.get(i - 1);
-			final Vec3d end = positions.get(i);
-			Vec3d normal = end.normalize();
-
-		    buffer.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
-		       .color(innerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
-
-		    buffer.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
-		       .color(innerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
-		}
-
-	    RenderSystem.lineWidth(2.0f);
-		BufferRenderer.drawWithGlobalProgram(buffer.end());
-
-	    matrices.pop();
+		matrices.pop();
 	}
 
 	private List<Vec3d> generatePositions(final Vec3d initialPos, final Vec3d finalPos) {
@@ -303,7 +312,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		}
 
 		void render(final WorldRenderContext context, final SpecialEffectsRenderer renderer) {
-			final double gradientStep = MathHelper.clamp(MathHelper.getLerpProgress(MinecraftClient.getInstance().world.getTime() - this.time + context.tickCounter().getTickDelta(false), 0, 10), 0, 1);
+			final double gradientStep = MathHelper.clamp(MathHelper.getLerpProgress(MinecraftClient.getInstance().world.getTime() - this.time + context.tickDelta(), 0, 10), 0, 1);
 			final Color outerColor = Color.gradientStep(Colors.ELECTRO, Colors.HYDRO, gradientStep, Ease.IN_QUART);
 			final Color innerColor = Colors.PHYSICAL;
 

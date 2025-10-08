@@ -54,5 +54,5 @@ public class CrystallizeShardEntityRenderer extends LivingEntityRenderer<Crystal
 	}
 
 	@Override
-	protected void renderLabelIfPresent(CrystallizeShardEntity entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, float tickDelta) {}
+	protected void renderLabelIfPresent(CrystallizeShardEntity entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {}
 }

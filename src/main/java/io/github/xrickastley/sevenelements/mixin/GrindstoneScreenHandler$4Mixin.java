@@ -7,7 +7,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
-import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 
 import net.minecraft.item.ItemStack;
 
@@ -18,7 +17,7 @@ public class GrindstoneScreenHandler$4Mixin {
 		at = @At("RETURN")
 	)
 	public int addElementsAsExperience(int original, @Local(argsOnly = true) ItemStack stack) {
-		final ElementalInfusionComponent component = stack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+		final ElementalInfusionComponent component = ElementalInfusionComponent.get(stack);
 
 		if (component == null || !component.hasElementalInfusion()) return original;
 

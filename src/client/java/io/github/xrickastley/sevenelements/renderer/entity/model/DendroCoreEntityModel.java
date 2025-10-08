@@ -54,7 +54,7 @@ public class DendroCoreEntityModel extends EntityModel<DendroCoreEntity> {
 	}
 
 	@Override
-	public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-		bone.render(matrices, vertexConsumer, light, overlay, color);
+	public void render(MatrixStack matrices, VertexConsumer vertices, int light, int overlay, float red, float green, float blue, float alpha) {
+		bone.render(matrices, vertices, light, overlay, red, green, blue, alpha);
 	}
 }

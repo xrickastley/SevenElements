@@ -4,10 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
-import org.ladysnake.cca.api.v3.component.ComponentKey;
-import org.ladysnake.cca.api.v3.component.ComponentRegistry;
-import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
-import org.ladysnake.cca.api.v3.component.tick.CommonTickingComponent;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.element.Element;
@@ -27,6 +23,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.util.Pair;
+
+import dev.onyxstudios.cca.api.v3.component.ComponentKey;
+import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
+import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
+import dev.onyxstudios.cca.api.v3.component.tick.CommonTickingComponent;
 
 public interface ElementComponent extends AutoSyncedComponent, CommonTickingComponent {
 	public static final ComponentKey<ElementComponent> KEY = ComponentRegistry.getOrCreate(SevenElements.identifier("elements"), ElementComponent.class);
@@ -95,7 +96,7 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 
 	private static Optional<ElementalDamageSource> attemptProjectileInfusions(DamageSource source, LivingEntity target) {
 		// Projectiles are indirect DMG sources.
-		if (source.isDirect()) return Optional.empty();
+		if (!source.isIndirect()) return Optional.empty();
 
 		return source.getSource() instanceof final ProjectileEntity projectile
 			? projectile.sevenelements$attemptInfusion(source, target)

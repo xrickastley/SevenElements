@@ -20,11 +20,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target({ ElementType.METHOD })
 public @interface Inject {
-    public String[] method() default {};
+	public String[] method() default {};
 
-    public At[] at() default {};
+	public At[] at() default {};
 
-    public String directive() default "";
+	public String directive() default "";
 
-    public boolean cancellable() default false;
+	public boolean cancellable() default false;
 }

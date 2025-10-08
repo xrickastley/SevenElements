@@ -1,5 +1,8 @@
 package io.github.xrickastley.sevenelements.entity;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
@@ -11,6 +14,7 @@ import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
+import io.github.xrickastley.sevenelements.networking.SevenElementsPayload;
 import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
@@ -22,10 +26,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
@@ -74,7 +74,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	public void tick() {
 		super.tick();
 
-    	this.idleAnimationState.startIfNotRunning(this.age);
+		this.idleAnimationState.startIfNotRunning(this.age);
 
 		this.checkCrystallizeShield();
 		this.syncToPlayers();
@@ -147,15 +147,15 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 		ElementComponent.denyElementsFor(CrystallizeShardEntity.class);
 	}
 
-	public static class SyncCrystallizeShardTypeS2CPayload implements CustomPayload {
-		public static final CustomPayload.Id<SyncCrystallizeShardTypeS2CPayload> ID = new CustomPayload.Id<>(
-			SevenElements.identifier("s2c/sync_crystallize_shard_type")
-		);
+	public static class SyncCrystallizeShardTypeS2CPayload implements SevenElementsPayload {
+		public static final Codec<SyncCrystallizeShardTypeS2CPayload> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+			Codec.INT.fieldOf("entityId").forGetter(SyncCrystallizeShardTypeS2CPayload::entityId),
+			Element.CODEC.fieldOf("element").forGetter(inst -> inst.element)
+		).apply(instance, SyncCrystallizeShardTypeS2CPayload::new));
 
-		public static final PacketCodec<RegistryByteBuf, SyncCrystallizeShardTypeS2CPayload> CODEC = PacketCodec.tuple(
-			PacketCodecs.INTEGER, SyncCrystallizeShardTypeS2CPayload::entityId,
-			PacketCodecs.codec(Element.CODEC), inst -> inst.element,
-			SyncCrystallizeShardTypeS2CPayload::new
+		public static final SevenElementsPayload.Id<SyncCrystallizeShardTypeS2CPayload> ID = new SevenElementsPayload.Id<>(
+			SevenElements.identifier("s2c/sync_crystallize_shard_type"),
+			SyncCrystallizeShardTypeS2CPayload.CODEC
 		);
 
 		private final int entityId;
@@ -167,8 +167,13 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 		}
 
 		@Override
-		public Id<? extends CustomPayload> getId() {
+		public Id<? extends SevenElementsPayload> getId() {
 			return ID;
+		}
+
+		@Override
+		public Codec<? extends SevenElementsPayload> getCodec() {
+			return CODEC;
 		}
 
 		public int entityId() {

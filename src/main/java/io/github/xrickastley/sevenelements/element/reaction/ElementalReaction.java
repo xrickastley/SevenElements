@@ -268,9 +268,9 @@ public abstract class ElementalReaction {
 
 		final Box boundingBox = target.getBoundingBox();
 
-		final double x = target.getX() + (boundingBox.getLengthX() * 1.50 * Math.random());
-		final double y = target.getY() + (boundingBox.getLengthY() * (0.25 + (Math.random() / 2.0)));
-		final double z = target.getZ() + (boundingBox.getLengthZ() * 1.50 * Math.random());
+		final double x = target.getX() + (boundingBox.getXLength() * 1.50 * Math.random());
+		final double y = target.getY() + (boundingBox.getYLength() * (0.25 + (Math.random() / 2.0)));
+		final double z = target.getZ() + (boundingBox.getZLength() * 1.50 * Math.random());
 
 		final Vec3d pos = new Vec3d(x, y, z);
 

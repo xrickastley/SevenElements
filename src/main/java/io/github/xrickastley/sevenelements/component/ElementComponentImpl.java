@@ -46,7 +46,6 @@ import net.minecraft.entity.decoration.ArmorStandEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry.Reference;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.sound.SoundCategory;
@@ -236,7 +235,7 @@ public final class ElementComponentImpl implements ElementComponent {
 	}
 
 	@Override
-	public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
+	public void writeToNbt(NbtCompound tag) {
 		final NbtList list = new NbtList();
 
 		this.getAppliedElements()
@@ -265,7 +264,7 @@ public final class ElementComponentImpl implements ElementComponent {
 	}
 
 	@Override
-	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
+	public void readFromNbt(NbtCompound tag) {
 		this.electroChargedCooldown = tag.getLong("ElectroChargedCooldown");
 		this.burningCooldown = tag.getLong("BurningCooldown");
 

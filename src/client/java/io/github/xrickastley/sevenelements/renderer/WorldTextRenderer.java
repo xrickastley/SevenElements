@@ -23,20 +23,14 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
+
+import me.shedaniel.autoconfig.AutoConfig;
 
 public final class WorldTextRenderer {
 	private final List<Entry> entries = new ArrayList<>();
 
 	public void render(WorldRenderContext context) {
-		final Camera camera = context.camera();
-		final MatrixStack matrixStack = new MatrixStack();
-
-		// Implement legacy renderWorld transforms.
-		matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-    	matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
-
-		entries.forEach(entry -> entry.render(camera, context.tickCounter().getTickDelta(false), matrixStack));
+		entries.forEach(entry -> entry.render(context.camera(), context.tickDelta(), context.matrixStack()));
 	}
 
 	public void tick(ClientWorld world) {
@@ -53,7 +47,9 @@ public final class WorldTextRenderer {
 	public static void drawText(final Camera camera, final MatrixStack matrices, final VertexConsumerProvider vertexConsumers, final OrderedText text, final double x, final double y, final double z, final int color, final float size, final boolean center, final float offset, final boolean visibleThroughObjects) {
 		final MinecraftClient client = MinecraftClient.getInstance();
 		final TextRenderer textRenderer = client.textRenderer;
-		final ClientConfig config = ClientConfig.get();
+		final ClientConfig config = AutoConfig
+			.getConfigHolder(ClientConfig.class)
+			.getConfig();
 
 		final double d = camera.getPos().x;
 		final double e = camera.getPos().y;
@@ -64,7 +60,7 @@ public final class WorldTextRenderer {
 		matrices.push();
 		matrices.translate((float) (x - d), (float) (y - e), (float) (z - f));
 		matrices.multiplyPositionMatrix(new Matrix4f().rotation(camera.getRotation()));
-		matrices.scale(scale, -scale, scale);
+		matrices.scale(-scale, -scale, scale);
 
 		float g = center ? (-textRenderer.getWidth(text) / 2.0f) : 0.0f;
 		g -= offset / size;
@@ -157,7 +153,10 @@ public final class WorldTextRenderer {
 		public DamageText(double x, double y, double z, Color color, double amount, double scale) {
 			super(x, y, z, color);
 
-			final ClientConfig config = ClientConfig.get();
+			final ClientConfig config = AutoConfig
+				.getConfigHolder(ClientConfig.class)
+				.getConfig();
+
 			final String damageFormat = config.developer.commafyDamage
 				? "%,.0f"
 				: "%.0f";

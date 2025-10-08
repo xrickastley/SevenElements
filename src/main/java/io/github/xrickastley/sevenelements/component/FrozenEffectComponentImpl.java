@@ -6,7 +6,6 @@ import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.MathHelper;
 
 public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
@@ -26,7 +25,7 @@ public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
 	}
 
 	@Override
-	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
+	public void readFromNbt(NbtCompound tag) {
 		this.isFrozen = tag.getBoolean("IsFrozen");
 		this.hadNoAi = tag.getBoolean("HadNoAi");
 		this.forcePose = EntityPose.valueOf(tag.getString("ForcePose"));
@@ -39,7 +38,7 @@ public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
 	}
 
 	@Override
-	public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
+	public void writeToNbt(NbtCompound tag) {
 		tag.putBoolean("IsFrozen", this.isFrozen);
 		tag.putBoolean("HadNoAi", this.hadNoAi);
 		tag.putString("ForcePose", this.forcePose.toString());

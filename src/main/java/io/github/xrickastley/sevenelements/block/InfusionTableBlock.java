@@ -1,7 +1,5 @@
 package io.github.xrickastley.sevenelements.block;
 
-import com.mojang.serialization.MapCodec;
-
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
@@ -27,7 +25,8 @@ import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Colors;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -35,10 +34,10 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldAccess;
 import net.minecraft.world.WorldView;
 
 public final class InfusionTableBlock extends HorizontalFacingBlock {
-	public static final MapCodec<InfusionTableBlock> CODEC = createCodec(InfusionTableBlock::new);
 	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
 	public static final EnumProperty<DoubleBlockHalf> HALF = Properties.DOUBLE_BLOCK_HALF;
 	private static final VoxelShape LOWER;
@@ -72,25 +71,20 @@ public final class InfusionTableBlock extends HorizontalFacingBlock {
 
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-    	final BlockPos blockPos = pos.up();
+		final BlockPos blockPos = pos.up();
 
-    	world.setBlockState(blockPos, this.getDefaultState().with(HALF, DoubleBlockHalf.UPPER));
+		world.setBlockState(blockPos, this.getDefaultState().with(HALF, DoubleBlockHalf.UPPER));
 	}
 
 	@Override
-	public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
+	public void onBroken(WorldAccess world, BlockPos pos, BlockState state) {
 		if (state.get(HALF) == DoubleBlockHalf.LOWER && state.getBlock() == this) {
 			if (world.getBlockState(pos.up()).getBlock() == this) world.removeBlock(pos.up(), false);
 		} else if (state.get(HALF) == DoubleBlockHalf.UPPER && state.getBlock() == this) {
 			if (world.getBlockState(pos.down()).getBlock() == this) world.removeBlock(pos.down(), false);
 		}
 
-		return super.onBreak(world, pos, state, player);
-	}
-
-	@Override
-	protected MapCodec<? extends HorizontalFacingBlock> getCodec() {
-		return CODEC;
+		super.onBroken(world, pos, state);
 	}
 
 	@Override
@@ -101,14 +95,15 @@ public final class InfusionTableBlock extends HorizontalFacingBlock {
 	}
 
 	@Override
-	protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
+	public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+
 		if (world.isClient) return ActionResult.SUCCESS;
 
 		if (world.getGameRules().getBoolean(SevenElementsGameRules.INFUSION_TABLE)) {
 			player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
 		} else  {
 			player.sendMessage(
-				Text.translatable("container.seven-elements.infusion_table.fail_by_gamerule").withColor(Colors.LIGHT_RED)
+				Text.translatable("container.seven-elements.infusion_table.fail_by_gamerule").formatted(Formatting.RED)
 			);
 		}
 
@@ -116,7 +111,7 @@ public final class InfusionTableBlock extends HorizontalFacingBlock {
 	}
 
 	@Override
-	protected @Nullable NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
+	public @Nullable NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
 		return new SimpleNamedScreenHandlerFactory(
 			(syncId, inventory, player) -> new ElementalInfusionScreenHandler(syncId, inventory, ScreenHandlerContext.create(world, pos)),
 			Text.translatable("container.seven-elements.infusion_table")
@@ -124,19 +119,19 @@ public final class InfusionTableBlock extends HorizontalFacingBlock {
 	}
 
 	@Override
-	protected boolean hasSidedTransparency(BlockState state) {
+	public boolean hasSidedTransparency(BlockState state) {
 		return true;
 	}
 
 	@Override
-	protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+	public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		return state.get(HALF) == DoubleBlockHalf.UPPER
 			? UPPER.offset(0, -1, 0)
 			: LOWER;
 	}
 
 	@Override
-	protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
+	public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
 		return state.get(HALF) == DoubleBlockHalf.UPPER
 			? world.getBlockState(pos.down()).getBlock() != this
 				? UPPER.offset(0, -1, 0)
@@ -147,13 +142,14 @@ public final class InfusionTableBlock extends HorizontalFacingBlock {
 	}
 
 	@Override
-	protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
+	@SuppressWarnings("deprecation")
+	public boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
 		if (state.get(HALF) != DoubleBlockHalf.UPPER)
 			return super.canPlaceAt(state, world, pos);
 
-        final BlockState blockState = world.getBlockState(pos.down());
+		final BlockState blockState = world.getBlockState(pos.down());
 
-        return blockState.isOf(this) && blockState.get(HALF) == DoubleBlockHalf.LOWER;
+		return blockState.isOf(this) && blockState.get(HALF) == DoubleBlockHalf.LOWER;
 	}
 
 	static {

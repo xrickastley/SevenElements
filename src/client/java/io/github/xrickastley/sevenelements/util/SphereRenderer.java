@@ -56,7 +56,10 @@ public final class SphereRenderer {
 		Matrix4f modelMat = matrices.peek().getPositionMatrix();
 		Matrix3f normalMat = matrices.peek().getNormalMatrix();
 
-		final BufferBuilder buf = Tessellator.getInstance().begin(DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
+		final Tessellator tessellator = Tessellator.getInstance();
+		final BufferBuilder buf = tessellator.getBuffer();
+
+		buf.begin(DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
 
 		for (int lat = 0; lat < latSteps; lat++) {
 			final double theta1 = Math.PI * lat / (double) latSteps;
@@ -98,7 +101,8 @@ public final class SphereRenderer {
 	private static void vertex(BufferBuilder buffer, Matrix4f projMat, Matrix3f normalMat, Vec3d pos, int color) {
 		buffer
 			.vertex(projMat, (float)pos.x, (float)pos.y, (float)pos.z)
-		   .color(color);
+			.color(color)
+			.next();
 	}
 
 	private static Vec3d relativeClamp(Vec3d pos, float radius) {

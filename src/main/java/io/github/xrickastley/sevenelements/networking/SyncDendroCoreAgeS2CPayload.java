@@ -1,25 +1,28 @@
 package io.github.xrickastley.sevenelements.networking;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import io.github.xrickastley.sevenelements.SevenElements;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+public record SyncDendroCoreAgeS2CPayload(int entityId, int age) implements SevenElementsPayload {
+	public static final Codec<SyncDendroCoreAgeS2CPayload> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		Codec.INT.fieldOf("entityId").forGetter(SyncDendroCoreAgeS2CPayload::entityId),
+		Codec.INT.fieldOf("age").forGetter(SyncDendroCoreAgeS2CPayload::age)
+	).apply(instance, SyncDendroCoreAgeS2CPayload::new));
 
-public record SyncDendroCoreAgeS2CPayload(int entityId, int age) implements CustomPayload {
-	public static final CustomPayload.Id<SyncDendroCoreAgeS2CPayload> ID = new CustomPayload.Id<>(
-		SevenElements.identifier("s2c/sync_dendro_core_age")
-	);
-
-	public static final PacketCodec<RegistryByteBuf, SyncDendroCoreAgeS2CPayload> CODEC = PacketCodec.tuple(
-		PacketCodecs.INTEGER, SyncDendroCoreAgeS2CPayload::entityId,
-		PacketCodecs.INTEGER, SyncDendroCoreAgeS2CPayload::age,
-		SyncDendroCoreAgeS2CPayload::new
+	public static final SevenElementsPayload.Id<SyncDendroCoreAgeS2CPayload> ID = new SevenElementsPayload.Id<>(
+		SevenElements.identifier("s2c/sync_dendro_core_age"),
+		SyncDendroCoreAgeS2CPayload.CODEC
 	);
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Id<? extends SevenElementsPayload> getId() {
 		return ID;
+	}
+
+	@Override
+	public Codec<? extends SevenElementsPayload> getCodec() {
+		return CODEC;
 	}
 }

@@ -9,6 +9,7 @@ import com.mojang.authlib.GameProfile;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,6 +44,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+@Debug(export = true)
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin
 	extends LivingEntity
@@ -87,8 +89,8 @@ public abstract class PlayerEntityMixin
 	}
 
 	// why are there two separate knockbacks :sob:
-	@Definition(id = "k", local = @Local(type = float.class, ordinal = 5))
-	@Expression("k > 0.0")
+	@Definition(id = "i", local = @Local(type = int.class, ordinal = 0))
+	@Expression("i > 0")
 	@ModifyExpressionValue(
 		method = "attack",
 		at = @At("MIXINEXTRAS:EXPRESSION")
@@ -112,7 +114,11 @@ public abstract class PlayerEntityMixin
 	private DamageSource checkForCritMain(DamageSource source, @Local(ordinal = 2) boolean crit) {
 		if (sevenelements$critDamageSources == null) sevenelements$critDamageSources = new ArrayList<>();
 
-		if (crit) sevenelements$critDamageSources.add(source);
+		if (crit) {
+			sevenelements$critDamageSources.add(
+				source instanceof final ElementalDamageSource eds ? eds.getOriginalSource() : source
+			);
+		}
 
 		return source;
 	}
@@ -171,9 +177,9 @@ public abstract class PlayerEntityMixin
 
 		final Box boundingBox = this.getBoundingBox();
 
-		final double x = this.getX() + (boundingBox.getLengthX() * 1.25 * Math.random());
-		final double y = this.getY() + (boundingBox.getLengthY() * 0.50 * Math.random()) + 0.50;
-		final double z = this.getZ() + (boundingBox.getLengthZ() * 1.25 * Math.random());
+		final double x = this.getX() + (boundingBox.getXLength() * 1.25 * Math.random());
+		final double y = this.getY() + (boundingBox.getYLength() * 0.50 * Math.random()) + 0.50;
+		final double z = this.getZ() + (boundingBox.getZLength() * 1.25 * Math.random());
 		final Vec3d pos = new Vec3d(x, y, z);
 		final boolean isCrit = eds.getOriginalSource() != null
 			&& source.getAttacker() instanceof final PlayerEntity player

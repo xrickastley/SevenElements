@@ -11,19 +11,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
+import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
-import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
+import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.interfaces.InfusableProjectile;
+import io.github.xrickastley.sevenelements.util.ImmutablePair;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Ownable;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.util.Pair;
 import net.minecraft.world.World;
 
 @Mixin(ProjectileEntity.class)
@@ -32,7 +35,7 @@ public abstract class ProjectileEntityMixin
 	implements Ownable, InfusableProjectile
 {
 	@Unique
-	private ElementalInfusionComponent sevenelements$infusionComponent;
+	private Pair<ElementalApplication.Builder, InternalCooldownContext.Builder> sevenelements$infusionComponent;
 
    	public ProjectileEntityMixin(EntityType<? extends ProjectileEntity> entityType, World world) {
    		super(entityType, world);
@@ -45,15 +48,28 @@ public abstract class ProjectileEntityMixin
 	public void sevenelements$setOriginStack(@Nullable ItemStack originStack) {
 		if (originStack == null) return;
 
-		this.sevenelements$infusionComponent = originStack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+		final ElementalInfusionComponent component = ElementalInfusionComponent.get(originStack);
+
+		this.sevenelements$infusionComponent = new ImmutablePair<>(
+			component.elementalInfusion(),
+			component.internalCooldown()
+		);
 	}
 
 	@Unique
 	@Override
-	public Optional<ElementalDamageSource> sevenelements$attemptInfusion(DamageSource source, Entity target) {
-		return this.sevenelements$infusionComponent == null
+	public Optional<ElementalDamageSource> sevenelements$attemptInfusion(DamageSource source, Entity _target) {
+		return this.sevenelements$infusionComponent == null || this.sevenelements$infusionComponent.getLeft() == null || this.sevenelements$infusionComponent.getRight() == null
 			? Optional.empty()
-			: this.sevenelements$infusionComponent.apply(source, target);
+			: _target instanceof final LivingEntity target && source.getAttacker() instanceof final LivingEntity attacker
+				? Optional.of(
+					new ElementalDamageSource(
+						source,
+						this.sevenelements$infusionComponent.getLeft().build(target),
+						this.sevenelements$infusionComponent.getRight().build(attacker)
+					)
+				)
+				: null;
 	}
 
 	@Inject(
@@ -61,12 +77,25 @@ public abstract class ProjectileEntityMixin
 		at = @At("TAIL")
 	)
 	public void writeInfusionToNbt(NbtCompound nbt, CallbackInfo ci) {
-		if (this.sevenelements$infusionComponent == null) return;
+		if (this.sevenelements$infusionComponent == null || this.sevenelements$infusionComponent.getLeft() == null || this.sevenelements$infusionComponent.getRight() == null) return;
 
-		final NbtElement componentNbt = ElementalInfusionComponent.CODEC
-			.encodeStart(NbtOps.INSTANCE, this.sevenelements$infusionComponent)
-			.resultOrPartial(SevenElements.sublogger()::error)
-			.orElseThrow();
+		final NbtCompound componentNbt = new NbtCompound();
+
+		componentNbt.put(
+			"elemental_infusion",
+			ElementalApplication.Builder.CODEC
+				.encodeStart(NbtOps.INSTANCE, this.sevenelements$infusionComponent.getLeft())
+				.resultOrPartial(SevenElements.sublogger()::error)
+				.orElseThrow()
+		);
+
+		componentNbt.put(
+			"internal_cooldown",
+			InternalCooldownContext.Builder.CODEC
+				.encodeStart(NbtOps.INSTANCE, this.sevenelements$infusionComponent.getRight())
+				.resultOrPartial(SevenElements.sublogger()::error)
+				.orElseThrow()
+		);
 
 		nbt.put("seven-elements:elemental_infusion", componentNbt);
 	}
@@ -78,9 +107,17 @@ public abstract class ProjectileEntityMixin
 	public void readInfusionFromNbt(NbtCompound nbt, CallbackInfo ci) {
 		if (!nbt.contains("seven-elements:elemental_infusion")) return;
 
-		this.sevenelements$infusionComponent = ElementalInfusionComponent.CODEC
-			.parse(NbtOps.INSTANCE, nbt.get("seven-elements:elemental_infusion"))
-			.resultOrPartial(SevenElements.sublogger()::error)
-			.orElseThrow();
+		final NbtCompound componentNbt = (NbtCompound) nbt.get("seven-elements:elemental_infusion");
+
+		this.sevenelements$infusionComponent = new ImmutablePair<ElementalApplication.Builder,InternalCooldownContext.Builder>(
+			ElementalApplication.Builder.CODEC
+				.parse(NbtOps.INSTANCE, componentNbt.get("elemental_infusion"))
+				.resultOrPartial(SevenElements.sublogger()::error)
+				.orElseThrow(),
+			InternalCooldownContext.Builder.CODEC
+				.parse(NbtOps.INSTANCE, componentNbt.get("internal_cooldown"))
+				.resultOrPartial(SevenElements.sublogger()::error)
+				.orElseThrow()
+		);
 	}
 }

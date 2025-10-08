@@ -50,10 +50,10 @@ public class BossBarHudMixin {
 	}
 
 	@Inject(
-		method = "renderBossBar(Lnet/minecraft/client/gui/DrawContext;IILnet/minecraft/entity/boss/BossBar;I[Lnet/minecraft/util/Identifier;[Lnet/minecraft/util/Identifier;)V",
+		method = "renderBossBar(Lnet/minecraft/client/gui/DrawContext;IILnet/minecraft/entity/boss/BossBar;)V",
 		at = @At("TAIL")
 	)
-	private void renderAppliedElements(DrawContext context, int x, int y, BossBar bossBar, int width, Identifier[] textures, Identifier[] notchedTextures, CallbackInfo ci) {
+	private void renderAppliedElements(DrawContext context, int x, int y, BossBar bossBar, CallbackInfo ci) {
 		if (bossBar.sevenelements$getEntity() == null || bossBar.sevenelements$getEntity().isDead()) return;
 
 		final double RADIUS = 5;

@@ -13,14 +13,12 @@ import org.jetbrains.annotations.Nullable;
 import io.github.xrickastley.sevenelements.mixin.ExplosionAccessor;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.TntEntity;
-import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -45,28 +43,28 @@ public class NonEntityDamagingExplosion extends Explosion {
 	private ExplosionBehavior behavior;
 	private ObjectArrayList<BlockPos> affectedBlocks;
 	private Map<PlayerEntity, Vec3d> affectedPlayers;
-	private final List<Entity> affectedEntities = new ArrayList<>();
+	private List<Entity> affectedEntities = new ArrayList<>();
 
-	public NonEntityDamagingExplosion(final World world, final @Nullable Entity entity, final double x, final double y, final double z, final float power, final List<BlockPos> affectedBlocks) {
+	public NonEntityDamagingExplosion(final World world, @Nullable final Entity entity, final double x, final double y, final double z, final float power, final List<BlockPos> affectedBlocks) {
 		super(world, entity, x, y, z, power, false, Explosion.DestructionType.DESTROY_WITH_DECAY, affectedBlocks);
 
 		supplyFromAccessor();
 	}
 
-	public NonEntityDamagingExplosion(final World world, final @Nullable Entity entity, final double x, final double y, final double z, final float power, final boolean createFire, final Explosion.DestructionType destructionType, final List<BlockPos> affectedBlocks) {
-		super(world, entity, x, y, z, power, createFire, destructionType, affectedBlocks);
-
-		supplyFromAccessor();
-	}
-
-	public NonEntityDamagingExplosion(final World world, final @Nullable Entity entity, final double x, final double y, final double z, final float power, final boolean createFire, final Explosion.DestructionType destructionType) {
+	public NonEntityDamagingExplosion(final World world, @Nullable final Entity entity, final double x, final double y, final double z, final float power, final boolean createFire, final Explosion.DestructionType destructionType, final List<BlockPos> affectedBlocks) {
 		super(world, entity, x, y, z, power, createFire, destructionType);
 
 		supplyFromAccessor();
 	}
 
-	public NonEntityDamagingExplosion(final World world, final @Nullable Entity entity, final @Nullable ExplosionBehavior behavior, final double x, final double y, final double z, final float power, final boolean createFire, final Explosion.DestructionType destructionType) {
-		super(world, entity, null, behavior, x, y, z, power, createFire, destructionType, ParticleTypes.EXPLOSION, ParticleTypes.EXPLOSION_EMITTER, SoundEvents.ENTITY_GENERIC_EXPLODE);
+	public NonEntityDamagingExplosion(final World world, @Nullable final Entity entity, final double x, final double y, final double z, final float power, final boolean createFire, final Explosion.DestructionType destructionType) {
+		super(world, entity, null, null, x, y, z, power, createFire, destructionType);
+
+		supplyFromAccessor();
+	}
+
+	public NonEntityDamagingExplosion(final World world, @Nullable final Entity entity, @Nullable final ExplosionBehavior behavior, final double x, final double y, final double z, final float power, final boolean createFire, final Explosion.DestructionType destructionType) {
+		super(world, entity, null, behavior, x, y, z, power, createFire, destructionType);
 
 		supplyFromAccessor();
 	}
@@ -135,7 +133,7 @@ public class NonEntityDamagingExplosion extends Explosion {
 		final Vec3d vec3d = new Vec3d(this.x, this.y, this.z);
 
 		for (final Entity entity : list) {
-			if (entity.isImmuneToExplosion(this)) continue;
+			if (entity.isImmuneToExplosion()) continue;
 
 			final double v = Math.sqrt(entity.squaredDistanceTo(vec3d)) / q;
 
@@ -152,16 +150,17 @@ public class NonEntityDamagingExplosion extends Explosion {
 			x /= z;
 			y /= z;
 
-			final double aa = (1.0 - v) * getExposure(vec3d, entity) * this.behavior.getKnockbackModifier(entity);
-        	final double ab = entity instanceof LivingEntity livingEntity
-				? aa * (1.0 - livingEntity.getAttributeValue(EntityAttributes.GENERIC_EXPLOSION_KNOCKBACK_RESISTANCE))
-        		: aa;
+			final double aa = getExposure(vec3d, entity);
+			final double ab = (1.0 - v) * aa;
+			final double ac = entity instanceof final LivingEntity livingEntity
+				? ProtectionEnchantment.transformExplosionKnockback(livingEntity, ab)
+				: ab;
 
 			this.affectedEntities.add(entity);
 
-        	w *= ab;
-        	x *= ab;
-        	y *= ab;
+			w *= ac;
+			x *= ac;
+			y *= ac;
 
 			final Vec3d vec3d2 = new Vec3d(w, x, y);
 
@@ -174,7 +173,6 @@ public class NonEntityDamagingExplosion extends Explosion {
 			}
 
 			this.affectedPlayers.put(playerEntity, vec3d2);
-			entity.onExplodedBy(this.entity);
 		}
 	}
 

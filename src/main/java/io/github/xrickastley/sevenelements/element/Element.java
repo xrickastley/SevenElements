@@ -1,5 +1,7 @@
 package io.github.xrickastley.sevenelements.element;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.Codec;
 
 import java.util.ArrayList;
@@ -14,14 +16,11 @@ import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
 import io.github.xrickastley.sevenelements.factory.SevenElementsParticleTypes;
+import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Color;
 import io.github.xrickastley.sevenelements.util.Colors;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtException;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.particle.ParticleTypes;
@@ -457,34 +456,26 @@ public enum Element {
 		};
 	}
 
-	private static record ParticleRenderer(ParticleType<? extends ParticleEffect> particle, Vec3d relativePos, Vec3d delta, double speed, int count, NbtCompound compound) {
+	private static record ParticleRenderer(ParticleType<? extends ParticleEffect> particle, Vec3d relativePos, Vec3d delta, double speed, int count, String data) {
 		private static final Random random = Random.create();
 
-		ParticleRenderer(ParticleType<? extends ParticleEffect> particle, Vec3d relativePos, Vec3d delta, double speed, int count, String nbt) {
-			this(particle, relativePos, delta, speed, count, parseCompound(nbt));
-		}
-
 		ParticleRenderer(ParticleType<? extends ParticleEffect> particle, Vec3d relativePos, Vec3d delta, double speed, int count) {
-			this(particle, relativePos, delta, speed, count, new NbtCompound());
+			this(particle, relativePos, delta, speed, count, "");
 		}
 
-		private static NbtCompound parseCompound(String nbt) {
+		@SuppressWarnings("deprecation")
+		private ParticleEffect getParticle(World world) {
 			try {
-				return StringNbtReader.parse(nbt);
-			} catch (Exception e) {
-				RuntimeException e2 = new NbtException("An invalid NBT string was provided!");
+				return particle
+					.getParametersFactory()
+					.read(ClassInstanceUtil.cast(particle), new StringReader(data));
+			} catch (CommandSyntaxException e) {
+				final IllegalArgumentException e2 = new IllegalArgumentException("Unable to parse particle data!");
+
 				e2.addSuppressed(e);
 
 				throw e2;
 			}
-		}
-
-		private ParticleEffect getParticle(World world) {
-			return particle
-				.getCodec()
-				.codec()
-				.parse(world.getRegistryManager().getOps(NbtOps.INSTANCE), compound)
-				.getOrThrow();
 		}
 
 		private void render(LivingEntity entity) {
@@ -492,7 +483,7 @@ public enum Element {
 			if (!entity.getWorld().isClient) return;
 
 			final Box box = entity.getBoundingBox();
-			final Vec3d pos = entity.getPos().add(relativePos.multiply(box.getLengthX(), box.getLengthY(), box.getLengthZ()));
+			final Vec3d pos = entity.getPos().add(relativePos.multiply(box.getXLength(), box.getYLength(), box.getZLength()));
 
 			if (count == 0) this.addSingleParticle(entity, pos);
 			else this.addMultipleParticles(entity, pos);

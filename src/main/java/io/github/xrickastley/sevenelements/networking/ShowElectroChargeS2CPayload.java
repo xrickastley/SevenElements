@@ -1,25 +1,24 @@
 package io.github.xrickastley.sevenelements.networking;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
 
-public record ShowElectroChargeS2CPayload(int mainEntity, List<Integer> otherEntities) implements CustomPayload {
-	public static final CustomPayload.Id<ShowElectroChargeS2CPayload> ID = new CustomPayload.Id<>(
-		SevenElements.identifier("s2c/show_electro_charged")
-	);
+public record ShowElectroChargeS2CPayload(int mainEntity, List<Integer> otherEntities) implements SevenElementsPayload {
+	public static final Codec<ShowElectroChargeS2CPayload> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		Codec.INT.fieldOf("mainEntity").forGetter(ShowElectroChargeS2CPayload::mainEntity),
+		Codec.INT.listOf().fieldOf("otherEntities").forGetter(ShowElectroChargeS2CPayload::otherEntities)
+	).apply(instance, ShowElectroChargeS2CPayload::new));
 
-	public static final PacketCodec<RegistryByteBuf, ShowElectroChargeS2CPayload> CODEC = PacketCodec.tuple(
-		PacketCodecs.INTEGER, ShowElectroChargeS2CPayload::mainEntity,
-		PacketCodecs.INTEGER.collect(PacketCodecs.toList()), ShowElectroChargeS2CPayload::otherEntities,
-		ShowElectroChargeS2CPayload::new
+	public static final SevenElementsPayload.Id<ShowElectroChargeS2CPayload> ID = new SevenElementsPayload.Id<>(
+		SevenElements.identifier("s2c/show_electro_charged"),
+		ShowElectroChargeS2CPayload.CODEC
 	);
 
 	public ShowElectroChargeS2CPayload(LivingEntity mainEntity, List<LivingEntity> otherEntities) {
@@ -27,7 +26,12 @@ public record ShowElectroChargeS2CPayload(int mainEntity, List<Integer> otherEnt
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Codec<? extends SevenElementsPayload> getCodec() {
+		return CODEC;
+	}
+
+	@Override
+	public Id<? extends SevenElementsPayload> getId() {
 		return ID;
 	}
 }

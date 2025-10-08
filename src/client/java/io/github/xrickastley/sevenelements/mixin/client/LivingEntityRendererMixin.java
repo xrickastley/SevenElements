@@ -37,7 +37,6 @@ import io.github.xrickastley.sevenelements.util.SphereRenderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -163,28 +162,29 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 		final float SCALE_PER_GU = 2.5f;
 
 		final Tessellator tessellator = Tessellator.getInstance();
+		final BufferBuilder buffer = tessellator.getBuffer();
 		final ClientConfig config = ClientConfig.get();
 
 		matrixStack.push();
-		matrixStack.translate(0f, entity.getBoundingBox().getLengthY() * 1.15, 0f);
+		matrixStack.translate(0f, entity.getBoundingBox().getYLength() * 1.15, 0f);
 		matrixStack.multiplyPositionMatrix(new Matrix4f().rotation(dispatcher.camera.getRotation()));
-		matrixStack.scale(GAUGE_SCALE, GAUGE_SCALE * 0.5f, GAUGE_SCALE);
+		matrixStack.scale(-GAUGE_SCALE, GAUGE_SCALE * 0.5f, GAUGE_SCALE);
 
-		final float xOffset = (float) (entity.getBoundingBox().getLengthX() * 1.5f) / GAUGE_SCALE;
+		final float xOffset = (float) (entity.getBoundingBox().getXLength() * 1.5f) / GAUGE_SCALE;
 		final float gaugeWidth = application.isGaugeUnits()
 			? (float) Math.min(SCALE_PER_GU * application.getGaugeUnits(), SCALE_PER_GU * 4)
 			: 2 * SCALE_PER_GU;
 
 		final Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
 
-		BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-		buffer.vertex(positionMatrix, 0 + xOffset, 0 - yOffset, 0).color(0xffffffff);
-		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 0 - yOffset, 0).color(0xffffffff);
-		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 1 - yOffset, 0).color(0xffffffff);
-		buffer.vertex(positionMatrix, 0 + xOffset, 1 - yOffset, 0).color(0xffffffff);
+		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+		buffer.vertex(positionMatrix, 0 + xOffset, 0 - yOffset, 0).color(0xffffffff).next();
+		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 0 - yOffset, 0).color(0xffffffff).next();
+		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 1 - yOffset, 0).color(0xffffffff).next();
+		buffer.vertex(positionMatrix, 0 + xOffset, 1 - yOffset, 0).color(0xffffffff).next();
 
 		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
-		BufferRenderer.drawWithGlobalProgram(buffer.end());
+		tessellator.draw();
 
 		final float progress = this.sevenelements$getProgress(application, tickDelta);
 		final Color elementColor = application.getElement().getDamageColor();
@@ -192,24 +192,24 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 			? elementColor.asARGB()
 			: elementColor.multiply(1, 1, 1, 0.5).asARGB();
 
-		buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-		buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color);
-		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 0 - yOffset, 0.0001f).color(color);
-		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 1 - yOffset, 0.0001f).color(color);
-		buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color);
+		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+		buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 0 - yOffset, 0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 1 - yOffset, 0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color).next();
 
-		BufferRenderer.drawWithGlobalProgram(buffer.end());
+		tessellator.draw();
 
 		if (application.isDuration()) {
 			final float gaugeProgress = (float) (application.getCurrentGauge() / application.getGaugeUnits());
 
-			buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-			buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color);
-			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 0 - yOffset, 0.0001f).color(color);
-			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 1 - yOffset, 0.0001f).color(color);
-			buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color);
+			buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+			buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color).next();
+			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 0 - yOffset, 0.0001f).color(color).next();
+			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 1 - yOffset, 0.0001f).color(color).next();
+			buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color).next();
 
-			BufferRenderer.drawWithGlobalProgram(buffer.end());
+			tessellator.draw();
 		}
 
 		RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
@@ -231,20 +231,22 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 				? 5f
 				: 2.5f;
 
-			buffer = tessellator.begin(VertexFormat.DrawMode.LINES, VertexFormats.LINES);
+			buffer.begin(VertexFormat.DrawMode.LINES, VertexFormats.LINES);
 			buffer
 				.vertex(positionMatrix, xOffset + i, 0 - yOffset, -0.0005f)
 				.color(0xff000000)
-				.normal(0, lineWidth, 0);
+				.normal(0, lineWidth, 0)
+				.next();
 			buffer
 				.vertex(positionMatrix, xOffset + i, addedY - yOffset, -0.0005f)
 				.color(0xff000000)
-				.normal(xOffset + i, lineWidth, 0);
+				.normal(xOffset + i, lineWidth, 0)
+				.next();
 
 			float prev = RenderSystem.getShaderLineWidth();
 
 			RenderSystem.lineWidth(lineWidth);
-			BufferRenderer.drawWithGlobalProgram(buffer.end());
+			tessellator.draw();
 			RenderSystem.lineWidth(prev);
 		}
 
@@ -271,7 +273,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
 		if (crystallizeShield == null) return;
 
-		final double lengthY = entity.getBoundingBox().getLengthY();
+		final double lengthY = entity.getBoundingBox().getYLength();
 
 		matrixStack.push();
 		matrixStack.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(dispatcher.camera.getYaw()));

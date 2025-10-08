@@ -86,7 +86,7 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 	}
 
 	public boolean canInfuse(PlayerEntity player) {
-		return (player.experienceLevel >= REQUIRED_LEVEL || player.isInCreativeMode()) && this.getResultSlot().hasStack();
+		return (player.experienceLevel >= REQUIRED_LEVEL || player.isCreative()) && this.getResultSlot().hasStack();
 	}
 
 	public boolean infuse(PlayerEntity player) {
@@ -110,7 +110,7 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 				.setType(InternalCooldownType.DEFAULT)
 		);
 
-		if (!player.isInCreativeMode()) serverPlayer.setExperienceLevel(serverPlayer.experienceLevel - REQUIRED_LEVEL);
+		if (!player.isCreative()) serverPlayer.setExperienceLevel(serverPlayer.experienceLevel - REQUIRED_LEVEL);
 
 		slot.setStack(stack);
 		slot.markDirty();

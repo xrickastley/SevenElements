@@ -15,30 +15,29 @@ import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
-import net.minecraft.registry.entry.RegistryEntry;
 
 public class SevenElementsAttributes {
-	private static final List<RegistryEntry<EntityAttribute>> ADDED_ATTRIBUTES = new ArrayList<>();
-	private static final Map<Element, ConcurrentHashMap<ModifierType, RegistryEntry<EntityAttribute>>> LINKS = new ConcurrentHashMap<>();
+	private static final List<EntityAttribute> ADDED_ATTRIBUTES = new ArrayList<>();
+	private static final Map<Element, ConcurrentHashMap<ModifierType, EntityAttribute>> LINKS = new ConcurrentHashMap<>();
 	private static boolean registered = false;
 
-	public static final RegistryEntry<EntityAttribute> PHYSICAL_DMG_BONUS = register("physical_dmg_bonus", createAttribute("Physical DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> PYRO_DMG_BONUS = register("pyro_dmg_bonus", createAttribute("Pyro DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> HYDRO_DMG_BONUS = register("hydro_dmg_bonus", createAttribute("Hydro DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> ANEMO_DMG_BONUS = register("anemo_dmg_bonus", createAttribute("Anemo DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> ELECTRO_DMG_BONUS = register("electro_dmg_bonus", createAttribute("Electro DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> DENDRO_DMG_BONUS = register("dendro_dmg_bonus", createAttribute("Dendro DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> CRYO_DMG_BONUS = register("cryo_dmg_bonus", createAttribute("Cryo DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> GEO_DMG_BONUS = register("geo_dmg_bonus", createAttribute("Geo DMG Bonus%", 0, 0, 400));
+	public static final EntityAttribute PHYSICAL_DMG_BONUS = register("physical_dmg_bonus", createAttribute("Physical DMG Bonus%", 0, 0, 400));
+	public static final EntityAttribute PYRO_DMG_BONUS = register("pyro_dmg_bonus", createAttribute("Pyro DMG Bonus%", 0, 0, 400));
+	public static final EntityAttribute HYDRO_DMG_BONUS = register("hydro_dmg_bonus", createAttribute("Hydro DMG Bonus%", 0, 0, 400));
+	public static final EntityAttribute ANEMO_DMG_BONUS = register("anemo_dmg_bonus", createAttribute("Anemo DMG Bonus%", 0, 0, 400));
+	public static final EntityAttribute ELECTRO_DMG_BONUS = register("electro_dmg_bonus", createAttribute("Electro DMG Bonus%", 0, 0, 400));
+	public static final EntityAttribute DENDRO_DMG_BONUS = register("dendro_dmg_bonus", createAttribute("Dendro DMG Bonus%", 0, 0, 400));
+	public static final EntityAttribute CRYO_DMG_BONUS = register("cryo_dmg_bonus", createAttribute("Cryo DMG Bonus%", 0, 0, 400));
+	public static final EntityAttribute GEO_DMG_BONUS = register("geo_dmg_bonus", createAttribute("Geo DMG Bonus%", 0, 0, 400));
 
-	public static final RegistryEntry<EntityAttribute> PHYSICAL_RES = register("physical_res", createAttribute("Physical RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> PYRO_RES = register("pyro_res", createAttribute("Pyro RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> HYDRO_RES = register("hydro_res", createAttribute("Hydro RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> ANEMO_RES = register("anemo_res", createAttribute("Anemo RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> ELECTRO_RES = register("electro_res", createAttribute("Electro RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> DENDRO_RES = register("dendro_res", createAttribute("Dendro RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> CRYO_RES = register("cryo_res", createAttribute("Cryo RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> GEO_RES = register("geo_res", createAttribute("Geo RES%", 0, -200, 100));
+	public static final EntityAttribute PHYSICAL_RES = register("physical_res", createAttribute("Physical RES%", 0, -200, 100));
+	public static final EntityAttribute PYRO_RES = register("pyro_res", createAttribute("Pyro RES%", 0, -200, 100));
+	public static final EntityAttribute HYDRO_RES = register("hydro_res", createAttribute("Hydro RES%", 0, -200, 100));
+	public static final EntityAttribute ANEMO_RES = register("anemo_res", createAttribute("Anemo RES%", 0, -200, 100));
+	public static final EntityAttribute ELECTRO_RES = register("electro_res", createAttribute("Electro RES%", 0, -200, 100));
+	public static final EntityAttribute DENDRO_RES = register("dendro_res", createAttribute("Dendro RES%", 0, -200, 100));
+	public static final EntityAttribute CRYO_RES = register("cryo_res", createAttribute("Cryo RES%", 0, -200, 100));
+	public static final EntityAttribute GEO_RES = register("geo_res", createAttribute("Geo RES%", 0, -200, 100));
 
 	public static void register() {
 		if (registered) return;
@@ -76,10 +75,10 @@ public class SevenElementsAttributes {
 			return amount;
 
 		final Element element = source.getElementalApplication().getElement();
-		final ConcurrentHashMap<ModifierType, RegistryEntry<EntityAttribute>> modifierMap = SevenElementsAttributes.LINKS.getOrDefault(element, new ConcurrentHashMap<>());
+		final ConcurrentHashMap<ModifierType, EntityAttribute> modifierMap = SevenElementsAttributes.LINKS.getOrDefault(element, new ConcurrentHashMap<>());
 
-		final RegistryEntry<EntityAttribute> dmgBonusAttribute = modifierMap.get(ModifierType.DMG_BONUS);
-		final RegistryEntry<EntityAttribute> resAttribute = modifierMap.get(ModifierType.RES);
+		final EntityAttribute dmgBonusAttribute = modifierMap.get(ModifierType.DMG_BONUS);
+		final EntityAttribute resAttribute = modifierMap.get(ModifierType.RES);
 
 		final float dmgBonusMultiplier = 1 + (target.getAttributes().hasAttribute(dmgBonusAttribute) && source.applyDMGBonus()
 			? (float) (attacker.getAttributes().getValue(dmgBonusAttribute) / 100)
@@ -100,7 +99,7 @@ public class SevenElementsAttributes {
 		return builder;
 	}
 
-	private static double getRESMultiplier(LivingEntity target, RegistryEntry<EntityAttribute> resAttribute) {
+	private static double getRESMultiplier(LivingEntity target, EntityAttribute resAttribute) {
 		final double elementalRes = target.getAttributes().getValue(resAttribute) / 100;
 
 		return elementalRes < 0
@@ -110,16 +109,16 @@ public class SevenElementsAttributes {
 				: 1 / ((4 * elementalRes) + 1);
 	}
 
-	private static void link(RegistryEntry<EntityAttribute> attribute, Element element, ModifierType modifierType) {
-		final ConcurrentHashMap<ModifierType, RegistryEntry<EntityAttribute>> modifierMap = SevenElementsAttributes.LINKS.getOrDefault(element, new ConcurrentHashMap<>());
+	private static void link(EntityAttribute attribute, Element element, ModifierType modifierType) {
+		final ConcurrentHashMap<ModifierType, EntityAttribute> modifierMap = SevenElementsAttributes.LINKS.getOrDefault(element, new ConcurrentHashMap<>());
 
 		modifierMap.put(modifierType, attribute);
 
 		SevenElementsAttributes.LINKS.put(element, modifierMap);
 	}
 
-	private static RegistryEntry<EntityAttribute> register(String name, EntityAttribute attribute) {
-		final RegistryEntry<EntityAttribute> entry = Registry.registerReference(Registries.ATTRIBUTE, SevenElements.identifier(name), attribute);
+	private static EntityAttribute register(String name, EntityAttribute attribute) {
+		final EntityAttribute entry = Registry.register(Registries.ATTRIBUTE, SevenElements.identifier(name), attribute);
 
 		SevenElementsAttributes.ADDED_ATTRIBUTES.add(entry);
 

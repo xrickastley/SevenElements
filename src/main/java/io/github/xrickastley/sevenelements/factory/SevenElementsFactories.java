@@ -16,7 +16,6 @@ public class SevenElementsFactories {
 
 		SevenElementsAttributes.register();
 		SevenElementsBlocks.register();
-		SevenElementsComponents.register();
 		SevenElementsCriteria.register();
 		SevenElementsEntityTypes.register();
 		SevenElementsGameRules.register();

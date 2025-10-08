@@ -12,12 +12,8 @@ import net.minecraft.util.Identifier;
 
 public final class DynamicRegistries {
 	public static <T> void register(Class<T> entryClass, RegistryKey<? extends Registry<T>> key, Codec<T> elementCodec) {
-		DynamicRegistries.register(entryClass, key, elementCodec, false);
-	}
-
-	public static <T> void register(Class<T> entryClass, RegistryKey<? extends Registry<T>> key, Codec<T> elementCodec, boolean requiredNonEmpty) {
 		SevenElementsRegistryLoader.add(
-			new SevenElementsRegistryLoader.Entry<>(entryClass, key, elementCodec, requiredNonEmpty)
+			new SevenElementsRegistryLoader.Entry<>(entryClass, key, elementCodec)
 		);
 
 		DynamicRegistriesImpl.register(key, elementCodec);
@@ -26,12 +22,8 @@ public final class DynamicRegistries {
 	}
 
 	public static <T, R> void registerIdentified(Class<T> resultClass, RegistryKey<? extends Registry<T>> key, Codec<R> builderCodec, Codec<T> elementCodec, BiFunction<R, Identifier, T> resultFn) {
-		DynamicRegistries.registerIdentified(resultClass, key, builderCodec, elementCodec, resultFn, false);
-	}
-
-	public static <T, R> void registerIdentified(Class<T> resultClass, RegistryKey<? extends Registry<T>> key, Codec<R> builderCodec, Codec<T> elementCodec, BiFunction<R, Identifier, T> resultFn, boolean requiredNonEmpty) {
 		SevenElementsRegistryLoader.add(
-			new SevenElementsRegistryLoader.IdentifiedEntry<>(resultClass, key, builderCodec, resultFn, requiredNonEmpty)
+			new SevenElementsRegistryLoader.IdentifiedEntry<>(resultClass, key, builderCodec, resultFn)
 		);
 
 		DynamicRegistriesImpl.register(key, elementCodec);

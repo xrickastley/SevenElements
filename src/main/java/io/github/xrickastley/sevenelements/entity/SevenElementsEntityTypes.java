@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 import io.github.xrickastley.sevenelements.SevenElements;
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnGroup;
@@ -13,16 +15,16 @@ import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 
 public class SevenElementsEntityTypes {
-	public static final EntityType<DendroCoreEntity> DENDRO_CORE = EntityType.Builder
-		.<DendroCoreEntity>create(DendroCoreEntity::new, SpawnGroup.MISC)
-		.dimensions(0.3125f, 0.4296875f)
-		.maxTrackingRange(64)
+	public static final EntityType<DendroCoreEntity> DENDRO_CORE = FabricEntityTypeBuilder
+		.<DendroCoreEntity>create(SpawnGroup.MISC, DendroCoreEntity::new)
+		.dimensions(EntityDimensions.fixed(0.3125f, 0.4296875f))
+		.trackRangeBlocks(64)
 		.build();
 
-	public static final EntityType<CrystallizeShardEntity> CRYSTALLIZE_SHARD = EntityType.Builder
-		.<CrystallizeShardEntity>create(CrystallizeShardEntity::new, SpawnGroup.MISC)
-		.dimensions(0.3125f, 0.875f)
-		.maxTrackingRange(64)
+	public static final EntityType<CrystallizeShardEntity> CRYSTALLIZE_SHARD = FabricEntityTypeBuilder
+		.<CrystallizeShardEntity>create(SpawnGroup.MISC, CrystallizeShardEntity::new)
+		.dimensions(EntityDimensions.fixed(0.3125f, 0.875f))
+		.trackRangeBlocks(64)
 		.build();
 
 	public static void register() {

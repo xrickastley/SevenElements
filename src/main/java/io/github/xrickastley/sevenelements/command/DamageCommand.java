@@ -18,7 +18,7 @@ import io.github.xrickastley.sevenelements.registry.SevenElementsRegistryKeys;
 
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
+import net.minecraft.command.argument.RegistryEntryArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -44,18 +44,18 @@ public class DamageCommand {
 						.then(
 							argument("tag", InternalCooldownTagType.tag())
 							.then(
-								argument("type", RegistryEntryReferenceArgumentType.registryEntry(registryAccess, SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE))
+								argument("type", RegistryEntryArgumentType.registryEntry(registryAccess, SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE))
 								.executes(context -> execute(context, EntityArgumentType.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), context.getSource().getWorld().getDamageSources().generic()))
 								.then(
 									literal("by")
 									.then(
 										argument("entity", EntityArgumentType.entity())
-										.executes(context -> execute(context, EntityArgumentType.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), new DamageSource(RegistryEntryReferenceArgumentType.getRegistryEntry(context, "damageType", RegistryKeys.DAMAGE_TYPE), EntityArgumentType.getEntity(context, "entity"))))
+										.executes(context -> execute(context, EntityArgumentType.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), new DamageSource(RegistryEntryArgumentType.getRegistryEntry(context, "damageType", RegistryKeys.DAMAGE_TYPE), EntityArgumentType.getEntity(context, "entity"))))
 										.then(
 											literal("from")
 											.then(
 												argument("cause", EntityArgumentType.entity())
-												.executes(context -> execute(context, EntityArgumentType.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), new DamageSource(RegistryEntryReferenceArgumentType.getRegistryEntry(context, "damageType", RegistryKeys.DAMAGE_TYPE), EntityArgumentType.getEntity(context, "entity"), EntityArgumentType.getEntity(context, "cause"))))
+												.executes(context -> execute(context, EntityArgumentType.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), new DamageSource(RegistryEntryArgumentType.getRegistryEntry(context, "damageType", RegistryKeys.DAMAGE_TYPE), EntityArgumentType.getEntity(context, "entity"), EntityArgumentType.getEntity(context, "cause"))))
 											)
 										)
 									)
@@ -79,7 +79,7 @@ public class DamageCommand {
 		final Element element = ElementArgumentType.getElement(context, "element");
 		final double gaugeUnits = DoubleArgumentType.getDouble(context, "gaugeUnits");
 		final InternalCooldownTag tag = InternalCooldownTagType.getTag(context, "tag");
-		final InternalCooldownType type = RegistryEntryReferenceArgumentType.getRegistryEntry(context, "type", SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE).value();
+		final InternalCooldownType type = RegistryEntryArgumentType.getRegistryEntry(context, "type", SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE).value();
 
 		if (!(target instanceof final LivingEntity livingTarget))
 			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", target.getDisplayName()));

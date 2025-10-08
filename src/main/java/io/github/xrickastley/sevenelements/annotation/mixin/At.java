@@ -9,15 +9,15 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target({ /* No targets allowed */ })
 public @interface At {
-    public enum Shift {
-        NONE, BEFORE, AFTER, BY;
-    }
+	public enum Shift {
+		NONE, BEFORE, AFTER, BY;
+	}
 
-    public String target() default "";
+	public String target() default "";
 
-    public String value();
+	public String value();
 
-    public int ordinal() default -1;
+	public int ordinal() default -1;
 
-    public Shift shift() default Shift.NONE;
+	public Shift shift() default Shift.NONE;
 }

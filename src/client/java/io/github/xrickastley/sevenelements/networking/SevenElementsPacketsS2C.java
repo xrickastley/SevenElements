@@ -17,27 +17,26 @@ import io.github.xrickastley.sevenelements.util.Color;
 import io.github.xrickastley.sevenelements.util.Colors;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.Context;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class SevenElementsPacketsS2C {
-	private static final List<PayloadHandler<? extends CustomPayload>> HANDLERS = new ArrayList<>();
+	private static final List<PayloadHandler<? extends SevenElementsPayload>> HANDLERS = new ArrayList<>();
 	private static boolean registered = false;
 
 	public static void register() {
 		ClientPlayConnectionEvents.INIT.register(SevenElementsPacketsS2C::onPlayInit);
 	}
 
-	public static void registerHandler(final PayloadHandler<? extends CustomPayload> handler) {
+	public static void registerHandler(final PayloadHandler<? extends SevenElementsPayload> handler) {
 		if (registered) throw new IllegalStateException("All ClientPlayConnectionEvents.INIT handlers have already been registered!");
 
 		SevenElementsPacketsS2C.HANDLERS.add(handler);
@@ -46,21 +45,21 @@ public class SevenElementsPacketsS2C {
 	private static void registerHandlers() {
 		registered = true;
 
-		for (final PayloadHandler<? extends CustomPayload> handler : SevenElementsPacketsS2C.HANDLERS)
-			ClientPlayNetworking.registerGlobalReceiver(handler.getPayloadId(), ClassInstanceUtil.cast(handler));
+		for (final PayloadHandler<? extends SevenElementsPayload> handler : SevenElementsPacketsS2C.HANDLERS)
+			ClientPlayNetworking.registerReceiver(handler.getPayloadId().Type(), ClassInstanceUtil.cast(handler));
 	}
 
 	private static void onPlayInit(ClientPlayNetworkHandler handler, MinecraftClient client) {
-		ClientPlayNetworking.registerGlobalReceiver(ShowElementalReactionS2CPayload.ID, SevenElementsPacketsS2C::onElementalReactionShow);
-		ClientPlayNetworking.registerGlobalReceiver(ShowElementalDamageS2CPayload.ID, SevenElementsPacketsS2C::onElementalDamageShow);
-		ClientPlayNetworking.registerGlobalReceiver(SyncDendroCoreAgeS2CPayload.ID, SevenElementsPacketsS2C::onSyncDendroCoreAge);
-		ClientPlayNetworking.registerGlobalReceiver(SyncCrystallizeShardTypeS2CPayload.ID, SevenElementsPacketsS2C::onSyncCrystallizeShardElement);
-		ClientPlayNetworking.registerGlobalReceiver(FinishElementalInfusionS2CPayload.ID, SevenElementsPacketsS2C::onFinishElementalInfusion);
+		ClientPlayNetworking.registerReceiver(ShowElementalReactionS2CPayload.ID.Type(), SevenElementsPacketsS2C::onElementalReactionShow);
+		ClientPlayNetworking.registerReceiver(ShowElementalDamageS2CPayload.ID.Type(), SevenElementsPacketsS2C::onElementalDamageShow);
+		ClientPlayNetworking.registerReceiver(SyncDendroCoreAgeS2CPayload.ID.Type(), SevenElementsPacketsS2C::onSyncDendroCoreAge);
+		ClientPlayNetworking.registerReceiver(SyncCrystallizeShardTypeS2CPayload.ID.Type(), SevenElementsPacketsS2C::onSyncCrystallizeShardElement);
+		ClientPlayNetworking.registerReceiver(FinishElementalInfusionS2CPayload.ID.Type(), SevenElementsPacketsS2C::onFinishElementalInfusion);
 
 		SevenElementsPacketsS2C.registerHandlers();
 	}
 
-	private static void onElementalReactionShow(ShowElementalReactionS2CPayload payload, Context context) {
+	private static void onElementalReactionShow(ShowElementalReactionS2CPayload payload, ClientPlayerEntity player, PacketSender sender) {
 		final Vec3d pos = payload.pos();
 		final ElementalReaction reaction = payload.reaction();
 
@@ -71,7 +70,7 @@ public class SevenElementsPacketsS2C {
 		);
 	}
 
-	private static void onElementalDamageShow(ShowElementalDamageS2CPayload payload, Context context) {
+	private static void onElementalDamageShow(ShowElementalDamageS2CPayload payload, ClientPlayerEntity player, PacketSender sender) {
 		final ClientConfig config = ClientConfig.get();
 
 		if (!config.rendering.text.showDamageText) return;
@@ -91,7 +90,7 @@ public class SevenElementsPacketsS2C {
 		);
 	}
 
-	private static void onSyncDendroCoreAge(SyncDendroCoreAgeS2CPayload payload, Context context) {
+	private static void onSyncDendroCoreAge(SyncDendroCoreAgeS2CPayload payload, ClientPlayerEntity player, PacketSender sender) {
 		final World world = MinecraftClient
 			.getInstance()
 			.player
@@ -104,7 +103,7 @@ public class SevenElementsPacketsS2C {
 		dendroCore.age = payload.age();
 	}
 
-	private static void onSyncCrystallizeShardElement(SyncCrystallizeShardTypeS2CPayload payload, Context context) {
+	private static void onSyncCrystallizeShardElement(SyncCrystallizeShardTypeS2CPayload payload, ClientPlayerEntity player, PacketSender sender) {
 		final World world = MinecraftClient
 			.getInstance()
 			.player
@@ -117,16 +116,16 @@ public class SevenElementsPacketsS2C {
 		crystallizeShard.syncFromPacket(payload);
 	}
 
-	private static void onFinishElementalInfusion(FinishElementalInfusionS2CPayload payload, Context context) {
-		final PlayerEntity playerEntity = context.player();
-		final ScreenHandler screenHandler = playerEntity.currentScreenHandler;
-		final Screen currentScreen = context.client().currentScreen;
+	private static void onFinishElementalInfusion(FinishElementalInfusionS2CPayload payload, ClientPlayerEntity player, PacketSender sender) {
+		final MinecraftClient client = MinecraftClient.getInstance();
+		final ScreenHandler screenHandler = player.currentScreenHandler;
+		final Screen currentScreen = client.currentScreen;
 
 		if (screenHandler != null
 			&& screenHandler.syncId == payload.syncId()
 			&& currentScreen instanceof final ElementalInfusionScreen screen
 		) {
 			screen.finishElementalInfusion(payload);
-    	}
+		}
 	}
 }

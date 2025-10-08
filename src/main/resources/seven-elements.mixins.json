@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AbstractBlockStateMixin",
+    "ArrowItemMixin",
     "BlockItemMixin",
     "BossBarMixin",
     "CrossbowItemMixin",
@@ -17,17 +18,14 @@
     "GrindstoneScreenHandlerMixin",
     "ItemStackMixin",
     "LivingEntityMixin",
-    "PersistentProjectileEntityMixin",
     "PlayerEntityMixin",
     "PrioritizedLivingEntityMixin",
     "PrioritizedPlayerEntityMixin",
     "ProjectileEntityMixin",
-    "RangedWeaponItemMixin",
-    "RegistryLoaderAccessor",
+    "ArrowItemMixin",
     "RegistryLoaderMixin",
     "ServerBossBarMixin",
     "StatusEffectMixin",
-    "WindChargeItemMixin",
     "WitherEntityMixin"
   ],
   "injectors": {

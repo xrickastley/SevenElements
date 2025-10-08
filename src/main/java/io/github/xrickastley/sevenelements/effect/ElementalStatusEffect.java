@@ -20,8 +20,6 @@ import io.github.xrickastley.sevenelements.util.Functions;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 /**
@@ -52,24 +50,15 @@ public abstract sealed class ElementalStatusEffect
 		return ElementalStatusEffect.ELEMENT_EFFECTS.get(element);
 	}
 
-	public static @Nullable RegistryEntry<StatusEffect> getEntryForElement(Element element) {
-		final ElementalStatusEffect effect = ElementalStatusEffect.ELEMENT_EFFECTS.get(element);
-
-		if (effect == null) return null;
-
-		return Registries.STATUS_EFFECT.getEntry(effect);
-	}
-
-	public static List<RegistryEntry<StatusEffect>> getElementEffects() {
+	public static List<ElementalStatusEffect> getElementEffects() {
 		return ElementalStatusEffect.ELEMENT_EFFECTS
 			.values()
 			.stream()
-			.map(Registries.STATUS_EFFECT::getEntry)
 			.toList();
 	}
 
-	public static Optional<ElementalStatusEffect> asElementEffect(RegistryEntry<StatusEffect> effect) {
-		return Optional.ofNullable(ClassInstanceUtil.castOrNull(effect.value(), ElementalStatusEffect.class));
+	public static Optional<ElementalStatusEffect> asElementEffect(StatusEffect effect) {
+		return Optional.ofNullable(ClassInstanceUtil.castOrNull(effect, ElementalStatusEffect.class));
 	}
 
 	public static void applyPossibleStatusEffect(ElementalApplication application) {
@@ -80,8 +69,8 @@ public abstract sealed class ElementalStatusEffect
 		effect.applyStatusEffect(application);
 	}
 
-	public static boolean isElementalEffect(RegistryEntry<StatusEffect> effect) {
-		return effect.value() instanceof ElementalStatusEffect;
+	public static boolean isElementalEffect(StatusEffect effect) {
+		return effect instanceof ElementalStatusEffect;
 	}
 
 	public Element getElement() {
@@ -93,7 +82,7 @@ public abstract sealed class ElementalStatusEffect
 
 		application.getEntity().addStatusEffect(
 			new StatusEffectInstance(
-				Registries.STATUS_EFFECT.getEntry(this),
+				this,
 				application.getRemainingTicks(),
 				0,
 				true,
@@ -138,7 +127,7 @@ public abstract sealed class ElementalStatusEffect
 		public void onElementRemoved(Element element, ElementalApplication application) {
 			if (application.getEntity() instanceof final ServerPlayerEntity player && player.networkHandler == null) return;
 
-			ClassInstanceUtil.ifPresentMapped(element, ElementalStatusEffect::getEffectForElement, Functions.composeConsumer(Registries.STATUS_EFFECT::getEntry, application.getEntity()::removeStatusEffect));
+			ClassInstanceUtil.ifPresentMapped(element, ElementalStatusEffect::getEffectForElement, application.getEntity()::removeStatusEffect);
 		}
 	}
 }

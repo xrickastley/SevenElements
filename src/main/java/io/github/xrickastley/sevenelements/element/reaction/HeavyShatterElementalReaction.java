@@ -25,7 +25,7 @@ public final class HeavyShatterElementalReaction extends AbstractShatterElementa
 			&& entity.sevenelements$getPlannedAttacker() != null
 			&& entity.sevenelements$getPlannedAttacker() instanceof final LivingEntity attacker
 			&& entity.sevenelements$getPlannedDamageSource() != null
-			&& entity.sevenelements$getPlannedDamageSource().isDirect()
+			&& !entity.sevenelements$getPlannedDamageSource().isIndirect()
 			&& Registries.ITEM
 				.getEntry(attacker.getMainHandStack().getItem())
 				.isIn(SevenElementsItemTags.HEAVY_WEAPON);

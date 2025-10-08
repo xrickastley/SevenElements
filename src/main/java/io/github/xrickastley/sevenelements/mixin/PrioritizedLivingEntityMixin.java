@@ -44,7 +44,6 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.util.Pair;
 import net.minecraft.world.World;
@@ -58,7 +57,7 @@ public abstract class PrioritizedLivingEntityMixin
 	protected float lastDamageTaken;
 	@Shadow
 	@Final
-	private Map<RegistryEntry<StatusEffect>, StatusEffectInstance> activeStatusEffects;
+	private Map<StatusEffect, StatusEffectInstance> activeStatusEffects;
 	@Shadow
 	protected abstract void onStatusEffectRemoved(StatusEffectInstance effect);
 
@@ -66,10 +65,10 @@ public abstract class PrioritizedLivingEntityMixin
 	public abstract boolean isDead();
 
 	@Shadow
-	public abstract boolean hasStatusEffect(RegistryEntry<StatusEffect> effect);
+	public abstract boolean hasStatusEffect(StatusEffect effect);
 
 	@Shadow
-	public abstract boolean removeStatusEffect(RegistryEntry<StatusEffect> effect);
+	public abstract boolean removeStatusEffect(StatusEffect effect);
 
 	@Unique
 	private List<ElementalReaction> sevenelements$reactions = new ArrayList<>();
@@ -99,9 +98,9 @@ public abstract class PrioritizedLivingEntityMixin
 	@Inject(
 		method = "canHaveStatusEffect",
 		at = @At("HEAD"),
-		cancellable = true,
-		order = Integer.MIN_VALUE // Frozen and Cryo **must** persist while their respective elements are applied.
+		cancellable = true
 	)
+	// Frozen and Cryo **must** persist while their respective elements are applied.
 	private void forceElementEffects(StatusEffectInstance effect, CallbackInfoReturnable<Boolean> cir) {
 		if (ElementalStatusEffect.isElementalEffect(effect.getEffectType())) cir.setReturnValue(true);
 	}
@@ -109,13 +108,13 @@ public abstract class PrioritizedLivingEntityMixin
 	@Inject(
 		method = "removeStatusEffectInternal",
 		at = @At("HEAD"),
-		cancellable = true,
-		order = Integer.MIN_VALUE // Frozen and Cryo **must** persist while their respective elements are applied.
+		cancellable = true
 	)
-	private void preventElementEffectRemoval(RegistryEntry<StatusEffect> effect, CallbackInfoReturnable<StatusEffectInstance> cir) {
+	// Frozen and Cryo **must** persist while their respective elements are applied.
+	private void preventElementEffectRemoval(StatusEffect effect, CallbackInfoReturnable<StatusEffectInstance> cir) {
 		if (this.isDead() || !ElementalStatusEffect.isElementalEffect(effect)) return;
 
-		final ElementalStatusEffect elementEffect = (ElementalStatusEffect) effect.value();
+		final ElementalStatusEffect elementEffect = (ElementalStatusEffect) effect;
 		final ElementComponent component = ElementComponent.KEY.get(this);
 
 		if (component.hasElementalApplication(elementEffect.getElement())) cir.setReturnValue(null);
@@ -146,7 +145,7 @@ public abstract class PrioritizedLivingEntityMixin
 			.stream()
 			.filter(this::hasStatusEffect)
 			.filter(Predicate.not(
-				Functions.composePredicate(RegistryEntry::value, ElementalStatusEffect.class::cast, ElementalStatusEffect::getElement, component::hasElementalApplication)
+				Functions.composePredicate(ElementalStatusEffect::getElement, component::hasElementalApplication)
 			))
 			.forEach(this::removeStatusEffect);
 	}
@@ -154,9 +153,9 @@ public abstract class PrioritizedLivingEntityMixin
 	@ModifyVariable(
 		method = "clearStatusEffects",
 		at = @At("STORE"),
-		ordinal = 0,
-		order = Integer.MIN_VALUE // Frozen and Cryo **must** persist while their respective elements are applied.
+		ordinal = 0
 	)
+	// Frozen and Cryo **must** persist while their respective elements are applied.
 	private Iterator<StatusEffectInstance> persistElementEffectsOnClear(Iterator<StatusEffectInstance> value) {
 		if (this.isDead()) return value;
 
@@ -172,9 +171,9 @@ public abstract class PrioritizedLivingEntityMixin
 
 	@Inject(
 		method = "damage",
-		at = @At("HEAD"),
-		order = Integer.MIN_VALUE // The planned attacker should be set as early as possible.
+		at = @At("HEAD")
 	)
+	// The planned attacker should be set as early as possible.
 	private void setPlannedAttacker(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		this.sevenelements$plannedAttacker = source.getAttacker();
 		this.sevenelements$plannedDamageSource = source;
@@ -183,8 +182,7 @@ public abstract class PrioritizedLivingEntityMixin
 	@Inject(
 		method = "damage",
 		at = @At("HEAD"),
-		cancellable = true,
-		order = Integer.MIN_VALUE
+		cancellable = true
 	)
 	private void preventDamageWhenFrozen(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		if (source.getAttacker() instanceof final LivingEntity entity && entity.hasStatusEffect(SevenElementsStatusEffects.FROZEN))
@@ -194,9 +192,9 @@ public abstract class PrioritizedLivingEntityMixin
 	@ModifyVariable(
 		method = "damage",
 		at = @At("HEAD"),
-		argsOnly = true,
-		order = Integer.MIN_VALUE // Infusions need to be considered before other DMG effects.
+		argsOnly = true
 	)
+	// Infusions need to be considered before other DMG effects.
 	private DamageSource applyElementalInfusions(DamageSource source) {
 		return ElementComponent.applyElementalInfusions(source, (LivingEntity)(Entity) this);
 	}
@@ -204,9 +202,9 @@ public abstract class PrioritizedLivingEntityMixin
 	@ModifyVariable(
 		method = "damage",
 		at = @At("HEAD"),
-		argsOnly = true,
-		order = Integer.MIN_VALUE // Additive DMG Bonus is a Base DMG multiplier, should be applied ASAP.
+		argsOnly = true
 	)
+	// Additive DMG Bonus is a Base DMG multiplier, should be applied ASAP.
 	private float applyDMGModifiers(float amount, @Local(argsOnly = true) DamageSource source) {
 		final boolean fireResistance = source.isIn(DamageTypeTags.IS_FIRE) && this.hasStatusEffect(StatusEffects.FIRE_RESISTANCE);
 		final boolean damageCooldown = this.timeUntilRegen > 10.0F && !source.isIn(DamageTypeTags.BYPASSES_COOLDOWN) && amount <= this.lastDamageTaken;
@@ -257,9 +255,10 @@ public abstract class PrioritizedLivingEntityMixin
 			value = "TAIL",
 			shift = At.Shift.BEFORE
 		),
-		argsOnly = true,
-		order = Integer.MAX_VALUE // Amplifying DMG Bonus is a Total DMG multiplier, should be applied as late as possible.
+		argsOnly = true
 	)
+	// Amplifying DMG Bonus is a Total DMG multiplier, should be applied as late as possible.
+	// Here since sevenelements$reactions is a required field.
 	private float applyReactionAmplifiers(float amount, @Local(argsOnly = true) DamageSource source) {
 		double amplifier = this.sevenelements$reactions != null && !this.sevenelements$reactions.isEmpty()
 			? Math.max(

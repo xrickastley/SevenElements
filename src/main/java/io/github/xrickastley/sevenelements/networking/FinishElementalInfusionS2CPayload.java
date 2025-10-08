@@ -1,21 +1,19 @@
 package io.github.xrickastley.sevenelements.networking;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+public class FinishElementalInfusionS2CPayload implements SevenElementsPayload {
+	public static final Codec<FinishElementalInfusionS2CPayload> CODEC = RecordCodecBuilder.create(instance -> instance.group(
+		Codec.INT.fieldOf("syncId").forGetter(FinishElementalInfusionS2CPayload::syncId)
+	).apply(instance, FinishElementalInfusionS2CPayload::new));
 
-public class FinishElementalInfusionS2CPayload implements CustomPayload {
-	public static final CustomPayload.Id<FinishElementalInfusionS2CPayload> ID = new CustomPayload.Id<>(
-		SevenElements.identifier("s2c/finish_elemental_infusion")
-	);
-
-	public static final PacketCodec<RegistryByteBuf, FinishElementalInfusionS2CPayload> CODEC = PacketCodec.tuple(
-		PacketCodecs.INTEGER, FinishElementalInfusionS2CPayload::syncId,
-		FinishElementalInfusionS2CPayload::new
+	public static final SevenElementsPayload.Id<FinishElementalInfusionS2CPayload> ID = new SevenElementsPayload.Id<>(
+		SevenElements.identifier("s2c/finish_elemental_infusion"),
+		FinishElementalInfusionS2CPayload.CODEC
 	);
 
 	private final int syncId;
@@ -33,7 +31,12 @@ public class FinishElementalInfusionS2CPayload implements CustomPayload {
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Id<? extends SevenElementsPayload> getId() {
 		return ID;
+	}
+
+	@Override
+	public Codec<? extends SevenElementsPayload> getCodec() {
+		return CODEC;
 	}
 }

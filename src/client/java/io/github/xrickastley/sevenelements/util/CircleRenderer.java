@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.apache.commons.lang3.function.TriConsumer;
 import org.joml.Matrix4f;
+
+import io.github.xrickastley.sevenelements.util.functions.TriConsumer;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
@@ -135,11 +135,14 @@ public class CircleRenderer {
 		@Override
 		public void render(Vec3d origin, Matrix4f posMatrix) {
 			final Tessellator tessellator = Tessellator.getInstance();
-			final BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+			final BufferBuilder buffer = tessellator.getBuffer();
 
-			bufferBuilder
+			buffer.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+
+			buffer
 				.vertex(posMatrix, (float) origin.getX(), (float) origin.getY(), (float) origin.getZ())
-				.color(this.color);
+				.color(this.color)
+				.next();
 
 			final double subdivisions = Math.ceil(360.0 * this.percentFilled);
 
@@ -147,9 +150,10 @@ public class CircleRenderer {
 				final float x = (float) (origin.getX() + (Math.cos((i * (Math.PI / 180)) + (Math.PI / 2)) * (this.radius * scaleFactor)));
 				final float y = (float) (origin.getY() - (Math.sin((i * (Math.PI / 180)) + (Math.PI / 2)) * (this.radius * scaleFactor)));
 
-				bufferBuilder
+				buffer
 					.vertex(posMatrix, x, y, (float) z)
-					.color(this.color);
+					.color(this.color)
+					.next();
 			}
 
 			RenderSystem.enableBlend();
@@ -159,7 +163,7 @@ public class CircleRenderer {
 			RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+			tessellator.draw();
 		}
 	}
 
@@ -175,7 +179,9 @@ public class CircleRenderer {
 		@Override
 		public void render(Vec3d origin, Matrix4f posMatrix) {
 			final Tessellator tessellator = Tessellator.getInstance();
-			final BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
+			final BufferBuilder buffer = tessellator.getBuffer();
+
+			buffer.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
 
 			final float innerRadius = (float) (this.radius * scaleFactor);
 			final float totalRadius = (float) ((this.radius + this.length) * scaleFactor);
@@ -183,9 +189,10 @@ public class CircleRenderer {
 			final float x = (float) (origin.getX() + (Math.cos((0 * (Math.PI / 180)) + (Math.PI / 2)) * innerRadius));
 			final float y = (float) (origin.getY() - (Math.sin((0 * (Math.PI / 180)) + (Math.PI / 2)) * innerRadius));
 
-			bufferBuilder
+			buffer
 				.vertex(posMatrix, x, y, (float) origin.getZ())
-				.color(this.color);
+				.color(this.color)
+				.next();
 
 			final double subdivisions = Math.ceil(360.0 * this.percentFilled);
 
@@ -193,17 +200,19 @@ public class CircleRenderer {
 				final float outerX = (float) (origin.getX() + (Math.cos((i * (Math.PI / 180)) + (Math.PI / 2)) * totalRadius));
 				final float outerY = (float) (origin.getY() - (Math.sin((i * (Math.PI / 180)) + (Math.PI / 2)) * totalRadius));
 
-				bufferBuilder
+				buffer
 					.vertex(posMatrix, outerX, outerY, (float) origin.getZ())
-					.color(this.color);
+					.color(this.color)
+					.next();
 
 				// Add vertices for the inner circle
 				final float innerX = (float) (origin.getX() + (Math.cos((i * (Math.PI / 180)) + (Math.PI / 2)) * innerRadius));
 				final float innerY = (float) (origin.getY() - (Math.sin((i * (Math.PI / 180)) + (Math.PI / 2)) * innerRadius));
 
-				bufferBuilder
+				buffer
 					.vertex(posMatrix, innerX, innerY, (float) origin.getZ())
-					.color(this.color);
+					.color(this.color)
+					.next();
 			}
 
 			RenderSystem.enableBlend();
@@ -213,7 +222,7 @@ public class CircleRenderer {
 			RenderSystem.setShader(GameRenderer::getPositionColorProgram);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+			tessellator.draw();
 		}
 	}
 

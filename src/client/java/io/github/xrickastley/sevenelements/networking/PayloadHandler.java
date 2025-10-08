@@ -1,8 +1,7 @@
 package io.github.xrickastley.sevenelements.networking;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.PlayPayloadHandler;
-import net.minecraft.network.packet.CustomPayload;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.PlayPacketHandler;
 
-public interface PayloadHandler<T extends CustomPayload> extends PlayPayloadHandler<T> {
-	CustomPayload.Id<T> getPayloadId();
+public interface PayloadHandler<T extends SevenElementsPayload> extends PlayPacketHandler<T> {
+	SevenElementsPayload.Id<T> getPayloadId();
 }

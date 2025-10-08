@@ -6,9 +6,9 @@ import net.minecraft.client.particle.ParticleTextureSheet;
 import net.minecraft.client.particle.SpriteBillboardParticle;
 import net.minecraft.client.particle.SpriteProvider;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.particle.EntityEffectParticleEffect;
+import net.minecraft.particle.DefaultParticleType;
 
-// Directly ported from Minecraft 1.21.5 to Minecraft 1.21
+// Ported with changes from Minecraft 1.21.5 to Minecraft 1.20.1
 public class LeavesParticle extends SpriteBillboardParticle {
 	// private static final float SPEED_SCALE = 0.0025F;
 	// private static final int field_43373 = 300;
@@ -90,16 +90,16 @@ public class LeavesParticle extends SpriteBillboardParticle {
 		}
 	}
 
-	public static class TintedLeavesFactory implements ParticleFactory<EntityEffectParticleEffect> {
+	public static class TintedLeavesFactory implements ParticleFactory<DefaultParticleType> {
 		private final SpriteProvider spriteProvider;
 
 		public TintedLeavesFactory(SpriteProvider spriteProvider) {
 			this.spriteProvider = spriteProvider;
 		}
 
-		public Particle createParticle(EntityEffectParticleEffect entityEffectParticleEffect, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
+		public Particle createParticle(DefaultParticleType particleEffect, ClientWorld clientWorld, double d, double e, double f, double g, double h, double i) {
 			Particle particle = new LeavesParticle(clientWorld, d, e, f, this.spriteProvider, 0.07F, 10.0F, true, false, 2.0F, 0.021F);
-			particle.setColor(entityEffectParticleEffect.getRed(), entityEffectParticleEffect.getGreen(), entityEffectParticleEffect.getBlue());
+			particle.setColor(0f, 1f, 0f);
 			return particle;
 		}
 	}

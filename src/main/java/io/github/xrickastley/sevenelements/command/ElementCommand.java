@@ -29,7 +29,7 @@ import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
+import net.minecraft.command.argument.RegistryEntryArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
@@ -130,7 +130,7 @@ public class ElementCommand {
 											argument("tag", InternalCooldownTagType.tag())
 											.executes(ElementCommand::infuseGaugeUnit)
 											.then(
-												argument("type", RegistryEntryReferenceArgumentType.registryEntry(registryAccess, SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE))
+												argument("type", RegistryEntryArgumentType.registryEntry(registryAccess, SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE))
 												.executes(ElementCommand::infuseGaugeUnit)
 											)
 										)
@@ -144,7 +144,7 @@ public class ElementCommand {
 												argument("tag", InternalCooldownTagType.tag())
 												.executes(ElementCommand::infuseDuration)
 												.then(
-													argument("type", RegistryEntryReferenceArgumentType.registryEntry(registryAccess, SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE))
+													argument("type", RegistryEntryArgumentType.registryEntry(registryAccess, SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE))
 													.executes(ElementCommand::infuseDuration)
 												)
 											)

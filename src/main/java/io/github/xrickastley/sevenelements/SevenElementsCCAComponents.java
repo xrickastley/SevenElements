@@ -1,17 +1,17 @@
 package io.github.xrickastley.sevenelements;
 
-import org.ladysnake.cca.api.v3.entity.EntityComponentFactoryRegistry;
-import org.ladysnake.cca.api.v3.entity.EntityComponentInitializer;
-import org.ladysnake.cca.api.v3.item.ItemComponentInitializer;
-import org.ladysnake.cca.api.v3.item.ItemComponentMigrationRegistry;
-
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
+import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.component.FrozenEffectComponent;
 import io.github.xrickastley.sevenelements.component.FrozenEffectComponentImpl;
-import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 
 import net.minecraft.entity.LivingEntity;
+
+import dev.onyxstudios.cca.api.v3.entity.EntityComponentFactoryRegistry;
+import dev.onyxstudios.cca.api.v3.entity.EntityComponentInitializer;
+import dev.onyxstudios.cca.api.v3.item.ItemComponentFactoryRegistry;
+import dev.onyxstudios.cca.api.v3.item.ItemComponentInitializer;
 
 
 public class SevenElementsCCAComponents implements EntityComponentInitializer, ItemComponentInitializer {
@@ -22,7 +22,7 @@ public class SevenElementsCCAComponents implements EntityComponentInitializer, I
 	}
 
 	@Override
-	public void registerItemComponentMigrations(ItemComponentMigrationRegistry registry) {
-		registry.registerMigration(SevenElements.identifier("elemental_infusions"), SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+	public void registerItemComponentFactories(ItemComponentFactoryRegistry registry) {
+		registry.register(i -> true, ElementalInfusionComponent.KEY, ElementalInfusionComponent::new);
 	}
 }

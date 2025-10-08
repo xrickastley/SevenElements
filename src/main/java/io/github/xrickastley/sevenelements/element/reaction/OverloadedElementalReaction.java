@@ -79,11 +79,7 @@ public class OverloadedElementalReaction extends ElementalReaction {
 					z,
 					power,
 					explosion.getAffectedBlocks(),
-					explosion.getAffectedPlayers().get(serverPlayerEntity),
-					explosion.getDestructionType(),
-					explosion.getParticle(),
-					explosion.getEmitterParticle(),
-					explosion.getSoundEvent()
+					explosion.getAffectedPlayers().get(serverPlayerEntity)
 				)
 			);
 		}

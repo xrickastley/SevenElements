@@ -8,13 +8,14 @@ import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.mixin.client.BossBarHudAccessor;
+import io.github.xrickastley.sevenelements.networking.SevenElementsPayload.Id;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.Context;
+import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.ClientBossBar;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.packet.CustomPayload.Id;
 
 public class SyncBossBarEntityPayloadHandler implements PayloadHandler<SyncBossBarEntityS2CPayload> {
 	private final Map<UUID, LivingEntity> deferredEntities = new HashMap<>();
@@ -25,7 +26,7 @@ public class SyncBossBarEntityPayloadHandler implements PayloadHandler<SyncBossB
 	}
 
 	@Override
-	public void receive(SyncBossBarEntityS2CPayload packet, Context context) {
+	public void receive(SyncBossBarEntityS2CPayload packet, ClientPlayerEntity player, PacketSender sender) {
 		final MinecraftClient client = MinecraftClient.getInstance();
 		final Map<UUID, ClientBossBar> bossBarMap = ((BossBarHudAccessor) client.inGameHud.getBossBarHud())
 			.getBossBars();

@@ -14,7 +14,6 @@ import io.github.xrickastley.sevenelements.command.InternalCooldownTagType;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.factory.SevenElementsFactories;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
-import io.github.xrickastley.sevenelements.registry.SevenElementsPayloadsS2C;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistryKeys;
 import io.github.xrickastley.sevenelements.registry.dynamic.DynamicRegistries;
 import io.github.xrickastley.sevenelements.registry.dynamic.DynamicRegistryLoadEvents.RegistryContext;
@@ -41,7 +40,6 @@ public class SevenElements implements ModInitializer {
 		LOGGER.info("Seven Elements Initialized!");
 
 		SevenElementsFactories.registerAll();
-		SevenElementsPayloadsS2C.register();
 
 		CommandRegistrationCallback.EVENT.register(SevenElements::onCommandRegistration);
 		DynamicRegistryLoadEvents.BEFORE_LOAD.register(SevenElements::onBeforeRegistryLoad);
@@ -70,7 +68,6 @@ public class SevenElements implements ModInitializer {
 			InternalCooldownTagType.class,
 			ConstantArgumentSerializer.of(InternalCooldownTagType::new)
 		);
-
 	}
 
 	public static Identifier identifier(String path) {

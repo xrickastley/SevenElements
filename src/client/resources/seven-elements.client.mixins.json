@@ -8,6 +8,7 @@
     "BossBarHudAccessor",
     "BossBarHudMixin",
     "InGameHudMixin",
+    "ItemStackMixin",
     "LivingEntityMixin",
     "LivingEntityRendererMixin"
   ],

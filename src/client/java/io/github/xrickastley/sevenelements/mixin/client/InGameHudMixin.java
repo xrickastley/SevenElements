@@ -24,7 +24,6 @@ import io.github.xrickastley.sevenelements.util.Functions;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
 
@@ -47,18 +46,17 @@ public class InGameHudMixin {
 		method = "renderStatusBars",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/gui/hud/InGameHud;renderArmor(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/entity/player/PlayerEntity;IIII)V",
-			shift = At.Shift.AFTER
+			target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V",
+			shift = At.Shift.BEFORE,
+			ordinal = 0
 		)
 	)
-	private void renderAppliedElements(DrawContext context, CallbackInfo ci, @Local PlayerEntity player, @Local(ordinal = 4) int y, @Local(ordinal = 2) int x, @Local(ordinal = 6) int p, @Local(ordinal = 7) int lines) {
-		this.client.getProfiler().swap("seven-elements:elements");
+	private void renderAppliedElements(DrawContext context, CallbackInfo ci, @Local PlayerEntity player, @Local(ordinal = 3) int x, @Local(ordinal = 9) int y) {
+		this.client.getProfiler().swap("origins-genshin:elements");
 
-		y -= (p - 1) * lines;
+		int offset = 0;
 
-		int offset = 1;
-
-		if (player.getArmor() > 0) offset++;
+		if (player.getArmor() > 0) offset += 1;
 
 		y -= (10 * (offset));
 
@@ -88,10 +86,14 @@ public class InGameHudMixin {
 	}
 
 	@Inject(
-		method = "renderMiscOverlays",
-		at = @At("TAIL")
+		method = "render(Lnet/minecraft/client/gui/DrawContext;F)V",
+		at = @At(
+			value = "INVOKE_ASSIGN",
+			target = "Lnet/minecraft/client/gui/hud/InGameHud;getTextRenderer()Lnet/minecraft/client/font/TextRenderer;",
+			shift = At.Shift.AFTER
+		)
 	)
-	private void renderFrozenOverlay(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+	private void renderFrozenOverlay(DrawContext context, float tickDelta, CallbackInfo ci) {
 		if (client.player != null && client.player.hasStatusEffect(SevenElementsStatusEffects.FROZEN))
 			this.renderOverlay(context, POWDER_SNOW_OUTLINE, 1.0F);
 	}

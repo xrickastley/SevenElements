@@ -8,15 +8,16 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Decoder;
 import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.Lifecycle;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -24,28 +25,23 @@ import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
-import io.github.xrickastley.sevenelements.mixin.RegistryLoaderAccessor;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistryKeys;
 import io.github.xrickastley.sevenelements.registry.dynamic.DynamicRegistryLoadEvents.RegistryContextImpl;
 import io.github.xrickastley.sevenelements.registry.dynamic.DynamicRegistryLoadEvents.RegistryEntryContextImpl;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.registry.MutableRegistry;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.RegistryLoader;
-import net.minecraft.registry.RegistryOps.RegistryInfoGetter;
 import net.minecraft.registry.RegistryOps;
-import net.minecraft.registry.SerializableRegistries.SerializedRegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryInfo;
 import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceFactory;
 import net.minecraft.resource.ResourceFinder;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 
 public final class SevenElementsRegistryLoader {
 	private static final List<Entry<?, ?>> DYNAMIC_REGISTRIES = new ArrayList<>();
@@ -66,118 +62,56 @@ public final class SevenElementsRegistryLoader {
 		SevenElementsRegistryLoader.UNMODIFIABLE_ENTRIES.putAll(key, ids);
 	}
 
-	public static <E> void loadFromResource(ResourceManager resourceManager, RegistryInfoGetter infoGetter, MutableRegistry<E> registry, Decoder<E> elementDecoder, Map<RegistryKey<?>, Exception> errors) {
-		final @Nullable Entry<? extends E, ?> dynRegEntry = SevenElementsRegistryLoader.getDynamicRegistry(registry);
+	public static <E> void load(RegistryOps.RegistryInfoGetter registryInfoGetter, ResourceManager resourceManager, RegistryKey<? extends Registry<E>> registryRef, MutableRegistry<E> newRegistry, Decoder<E> decoder, Map<RegistryKey<?>, Exception> exceptions) {
+		final @Nullable Entry<? extends E, ?> dynRegEntry = SevenElementsRegistryLoader.getDynamicRegistry(newRegistry);
 
 		if (dynRegEntry == null)
 			throw new IllegalArgumentException("You may only pass a dynamic registry registered to the SevenElementsRegistryLoader!");
 
-		DynamicRegistryLoadEvents.BEFORE_LOAD.invoker().onBeforeLoad(new RegistryContextImpl<>(registry.getKey(), registry));
+		DynamicRegistryLoadEvents.BEFORE_LOAD.invoker().onBeforeLoad(new RegistryContextImpl<>(registryRef, newRegistry));
 
-		dynRegEntry.requireUnmodifiableEntries(registry);
+		dynRegEntry.requireUnmodifiableEntries(newRegistry);
 
 		final String path = dynRegEntry.getPath();
 		final ResourceFinder resourceFinder = ResourceFinder.json(path);
-		final RegistryOps<JsonElement> registryOps = RegistryOps.of(JsonOps.INSTANCE, infoGetter);
+		final RegistryOps<JsonElement> registryOps = RegistryOps.of(JsonOps.INSTANCE, registryInfoGetter);
+		final Iterator<Map.Entry<Identifier, Resource>> var9 = resourceFinder.findResources(resourceManager).entrySet().iterator();
 
-		for (java.util.Map.Entry<Identifier, Resource> entry : resourceFinder.findResources(resourceManager).entrySet()) {
+		while (var9.hasNext()) {
+			Map.Entry<Identifier, Resource> entry = var9.next();
 			final Identifier identifier = entry.getKey();
 			final Identifier resourceId = resourceFinder.toResourceId(identifier);
 
 			if (dynRegEntry.isUnmodifiable(resourceId)) {
 				SevenElements
 					.sublogger()
-					.warn("The data pack (\"{}\") with file at path ({}/{}) attempted to overwrite the preloaded entry {}, ignoring!", entry.getValue().getPackId(), identifier.getNamespace(), identifier.getPath(), resourceId);
+					.warn("The data pack (\"{}\") with file at path ({}/{}) attempted to overwrite the preloaded entry {}, ignoring!", entry.getValue().getResourcePackName(), identifier.getNamespace(), identifier.getPath(), resourceId);
 
 				continue;
 			}
 
-			final RegistryKey<E> registryKey = RegistryKey.of(registry.getKey(), resourceId);
+			final RegistryKey<E> registryKey = RegistryKey.of(registryRef, resourceId);
 			final Resource resource = entry.getValue();
-			final RegistryEntryInfo registryEntryInfo = RegistryLoaderAccessor.getResourceEntryInfoGetter().apply(resource.getKnownPackInfo());
 
 			try {
-				parseAndAdd(registry, ClassInstanceUtil.cast(dynRegEntry), registryOps, registryKey, resourceId, resource, registryEntryInfo);
+				parseAndAdd(newRegistry, ClassInstanceUtil.cast(dynRegEntry), registryOps, registryKey, resourceId, resource);
 			} catch (Exception var15) {
-				errors.put(registryKey, new IllegalStateException(String.format(Locale.ROOT, "Failed to parse %s from pack %s", identifier, resource.getPackId()), var15));
+				exceptions.put(registryKey, new IllegalStateException(String.format(Locale.ROOT, "Failed to parse %s from pack %s", identifier, resource.getResourcePackName()), var15));
 			}
 		}
 
-		DynamicRegistryLoadEvents.AFTER_LOAD.invoker().onAfterLoad(new RegistryContextImpl<>(registry.getKey(), registry));
+		DynamicRegistryLoadEvents.AFTER_LOAD.invoker().onAfterLoad(new RegistryContextImpl<>(registryRef, newRegistry));
 	}
 
-	public static <E> void loadFromNetwork(
-		Map<RegistryKey<? extends Registry<?>>, List<SerializedRegistryEntry>> data,
-		ResourceFactory factory,
-		RegistryInfoGetter infoGetter,
-		MutableRegistry<E> registry,
-		Decoder<E> decoder,
-		Map<RegistryKey<?>, Exception> loadingErrors
-	) {
-		final @Nullable Entry<? extends E, ?> dynRegEntry = SevenElementsRegistryLoader.getDynamicRegistry(registry);
-
-		if (dynRegEntry == null)
-			throw new IllegalArgumentException("You may only pass a dynamic registry registered to the SevenElementsRegistryLoader!");
-
-		DynamicRegistryLoadEvents.BEFORE_LOAD.invoker().onBeforeLoad(new RegistryContextImpl<>(registry.getKey(), registry));
-
-		dynRegEntry.requireUnmodifiableEntries(registry);
-
-		List<SerializedRegistryEntry> list = data.get(registry.getKey());
-		if (list != null) {
-			RegistryOps<NbtElement> registryOps = RegistryOps.of(NbtOps.INSTANCE, infoGetter);
-			RegistryOps<JsonElement> registryOps2 = RegistryOps.of(JsonOps.INSTANCE, infoGetter);
-			String string = RegistryKeys.getPath(registry.getKey());
-			ResourceFinder resourceFinder = ResourceFinder.json(string);
-
-			for (SerializedRegistryEntry serializedRegistryEntry : list) {
-				if (dynRegEntry.isUnmodifiable(serializedRegistryEntry.id())) continue;
-
-				RegistryKey<E> registryKey = RegistryKey.of(registry.getKey(), serializedRegistryEntry.id());
-				Optional<NbtElement> optional = serializedRegistryEntry.data();
-				if (optional.isPresent()) {
-					try {
-						DataResult<E> dataResult = decoder.parse(registryOps, optional.get());
-						E object = dataResult.getOrThrow();
-						registry.add(registryKey, object, RegistryLoaderAccessor.getExperimentalEntryInfo());
-
-						DynamicRegistryLoadEvents.ENTRY_LOAD.invoker().onEntryLoad(new RegistryEntryContextImpl<>(object, registry.getKey(), registry));
-					} catch (Exception var17) {
-						loadingErrors.put(registryKey, new IllegalStateException(String.format(Locale.ROOT, "Failed to parse value %s from server", optional.get()), var17));
-					}
-				} else {
-					Identifier identifier = resourceFinder.toResourcePath(serializedRegistryEntry.id());
-
-					try {
-						Resource resource = factory.getResourceOrThrow(identifier);
-						final Identifier resourceId = resourceFinder.toResourceId(identifier);
-
-						if (dynRegEntry.isUnmodifiable(resourceId)) {
-							SevenElements
-								.sublogger()
-								.warn("The data pack (\"{}\") with file at path ({}/{}) attempted to overwrite the preloaded entry {}, ignoring!", resource.getPackId(), identifier.getNamespace(), identifier.getPath(), resourceId);
-
-							continue;
-						}
-
-						parseAndAdd(registry, ClassInstanceUtil.cast(dynRegEntry), registryOps2, registryKey, resourceFinder.toResourceId(identifier), resource, RegistryLoaderAccessor.getExperimentalEntryInfo());
-					} catch (Exception var18) {
-						loadingErrors.put(registryKey, new IllegalStateException("Failed to parse local data", var18));
-					}
-				}
-			}
-
-			DynamicRegistryLoadEvents.AFTER_LOAD.invoker().onAfterLoad(new RegistryContextImpl<>(registry.getKey(), registry));
-		}
-	}
-
-	public static <E> void parseAndAdd(MutableRegistry<E> registry, Entry<E, ?> entry, RegistryOps<JsonElement> ops, RegistryKey<E> key, Identifier identifier, Resource resource, RegistryEntryInfo entryInfo) throws IOException {
+	public static <E> void parseAndAdd(MutableRegistry<E> registry, Entry<E, ?> entry, RegistryOps<JsonElement> ops, RegistryKey<E> key, Identifier identifier, Resource resource) throws IOException {
 		Reader reader = resource.getReader();
 
 		try {
 			JsonElement jsonElement = JsonParser.parseReader(reader);
-			E object = entry.parse(ops, jsonElement, identifier);
-			registry.add(key, object, entryInfo);
+			Pair<E, ? extends DataResult<?>> pair = entry.parse(ops, jsonElement, identifier);
+			E object = pair.getLeft();
+			DataResult<?> dataResult = pair.getRight();
+			registry.add(key, object, resource.isAlwaysStable() ? Lifecycle.stable() : dataResult.lifecycle());
 
 			DynamicRegistryLoadEvents.ENTRY_LOAD.invoker().onEntryLoad(new RegistryEntryContextImpl<>(object, registry.getKey(), registry));
 		} catch (Throwable var11) {
@@ -228,18 +162,12 @@ public final class SevenElementsRegistryLoader {
 		private final Class<T> entryClass;
 		private final RegistryKey<? extends Registry<T>> key;
 		private final Codec<C> elementCodec;
-		private final boolean requiredNonEmpty;
 		private boolean useNamespace = false;
 
 		public Entry(Class<T> entryClass, RegistryKey<? extends Registry<T>> registryKey, Codec<C> codec) {
-			this(entryClass, registryKey, codec, false);
-		}
-
-		public Entry(Class<T> entryClass, RegistryKey<? extends Registry<T>> key, Codec<C> elementCodec, boolean requiredNonEmpty) {
 			this.entryClass = entryClass;
-			this.key = key;
-			this.elementCodec = elementCodec;
-			this.requiredNonEmpty = requiredNonEmpty;
+			this.key = registryKey;
+			this.elementCodec = codec;
 		}
 
 		/**
@@ -260,7 +188,7 @@ public final class SevenElementsRegistryLoader {
 		 * @return The expected path of data pack entries.
 		 */
 		public String getPath() {
-			final String path = RegistryKeys.getPath(key);
+			final String path = key.getValue().getPath();
 
 			return this.useNamespace
 				? key.getValue().getNamespace() + "/" + path
@@ -268,19 +196,25 @@ public final class SevenElementsRegistryLoader {
 		}
 
 		public RegistryLoader.Entry<T> asRegistryLoaderEntry() {
-			return new RegistryLoader.Entry<>(key, ClassInstanceUtil.cast(elementCodec), requiredNonEmpty);
+			return new RegistryLoader.Entry<>(key, ClassInstanceUtil.cast(elementCodec));
 		}
 
-		public T parse(RegistryOps<JsonElement> ops, JsonElement jsonElement, Identifier identifier) {
+		public Pair<T, DataResult<C>> parse(RegistryOps<JsonElement> ops, JsonElement jsonElement, Identifier identifier) {
 			DataResult<C> dataResult = this.elementCodec.parse(ops, jsonElement);
 
-			return entryClass.cast(dataResult.getOrThrow());
+			return new Pair<>(
+				entryClass.cast(dataResult.getOrThrow(false, error -> {})),
+				dataResult
+			);
 		}
 
-		public T parse(RegistryOps<NbtElement> ops, NbtElement nbt, Identifier identifier) {
+		public Pair<T, DataResult<C>> parse(RegistryOps<NbtElement> ops, NbtElement nbt, Identifier identifier) {
 			DataResult<C> dataResult = this.elementCodec.parse(ops, nbt);
 
-			return entryClass.cast(dataResult.getOrThrow());
+			return new Pair<>(
+				entryClass.cast(dataResult.getOrThrow(false, error -> {})),
+				dataResult
+			);
 		}
 
 		public boolean isUnmodifiable(Identifier id) {
@@ -315,28 +249,29 @@ public final class SevenElementsRegistryLoader {
 		private final BiFunction<R, Identifier, T> resultFn;
 
 		public IdentifiedEntry(Class<T> resultClass, RegistryKey<? extends Registry<T>> registryKey, Codec<R> resultCodec, BiFunction<R, Identifier, T> resultFn) {
-			this(resultClass, registryKey, resultCodec, resultFn, false);
-		}
-
-		public IdentifiedEntry(Class<T> resultClass, RegistryKey<? extends Registry<T>> registryKey, Codec<R> resultCodec, BiFunction<R, Identifier, T> resultFn, boolean requiredNonEmpty) {
-			// T is a generic anyway, just ensure transformation before setting.
-			super(resultClass, ClassInstanceUtil.cast(registryKey), resultCodec, requiredNonEmpty);
+			super(resultClass, registryKey, resultCodec);
 
 			this.resultFn = resultFn;
 		}
 
 		@Override
-		public T parse(RegistryOps<JsonElement> ops, JsonElement jsonElement, Identifier identifier) {
+		public Pair<T, DataResult<R>> parse(RegistryOps<JsonElement> ops, JsonElement jsonElement, Identifier identifier) {
 			DataResult<R> dataResult = super.elementCodec.parse(ops, jsonElement);
 
-			return this.resultFn.apply(dataResult.getOrThrow(), identifier);
+			return new Pair<>(
+				this.resultFn.apply(dataResult.getOrThrow(false, error -> {}), identifier),
+				dataResult
+			);
 		}
 
 		@Override
-		public T parse(RegistryOps<NbtElement> ops, NbtElement nbt, Identifier identifier) {
+		public Pair<T, DataResult<R>> parse(RegistryOps<NbtElement> ops, NbtElement nbt, Identifier identifier) {
 			DataResult<R> dataResult = super.elementCodec.parse(ops, nbt);
 
-			return this.resultFn.apply(dataResult.getOrThrow(), identifier);
+			return new Pair<>(
+				this.resultFn.apply(dataResult.getOrThrow(false, error -> {}), identifier),
+				dataResult
+			);
 		}
 	}
 

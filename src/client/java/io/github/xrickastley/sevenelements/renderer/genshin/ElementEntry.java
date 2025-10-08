@@ -9,7 +9,6 @@ import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.util.Ease;
 
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
@@ -53,9 +52,9 @@ public final class ElementEntry {
 		final float intervalSplit = blinkInterval / 2f;
 
 		matrixStack.push();
-		matrixStack.translate(0, entity.getBoundingBox().getLengthY() * 1.1, 0);
+		matrixStack.translate(0, entity.getBoundingBox().getYLength() * 1.1, 0);
 		matrixStack.multiplyPositionMatrix(new Matrix4f().rotation(camera.getRotation()));
-		matrixStack.scale(0.50F, 0.50F, 0.50F);
+		matrixStack.scale(-0.50F, 0.50F, 0.50F);
 
 		final float alpha = (float) (this.secondsLeft <= (BLINK_SECONDS + intervalSplit)
 			? this.secondsLeft % blinkInterval <= intervalSplit
@@ -93,17 +92,19 @@ public final class ElementEntry {
 
 	private void draw(final MatrixStack matrixStack, final Camera camera, final float offset) {
 		final Tessellator tessellator = Tessellator.getInstance();
-		final BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+		final BufferBuilder buffer = tessellator.getBuffer();
+
+		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
 
 		final float finalXOffset = -0.5f + offset;
 
 		final Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
 
-		buffer.vertex(positionMatrix, 0 + finalXOffset, 0, 0).texture(0f, 1f);
-		buffer.vertex(positionMatrix, 1 + finalXOffset, 0, 0).texture(1f, 1f);
-		buffer.vertex(positionMatrix, 1 + finalXOffset, 1, 0).texture(1f, 0f);
-		buffer.vertex(positionMatrix, 0 + finalXOffset, 1, 0).texture(0f, 0f);
+		buffer.vertex(positionMatrix, 0 + finalXOffset, 0, 0).texture(0f, 1f).next();
+		buffer.vertex(positionMatrix, 1 + finalXOffset, 0, 0).texture(1f, 1f).next();
+		buffer.vertex(positionMatrix, 1 + finalXOffset, 1, 0).texture(1f, 0f).next();
+		buffer.vertex(positionMatrix, 0 + finalXOffset, 1, 0).texture(0f, 0f).next();
 
-		BufferRenderer.drawWithGlobalProgram(buffer.end());
+		tessellator.draw();
 	}
 }
