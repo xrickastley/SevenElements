@@ -4,9 +4,11 @@
 
 </p>
 
-<h2 align="center">Welcome to the Seven Elements Repository!</h2>	
+<h2 align="center">Welcome to the Seven Elements Repository!</h2>
 
 This is the GitHub monorepo for the Seven Elements mod.
+
+Download the mod from [Modrinth](https://modrinth.com/mod/seven-elements) or [CurseForge](https://www.curseforge.com/minecraft/mc-mods/seven-elements)!
 
 Wanna get started? You can visit the [wiki](https://xrickastley.github.io/SevenElements/wiki/)! You might just find what you need there. Alternatively, you may also visit the mod's [javadoc](https://xrickastley.github.io/SevenElements/javadoc/)!
 
