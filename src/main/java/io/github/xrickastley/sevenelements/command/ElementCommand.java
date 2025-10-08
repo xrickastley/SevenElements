@@ -288,7 +288,7 @@ public class ElementCommand {
 			InternalCooldownType.DEFAULT
 		);
 
-		final Entity entity = context.getSource().getEntityOrThrow();
+		final Entity entity = EntityArgumentType.getEntity(context, "entity");
 
 		if (!(entity instanceof final LivingEntity livingEntity))
 			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
@@ -331,7 +331,7 @@ public class ElementCommand {
 			InternalCooldownType.DEFAULT
 		);
 
-		final Entity entity = context.getSource().getEntityOrThrow();
+		final Entity entity = EntityArgumentType.getEntity(context, "entity");
 
 		if (!(entity instanceof final LivingEntity livingEntity))
 			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
@@ -363,8 +363,7 @@ public class ElementCommand {
 	}
 
 	private static int infuseRemove(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-		final ServerCommandSource source = context.getSource();
-		final Entity entity = source.getEntityOrThrow();
+		final Entity entity = EntityArgumentType.getEntity(context, "entity");
 
 		if (!(entity instanceof final LivingEntity livingEntity))
 			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
