@@ -1,0 +1,45 @@
+name: Update directory index
+
+on:
+  push:
+    branches:
+      - gh-pages
+
+permissions:
+  contents: write
+
+jobs:
+  update-index:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+
+      - name: Generate index.html for /javadoc/
+        run: |
+          cd javadoc
+          cat > index.html <<'EOF'
+          <!DOCTYPE html>
+          <html lang='en'>
+          <head><meta charset='UTF-8'><title>Index of /javadoc/</title></head>
+          <body><h1>Index of /javadoc/</h1><hr><ul>
+          EOF
+
+          for dir in */; do
+            echo "<li><a href=\"$dir\">v$dir</a></li>" >> index.html
+          done
+
+          cat >> index.html <<'EOF'
+          </ul><hr></body></html>
+          EOF
+
+      - name: Commit and push changes
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add javadoc/index.html
+          git commit -m "Update javadoc index [skip ci]" || echo "No changes"
+          git push
