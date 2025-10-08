@@ -74,7 +74,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	public void tick() {
 		super.tick();
 
-    	this.idleAnimationState.startIfNotRunning(this.age);
+		this.idleAnimationState.startIfNotRunning(this.age);
 
 		this.checkCrystallizeShield();
 		this.syncToPlayers();

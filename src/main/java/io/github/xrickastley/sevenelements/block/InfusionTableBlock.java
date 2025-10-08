@@ -72,9 +72,9 @@ public final class InfusionTableBlock extends HorizontalFacingBlock {
 
 	@Override
 	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-    	final BlockPos blockPos = pos.up();
+		final BlockPos blockPos = pos.up();
 
-    	world.setBlockState(blockPos, this.getDefaultState().with(HALF, DoubleBlockHalf.UPPER));
+		world.setBlockState(blockPos, this.getDefaultState().with(HALF, DoubleBlockHalf.UPPER));
 	}
 
 	@Override
@@ -151,9 +151,9 @@ public final class InfusionTableBlock extends HorizontalFacingBlock {
 		if (state.get(HALF) != DoubleBlockHalf.UPPER)
 			return super.canPlaceAt(state, world, pos);
 
-        final BlockState blockState = world.getBlockState(pos.down());
+		final BlockState blockState = world.getBlockState(pos.down());
 
-        return blockState.isOf(this) && blockState.get(HALF) == DoubleBlockHalf.LOWER;
+		return blockState.isOf(this) && blockState.get(HALF) == DoubleBlockHalf.LOWER;
 	}
 
 	static {

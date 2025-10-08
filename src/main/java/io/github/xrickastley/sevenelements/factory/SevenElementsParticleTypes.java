@@ -23,12 +23,12 @@ public class SevenElementsParticleTypes {
 	private static <T extends ParticleEffect> ParticleType<T> register(String name, boolean alwaysShow, Function<ParticleType<T>, MapCodec<T>> codecGetter, Function<ParticleType<T>, PacketCodec<? super RegistryByteBuf, T>> packetCodecGetter) {
 		return Registry.register(Registries.PARTICLE_TYPE, SevenElements.identifier(name), new ParticleType<T>(alwaysShow) {
 			public MapCodec<T> getCodec() {
-                return codecGetter.apply(this);
-            }
+				return codecGetter.apply(this);
+			}
 
-            public PacketCodec<? super RegistryByteBuf, T> getPacketCodec() {
-                return packetCodecGetter.apply(this);
-            }
+			public PacketCodec<? super RegistryByteBuf, T> getPacketCodec() {
+				return packetCodecGetter.apply(this);
+			}
 		});
 	}
 }

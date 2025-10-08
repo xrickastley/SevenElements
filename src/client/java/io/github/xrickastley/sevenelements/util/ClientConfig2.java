@@ -24,7 +24,7 @@ public class ClientConfig2 implements ConfigData {
 		public double normalDMGScale = 0.65;
 		public double critDMGScale = 1.0;
 		@ConfigEntry.Gui.Tooltip(count = 4)
-        @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
+		@ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
 		public EffectRenderType effectRenderType = EffectRenderType.ALL;
 		public boolean displayTooltipAfterInfusion = true;
 		@ConfigEntry.BoundedDiscrete(min = 5, max = 50)

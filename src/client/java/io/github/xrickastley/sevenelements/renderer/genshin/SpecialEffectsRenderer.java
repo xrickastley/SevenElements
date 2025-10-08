@@ -84,7 +84,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		if (mainEntity == null) {
 			SevenElements.sublogger().warn("Received packet for unknown main Electro-Charged entity, ignoring!");
 
-            return;
+			return;
 		}
 
 		entries.add(

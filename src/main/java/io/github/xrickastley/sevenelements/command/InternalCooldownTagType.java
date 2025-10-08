@@ -50,7 +50,7 @@ public class InternalCooldownTagType implements ArgumentType<Holder<String>> {
 		while (reader.canRead() && reader.peek() != ' ') reader.skip();
 
 		return reader.getString().substring(start, reader.getCursor());
-    }
+	}
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {

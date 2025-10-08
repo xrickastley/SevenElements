@@ -20,7 +20,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.CLASS)
 @Target({ ElementType.METHOD })
 public @interface ModifyVariable {
-    public String[] method() default {};
+	public String[] method() default {};
 
-    public At at();
+	public At at();
 }

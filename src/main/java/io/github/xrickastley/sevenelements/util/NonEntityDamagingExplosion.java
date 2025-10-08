@@ -153,15 +153,15 @@ public class NonEntityDamagingExplosion extends Explosion {
 			y /= z;
 
 			final double aa = (1.0 - v) * getExposure(vec3d, entity) * this.behavior.getKnockbackModifier(entity);
-        	final double ab = entity instanceof LivingEntity livingEntity
+			final double ab = entity instanceof LivingEntity livingEntity
 				? aa * (1.0 - livingEntity.getAttributeValue(EntityAttributes.GENERIC_EXPLOSION_KNOCKBACK_RESISTANCE))
-        		: aa;
+				: aa;
 
 			this.affectedEntities.add(entity);
 
-        	w *= ab;
-        	x *= ab;
-        	y *= ab;
+			w *= ab;
+			x *= ab;
+			y *= ab;
 
 			final Vec3d vec3d2 = new Vec3d(w, x, y);
 

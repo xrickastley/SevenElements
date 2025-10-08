@@ -34,7 +34,7 @@ public final class WorldTextRenderer {
 
 		// Implement legacy renderWorld transforms.
 		matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-    	matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
+		matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
 
 		entries.forEach(entry -> entry.render(camera, context.tickCounter().getTickDelta(false), matrixStack));
 	}

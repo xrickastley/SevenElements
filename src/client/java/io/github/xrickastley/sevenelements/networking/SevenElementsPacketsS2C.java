@@ -127,6 +127,6 @@ public class SevenElementsPacketsS2C {
 			&& currentScreen instanceof final ElementalInfusionScreen screen
 		) {
 			screen.finishElementalInfusion(payload);
-    	}
+		}
 	}
 }
