@@ -11,7 +11,7 @@ However, there may be instances where you extend `LivingEntity` but do not want 
 This is done by both `DendroCoreEntity` and `CrystallizeShardEntity`:
 
 ```java{5}
-public final class DendroCoreEntity extends OriginsGenshinEntity { 
+public final class DendroCoreEntity extends SevenElementsEntity { 
 	// ...
 
 	static {
@@ -23,7 +23,7 @@ public final class DendroCoreEntity extends OriginsGenshinEntity {
 ```
 
 ```java{5}
-public final class CrystallizeShardEntity extends OriginsGenshinEntity { 
+public final class CrystallizeShardEntity extends SevenElementsEntity { 
 	// ...
 
 	static {
@@ -34,6 +34,6 @@ public final class CrystallizeShardEntity extends OriginsGenshinEntity {
 }
 ```
 
-Technically, you can pass `OriginsGenshinEntity.class` instead. However, that blocks all inheritors of `OriginsGenshinEntity` from having Elements applied to them. As such, always consider the possible **inheritors** of the entity class you are blocking Elements for.
+Technically, you can pass `SevenElementsEntity.class` instead. However, that blocks all inheritors of `SevenElementsEntity` from having Elements applied to them. As such, always consider the possible **inheritors** of the entity class you are blocking Elements for.
 
 If you decide to block Elements for an abstract entity class, decide in the future that only a specific inheritor should have elements, you need to unblock Elements for said abstract entity class and add calls to `ElementComponent#denyElementsFor` for **all** inheritors of the abstract entity class except the specific inheritor.

@@ -35,6 +35,8 @@ Reaction ID: `seven-elements:frozen`
 
 Shatter is the [Elemental Reaction](../elemental_reactions.md) triggered when an entity inflicted with the <span class="cryo">**Freeze**</span> aura receives <span class="geo">**Geo DMG**</span> or is **directly** hit by a [Heavy Weapon](../../../developer/data_pack/item_tag.md#heavy_weapon).
 
+Shatter **cannot** be triggered directly on the same hit after a <span class="cryo">**Frozen**</span> reaction even when it was triggered by a **direct** hit from a [Heavy Weapon](../../../developer/data_pack/item_tag.md#heavy_weapon). Shatter can **only** be triggered by a **direct** hit from a [Heavy Weapon](../../../developer/data_pack/item_tag.md#heavy_weapon) that does **not** trigger the <span class="cryo">**Frozen**</span> reaction on the same hit.
+
 Upon triggering Shatter, the <span class="cryo">**Freeze**</span> aura is removed. If Shatter was triggered by dealing <span class="geo">**Geo DMG**</span>, the <span class="geo">**Geo**</span> attack that dealt the damage will sustain no gauge deduction.	
 
 Unlike **Genshin Impact**, Shatter has its own *reaction text*!
@@ -51,6 +53,6 @@ Unlike **Genshin Impact**, Shatter has its own *reaction text*!
 Reaction Multiplier: **3**  
 Reaction ID(s):
 
-- `seven-elements:shatter` (triggered by being hit with an [Axe](https://minecraft.wiki/w/Axe) or [Pickaxe](https://minecraft.wiki/w/Pickaxe))
+- `seven-elements:shatter_heavy` (triggered by being hit with a [Heavy Weapon](../../../developer/data_pack/item_tag.md#heavy_weapon))
 - `seven-elements:shatter_geo` (triggered by receiving <span class="geo">**Geo DMG**</span>)
 

@@ -8,6 +8,14 @@ next: false
 	<b>Seven Elements</b> is a Minecraft mod that brings Genshin Impact's Elemental Combat System to Minecraft with the goal of staying faithful to the systems that hold it such as the <a href="https://genshin-impact.fandom.com/wiki/Elemental_Gauge_Theory">Elemental Gauge Theory</a> and <a href="https://genshin-impact.fandom.com/wiki/Internal_Cooldown">Internal Cooldown</a> while ensuring a smooth integration within Minecraft.
 </p>
 
+<br>
+
+<p align="center">Tired of standard vanilla combat? Ever wanted to spice things up a little bit?</p>
+
+<p align="center"><b>Seven Elements</b> is a Minecraft mod that brings Genshin Impact's intricate Elemental Combat System to Minecraft, introducing Elements into the game. With two elements, trigger various reactions and harness the elements to your advantage!</p>
+
+<p align="center">Download the mod from <a href="https://modrinth.com/mod/seven-elements">Modrinth</a> or <a href="https://www.curseforge.com/minecraft/mc-mods/seven-elements">CurseForge</a>!</p>
+
 ## Getting Started
 
 It all starts with the [Infusion Table](./workstations/infusion_table.md).
