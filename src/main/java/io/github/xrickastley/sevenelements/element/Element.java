@@ -505,7 +505,7 @@ public enum Element {
 			double velY = speed * delta.y;
 			double velZ = speed * delta.z;
 
-			world.addParticle(this.getParticle(world), false, pos.x, pos.y, pos.z, velX, velY, velZ);
+			world.addParticle(this.getParticle(world), pos.x, pos.y, pos.z, velX, velY, velZ);
 		}
 
 		private void addMultipleParticles(LivingEntity entity, Vec3d pos) {
@@ -519,7 +519,7 @@ public enum Element {
 				double velY = random.nextGaussian() * speed;
 				double velZ = random.nextGaussian() * speed;
 
-				world.addParticle(this.getParticle(world), false, pos.x + randX, pos.y + randY, pos.z + randZ, velX, velY, velZ);
+				world.addParticle(this.getParticle(world), pos.x + randX, pos.y + randY, pos.z + randZ, velX, velY, velZ);
 			}
 		}
 	}

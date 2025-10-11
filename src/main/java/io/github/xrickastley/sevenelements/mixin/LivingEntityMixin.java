@@ -162,7 +162,7 @@ public abstract class LivingEntityMixin
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/entity/damage/DamageSource;isIn(Lnet/minecraft/registry/tag/TagKey;)Z",
-			ordinal = 7
+			ordinal = 6
 		)
 	)
 	private boolean preventKnockbackIfCrystallize(boolean original, @Local(argsOnly = true) DamageSource source, @Share("sevenelements$hasCrystallizeShield") LocalBooleanRef hasCrystallizeShield) {

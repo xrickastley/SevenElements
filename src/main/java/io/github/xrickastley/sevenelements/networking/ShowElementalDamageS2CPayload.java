@@ -18,7 +18,7 @@ public record ShowElementalDamageS2CPayload(Vec3d pos, Element element, float am
 		PacketCodecs.codec(Vec3d.CODEC), ShowElementalDamageS2CPayload::pos,
 		PacketCodecs.codec(Element.CODEC), ShowElementalDamageS2CPayload::element,
 		PacketCodecs.FLOAT, ShowElementalDamageS2CPayload::amount,
-		PacketCodecs.BOOL, ShowElementalDamageS2CPayload::crit,
+		PacketCodecs.BOOLEAN, ShowElementalDamageS2CPayload::crit,
 		ShowElementalDamageS2CPayload::new
 	);
 

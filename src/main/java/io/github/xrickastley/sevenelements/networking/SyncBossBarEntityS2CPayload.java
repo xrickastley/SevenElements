@@ -19,7 +19,7 @@ public record SyncBossBarEntityS2CPayload(UUID uuid, boolean hasEntity, int enti
 
 	public static final PacketCodec<RegistryByteBuf, SyncBossBarEntityS2CPayload> CODEC = PacketCodec.tuple(
 		Uuids.PACKET_CODEC, SyncBossBarEntityS2CPayload::uuid,
-		PacketCodecs.BOOL, SyncBossBarEntityS2CPayload::hasEntity,
+		PacketCodecs.BOOLEAN, SyncBossBarEntityS2CPayload::hasEntity,
 		PacketCodecs.INTEGER, SyncBossBarEntityS2CPayload::entityId,
 		SyncBossBarEntityS2CPayload::new
 	);
