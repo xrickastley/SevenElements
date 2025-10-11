@@ -10,6 +10,7 @@ import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.server.world.ServerWorld;
 
 public abstract sealed class AbstractSwirlElementalReaction
 	extends ElementalReaction
@@ -83,6 +84,8 @@ public abstract sealed class AbstractSwirlElementalReaction
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
+		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
+
 		final double gaugeOriginAura = auraElement.getCurrentGauge() + reducedGauge;
 		final double gaugeAnemo = triggeringElement.getCurrentGauge() + reducedGauge;
 
@@ -111,7 +114,7 @@ public abstract sealed class AbstractSwirlElementalReaction
 				InternalCooldownContext.ofNone(origin)
 			).shouldApplyDMGBonus(false);
 
-			target.damage(source, damage);
+			target.damage(world, source, damage);
 		}
 	}
 }

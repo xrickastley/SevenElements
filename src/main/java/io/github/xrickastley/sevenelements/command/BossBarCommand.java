@@ -61,7 +61,7 @@ public class BossBarCommand {
 		if (!(entity instanceof final LivingEntity target)) {
 			context
 				.getSource()
-				.sendError(Text.translatable("commands.element.failed.entity", entity).formatted(Formatting.RED));
+				.sendError(Text.translatable("commands.element.failed.entity", entity.getDisplayName()).formatted(Formatting.RED));
 
 			return 0;
 		}
@@ -70,7 +70,7 @@ public class BossBarCommand {
 
 		context
 			.getSource()
-			.sendFeedback(() -> Text.translatable("commands.bossbar.set.entity.success", bossBar.toHoverableText(), target), true);
+			.sendFeedback(() -> Text.translatable("commands.bossbar.set.entity.success", bossBar.toHoverableText(), target.getDisplayName()), true);
 
 		return 1;
 	}
@@ -84,7 +84,7 @@ public class BossBarCommand {
 			.getSource()
 			.sendFeedback(
 				() -> entity != null
-					? Text.translatable("commands.bossbar.get.entity.success", bossBar.toHoverableText(), entity)
+					? Text.translatable("commands.bossbar.get.entity.success", bossBar.toHoverableText(), entity.getDisplayName())
 					: Text.translatable("commands.bossbar.get.entity.none", bossBar.toHoverableText()),
 				true
 			);

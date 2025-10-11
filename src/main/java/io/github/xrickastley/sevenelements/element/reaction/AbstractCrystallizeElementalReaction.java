@@ -73,7 +73,7 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 
 		final Optional<BlockPos> blockPos = AIR_BLOCKS.contains(blockState.getBlock())
 			? this.scan(world, originPos, new Vec3i(0, -1, 0), Functions.composePredicate(BlockState::getBlock, AIR_BLOCKS::contains), bp -> bp.getY() >= world.getBottomY()).map(bp -> bp.add(0, 1, 0))
-			: this.scan(world, originPos, new Vec3i(0, +1, 0), Functions.composePredicate(BlockState::getBlock, Predicate.not(AIR_BLOCKS::contains)), bp -> bp.getY() <= world.getTopY());
+			: this.scan(world, originPos, new Vec3i(0, +1, 0), Functions.composePredicate(BlockState::getBlock, Predicate.not(AIR_BLOCKS::contains)), bp -> bp.getY() <= world.getTopYInclusive());
 
 		final BlockPos finalBlockPos = blockPos.orElse(originPos);
 

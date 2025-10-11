@@ -37,7 +37,7 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.16.0",
-		"minecraft": ">=1.21 <=1.21.1",
+		"minecraft": ">=1.21.2 <=1.21.3",
 		"java": ">=21",
 		"fabric-api": "*",
 		"cloth-config": "*"	
@@ -58,6 +58,9 @@
 			],
 			"net/minecraft/class_1676": [
 				"io/github/xrickastley/sevenelements/interfaces/InfusableProjectile"
+			],
+			"net/minecraft/class_10017": [
+				"io/github/xrickastley/sevenelements/interfaces/EntityAwareRenderState"
 			]
 		},
 		"cardinal-components": [

@@ -24,9 +24,11 @@ import io.github.xrickastley.sevenelements.util.Functions;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.profiler.Profilers;
 
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
@@ -52,7 +54,7 @@ public class InGameHudMixin {
 		)
 	)
 	private void renderAppliedElements(DrawContext context, CallbackInfo ci, @Local PlayerEntity player, @Local(ordinal = 4) int y, @Local(ordinal = 2) int x, @Local(ordinal = 6) int p, @Local(ordinal = 7) int lines) {
-		this.client.getProfiler().swap("seven-elements:elements");
+		Profilers.get().swap("seven-elements:elements");
 
 		y -= (p - 1) * lines;
 
@@ -83,7 +85,7 @@ public class InGameHudMixin {
 				.add(4.5 * scaleFactor, 1, 0x7F646464)
 				.draw(context.getMatrices().peek().getPositionMatrix());
 
-			context.drawTexture(texture, x1, y, 9, 9, 0, 0, 9, 9, 9, 9);
+			context.drawTexture(RenderLayer::getGuiTextured, texture, x1, y, 0, 0, 9, 9, 9, 9);
 		}
 	}
 

@@ -1,8 +1,7 @@
 package io.github.xrickastley.sevenelements.renderer.entity.model;
 
 import io.github.xrickastley.sevenelements.SevenElements;
-import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
-
+import io.github.xrickastley.sevenelements.renderer.entity.state.DendroCoreEntityState;
 import net.minecraft.client.model.Dilation;
 import net.minecraft.client.model.ModelData;
 import net.minecraft.client.model.ModelPart;
@@ -10,17 +9,17 @@ import net.minecraft.client.model.ModelPartBuilder;
 import net.minecraft.client.model.ModelPartData;
 import net.minecraft.client.model.ModelTransform;
 import net.minecraft.client.model.TexturedModelData;
-import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.model.EntityModelLayer;
-import net.minecraft.client.util.math.MatrixStack;
 
-public class DendroCoreEntityModel extends EntityModel<DendroCoreEntity> {
+public class DendroCoreEntityModel extends EntityModel<DendroCoreEntityState> {
 	public static final EntityModelLayer MODEL_LAYER = new EntityModelLayer(SevenElements.identifier("dendro_core"), "all");
 
 	private final ModelPart bone;
 
 	public DendroCoreEntityModel(ModelPart root) {
+		super(root);
+
 		this.bone = root.getChild("bone");
 	}
 
@@ -40,21 +39,11 @@ public class DendroCoreEntityModel extends EntityModel<DendroCoreEntity> {
 	}
 
 	@Override
-	public void setAngles(DendroCoreEntity entity, float limbAngle, float limbDistance, float animationProgress, float headYaw, float headPitch) {
-
-	}
-
-	@Override
-	public void animateModel(DendroCoreEntity entity, float limbAngle, float limbDistance, float tickDelta) {
-		float progress = (entity.age + tickDelta) % 60 == 0
+	public void setAngles(DendroCoreEntityState state) {
+		float progress = state.age % 60 == 0
 			? 1
-			: (entity.age + tickDelta) % 60;
+			: state.age % 60;
 
 		bone.setAngles(0, -progress * 0.05f, 0);
-	}
-
-	@Override
-	public void render(MatrixStack matrices, VertexConsumer vertexConsumer, int light, int overlay, int color) {
-		bone.render(matrices, vertexConsumer, light, overlay, color);
 	}
 }

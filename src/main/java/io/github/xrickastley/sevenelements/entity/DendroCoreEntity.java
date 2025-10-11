@@ -9,6 +9,9 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.Codec;
+
+import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplications;
@@ -17,7 +20,6 @@ import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReactions;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
-import io.github.xrickastley.sevenelements.networking.SyncDendroCoreAgeS2CPayload;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
@@ -34,9 +36,14 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtHelper;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.network.RegistryByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.codec.PacketCodecs;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -99,6 +106,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		if (target == null) return;
 
 		this.target = target.getUuid();
+		this.sendSyncPayload();
 	}
 
 	public void setAsBurgeon() {
@@ -118,6 +126,11 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 	public boolean isBurgeon() {
 		return this.type == Type.BURGEON;
+	}
+
+	public void syncFromPayload(SyncDendroCoreS2CPayload payload) {
+		this.type = payload.type;
+		this.age = payload.age;
 	}
 
 	@Override
@@ -189,7 +202,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			if (this.curTicksInHitbox < DendroCoreEntity.SPRAWLING_SHOT_DELAY) return;
 
 			for (final Entity target2 : ElementalReaction.getEntitiesInAoE(target, 1.0, e -> !owners.contains(e.getUuid())))
-				target2.damage(this.createDamageSource(target), ElementalReaction.getReactionDamage(this, 3.0));
+				target2.damage(world, this.createDamageSource(target), ElementalReaction.getReactionDamage(this, 3.0));
 
 			this.remove(RemovalReason.KILLED);
 
@@ -203,12 +216,12 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	}
 
 	@Override
-	public void kill() {
+	public void kill(ServerWorld world) {
 		this.explode(2.0);
 	}
 
 	@Override
-	public boolean damage(DamageSource source, float amount) {
+	public boolean damage(ServerWorld world, DamageSource source, float amount) {
 		source = ElementComponent.applyElementalInfusions(source, this);
 
 		if (!(source instanceof final ElementalDamageSource eds) || !this.isNormal()) return false;
@@ -241,6 +254,8 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	}
 
 	private void removeOldDendroCores() {
+		if (!(this.getWorld() instanceof final ServerWorld world)) return;
+
 		final Box box = Box.of(this.getLerpedPos(1f), DendroCoreEntity.DENDRO_CORES_IN_RADIUS, DendroCoreEntity.DENDRO_CORES_IN_RADIUS, DendroCoreEntity.DENDRO_CORES_IN_RADIUS);
 		final List<DendroCoreEntity> dendroCores = this.getWorld().getEntitiesByClass(DendroCoreEntity.class, box, dc -> true);
 
@@ -250,21 +265,18 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 		final Queue<DendroCoreEntity> queue = new LinkedList<>(dendroCores);
 
-		while (queue.peek() != null && queue.size() > 5) queue.remove().kill();
+		while (queue.peek() != null && queue.size() > 5) queue.remove().kill(world);
 	}
 
 	private boolean explode(final double reactionMultiplier) {
+		if (!(this.getWorld() instanceof final ServerWorld world)) return false;
+
 		if (this.exploded) return false;
 
 		this.exploded = true;
 		this.age = 117;
 
-		if (!this.getWorld().isClient) {
-			final SyncDendroCoreAgeS2CPayload packet = new SyncDendroCoreAgeS2CPayload(this.getId(), this.age);
-
-			for (final ServerPlayerEntity otherPlayer : PlayerLookup.tracking(this))
-				ServerPlayNetworking.send(otherPlayer, packet);
-		}
+		if (!this.getWorld().isClient) this.sendSyncPayload();
 
 		final @Nullable LivingEntity recentOwner = this.getRecentOwner();
 
@@ -277,7 +289,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 			if (this.owners.contains(target.getUuid())) damage *= 0.02f;
 
-			target.damage(source, damage);
+			target.damage(world, source, damage);
 		}
 
 		this.getWorld()
@@ -308,11 +320,58 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		).shouldApplyDMGBonus(false);
 	}
 
+	private void sendSyncPayload() {
+		final SyncDendroCoreS2CPayload packet = new SyncDendroCoreS2CPayload(this);
+
+		for (final ServerPlayerEntity otherPlayer : PlayerLookup.tracking(this))
+			ServerPlayNetworking.send(otherPlayer, packet);
+	}
+
 	static {
 		ElementComponent.denyElementsFor(DendroCoreEntity.class);
 	}
 
 	private static enum Type {
-		NORMAL, HYPERBLOOM, BURGEON
+		NORMAL, HYPERBLOOM, BURGEON;
+
+		static final Codec<Type> CODEC = Codecs.NON_EMPTY_STRING.xmap(Type::valueOf, Type::toString);
+	}
+
+	public static class SyncDendroCoreS2CPayload implements CustomPayload {
+		public static final CustomPayload.Id<SyncDendroCoreS2CPayload> ID = new CustomPayload.Id<>(
+			SevenElements.identifier("s2c/sync_dendro_core")
+		);
+
+		public static final PacketCodec<RegistryByteBuf, SyncDendroCoreS2CPayload> CODEC = PacketCodec.tuple(
+			PacketCodecs.INTEGER, inst -> inst.entityId,
+			PacketCodecs.INTEGER, inst -> inst.age,
+			PacketCodecs.codec(DendroCoreEntity.Type.CODEC), inst -> inst.type,
+			SyncDendroCoreS2CPayload::new
+		);
+
+		private final int entityId;
+		private final int age;
+		private final DendroCoreEntity.Type type;
+
+		private SyncDendroCoreS2CPayload(int entityId, int age, DendroCoreEntity.Type type) {
+			this.entityId = entityId;
+			this.age = age;
+			this.type = type;
+		}
+
+		private SyncDendroCoreS2CPayload(final DendroCoreEntity dendroCore) {
+			this.entityId = dendroCore.getId();
+			this.age = dendroCore.getAge();
+			this.type = dendroCore.type;
+		}
+
+		@Override
+		public Id<? extends CustomPayload> getId() {
+			return ID;
+		}
+
+		public int entityId() {
+			return this.entityId;
+		}
 	}
 }

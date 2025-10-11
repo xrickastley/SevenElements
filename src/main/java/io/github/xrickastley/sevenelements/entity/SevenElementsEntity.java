@@ -33,7 +33,7 @@ public sealed class SevenElementsEntity
 
 	public static DefaultAttributeContainer.Builder getAttributeBuilder() {
 		return LivingEntity.createLivingAttributes()
-			.add(EntityAttributes.GENERIC_MAX_HEALTH, 1);
+			.add(EntityAttributes.MAX_HEALTH, 1);
 	}
 
 	public int getAge() {
@@ -79,12 +79,12 @@ public sealed class SevenElementsEntity
 	}
 
 	@Override
-	public void kill() {
+	public void kill(ServerWorld world) {
 		this.remove(RemovalReason.KILLED);
 	}
 
 	@Override
-	public boolean damage(DamageSource source, float amount) {
+	public boolean damage(ServerWorld world, DamageSource source, float amount) {
 		return false;
 	}
 

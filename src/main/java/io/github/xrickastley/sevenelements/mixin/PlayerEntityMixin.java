@@ -105,7 +105,7 @@ public abstract class PlayerEntityMixin
 		method = "attack",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z"
+			target = "Lnet/minecraft/entity/Entity;sidedDamage(Lnet/minecraft/entity/damage/DamageSource;F)Z"
 		),
 		index = 0
 	)
@@ -121,7 +121,7 @@ public abstract class PlayerEntityMixin
 		method = "attack",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/LivingEntity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z"
+			target = "Lnet/minecraft/entity/LivingEntity;serverDamage(Lnet/minecraft/entity/damage/DamageSource;F)V"
 		),
 		index = 0
 	)
@@ -148,8 +148,8 @@ public abstract class PlayerEntityMixin
 		method = "applyDamage",
 		at = @At("TAIL")
 	)
-	private void damageHandlers_elements(final DamageSource source, float amount, CallbackInfo ci) {
-		this.sevenelements$triggerDendroCoreReactions(source);
+	private void damageHandlers_elements(ServerWorld world, DamageSource source, float amount, CallbackInfo ci) {
+		this.sevenelements$triggerDendroCoreReactions(world, source);
 
 		if (!source.sevenelements$displayDamage()) return;
 
@@ -164,10 +164,6 @@ public abstract class PlayerEntityMixin
 		final float extra = sevenelements$subdamage - (float) Math.floor(sevenelements$subdamage);
 
 		sevenelements$subdamage = (float) Math.floor(sevenelements$subdamage);
-
-		final World world = this.getWorld();
-
-		if (world.isClient || !(world instanceof ServerWorld)) return;
 
 		final Box boundingBox = this.getBoundingBox();
 
@@ -192,7 +188,7 @@ public abstract class PlayerEntityMixin
 	}
 
 	@Unique
-	private void sevenelements$triggerDendroCoreReactions(final DamageSource source) {
+	private void sevenelements$triggerDendroCoreReactions(final ServerWorld world, final DamageSource source) {
 		if (!(source instanceof final ElementalDamageSource eds)) return;
 
 		final Element element = eds.getElementalApplication().getElement();
@@ -201,6 +197,6 @@ public abstract class PlayerEntityMixin
 
 		this.getWorld()
 			.getEntitiesByClass(DendroCoreEntity.class, BoxUtil.multiplyBox(this.getBoundingBox(), 2), dc -> true)
-			.forEach(dc -> dc.damage(source, 1));
+			.forEach(dc -> dc.damage(world, source, 1));
 	}
 }

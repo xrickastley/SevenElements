@@ -7,11 +7,10 @@ import org.joml.Matrix4f;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.util.Ease;
-
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
@@ -63,7 +62,7 @@ public final class ElementEntry {
 				: MathHelper.lerp(((this.secondsLeft % blinkInterval) - 0.25) / intervalSplit, 1, 0)
 			: 1);
 
-		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
+		RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX);
 		RenderSystem.setShaderTexture(0, this.element.getTexture());
 		RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
 

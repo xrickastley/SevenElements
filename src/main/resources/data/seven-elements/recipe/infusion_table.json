@@ -2,15 +2,15 @@
 	"type": "minecraft:crafting_shaped",
 	"category": "misc",
 	"key": {
-		"_": { "item": "minecraft:smooth_stone_slab" },
-		"|": { "item": "minecraft:gold_block" },
-		"P": { "item": "minecraft:fire_charge" },
-		"H": { "item": "minecraft:water_bucket" },
-		"A": { "item": "minecraft:wind_charge" },
-		"E": { "item": "minecraft:lightning_rod" },
-		"D": { "tag": "minecraft:leaves" },
-		"C": { "item": "minecraft:blue_ice" },
-		"G": { "tag": "minecraft:stone_crafting_materials" }
+		"_": "minecraft:smooth_stone_slab",
+		"|": "minecraft:gold_block",
+		"P": "minecraft:fire_charge",
+		"H": "minecraft:water_bucket",
+		"A": "minecraft:wind_charge",
+		"E": "minecraft:lightning_rod",
+		"D": "#minecraft:leaves",
+		"C": "minecraft:blue_ice",
+		"G": "#minecraft:stone_crafting_materials"
 	},
 	"pattern": [
 		"AED",

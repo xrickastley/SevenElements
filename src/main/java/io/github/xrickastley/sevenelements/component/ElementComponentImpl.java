@@ -49,6 +49,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry.Reference;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
@@ -196,7 +197,8 @@ public final class ElementComponentImpl implements ElementComponent {
 	@Override
 	public List<ElementalReaction> addElementalApplication(ElementalApplication application, InternalCooldownContext icdContext) {
 		// Only do this on the server || Only do this when doElements is true.
-		if (application.getEntity().getWorld().isClient || !application.getEntity().getWorld().getGameRules().getBoolean(SevenElementsGameRules.DO_ELEMENTS)) return Collections.emptyList();
+		if (!(application.getEntity().getWorld() instanceof final ServerWorld world) 
+			|| !world.getGameRules().getBoolean(SevenElementsGameRules.DO_ELEMENTS)) return Collections.emptyList();
 
 		if (application.isGaugeUnits() && !application.isAuraElement() && this.getAppliedElements().isEmpty())
 			application = application.asAura();

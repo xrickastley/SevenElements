@@ -7,6 +7,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 
 import java.util.List;
 
+import net.minecraft.util.ActionResult;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,7 +35,6 @@ import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
 // Prioritized since Frozen **MUST** disable using items.
@@ -47,14 +47,12 @@ public abstract class ItemStackMixin implements ComponentHolder {
 		method = "use",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/item/Item;use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;"
+			target = "Lnet/minecraft/item/Item;use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;"
 		)
 	)
-	private TypedActionResult<ItemStack> frozenPreventsItemUse(Item instance, World world, PlayerEntity user, Hand hand, Operation<TypedActionResult<ItemStack>> original) {
-		ItemStack handStack = user.getStackInHand(hand);
-
+	private ActionResult frozenPreventsItemUse(Item instance, World world, PlayerEntity user, Hand hand, Operation<ActionResult> original) {
 		return user.hasStatusEffect(SevenElementsStatusEffects.FROZEN)
-			? TypedActionResult.fail(handStack)
+			? ActionResult.FAIL
 			: original.call(instance, world, user, hand);
 	}
 

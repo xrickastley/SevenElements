@@ -7,6 +7,7 @@ import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
 import io.github.xrickastley.sevenelements.entity.SevenElementsEntityTypes;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 
@@ -24,7 +25,8 @@ public abstract sealed class AbstractBloomElementalReaction
 
 		if (!(world instanceof final ServerWorld serverWorld)) return;
 
-		final DendroCoreEntity dendroCore = new DendroCoreEntity(SevenElementsEntityTypes.DENDRO_CORE, serverWorld, origin);
+		final DendroCoreEntity dendroCore = SevenElementsEntityTypes.DENDRO_CORE.create(serverWorld, SpawnReason.TRIGGERED);
+		dendroCore.addOwner(origin);
 		dendroCore.setPosition(entity.getPos());
 
 		serverWorld.spawnNewEntityAndPassengers(dendroCore);

@@ -27,10 +27,11 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
 import net.minecraft.entity.Entity;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
-import net.minecraft.world.World;
 
 public class SevenElements implements ModInitializer {
 	public static final String MOD_ID = "seven-elements";
@@ -77,6 +78,10 @@ public class SevenElements implements ModInitializer {
 		return Identifier.of(MOD_ID, path);
 	}
 
+	public static <T> RegistryKey<T> registryKey(RegistryKey<? extends Registry<T>> registry, String path) {
+		return RegistryKey.of(registry, SevenElements.identifier(path));
+	}
+
 	public static Logger sublogger() {
 		final String className = Thread.currentThread().getStackTrace()[2].getClassName();
 
@@ -96,10 +101,12 @@ public class SevenElements implements ModInitializer {
 	}
 
 	public static float getLevelMultiplier(Entity entity) {
-		return getLevelMultiplier(entity.getWorld());
+		return entity.getWorld() instanceof final ServerWorld world
+			? SevenElements.getLevelMultiplier(world)
+			: 5.0f;
 	}
 
-	public static float getLevelMultiplier(World world) {
+	public static float getLevelMultiplier(ServerWorld world) {
 		return (float) world
 			.getGameRules()
 			.get(SevenElementsGameRules.LEVEL_MULTIPLIER)

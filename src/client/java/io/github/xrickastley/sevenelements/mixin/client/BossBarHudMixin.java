@@ -25,8 +25,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.BossBarHud;
 import net.minecraft.client.gui.hud.ClientBossBar;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.boss.BossBar;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.profiler.Profilers;
 
 @Mixin(BossBarHud.class)
 public class BossBarHudMixin {
@@ -61,7 +63,7 @@ public class BossBarHudMixin {
 		final int SHIFT = 1;
 		final int INNER_BOUND = (int) ((RADIUS - SHIFT) * 2);
 
-		this.client.getProfiler().swap("seven-elements:elements");
+		Profilers.get().swap("seven-elements:elements");
 
 		y += 6;
 
@@ -82,7 +84,7 @@ public class BossBarHudMixin {
 				.add(RADIUS * scaleFactor, 1, 0x7F646464)
 				.draw(context.getMatrices().peek().getPositionMatrix());
 
-			context.drawTexture(texture, x1 + SHIFT, y + SHIFT, INNER_BOUND, INNER_BOUND, 0, 0, INNER_BOUND, INNER_BOUND, INNER_BOUND, INNER_BOUND);
+			context.drawTexture(RenderLayer::getGuiTextured, texture, x1 + SHIFT, y + SHIFT, 0, 0, INNER_BOUND, INNER_BOUND, INNER_BOUND, INNER_BOUND);
 		}
 	}
 }

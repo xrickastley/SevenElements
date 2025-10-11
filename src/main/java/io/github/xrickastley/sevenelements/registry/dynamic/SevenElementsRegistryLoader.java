@@ -41,6 +41,7 @@ import net.minecraft.registry.RegistryOps.RegistryInfoGetter;
 import net.minecraft.registry.RegistryOps;
 import net.minecraft.registry.SerializableRegistries.SerializedRegistryEntry;
 import net.minecraft.registry.entry.RegistryEntryInfo;
+import net.minecraft.registry.tag.TagGroupLoader;
 import net.minecraft.resource.Resource;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.resource.ResourceFinder;
@@ -103,11 +104,13 @@ public final class SevenElementsRegistryLoader {
 			}
 		}
 
+		TagGroupLoader.loadInitial(resourceManager, registry);
+
 		DynamicRegistryLoadEvents.AFTER_LOAD.invoker().onAfterLoad(new RegistryContextImpl<>(registry.getKey(), registry));
 	}
 
 	public static <E> void loadFromNetwork(
-		Map<RegistryKey<? extends Registry<?>>, List<SerializedRegistryEntry>> data,
+		Map<RegistryKey<? extends Registry<?>>, RegistryLoader.ElementsAndTags> data,
 		ResourceFactory factory,
 		RegistryInfoGetter infoGetter,
 		MutableRegistry<E> registry,
@@ -123,14 +126,14 @@ public final class SevenElementsRegistryLoader {
 
 		dynRegEntry.requireUnmodifiableEntries(registry);
 
-		List<SerializedRegistryEntry> list = data.get(registry.getKey());
-		if (list != null) {
+		RegistryLoader.ElementsAndTags elementsAndTags = data.get(registry.getKey());
+		if (elementsAndTags != null) {
 			RegistryOps<NbtElement> registryOps = RegistryOps.of(NbtOps.INSTANCE, infoGetter);
 			RegistryOps<JsonElement> registryOps2 = RegistryOps.of(JsonOps.INSTANCE, infoGetter);
 			String string = RegistryKeys.getPath(registry.getKey());
 			ResourceFinder resourceFinder = ResourceFinder.json(string);
 
-			for (SerializedRegistryEntry serializedRegistryEntry : list) {
+			for (SerializedRegistryEntry serializedRegistryEntry : elementsAndTags.elements()) {
 				if (dynRegEntry.isUnmodifiable(serializedRegistryEntry.id())) continue;
 
 				RegistryKey<E> registryKey = RegistryKey.of(registry.getKey(), serializedRegistryEntry.id());
@@ -167,6 +170,7 @@ public final class SevenElementsRegistryLoader {
 				}
 			}
 
+			TagGroupLoader.loadFromNetwork(elementsAndTags.tags(), registry);
 			DynamicRegistryLoadEvents.AFTER_LOAD.invoker().onAfterLoad(new RegistryContextImpl<>(registry.getKey(), registry));
 		}
 	}

@@ -15,20 +15,20 @@ import net.minecraft.predicate.item.ItemPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public class ElementalInfusionCriterion extends AbstractCriterion<ElementalInfusionCriterion.Conditions> {
-	public Codec<Conditions> getConditionsCodec() {
-		return Conditions.CODEC;
+	public Codec<io.github.xrickastley.sevenelements.advancement.criterion.ElementalInfusionCriterion.Conditions> getConditionsCodec() {
+		return io.github.xrickastley.sevenelements.advancement.criterion.ElementalInfusionCriterion.Conditions.CODEC;
 	}
 
 	public void trigger(ServerPlayerEntity player, ItemStack stack, Element infused) {
-		this.trigger(player, Functions.withArgument(Conditions::requirementsMet, stack, infused));
+		this.trigger(player, Functions.withArgument(io.github.xrickastley.sevenelements.advancement.criterion.ElementalInfusionCriterion.Conditions::requirementsMet, stack, infused));
 	}
 
 	public record Conditions(Optional<LootContextPredicate> player, Optional<ItemPredicate> item, Optional<Element> element) implements AbstractCriterion.Conditions {
 		public static final Codec<ElementalInfusionCriterion.Conditions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			LootContextPredicate.CODEC.optionalFieldOf("player").forGetter(Conditions::player),
-			ItemPredicate.CODEC.optionalFieldOf("item").forGetter(Conditions::item),
-			Element.CODEC.optionalFieldOf("element").forGetter(Conditions::element)
-		).apply(instance, Conditions::new));
+			LootContextPredicate.CODEC.optionalFieldOf("player").forGetter(io.github.xrickastley.sevenelements.advancement.criterion.ElementalInfusionCriterion.Conditions::player),
+			ItemPredicate.CODEC.optionalFieldOf("item").forGetter(io.github.xrickastley.sevenelements.advancement.criterion.ElementalInfusionCriterion.Conditions::item),
+			Element.CODEC.optionalFieldOf("element").forGetter(io.github.xrickastley.sevenelements.advancement.criterion.ElementalInfusionCriterion.Conditions::element)
+		).apply(instance, io.github.xrickastley.sevenelements.advancement.criterion.ElementalInfusionCriterion.Conditions::new));
 
 		public boolean requirementsMet(ItemStack stack, Element infused) {
 			return (element.isEmpty() || element.get() == infused)

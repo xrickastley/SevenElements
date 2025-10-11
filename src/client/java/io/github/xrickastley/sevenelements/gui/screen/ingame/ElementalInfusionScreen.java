@@ -12,7 +12,7 @@ import io.github.xrickastley.sevenelements.util.MathHelper2;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.render.GameRenderer;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.slot.Slot;
@@ -48,14 +48,10 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 
 	@Override
 	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.setShaderTexture(0, TEXTURE);
-
 		final int x = (width - backgroundWidth) / 2;
 		final int y = (height - backgroundHeight) / 2;
 
-		context.drawTexture(TEXTURE, x, y, 0, 0, backgroundWidth, backgroundHeight);
+		context.drawTexture(RenderLayer::getGuiTextured, TEXTURE, x, y, 0, 0, backgroundWidth, backgroundHeight, 256, 256);
 
 		this.drawElements(context, x, y);
 		this.drawInfuseButton(context, x, y, mouseX, mouseY);
@@ -71,13 +67,13 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableCull();
 
-		context.drawTexture(Element.PYRO.getTexture(), x + 76, y + 18, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.HYDRO.getTexture(), x + 107, y + 33, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.ANEMO.getTexture(), x + 115, y + 63, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.ELECTRO.getTexture(), x + 94, y + 92, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.DENDRO.getTexture(), x + 59, y + 92, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.CRYO.getTexture(), x + 37, y + 63, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.GEO.getTexture(), x + 45, y + 33, 24, 24, 0, 0, 24, 24, 24, 24);
+		context.drawTexture(RenderLayer::getGuiTextured, Element.PYRO.getTexture(), x + 76, y + 18, 0, 0, 24, 24, 24, 24);
+		context.drawTexture(RenderLayer::getGuiTextured, Element.HYDRO.getTexture(), x + 107, y + 33, 0, 0, 24, 24, 24, 24);
+		context.drawTexture(RenderLayer::getGuiTextured, Element.ANEMO.getTexture(), x + 115, y + 63, 0, 0, 24, 24, 24, 24);
+		context.drawTexture(RenderLayer::getGuiTextured, Element.ELECTRO.getTexture(), x + 94, y + 92, 0, 0, 24, 24, 24, 24);
+		context.drawTexture(RenderLayer::getGuiTextured, Element.DENDRO.getTexture(), x + 59, y + 92, 0, 0, 24, 24, 24, 24);
+		context.drawTexture(RenderLayer::getGuiTextured, Element.CRYO.getTexture(), x + 37, y + 63, 0, 0, 24, 24, 24, 24);
+		context.drawTexture(RenderLayer::getGuiTextured, Element.GEO.getTexture(), x + 45, y + 33, 0, 0, 24, 24, 24, 24);
 
 		RenderSystem.disableBlend();
 		RenderSystem.disableCull();
@@ -106,8 +102,8 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 			: 0x685E4A;
 
 		RenderSystem.enableBlend();
-		context.drawGuiTexture(texture, x1, y1, 90, 19);
-		context.drawGuiTexture(expTexture, x2 - 24, y2 - 16, 24, 16);
+		context.drawGuiTexture(RenderLayer::getGuiTextured, texture, x1, y1, 90, 19);
+		context.drawGuiTexture(RenderLayer::getGuiTextured, expTexture, x2 - 24, y2 - 16, 24, 16);
 		context.drawText(this.textRenderer, Text.translatable("container.seven-elements.infusion_table.infuse"), x1 + 6, y1 + 6, color, false);
 		RenderSystem.disableBlend();
 	}

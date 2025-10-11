@@ -1,13 +1,16 @@
 package io.github.xrickastley.sevenelements.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -34,7 +37,6 @@ import io.github.xrickastley.sevenelements.element.reaction.ElementalReactions;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.interfaces.ILivingEntity;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
-import io.github.xrickastley.sevenelements.util.FilteredIterator;
 import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.minecraft.entity.Entity;
@@ -46,6 +48,7 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Pair;
 import net.minecraft.world.World;
 
@@ -59,8 +62,6 @@ public abstract class PrioritizedLivingEntityMixin
 	@Shadow
 	@Final
 	private Map<RegistryEntry<StatusEffect>, StatusEffectInstance> activeStatusEffects;
-	@Shadow
-	protected abstract void onStatusEffectRemoved(StatusEffectInstance effect);
 
 	@Shadow
 	public abstract boolean isDead();
@@ -151,23 +152,48 @@ public abstract class PrioritizedLivingEntityMixin
 			.forEach(this::removeStatusEffect);
 	}
 
-	@ModifyVariable(
+	@ModifyExpressionValue(
 		method = "clearStatusEffects",
-		at = @At("STORE"),
-		ordinal = 0,
-		order = Integer.MIN_VALUE // Frozen and Cryo **must** persist while their respective elements are applied.
+		at = @At(
+			value = "INVOKE",
+			target = "Lcom/google/common/collect/Maps;newHashMap(Ljava/util/Map;)Ljava/util/HashMap;",
+			remap = false
+		)
 	)
-	private Iterator<StatusEffectInstance> persistElementEffectsOnClear(Iterator<StatusEffectInstance> value) {
+	// Frozen and Cryo **must** persist while their respective elements are applied.
+	private HashMap<RegistryEntry<StatusEffect>, StatusEffectInstance> persistElementEffectsOnClearStart(HashMap<RegistryEntry<StatusEffect>, StatusEffectInstance> value, @Share(value = "savedElements", namespace = "seven-elements") LocalRef<List<StatusEffectInstance>> savedEffects) {
 		if (this.isDead()) return value;
 
 		final ElementComponent component = ElementComponent.KEY.get(this);
 
-		return FilteredIterator.of(value,
-			v -> ElementalStatusEffect
-				.asElementEffect(v.getEffectType())
-				.map(Functions.compose(ElementalStatusEffect::getElement, component::hasElementalApplication, b -> !b))
-				.orElse(false)
-		);
+		savedEffects.set(new ArrayList<>());
+
+		value
+			.keySet()
+			.stream()
+			.filter(
+				e -> ElementalStatusEffect
+					.asElementEffect(e)
+					.map(Functions.compose(ElementalStatusEffect::getElement, component::hasElementalApplication, b -> !b))
+					.orElse(false)
+			)
+			.peek(Functions.composeConsumer(value::get, savedEffects.get()::add))
+			.forEach(value::remove);
+
+		return value;
+	}
+
+	@Inject(
+		method = "clearStatusEffects",
+		at = @At(
+			value = "RETURN",
+			ordinal = 2
+		),
+		order = Integer.MIN_VALUE // Frozen and Cryo **must** persist while their respective elements are applied.
+	)
+	private void persistElementEffectsOnClearEnd(CallbackInfoReturnable<Boolean> cir, @Share(value = "savedElements", namespace = "seven-elements") LocalRef<List<StatusEffectInstance>> savedEffects) {
+		for (final StatusEffectInstance effect : savedEffects.get())
+			this.activeStatusEffects.put(effect.getEffectType(), effect);
 	}
 
 	@Inject(
@@ -175,7 +201,7 @@ public abstract class PrioritizedLivingEntityMixin
 		at = @At("HEAD"),
 		order = Integer.MIN_VALUE // The planned attacker should be set as early as possible.
 	)
-	private void setPlannedAttacker(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+	private void setPlannedAttacker(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		this.sevenelements$plannedAttacker = source.getAttacker();
 		this.sevenelements$plannedDamageSource = source;
 	}
@@ -186,7 +212,7 @@ public abstract class PrioritizedLivingEntityMixin
 		cancellable = true,
 		order = Integer.MIN_VALUE
 	)
-	private void preventDamageWhenFrozen(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+	private void preventDamageWhenFrozen(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		if (source.getAttacker() instanceof final LivingEntity entity && entity.hasStatusEffect(SevenElementsStatusEffects.FROZEN))
 			cir.setReturnValue(false);
 	}
@@ -207,12 +233,12 @@ public abstract class PrioritizedLivingEntityMixin
 		argsOnly = true,
 		order = Integer.MIN_VALUE // Additive DMG Bonus is a Base DMG multiplier, should be applied ASAP.
 	)
-	private float applyDMGModifiers(float amount, @Local(argsOnly = true) DamageSource source) {
+	private float applyDMGModifiers(float amount, @Local(argsOnly = true) DamageSource source, @Local(argsOnly = true) ServerWorld world) {
 		final boolean fireResistance = source.isIn(DamageTypeTags.IS_FIRE) && this.hasStatusEffect(StatusEffects.FIRE_RESISTANCE);
 		final boolean damageCooldown = this.timeUntilRegen > 10.0F && !source.isIn(DamageTypeTags.BYPASSES_COOLDOWN) && amount <= this.lastDamageTaken;
 
 		// do **not** apply an element **if** DMG cannot be applied.
-		if (this.isInvulnerableTo(source) || this.getWorld().isClient || this.isDead() || fireResistance || damageCooldown) return amount;
+		if (this.isInvulnerable() || this.getWorld().isClient || this.isDead() || fireResistance || damageCooldown) return amount;
 
 		final ElementalDamageSource eds = source instanceof final ElementalDamageSource eds2
 			? eds2
@@ -243,7 +269,7 @@ public abstract class PrioritizedLivingEntityMixin
 					.stream()
 					.filter(reaction -> reaction instanceof AdditiveElementalReaction)
 					.map(reaction -> ((AdditiveElementalReaction) reaction))
-					.reduce(0.0f, (acc, reaction) -> acc + (float) reaction.getDamageBonus(this.getWorld()), Float::sum),
+					.reduce(0.0f, (acc, reaction) -> acc + (float) reaction.getDamageBonus(world), Float::sum),
 				0.0f
 			)
 			: 0.0f;

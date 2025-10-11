@@ -3,6 +3,7 @@ package io.github.xrickastley.sevenelements.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 
+import net.minecraft.server.world.ServerWorld;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -65,12 +66,11 @@ public abstract class EntityMixin {
 		method = "onStruckByLightning",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/entity/damage/DamageSource;F)Z",
-			ordinal = 0
+			target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;F)Z"
 		)
 	)
-	private DamageSource applyElectroOnLightning(DamageSource source) {
-		return (Entity)(Object) this instanceof final LivingEntity entity && this.getWorld().getGameRules().getBoolean(SevenElementsGameRules.ELECTRO_FROM_LIGHTNING)
+	private DamageSource applyElectroOnLightning(DamageSource source, @Local(argsOnly = true) ServerWorld world) {
+		return (Entity)(Object) this instanceof final LivingEntity entity && world.getGameRules().getBoolean(SevenElementsGameRules.ELECTRO_FROM_LIGHTNING)
 			? new ElementalDamageSource(source, ElementalApplications.gaugeUnits(entity, Element.ELECTRO, 2.0), InternalCooldownContext.ofType(null, "seven-elements:natural_environment", InternalCooldownType.INTERVAL_ONLY).forced())
 			: source;
 	}

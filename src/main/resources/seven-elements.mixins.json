@@ -11,7 +11,6 @@
     "EnderDragonEntityMixin",
     "EnderDragonFightMixin",
     "EntityMixin",
-    "ExplosionAccessor",
     "GrindstoneScreenHandler$23Mixin",
     "GrindstoneScreenHandler$4Mixin",
     "GrindstoneScreenHandlerMixin",

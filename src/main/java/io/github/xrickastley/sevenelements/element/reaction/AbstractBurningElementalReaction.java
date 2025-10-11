@@ -31,6 +31,7 @@ import io.github.xrickastley.sevenelements.registry.SevenElementsRegistries;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.registry.entry.RegistryEntry.Reference;
+import net.minecraft.server.world.ServerWorld;
 
 public abstract sealed class AbstractBurningElementalReaction
 	extends ElementalReaction
@@ -137,6 +138,8 @@ public abstract sealed class AbstractBurningElementalReaction
 		at = @At("HEAD")
 	)
 	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity) {
+		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
+	
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 
 		if (!component.hasElementalApplication(Element.BURNING) || component.isBurningOnCD() || entity.getWorld().isClient) return;
@@ -163,7 +166,7 @@ public abstract sealed class AbstractBurningElementalReaction
 					: InternalCooldownContext.ofType(entity, "seven-elements:reactions/burning", BURNING_PYRO_ICD)
 			).shouldApplyDMGBonus(false);
 
-			target.damage(source, damage);
+			target.damage(world, source, damage);
 			target.setOnFire(true);
 			target.setFireTicks(5);
 

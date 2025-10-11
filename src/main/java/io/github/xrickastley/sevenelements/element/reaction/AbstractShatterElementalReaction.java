@@ -12,6 +12,7 @@ import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.server.world.ServerWorld;
 
 /*
  * DEV NOTE: No concept of "Poise" exists within Seven Elements, therefore the implementation of
@@ -45,6 +46,8 @@ public abstract sealed class AbstractShatterElementalReaction
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
+		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
+
 		final float damage = ElementalReaction.getReactionDamage(entity, 3.0);
 		final ElementalDamageSource source = new ElementalDamageSource(
 			entity
@@ -54,7 +57,7 @@ public abstract sealed class AbstractShatterElementalReaction
 			InternalCooldownContext.ofNone(entity)
 		).shouldApplyDMGBonus(false).shouldInfuse(false);
 
-		entity.damage(source, damage);
+		entity.damage(world, source, damage);
 		entity.removeStatusEffect(SevenElementsStatusEffects.FROZEN);
 	}
 }

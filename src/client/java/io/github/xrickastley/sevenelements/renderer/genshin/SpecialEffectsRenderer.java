@@ -31,11 +31,11 @@ import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.Context;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat.DrawMode;
 import net.minecraft.client.render.VertexFormats;
@@ -223,7 +223,8 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 	    RenderSystem.enableBlend();
 	    RenderSystem.defaultBlendFunc();
 	    RenderSystem.disableCull();
-	    RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
+		RenderSystem.enableDepthTest();
+	    RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
 	    RenderSystem.setShaderColor(1, 1, 1, 1);
 
 	    RenderSystem.lineWidth(6.0f);

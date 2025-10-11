@@ -8,10 +8,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.StatusEffectsDisplay;
 import net.minecraft.entity.effect.StatusEffectInstance;
 
-@Mixin(AbstractInventoryScreen.class)
+@Mixin(StatusEffectsDisplay.class)
 public class AbstractInventoryScreenMixin {
 	@Inject(
 		method = "drawStatusEffectSprites",

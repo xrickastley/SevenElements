@@ -36,9 +36,10 @@ import io.github.xrickastley.sevenelements.util.SphereRenderer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.VertexFormat;
@@ -47,6 +48,7 @@ import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
+import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
@@ -56,7 +58,7 @@ import net.minecraft.util.math.Vec3d;
 
 @Environment(EnvType.CLIENT)
 @Mixin(value = LivingEntityRenderer.class, priority = Integer.MAX_VALUE)
-public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> {
+public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends EntityRenderer<T, S> {
 	protected LivingEntityRendererMixin(EntityRendererFactory.Context context) {
 		super(context);
 
@@ -64,10 +66,14 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 	}
 
 	@Inject(
-		method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+		method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
 		at = @At("TAIL")
 	)
-	private void addRenderers(final T entity, final float yaw, final float tickDelta, final MatrixStack matrixStack, final VertexConsumerProvider vertexConsumers, final int light, CallbackInfo ci) {
+	private void addRenderers(S state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
+		if (!(state.sevenelements$getEntity() instanceof final LivingEntity entity)) return;
+
+		final float tickDelta = MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false);
+
 		this.sevenelements$renderElementsIfPresent(entity, matrixStack, tickDelta);
 		this.sevenelements$renderElementalGauges(entity, matrixStack, tickDelta);
 		this.sevenelements$renderCrystallizeShield(entity, matrixStack);
@@ -183,7 +189,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 1 - yOffset, 0).color(0xffffffff);
 		buffer.vertex(positionMatrix, 0 + xOffset, 1 - yOffset, 0).color(0xffffffff);
 
-		RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+		RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
 		BufferRenderer.drawWithGlobalProgram(buffer.end());
 
 		final float progress = this.sevenelements$getProgress(application, tickDelta);
@@ -212,7 +218,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 			BufferRenderer.drawWithGlobalProgram(buffer.end());
 		}
 
-		RenderSystem.setShader(GameRenderer::getRenderTypeLinesProgram);
+		RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
 		RenderSystem.disableCull();
 
 		final float scaledGauge = (float) (0.1 * gaugeWidth / application.getGaugeUnits());
@@ -317,39 +323,43 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 		method = "getRenderLayer",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getTexture(Lnet/minecraft/entity/Entity;)Lnet/minecraft/util/Identifier;"
+			target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getTexture(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;)Lnet/minecraft/util/Identifier;"
 		)
 	)
-	private Identifier renderFrostedModel(Identifier original, @Local(argsOnly = true) LivingEntity entity) {
+	private Identifier renderFrostedModel(Identifier original, @Local(argsOnly = true) LivingEntityRenderState state) {
 		if (!ClientConfig.getEffectRenderType().allowsSpecialEffects()) return original;
 
-		return this.sevenelements$ifFrozen(entity, c -> Identifier.of("minecraft", "textures/block/ice.png"), original);
+		return state.sevenelements$getEntity() instanceof final LivingEntity entity
+			? this.sevenelements$ifFrozen(entity, c -> Identifier.of("minecraft", "textures/block/ice.png"), original)
+			: original;
 	}
 
 	@ModifyReturnValue(
 		method = "isShaking",
 		at = @At("RETURN")
 	)
-	private boolean isShakingWhenFrozen(boolean original, @Local(argsOnly = true) LivingEntity entity) {
-		return original || this.sevenelements$getComponent(entity).isFrozen();
+	private boolean isShakingWhenFrozen(boolean original, @Local(argsOnly = true) LivingEntityRenderState state) {
+		return original
+			|| (state.sevenelements$getEntity() instanceof final LivingEntity entity && this.sevenelements$getComponent(entity).isFrozen());
 	}
 
 	@Inject(
-		method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+		method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
 		at = @At("HEAD")
 	)
-	private void forceFrozenPose(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci, @Local(argsOnly = true) LivingEntity entity) {
+	private void forceFrozenPose(S state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
+		if (!(state.sevenelements$getEntity() instanceof final LivingEntity entity)) return;
+
 		final FrozenEffectComponent component = FrozenEffectComponent.KEY.get(entity);
 
-		if (component.isFrozen()) livingEntity.setPose(component.getForcePose());
+		if (component.isFrozen()) entity.setPose(component.getForcePose());
 	}
 
 	@ModifyExpressionValue(
-		method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/util/math/MathHelper;lerpAngleDegrees(FFF)F",
-			ordinal = 0
+			target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;clampBodyYaw(Lnet/minecraft/entity/LivingEntity;FF)F"
 		)
 	)
 	private float forceFrozenBodyYaw(float original, @Local(argsOnly = true) LivingEntity entity) {
@@ -357,11 +367,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 	}
 
 	@ModifyExpressionValue(
-		method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/util/math/MathHelper;lerpAngleDegrees(FFF)F",
-			ordinal = 1
+			target = "Lnet/minecraft/util/math/MathHelper;lerpAngleDegrees(FFF)F"
 		)
 	)
 	private float forceFrozenHeadYaw(float original, @Local(argsOnly = true) LivingEntity entity) {
@@ -369,11 +378,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 	}
 
 	@ModifyExpressionValue(
-		method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F",
-			ordinal = 0
+			target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;clampBodyYaw(Lnet/minecraft/entity/LivingEntity;FF)F"
 		)
 	)
 	private float forceFrozenPitch(float original, @Local(argsOnly = true) LivingEntity entity) {
@@ -381,7 +389,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 	}
 
 	@ModifyExpressionValue(
-		method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/entity/LimbAnimator;getSpeed(F)F"
@@ -392,7 +400,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 	}
 
 	@ModifyExpressionValue(
-		method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
+		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/entity/LimbAnimator;getPos(F)F"

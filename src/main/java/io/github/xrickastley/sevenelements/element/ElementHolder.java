@@ -11,6 +11,7 @@ import io.github.xrickastley.sevenelements.events.ElementEvents;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.server.world.ServerWorld;
 
 public final class ElementHolder {
 	// The entity holding the element.
@@ -84,7 +85,8 @@ public final class ElementHolder {
 	}
 
 	public boolean shouldDoElements() {
-		return owner.getWorld().getGameRules().getBoolean(SevenElementsGameRules.DO_ELEMENTS);
+		return !(owner.getWorld() instanceof final ServerWorld world)
+			|| world.getGameRules().getBoolean(SevenElementsGameRules.DO_ELEMENTS);
 	}
 
 	/**

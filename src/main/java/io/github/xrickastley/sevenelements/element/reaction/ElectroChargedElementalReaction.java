@@ -23,6 +23,7 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 
 public class ElectroChargedElementalReaction extends ElementalReaction {
 	ElectroChargedElementalReaction() {
@@ -68,6 +69,8 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
+		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
+
 		final ElementComponent entityComponent = ElementComponent.KEY.get(entity);
 
 		entityComponent.setOrRetainElectroChargedOrigin(origin);
@@ -90,7 +93,7 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 				InternalCooldownContext.ofNone(origin)
 			).shouldApplyDMGBonus(false);
 
-			target.damage(source, damage);
+			target.damage(world, source, damage);
 
 			ElementComponent.KEY
 				.get(target)

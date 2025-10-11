@@ -4,6 +4,7 @@ import com.mojang.serialization.MapCodec;
 
 import org.jetbrains.annotations.Nullable;
 
+import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler;
 
@@ -18,11 +19,12 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager.Builder;
-import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
 import net.minecraft.state.property.Properties;
 import net.minecraft.text.Text;
@@ -39,14 +41,17 @@ import net.minecraft.world.WorldView;
 
 public final class InfusionTableBlock extends HorizontalFacingBlock {
 	public static final MapCodec<InfusionTableBlock> CODEC = createCodec(InfusionTableBlock::new);
-	public static final DirectionProperty FACING = HorizontalFacingBlock.FACING;
+	public static final EnumProperty<Direction> FACING = HorizontalFacingBlock.FACING;
 	public static final EnumProperty<DoubleBlockHalf> HALF = Properties.DOUBLE_BLOCK_HALF;
 	private static final VoxelShape LOWER;
 	private static final VoxelShape UPPER;
 	private static final VoxelShape SHAPE;
 
 	InfusionTableBlock() {
-		this(AbstractBlock.Settings.create());
+		this(
+			AbstractBlock.Settings.create()
+				.registryKey(SevenElements.registryKey(RegistryKeys.BLOCK, "infusion_table"))
+		);
 	}
 
 	private InfusionTableBlock(AbstractBlock.Settings settings) {
@@ -102,13 +107,14 @@ public final class InfusionTableBlock extends HorizontalFacingBlock {
 
 	@Override
 	protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-		if (world.isClient) return ActionResult.SUCCESS;
+		if (!(world instanceof final ServerWorld serverWorld)) return ActionResult.SUCCESS;
 
-		if (world.getGameRules().getBoolean(SevenElementsGameRules.INFUSION_TABLE)) {
+		if (serverWorld.getGameRules().getBoolean(SevenElementsGameRules.INFUSION_TABLE)) {
 			player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
 		} else  {
 			player.sendMessage(
-				Text.translatable("container.seven-elements.infusion_table.fail_by_gamerule").withColor(Colors.LIGHT_RED)
+				Text.translatable("container.seven-elements.infusion_table.fail_by_gamerule").withColor(Colors.LIGHT_RED),
+				false
 			);
 		}
 

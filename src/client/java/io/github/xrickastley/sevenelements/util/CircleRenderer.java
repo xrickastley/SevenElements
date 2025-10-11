@@ -10,9 +10,9 @@ import org.apache.commons.lang3.function.TriConsumer;
 import org.joml.Matrix4f;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexFormat;
 import net.minecraft.client.render.VertexFormats;
@@ -156,7 +156,7 @@ public class CircleRenderer {
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.enableCull();
 
-			RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+			RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
 			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
@@ -210,7 +210,7 @@ public class CircleRenderer {
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.enableCull();
 
-			RenderSystem.setShader(GameRenderer::getPositionColorProgram);
+			RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
 			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());

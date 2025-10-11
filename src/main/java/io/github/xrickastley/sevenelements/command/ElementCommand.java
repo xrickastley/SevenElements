@@ -172,7 +172,7 @@ public class ElementCommand {
 		final boolean aura = CommandUtils.getOrDefault(context, "isAura", Boolean.class, true);
 
 		if (!(entity instanceof final LivingEntity target))
-			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity));
+			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity.getDisplayName()));
 
 		final ElementComponent component = ElementComponent.KEY.get(target);
 		final ElementalApplication application = ElementalApplications.gaugeUnits(target, element, gaugeUnits, aura);
@@ -191,7 +191,7 @@ public class ElementCommand {
 		final int duration = IntegerArgumentType.getInteger(context, "duration");
 
 		if (!(entity instanceof final LivingEntity target))
-			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity));
+			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity.getDisplayName()));
 
 		final ElementComponent component = ElementComponent.KEY.get(target);
 		final ElementalApplication application = ElementalApplications.duration(target, element, gaugeUnits, duration);
@@ -208,7 +208,7 @@ public class ElementCommand {
 		final Element element = ElementArgumentType.getElement(context, "element");
 
 		if (!(entity instanceof final LivingEntity target))
-			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity));
+			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity.getDisplayName()));
 
 		final ElementComponent component = ElementComponent.KEY.get(target);
 		final ElementHolder holder = component.getElementHolder(element);
@@ -220,7 +220,7 @@ public class ElementCommand {
 
 		ElementComponent.sync(entity);
 
-		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.remove", element.getText(), entity), true);
+		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.remove", element.getText(), entity.getDisplayName()), true);
 	}
 
 	private static int reduceElement(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -250,13 +250,13 @@ public class ElementCommand {
 		final Entity entity = EntityArgumentType.getEntity(context, "target");
 
 		if (!(entity instanceof final LivingEntity target))
-			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity));
+			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity.getDisplayName()));
 
 		final ElementComponent component = ElementComponent.KEY.get(target);
 		final Array<ElementalApplication> appliedElements = component.getAppliedElements();
 
 		if (appliedElements.isEmpty())
-			return CommandUtils.sendError(context, Text.translatable("commands.element.query.multiple.none", entity));
+			return CommandUtils.sendError(context, Text.translatable("commands.element.query.multiple.none", entity.getDisplayName()));
 
 		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.query.multiple.success", entity.getDisplayName(), Texts.join(appliedElements, ElementalApplications::getTimerText)), true);
 	}
@@ -266,7 +266,7 @@ public class ElementCommand {
 		final Element element = ElementArgumentType.getElement(context, "element");
 
 		if (!(entity instanceof final LivingEntity target))
-			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity));
+			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity.getDisplayName()));
 
 		final ElementComponent component = ElementComponent.KEY.get(target);
 		final @Nullable ElementalApplication application = component.getElementHolder(element).getElementalApplication();

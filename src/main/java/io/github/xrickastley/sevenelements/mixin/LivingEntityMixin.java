@@ -45,6 +45,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
+import java.util.Collection;
+
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin
 	extends Entity
@@ -69,14 +71,14 @@ public abstract class LivingEntityMixin
 	}
 
 	@Inject(
-		method = "onStatusEffectRemoved",
+		method = "onStatusEffectsRemoved",
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/entity/effect/StatusEffect;onRemoved(Lnet/minecraft/entity/attribute/AttributeContainer;)V",
 			shift = At.Shift.AFTER
 		)
 	)
-	private void triggerEntityOnRemoved(StatusEffectInstance effect, CallbackInfo ci) {
+	private void triggerEntityOnRemoved(Collection<StatusEffectInstance> effects, CallbackInfo ci, @Local StatusEffectInstance effect) {
 		effect
 			.getEffectType()
 			.value()
@@ -88,7 +90,9 @@ public abstract class LivingEntityMixin
 		at = @At("HEAD")
 	)
 	private void applyNaturalElements(CallbackInfo ci) {
-		if (this.isWet() && this.getWorld().getGameRules().getBoolean(SevenElementsGameRules.HYDRO_FROM_WATER)) {
+		if (!(this.getWorld() instanceof final ServerWorld world)) return;
+
+		if (this.isWet() && world.getGameRules().getBoolean(SevenElementsGameRules.HYDRO_FROM_WATER)) {
 			final ElementComponent component = ElementComponent.KEY.get(this);
 
 			component.addElementalApplication(
@@ -98,7 +102,7 @@ public abstract class LivingEntityMixin
 					.forced(),
 				1.0
 			);
-		} else if (this.getBlockStateAtPos().getBlock() == Blocks.FIRE && this.getWorld().getGameRules().getBoolean(SevenElementsGameRules.PYRO_FROM_FIRE)) {
+		} else if (this.getBlockStateAtPos().getBlock() == Blocks.FIRE && world.getGameRules().getBoolean(SevenElementsGameRules.PYRO_FROM_FIRE)) {
 			final ElementComponent component = ElementComponent.KEY.get(this);
 
 			component.addElementalApplication(
@@ -115,7 +119,7 @@ public abstract class LivingEntityMixin
 		method = "damage",
 		at = @At("HEAD")
 	)
-	private void resetCrystallizeShieldBlockedState(DamageSource source, float amount, CallbackInfoReturnable<Boolean> ci) {
+	private void resetCrystallizeShieldBlockedState(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		this.sevenelements$blockedByCrystallizeShield = false;
 	}
 
@@ -144,12 +148,12 @@ public abstract class LivingEntityMixin
 		method = "damage",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/LivingEntity;applyDamage(Lnet/minecraft/entity/damage/DamageSource;F)V",
+			target = "Lnet/minecraft/entity/LivingEntity;applyDamage(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;F)V",
 			shift = At.Shift.AFTER
 		),
 		cancellable = true
 	)
-	private void cancelIfFullyBlocked(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+	private void cancelIfFullyBlocked(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		if (this.sevenelements$blockedByCrystallizeShield) cir.setReturnValue(false);
 	}
 
@@ -171,8 +175,8 @@ public abstract class LivingEntityMixin
 		method = "applyDamage",
 		at = @At("TAIL")
 	)
-	private void elementDamageHandler(final DamageSource source, float amount, CallbackInfo ci) {
-		this.sevenelements$triggerDendroCoreReactions(source);
+	private void elementDamageHandler(ServerWorld world, DamageSource source, float amount, CallbackInfo ci) {
+		this.sevenelements$triggerDendroCoreReactions(world, source);
 
 		if (!source.sevenelements$displayDamage()) return;
 
@@ -187,10 +191,6 @@ public abstract class LivingEntityMixin
 		final float extra = sevenelements$subdamage - (float) Math.floor(sevenelements$subdamage);
 
 		sevenelements$subdamage = (float) Math.floor(sevenelements$subdamage);
-
-		final World world = this.getWorld();
-
-		if (world.isClient || !(world instanceof ServerWorld)) return;
 
 		final Box boundingBox = this.getBoundingBox();
 
@@ -223,7 +223,7 @@ public abstract class LivingEntityMixin
 	}
 
 	@Unique
-	private void sevenelements$triggerDendroCoreReactions(final DamageSource source) {
+	private void sevenelements$triggerDendroCoreReactions(final ServerWorld world, final DamageSource source) {
 		if (!(source instanceof final ElementalDamageSource eds)) return;
 
 		final Element element = eds.getElementalApplication().getElement();
@@ -232,7 +232,7 @@ public abstract class LivingEntityMixin
 
 		this.getWorld()
 			.getEntitiesByClass(DendroCoreEntity.class, BoxUtil.multiplyBox(this.getBoundingBox(), 2), dc -> true)
-			.forEach(dc -> dc.damage(source, 1));
+			.forEach(dc -> dc.damage(world, source, 1));
 	}
 
 	@Unique

@@ -20,11 +20,14 @@ import net.minecraft.item.TallBlockItem;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 
 public class SevenElementsItems {
 	public static final Item INFUSION_TABLE = new TallBlockItem(
 		SevenElementsBlocks.INFUSION_TABLE,
 		new Item.Settings()
+		    .useBlockPrefixedTranslationKey()
+		    .registryKey(SevenElements.registryKey(RegistryKeys.ITEM, "infusion_table"))
 	);
 
 	public static void register() {

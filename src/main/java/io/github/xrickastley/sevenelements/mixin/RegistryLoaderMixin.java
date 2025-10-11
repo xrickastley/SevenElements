@@ -2,7 +2,6 @@ package io.github.xrickastley.sevenelements.mixin;
 
 import com.mojang.serialization.Decoder;
 
-import java.util.List;
 import java.util.Map;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,9 +15,7 @@ import net.minecraft.registry.MutableRegistry;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryLoader;
-import net.minecraft.registry.RegistryOps.RegistryInfoGetter;
 import net.minecraft.registry.RegistryOps;
-import net.minecraft.registry.SerializableRegistries.SerializedRegistryEntry;
 import net.minecraft.resource.ResourceFactory;
 import net.minecraft.resource.ResourceManager;
 
@@ -48,9 +45,9 @@ public class RegistryLoaderMixin {
 		cancellable = true
 	)
 	private static <E> void doSevenElementsLoadFromNetwork(
-		Map<RegistryKey<? extends Registry<?>>, List<SerializedRegistryEntry>> data,
+		Map<RegistryKey<? extends Registry<?>>, RegistryLoader.ElementsAndTags> data,
 		ResourceFactory factory,
-		RegistryInfoGetter infoGetter,
+		RegistryOps.RegistryInfoGetter infoGetter,
 		MutableRegistry<E> registry,
 		Decoder<E> decoder,
 		Map<RegistryKey<?>, Exception> loadingErrors,

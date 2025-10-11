@@ -23,13 +23,13 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 
 public abstract class ElementalReaction {
 	protected final String name;
@@ -78,11 +78,11 @@ public abstract class ElementalReaction {
 		return SevenElements.getLevelMultiplier(entity) * reactionMultiplier;
 	}
 
-	public static float getReactionDamage(World world, double reactionMultiplier) {
+	public static float getReactionDamage(ServerWorld world, double reactionMultiplier) {
 		return ElementalReaction.getReactionDamage(world, (float) reactionMultiplier);
 	}
 
-	public static float getReactionDamage(World world, float reactionMultiplier) {
+	public static float getReactionDamage(ServerWorld world, float reactionMultiplier) {
 		return SevenElements.getLevelMultiplier(world) * reactionMultiplier;
 	}
 

@@ -9,13 +9,14 @@ import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectCategory;
 import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.server.world.ServerWorld;
 
 public final class FrozenStatusEffect extends ElementalStatusEffect {
 	FrozenStatusEffect() {
 		super(StatusEffectCategory.HARMFUL, 0x84e8f9, Element.FREEZE);
 
-		this.addAttributeModifier(EntityAttributes.GENERIC_MOVEMENT_SPEED, SevenElements.identifier("frozen"), -1, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		this.addAttributeModifier(EntityAttributes.GENERIC_ATTACK_DAMAGE, SevenElements.identifier("frozen"), Integer.MIN_VALUE, EntityAttributeModifier.Operation.ADD_VALUE);
+		this.addAttributeModifier(EntityAttributes.MOVEMENT_SPEED, SevenElements.identifier("frozen"), -1, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		this.addAttributeModifier(EntityAttributes.ATTACK_DAMAGE, SevenElements.identifier("frozen"), Integer.MIN_VALUE, EntityAttributeModifier.Operation.ADD_VALUE);
 	}
 
 	@Override
@@ -33,7 +34,7 @@ public final class FrozenStatusEffect extends ElementalStatusEffect {
 	}
 
 	@Override
-	public boolean applyUpdateEffect(LivingEntity entity, int amplifier) {
+	public boolean applyUpdateEffect(ServerWorld serverWorld, LivingEntity entity, int amplifier) {
 		if (entity.getStatusEffect(SevenElementsStatusEffects.FROZEN).getDuration() == 1 && entity instanceof final MobEntity mob)
 			mob.setAiDisabled(false);
 

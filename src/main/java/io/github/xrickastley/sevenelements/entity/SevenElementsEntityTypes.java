@@ -11,19 +11,20 @@ import net.minecraft.entity.SpawnGroup;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
 
 public class SevenElementsEntityTypes {
 	public static final EntityType<DendroCoreEntity> DENDRO_CORE = EntityType.Builder
 		.<DendroCoreEntity>create(DendroCoreEntity::new, SpawnGroup.MISC)
 		.dimensions(0.3125f, 0.4296875f)
 		.maxTrackingRange(64)
-		.build();
+		.build(SevenElements.registryKey(RegistryKeys.ENTITY_TYPE, "dendro_core"));
 
 	public static final EntityType<CrystallizeShardEntity> CRYSTALLIZE_SHARD = EntityType.Builder
 		.<CrystallizeShardEntity>create(CrystallizeShardEntity::new, SpawnGroup.MISC)
 		.dimensions(0.3125f, 0.875f)
 		.maxTrackingRange(64)
-		.build();
+		.build(SevenElements.registryKey(RegistryKeys.ENTITY_TYPE, "crystallize_shard"));
 
 	public static void register() {
 		register("dendro_core", SevenElementsEntityTypes.DENDRO_CORE, SevenElementsEntity::getAttributeBuilder);

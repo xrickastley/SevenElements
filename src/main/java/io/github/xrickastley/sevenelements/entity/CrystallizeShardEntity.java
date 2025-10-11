@@ -14,13 +14,14 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
-
+import io.github.xrickastley.sevenelements.util.MathHelper2;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.AnimationState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
@@ -29,6 +30,7 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 // Should technically extend Entity, but extends LivingEntity instead to NOT deal with more Networking and Spawn Packets.
@@ -50,6 +52,20 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 
 		this.element = this.getWorld().isClient ? null : element;
 		this.owner = ClassInstanceUtil.mapOrNull(owner, LivingEntity::getUuid);
+	}
+
+	public static CrystallizeShardEntity create(ServerWorld world, @Nullable LivingEntity owner, Element element, Vec3d pos, SpawnReason reason) {
+		return SevenElementsEntityTypes.CRYSTALLIZE_SHARD.create(
+			world,
+			shard -> {
+				shard.element = element;
+				shard.owner = ClassInstanceUtil.mapOrNull(owner, LivingEntity::getUuid);
+			},
+			MathHelper2.asBlockPos(pos),
+			reason,
+			true,
+			false
+		);
 	}
 
 	@Override

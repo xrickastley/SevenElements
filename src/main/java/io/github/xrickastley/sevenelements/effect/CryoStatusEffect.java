@@ -8,17 +8,18 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectCategory;
+import net.minecraft.server.world.ServerWorld;
 
 public final class CryoStatusEffect extends ElementalStatusEffect {
 	CryoStatusEffect() {
 		super(StatusEffectCategory.HARMFUL, 0x84e8f9, Element.CRYO);
 
-		this.addAttributeModifier(EntityAttributes.GENERIC_MOVEMENT_SPEED, SevenElements.identifier("cryo"), -0.15, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
-		this.addAttributeModifier(EntityAttributes.GENERIC_ATTACK_DAMAGE, SevenElements.identifier("cryo"), -0.15, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		this.addAttributeModifier(EntityAttributes.MOVEMENT_SPEED, SevenElements.identifier("cryo"), -0.15, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
+		this.addAttributeModifier(EntityAttributes.ATTACK_DAMAGE, SevenElements.identifier("cryo"), -0.15, EntityAttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 	}
 
 	@Override
-	public boolean applyUpdateEffect(LivingEntity entity, int amplifier) {
+	public boolean applyUpdateEffect(ServerWorld serverWorld, LivingEntity entity, int amplifier) {
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 
 		if (component.hasElementalApplication(Element.CRYO)) return false;
