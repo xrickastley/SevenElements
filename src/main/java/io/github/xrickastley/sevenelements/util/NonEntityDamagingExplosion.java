@@ -47,7 +47,6 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 /**
  * A class for explosions that don't damage entities.
  */
-// TODO: CHANGE IMPL
 public class NonEntityDamagingExplosion implements Explosion {
 	private static final ExplosionBehavior DEFAULT_BEHAVIOR = new ExplosionBehavior();
 	private final boolean createFire;
