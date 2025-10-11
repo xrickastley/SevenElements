@@ -2,6 +2,8 @@ package io.github.xrickastley.sevenelements.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.Share;
+import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,8 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalRef;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

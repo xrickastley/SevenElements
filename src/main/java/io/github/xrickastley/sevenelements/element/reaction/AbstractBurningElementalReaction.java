@@ -139,7 +139,7 @@ public abstract sealed class AbstractBurningElementalReaction
 	)
 	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity) {
 		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
-	
+
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 
 		if (!component.hasElementalApplication(Element.BURNING) || component.isBurningOnCD() || entity.getWorld().isClient) return;

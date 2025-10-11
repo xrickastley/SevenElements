@@ -7,6 +7,7 @@ import org.joml.Matrix4f;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.util.Ease;
+
 import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.BufferRenderer;

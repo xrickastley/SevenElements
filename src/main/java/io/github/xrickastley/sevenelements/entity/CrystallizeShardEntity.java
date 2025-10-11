@@ -15,6 +15,7 @@ import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.MathHelper2;
+
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.AnimationState;

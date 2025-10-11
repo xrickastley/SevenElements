@@ -2,6 +2,7 @@ package io.github.xrickastley.sevenelements.renderer.entity.model;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.renderer.entity.state.CrystallizeShardEntityState;
+
 import net.minecraft.client.model.Dilation;
 import net.minecraft.client.model.ModelData;
 import net.minecraft.client.model.ModelPart;

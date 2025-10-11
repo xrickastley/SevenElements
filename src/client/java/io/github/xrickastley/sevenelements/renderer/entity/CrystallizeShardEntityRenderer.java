@@ -7,6 +7,7 @@ import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity;
 import io.github.xrickastley.sevenelements.renderer.entity.model.CrystallizeShardEntityModel;
 import io.github.xrickastley.sevenelements.renderer.entity.state.CrystallizeShardEntityState;
+
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;

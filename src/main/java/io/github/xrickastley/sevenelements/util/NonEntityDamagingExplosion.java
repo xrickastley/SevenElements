@@ -34,13 +34,14 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.profiler.Profilers;
 import net.minecraft.world.GameRules;
-import net.minecraft.world.RaycastContext;
 import net.minecraft.world.RaycastContext.FluidHandling;
 import net.minecraft.world.RaycastContext.ShapeType;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.event.GameEvent;
 import net.minecraft.world.explosion.EntityExplosionBehavior;
 import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
+
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 /**
@@ -201,8 +202,8 @@ public class NonEntityDamagingExplosion implements Explosion {
 			boolean bl = this.behavior.shouldDamage(this, entity);
 			float p = this.behavior.getKnockbackModifier(entity);
 			float q = !bl && p == 0.0F ? 0.0F : calculateReceivedDamage(this.pos, entity);
-			
-			
+
+
 
 			double r = (1.0 - d) * (double) q * (double) p;
 			double s = entity instanceof LivingEntity livingEntity

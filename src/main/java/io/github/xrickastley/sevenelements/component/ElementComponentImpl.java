@@ -197,7 +197,7 @@ public final class ElementComponentImpl implements ElementComponent {
 	@Override
 	public List<ElementalReaction> addElementalApplication(ElementalApplication application, InternalCooldownContext icdContext) {
 		// Only do this on the server || Only do this when doElements is true.
-		if (!(application.getEntity().getWorld() instanceof final ServerWorld world) 
+		if (!(application.getEntity().getWorld() instanceof final ServerWorld world)
 			|| !world.getGameRules().getBoolean(SevenElementsGameRules.DO_ELEMENTS)) return Collections.emptyList();
 
 		if (application.isGaugeUnits() && !application.isAuraElement() && this.getAppliedElements().isEmpty())

@@ -1,5 +1,7 @@
 package io.github.xrickastley.sevenelements.entity;
 
+import com.mojang.serialization.Codec;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -8,8 +10,6 @@ import java.util.Queue;
 import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
-
-import com.mojang.serialization.Codec;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.ElementComponent;

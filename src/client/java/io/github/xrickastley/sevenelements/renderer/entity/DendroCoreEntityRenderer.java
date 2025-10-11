@@ -6,6 +6,7 @@ import io.github.xrickastley.sevenelements.renderer.entity.model.DendroCoreEntit
 import io.github.xrickastley.sevenelements.renderer.entity.state.DendroCoreEntityState;
 import io.github.xrickastley.sevenelements.util.Ease;
 import io.github.xrickastley.sevenelements.util.MathHelper2;
+
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRendererFactory;
