@@ -34,9 +34,7 @@
 	},
 	"requirements": [
 		[
-			"craft"
-		],
-		[
+			"craft",
 			"place"
 		]
 	],
