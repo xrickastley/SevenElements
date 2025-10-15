@@ -133,6 +133,8 @@
 	
 	"item.seven-elements.infusion_table": "Infusion Table",
 
+	"tag.item.seven-elements.heavy_weapon": "Heavy Weapon",
+
 	"gamerule.doElements": "(Seven Elements) Do elements",
 	"gamerule.levelMultiplier": "(Seven Elements) Level Multiplier",
 	"gamerule.levelMultiplier.description": "How strong the effects of Elemental Reactions are",
