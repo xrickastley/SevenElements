@@ -48,7 +48,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	public CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, World world, Element element, @Nullable LivingEntity owner) {
 		super(entityType, world);
 
-		this.element = this.getWorld().isClient ? null : element;
+		this.element = this.getWorld().isClient ? null : JavaScriptUtil.nullishCoalesing(element, Element.GEO);
 		this.owner = ClassInstanceUtil.mapOrNull(owner, LivingEntity::getUuid);
 	}
 
