@@ -78,9 +78,7 @@ public final class ElementEntry {
 	}
 
 	private void draw(final MatrixStack matrixStack, final Camera camera, final float offset, final float alpha) {
-		final Identifier texture =
-			this.element.getTexture();
-			// SevenElements.identifier("textures/element/hydro.png");
+		final Identifier texture = this.element.getTexture();
 
 		if (texture == null) return;
 
