@@ -22,7 +22,7 @@ public class NbtHelper {
 
 	public static <T> List<T> getList(NbtCompound nbt, String key, Codec<T> entryCodec) {
 		final List<T> result = new ArrayList<>();
-		final NbtList list = nbt.getListOrEmpty("Owners");
+		final NbtList list = nbt.getListOrEmpty(key);
 
 		for (int i = 0; i < list.size(); i++) {
 			final NbtElement element = list.get(i);
