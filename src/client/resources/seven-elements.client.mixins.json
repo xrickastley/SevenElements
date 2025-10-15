@@ -3,12 +3,13 @@
   "package": "io.github.xrickastley.sevenelements.mixin.client",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "AbstractInventoryScreenMixin",
     "BossBarHud$1Mixin",
     "BossBarHudAccessor",
     "BossBarHudMixin",
+    "BufferBuilderAccessor",
     "EntityRendererMixin",
     "EntityRenderStateMixin",
+    "GameRendererMixin",
     "InGameHudMixin",
     "LivingEntityMixin",
     "LivingEntityRendererMixin"

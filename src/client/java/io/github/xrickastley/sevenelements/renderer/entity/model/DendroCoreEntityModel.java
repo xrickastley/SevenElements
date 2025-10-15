@@ -30,7 +30,7 @@ public class DendroCoreEntityModel extends EntityModel<DendroCoreEntityState> {
 		final ModelPartData modelPartData = modelData.getRoot();
 		final ModelPartData bone = modelPartData.addChild("bone", ModelPartBuilder.create().uv(21, 2).cuboid(-0.5F, -15.0F, -6.5F, 0.0F, 17.0F, 13.0F, new Dilation(0.0F))
 		.uv(21, 15).cuboid(-7.0F, -15.0F, 0.0F, 13.0F, 17.0F, 0.0F, new Dilation(0.0F))
-		.uv(25, 2).cuboid(-1.5F, -14.0F, -1.0F, 2.0F, 3.0F, 2.0F, new Dilation(0.0F)), ModelTransform.pivot(0.5F, 22.0F, 0.0F));
+		.uv(25, 2).cuboid(-1.5F, -14.0F, -1.0F, 2.0F, 3.0F, 2.0F, new Dilation(0.0F)), ModelTransform.origin(0.5F, 22.0F, 0.0F));
 
 		bone.addChild("cube_r1", ModelPartBuilder.create().uv(0, 5).cuboid(0.0F, -10.0F, -5.0F, 0.0F, 12.0F, 10.0F, new Dilation(0.0F))
 		.uv(0, 15).cuboid(-5.0F, -10.0F, 0.0F, 10.0F, 12.0F, 0.0F, new Dilation(0.0F))

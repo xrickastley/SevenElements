@@ -23,9 +23,7 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
-import io.github.xrickastley.sevenelements.util.Functions;
-import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
-
+import io.github.xrickastley.sevenelements.util.NbtHelper;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
@@ -33,9 +31,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtHelper;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
@@ -43,6 +38,7 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
@@ -137,40 +133,21 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	public void writeCustomDataToNbt(NbtCompound nbt) {
 		super.writeCustomDataToNbt(nbt);
 
-		nbt.putString("Type", this.type.toString());
+		nbt.put("Type", DendroCoreEntity.Type.CODEC, this.type);
+		nbt.putNullable("Target", Uuids.CODEC, target);
 
-		if (target != null) nbt.putUuid("Target", target);
-
-		final NbtList list = new NbtList();
-
-		this.owners.forEach(
-			Functions.consumer(Functions.compose(NbtHelper::fromUuid, list::add))
-		);
-
-		nbt.put("Owners", list);
+		NbtHelper.putList(nbt, "Owners", Uuids.CODEC, this.owners);
 	}
 
 	@Override
 	public void readCustomDataFromNbt(NbtCompound nbt) {
 		super.readCustomDataFromNbt(nbt);
 
-		this.type = JavaScriptUtil.nullishCoalesing(
-			nbt.contains("Type")
-				? Type.valueOf(nbt.getString("Type"))
-				: null,
-			Type.NORMAL
-		);
-
-		this.target = nbt.contains("Target")
-			? nbt.getUuid("Target")
-			: null;
+		this.type = nbt.get("Type", DendroCoreEntity.Type.CODEC).orElse(Type.NORMAL);
+		this.target = nbt.get("Target", Uuids.CODEC).orElse(null);
 
 		this.owners.clear();
-
-		nbt.getList("Owners", NbtElement.LIST_TYPE)
-			.forEach(
-				Functions.consumer(Functions.compose(NbtHelper::toUuid, this.owners::add))
-			);
+		this.owners.addAll(NbtHelper.getList(nbt, "Owners", Uuids.CODEC));
 	}
 
 	private void doHyperbloom() {

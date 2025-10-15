@@ -92,7 +92,7 @@ public abstract class LivingEntityMixin
 	private void applyNaturalElements(CallbackInfo ci) {
 		if (!(this.getWorld() instanceof final ServerWorld world)) return;
 
-		if (this.isWet() && world.getGameRules().getBoolean(SevenElementsGameRules.HYDRO_FROM_WATER)) {
+		if (this.isTouchingWater() && world.getGameRules().getBoolean(SevenElementsGameRules.HYDRO_FROM_WATER)) {
 			final ElementComponent component = ElementComponent.KEY.get(this);
 
 			component.addElementalApplication(
@@ -162,7 +162,7 @@ public abstract class LivingEntityMixin
 		at = @At(
 			value = "INVOKE",
 			target = "Lnet/minecraft/entity/damage/DamageSource;isIn(Lnet/minecraft/registry/tag/TagKey;)Z",
-			ordinal = 6
+			ordinal = 5
 		)
 	)
 	private boolean preventKnockbackIfCrystallize(boolean original, @Local(argsOnly = true) DamageSource source, @Share("sevenelements$hasCrystallizeShield") LocalBooleanRef hasCrystallizeShield) {
@@ -175,7 +175,7 @@ public abstract class LivingEntityMixin
 		method = "applyDamage",
 		at = @At("TAIL")
 	)
-	private void elementDamageHandler(ServerWorld world, DamageSource source, float amount, CallbackInfo ci) {
+	private void elementDamageHandler(ServerWorld world, DamageSource source, float _amount, CallbackInfo ci, @Local(ordinal = 1) float amount) {
 		this.sevenelements$triggerDendroCoreReactions(world, source);
 
 		if (!source.sevenelements$displayDamage()) return;

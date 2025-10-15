@@ -1,7 +1,9 @@
 package io.github.xrickastley.sevenelements.component;
 
-import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
+import com.mojang.serialization.Codec;
 
+import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
+import io.github.xrickastley.sevenelements.util.NbtHelper;
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
@@ -10,6 +12,8 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.MathHelper;
 
 public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
+	private static final Codec<EntityPose> ENTITY_POSE_CODEC = Codec.INT.xmap(EntityPose.INDEX_TO_VALUE::apply, EntityPose::getIndex);
+
 	private final LivingEntity owner;
 	private boolean isFrozen = false;
 	private boolean hadNoAi = false;
@@ -27,22 +31,22 @@ public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
 
 	@Override
 	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
-		this.isFrozen = tag.getBoolean("IsFrozen");
-		this.hadNoAi = tag.getBoolean("HadNoAi");
-		this.forcePose = EntityPose.valueOf(tag.getString("ForcePose"));
-		this.forceHeadYaw = tag.getFloat("ForceHeadYaw");
-		this.forceBodyYaw = tag.getFloat("ForceBodyYaw");
-		this.forcePitch = tag.getFloat("ForcePitch");
-		this.forceLimbAngle = tag.getFloat("ForceLimbAngle");
-		this.forceLimbDistance = tag.getFloat("ForceLimbDistance");
-		this.ticksFrozen = tag.getInt("TicksFrozen");
+		this.isFrozen = NbtHelper.get(tag, "IsFrozen", Codec.BOOL);
+		this.hadNoAi = NbtHelper.get(tag, "HadNoAi", Codec.BOOL);
+		this.forcePose = NbtHelper.get(tag, "ForcePose", ENTITY_POSE_CODEC);
+		this.forceHeadYaw = NbtHelper.get(tag, "ForceHeadYaw", Codec.FLOAT);
+		this.forceBodyYaw = NbtHelper.get(tag, "ForceBodyYaw", Codec.FLOAT);
+		this.forcePitch = NbtHelper.get(tag, "ForcePitch", Codec.FLOAT);
+		this.forceLimbAngle = NbtHelper.get(tag, "ForceLimbAngle", Codec.FLOAT);
+		this.forceLimbDistance = NbtHelper.get(tag, "ForceLimbDistance", Codec.FLOAT);
+		this.ticksFrozen = NbtHelper.get(tag, "TicksFrozen", Codec.INT);
 	}
 
 	@Override
 	public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
 		tag.putBoolean("IsFrozen", this.isFrozen);
 		tag.putBoolean("HadNoAi", this.hadNoAi);
-		tag.putString("ForcePose", this.forcePose.toString());
+		tag.put("ForcePose", ENTITY_POSE_CODEC, this.forcePose);
 		tag.putFloat("ForceHeadYaw", this.forceHeadYaw);
 		tag.putFloat("ForceBodyYaw", this.forceBodyYaw);
 		tag.putFloat("ForcePitch", this.forcePitch);

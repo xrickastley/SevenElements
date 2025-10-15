@@ -7,7 +7,6 @@ import io.github.xrickastley.sevenelements.entity.SevenElementsEntityTypes;
 import io.github.xrickastley.sevenelements.gui.screen.ingame.ElementalInfusionScreen;
 import io.github.xrickastley.sevenelements.networking.SevenElementsPacketsS2C;
 import io.github.xrickastley.sevenelements.networking.SyncBossBarEntityPayloadHandler;
-import io.github.xrickastley.sevenelements.particle.SevenElementsClientParticleFactory;
 import io.github.xrickastley.sevenelements.renderer.WorldTextRenderer;
 import io.github.xrickastley.sevenelements.renderer.entity.CrystallizeShardEntityRenderer;
 import io.github.xrickastley.sevenelements.renderer.entity.DendroCoreEntityRenderer;
@@ -54,7 +53,6 @@ public class SevenElementsClient implements ClientModInitializer {
 		EntityModelLayerRegistry.registerModelLayer(CrystallizeShardEntityModel.MODEL_LAYER, CrystallizeShardEntityModel::getTexturedModelData);
 
 		SevenElementsPacketsS2C.register();
-		SevenElementsClientParticleFactory.register();
 
 		AutoConfig.register(ClientConfig.class, GsonConfigSerializer::new);
 

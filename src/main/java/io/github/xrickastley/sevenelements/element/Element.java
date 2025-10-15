@@ -13,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
-import io.github.xrickastley.sevenelements.factory.SevenElementsParticleTypes;
 import io.github.xrickastley.sevenelements.util.Color;
 import io.github.xrickastley.sevenelements.util.Colors;
 
@@ -87,7 +86,7 @@ public enum Element {
 			.setDamageColor(Colors.DENDRO)
 			.setPriority(2)
 			.setDecayRate(Decays.DENDRO_DECAY_RATE)
-			.particleRenderer(new ParticleRenderer(SevenElementsParticleTypes.TINTED_LEAVES, new Vec3d(0, 0.75, 0), new Vec3d(0.125, 0.250, 0.125), 0.01, 2, "{color: [0, 1, 0, 1]}"))
+			.particleRenderer(new ParticleRenderer(ParticleTypes.TINTED_LEAVES, new Vec3d(0, 0.75, 0), new Vec3d(0.125, 0.250, 0.125), 0.01, 2, "{color: [0, 1, 0, 1]}"))
 	),
 	CRYO(
 		SevenElements.identifier("cryo"),
@@ -470,7 +469,7 @@ public enum Element {
 
 		private static NbtCompound parseCompound(String nbt) {
 			try {
-				return StringNbtReader.parse(nbt);
+				return StringNbtReader.readCompound(nbt);
 			} catch (Exception e) {
 				RuntimeException e2 = new NbtException("An invalid NBT string was provided!");
 				e2.addSuppressed(e);
@@ -505,7 +504,7 @@ public enum Element {
 			double velY = speed * delta.y;
 			double velZ = speed * delta.z;
 
-			world.addParticle(this.getParticle(world), pos.x, pos.y, pos.z, velX, velY, velZ);
+			world.addParticleClient(this.getParticle(world), pos.x, pos.y, pos.z, velX, velY, velZ);
 		}
 
 		private void addMultipleParticles(LivingEntity entity, Vec3d pos) {
@@ -519,7 +518,7 @@ public enum Element {
 				double velY = random.nextGaussian() * speed;
 				double velZ = random.nextGaussian() * speed;
 
-				world.addParticle(this.getParticle(world), pos.x + randX, pos.y + randY, pos.z + randZ, velX, velY, velZ);
+				world.addParticleClient(this.getParticle(world), pos.x + randX, pos.y + randY, pos.z + randZ, velX, velY, velZ);
 			}
 		}
 	}

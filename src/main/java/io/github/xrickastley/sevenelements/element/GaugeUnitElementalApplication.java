@@ -6,16 +6,20 @@ import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.Codec;
+
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.events.ElementEvents;
 import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException.Operation;
 import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
+import io.github.xrickastley.sevenelements.util.NbtHelper;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.text.Text;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.MathHelper;
 
 public final class GaugeUnitElementalApplication extends ElementalApplication {
@@ -31,17 +35,17 @@ public final class GaugeUnitElementalApplication extends ElementalApplication {
 	}
 
 	static ElementalApplication fromNbt(LivingEntity entity, NbtCompound nbt, long syncedAt) {
-		final Element element = Element.valueOf(nbt.getString("Element"));
-		final UUID uuid = nbt.getUuid("UUID");
-		final double gaugeUnits = nbt.getDouble("GaugeUnits");
-		final double currentGauge = nbt.getDouble("CurrentGauge");
-		final boolean isAura = nbt.getBoolean("IsAura");
+		final Element element = NbtHelper.get(nbt, "Element", Element.CODEC);
+		final UUID uuid = NbtHelper.get(nbt, "UUID", Uuids.CODEC);
+		final double gaugeUnits = NbtHelper.get(nbt, "GaugeUnits", Codec.doubleRange(0, Double.MAX_VALUE));
+		final double currentGauge = NbtHelper.get(nbt, "CurrentGauge", Codec.doubleRange(0, Double.MAX_VALUE));
+		final boolean isAura = NbtHelper.get(nbt, "IsAura", Codec.BOOL);
 
 		final var application = new GaugeUnitElementalApplication(entity, element, uuid, gaugeUnits, isAura);
 
 		final double syncedGaugeDeduction = Math.max(entity.getWorld().getTime() - syncedAt, 0) * application.getDecayRate();
 		application.currentGauge = MathHelper.clamp(currentGauge - syncedGaugeDeduction, 0, application.gaugeUnits);
-		application.appliedAt = nbt.getLong("AppliedAt");
+		application.appliedAt = NbtHelper.get(nbt, "AppliedAt", Codec.LONG);
 
 		return application;
 	}

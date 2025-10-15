@@ -31,6 +31,7 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
@@ -73,18 +74,16 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	public void writeCustomDataToNbt(NbtCompound nbt) {
 		super.writeCustomDataToNbt(nbt);
 
-		if (this.element != null) nbt.putString("Element", this.element.toString());
-
-		if (this.owner != null) nbt.putUuid("Owner", this.owner);
+		nbt.put("Element", Element.CODEC, this.element);
+		nbt.putNullable("Owner", Uuids.CODEC, this.owner);
 	}
 
 	@Override
 	public void readCustomDataFromNbt(NbtCompound nbt) {
 		super.readCustomDataFromNbt(nbt);
 
-		if (nbt.contains("Element")) this.element = Element.valueOf(nbt.getString("Element"));
-
-		if (nbt.contains("Owner")) this.owner = nbt.getUuid("Owner");
+		this.element = nbt.get("Element", Element.CODEC).orElse(this.element);
+		this.owner = nbt.get("Owner", Uuids.CODEC).orElse(this.owner);
 	}
 
 	@Override
@@ -111,9 +110,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	 * While the element is considered {@code null}, the Crystallize Shard is not rendered. <br> <br>
 	 */
 	public @Nullable Element getElement() {
-		return this.getWorld().isClient
-			? element
-			: JavaScriptUtil.nullishCoalesing(element, Element.GEO);
+		return element;
 	}
 
 	public void syncFromPacket(SyncCrystallizeShardTypeS2CPayload packet) {

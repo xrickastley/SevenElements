@@ -1,23 +1,21 @@
 package io.github.xrickastley.sevenelements.util;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import java.util.function.Function;
 
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
-import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat.DrawMode;
-import net.minecraft.client.render.VertexFormats;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
+import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public final class SphereRenderer {
+	private static final BufferAllocator allocator = new BufferAllocator(SevenElementsRenderLayer.getSphere().getExpectedBufferSize());
 	private SphereRenderer() {}
 
 	/**
@@ -56,7 +54,7 @@ public final class SphereRenderer {
 		Matrix4f modelMat = matrices.peek().getPositionMatrix();
 		Matrix3f normalMat = matrices.peek().getNormalMatrix();
 
-		final BufferBuilder buf = Tessellator.getInstance().begin(DrawMode.TRIANGLES, VertexFormats.POSITION_COLOR);
+		final BufferBuilder buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.SPHERE);
 
 		for (int lat = 0; lat < latSteps; lat++) {
 			final double theta1 = Math.PI * lat / (double) latSteps;
@@ -71,19 +69,17 @@ public final class SphereRenderer {
 				final Vec3d v10 = spherical(radius, theta2, phi1);
 				final Vec3d v11 = spherical(radius, theta2, phi2);
 
-				vertex(buf, modelMat, normalMat, v10, colorFunc.apply(SphereRenderer.relativeClamp(v10, radius)));
-				vertex(buf, modelMat, normalMat, v00, colorFunc.apply(SphereRenderer.relativeClamp(v00, radius)));
-				vertex(buf, modelMat, normalMat, v11, colorFunc.apply(SphereRenderer.relativeClamp(v11, radius)));
+				vertex(buffer, modelMat, normalMat, v10, colorFunc.apply(SphereRenderer.relativeClamp(v10, radius)));
+				vertex(buffer, modelMat, normalMat, v00, colorFunc.apply(SphereRenderer.relativeClamp(v00, radius)));
+				vertex(buffer, modelMat, normalMat, v11, colorFunc.apply(SphereRenderer.relativeClamp(v11, radius)));
 
-				vertex(buf, modelMat, normalMat, v00, colorFunc.apply(SphereRenderer.relativeClamp(v00, radius)));
-				vertex(buf, modelMat, normalMat, v11, colorFunc.apply(SphereRenderer.relativeClamp(v11, radius)));
-				vertex(buf, modelMat, normalMat, v01, colorFunc.apply(SphereRenderer.relativeClamp(v01, radius)));
+				vertex(buffer, modelMat, normalMat, v00, colorFunc.apply(SphereRenderer.relativeClamp(v00, radius)));
+				vertex(buffer, modelMat, normalMat, v11, colorFunc.apply(SphereRenderer.relativeClamp(v11, radius)));
+				vertex(buffer, modelMat, normalMat, v01, colorFunc.apply(SphereRenderer.relativeClamp(v01, radius)));
 			}
 		}
 
-		RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-
-		BufferRenderer.drawWithGlobalProgram(buf.end());
+		SevenElementsRenderLayer.getSphere().draw(buffer.end());
 
 		matrices.pop();
 	}
@@ -98,7 +94,7 @@ public final class SphereRenderer {
 	private static void vertex(BufferBuilder buffer, Matrix4f projMat, Matrix3f normalMat, Vec3d pos, int color) {
 		buffer
 			.vertex(projMat, (float)pos.x, (float)pos.y, (float)pos.z)
-		   .color(color);
+			.color(color);
 	}
 
 	private static Vec3d relativeClamp(Vec3d pos, float radius) {

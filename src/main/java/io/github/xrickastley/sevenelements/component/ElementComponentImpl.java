@@ -16,6 +16,8 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.Codec;
+
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementHolder;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
@@ -37,7 +39,7 @@ import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.ImmutablePair;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
-
+import io.github.xrickastley.sevenelements.util.NbtHelper;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -268,24 +270,20 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	@Override
 	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
-		this.electroChargedCooldown = tag.getLong("ElectroChargedCooldown");
-		this.burningCooldown = tag.getLong("BurningCooldown");
+		this.electroChargedCooldown = NbtHelper.get(tag, "ElectroChargedCooldown", Codec.LONG);
+		this.burningCooldown = NbtHelper.get(tag, "BurningCooldown", Codec.LONG);
 
-		if (tag.contains("LastReaction")) {
-			final NbtCompound lastReaction = tag.getCompound("LastReaction");
-
+		tag.getCompound("LastReaction").ifPresent(lastReaction -> {
 			this.lastReaction = new Pair<>(
-				SevenElementsRegistries.ELEMENTAL_REACTION.get(Identifier.tryParse(lastReaction.getString("Id"))),
-				lastReaction.getLong("Time")
+				SevenElementsRegistries.ELEMENTAL_REACTION.get(NbtHelper.get(lastReaction, "Id", Identifier.CODEC)),
+				NbtHelper.get(lastReaction, "Time", Codec.LONG)
 			);
-		}
+		});
 
-		this.crystallizeShield = tag.contains("CrystallizeShield")
-			? CrystallizeShield.ofNbt(tag.getCompound("CrystallizeShield"))
-			: null;
+		this.crystallizeShield = CrystallizeShield.ofNbt(tag.getCompound("CrystallizeShield"));
 
-		final NbtList list = tag.getList("AppliedElements", NbtElement.COMPOUND_TYPE);
-		final long syncedAt = tag.getLong("SyncedAt");
+		final NbtList list = tag.getListOrEmpty("AppliedElements");
+		final long syncedAt = NbtHelper.get(tag, "SyncedAt", Codec.LONG);
 
 		this.elementHolders
 			.values()
@@ -533,8 +531,12 @@ public final class ElementComponentImpl implements ElementComponent {
 			this.amount = amount;
 		}
 
-		private static CrystallizeShield ofNbt(final NbtCompound tag) {
-			return new CrystallizeShield(Element.valueOf(tag.getString("Element")), tag.getDouble("Amount"), tag.getLong("AppliedAt"));
+		private static @Nullable CrystallizeShield ofNbt(final Optional<NbtCompound> nbt) {
+			return nbt.map(tag -> new CrystallizeShield(
+				NbtHelper.get(tag, "Element", Element.CODEC), 
+				NbtHelper.get(tag, "Amount", Codec.DOUBLE), 
+				NbtHelper.get(tag, "AppliedAt", Codec.LONG)
+			)).orElse(null);
 		}
 
 		private float reduce(ElementalDamageSource source, float amount) {
@@ -619,15 +621,20 @@ public final class ElementComponentImpl implements ElementComponent {
 			tag.putInt("UnfreezeTicks", unfreezeTicks);
 		}
 
-		public void readFromNbt(NbtCompound tag, long syncDiff) {
-			this.isFreezeReapplied = tag.getBoolean("FreezeReapplied");
-			this.freezeReappliedAt = tag.getLong("FreezeReappliedAt");
-			this.freezeTicks = tag.getInt("FreezeTicks");
+		public void readFromNbt(Optional<NbtCompound> tag, long syncDiff) {
+			if (tag.isEmpty()) return;
+
+			final NbtCompound nbt = tag.get();
+
+			this.isFreezeReapplied = NbtHelper.get(nbt, "FreezeReapplied", Codec.BOOL);
+			this.freezeReappliedAt = NbtHelper.get(nbt, "FreezeReappliedAt", Codec.LONG);
+			this.freezeTicks = NbtHelper.get(nbt, "FreezeTicks", Codec.intRange(0, Integer.MAX_VALUE));
 
 			final @Nullable ElementalApplication freezeApp = impl.getElementalApplication(Element.FREEZE);
 			final int syncUnfrozenTicks = JavaScriptUtil.nullishCoalesing(ClassInstanceUtil.mapOrNull(freezeApp, ElementalApplication::getRemainingTicks), 0);
 
-			this.unfreezeTicks = tag.getInt("UnfreezeTicks") + (int) Math.max(0, syncDiff - syncUnfrozenTicks);
+			this.unfreezeTicks = NbtHelper.get(nbt, "UnfreezeTicks", Codec.intRange(0, Integer.MAX_VALUE))
+				+ (int) Math.max(0, syncDiff - syncUnfrozenTicks);
 		}
 
 		static {

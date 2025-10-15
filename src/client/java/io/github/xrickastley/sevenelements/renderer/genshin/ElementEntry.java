@@ -1,29 +1,28 @@
 package io.github.xrickastley.sevenelements.renderer.genshin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import org.joml.Matrix4f;
 
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
 import io.github.xrickastley.sevenelements.util.Ease;
 
-import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 public final class ElementEntry {
 	private static final float BLINK_SECONDS = 1.5f;
 	private static final float BLINK_COUNT = 3;
-
+	private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(RenderLayer.SOLID_BUFFER_SIZE);
 	private final Element element;
 	private final double secondsLeft;
 	private final long appliedAt;
@@ -39,7 +38,7 @@ public final class ElementEntry {
 	public static ElementEntry of(ElementalApplication application, float tickDelta) {
 		return new ElementEntry(application.getElement(), (application.getRemainingTicks() - tickDelta) / 20.0, application.getAppliedAt(), tickDelta);
 	}
-
+	
 	public Element getElement() {
 		return element;
 	}
@@ -63,16 +62,7 @@ public final class ElementEntry {
 				: MathHelper.lerp(((this.secondsLeft % blinkInterval) - 0.25) / intervalSplit, 1, 0)
 			: 1);
 
-		RenderSystem.setShader(ShaderProgramKeys.POSITION_TEX);
-		RenderSystem.setShaderTexture(0, this.element.getTexture());
-		RenderSystem.setShaderColor(1f, 1f, 1f, alpha);
-
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.disableCull();
-		RenderSystem.enableDepthTest();
-
-		this.draw(matrixStack, camera, offset);
+		this.draw(matrixStack, camera, offset, alpha);
 
 		if (this.getAppliedTicks(entity) <= 5) {
 			final double animationProgress = Ease.LINEAR.applyLerpProgress(this.getAppliedTicks(entity) + tickDelta, 1, 6);
@@ -81,29 +71,29 @@ public final class ElementEntry {
 
 			matrixStack.scale(scale2, scale2, scale2);
 
-			RenderSystem.setShaderColor(1f, 1f, 1f, alpha2);
-
-			this.draw(matrixStack, camera, offset);
+			this.draw(matrixStack, camera, offset, alpha2);
 		}
 
 		matrixStack.pop();
-
-		RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 	}
 
-	private void draw(final MatrixStack matrixStack, final Camera camera, final float offset) {
-		final Tessellator tessellator = Tessellator.getInstance();
-		final BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
+	private void draw(final MatrixStack matrixStack, final Camera camera, final float offset, final float alpha) {
+		final Identifier texture = 
+			this.element.getTexture();
+			// SevenElements.identifier("textures/element/hydro.png");
+
+		if (texture == null) return;
+
+		final BufferBuilder buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.ELEMENTS);
 
 		final float finalXOffset = -0.5f + offset;
-
 		final Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
 
-		buffer.vertex(positionMatrix, 0 + finalXOffset, 0, 0).texture(0f, 1f);
-		buffer.vertex(positionMatrix, 1 + finalXOffset, 0, 0).texture(1f, 1f);
-		buffer.vertex(positionMatrix, 1 + finalXOffset, 1, 0).texture(1f, 0f);
-		buffer.vertex(positionMatrix, 0 + finalXOffset, 1, 0).texture(0f, 0f);
+		buffer.vertex(positionMatrix, 0 + finalXOffset, 0, 0).texture(0f, 1f).color(1f, 1f, 1f, alpha);
+		buffer.vertex(positionMatrix, 1 + finalXOffset, 0, 0).texture(1f, 1f).color(1f, 1f, 1f, alpha);
+		buffer.vertex(positionMatrix, 1 + finalXOffset, 1, 0).texture(1f, 0f).color(1f, 1f, 1f, alpha);
+		buffer.vertex(positionMatrix, 0 + finalXOffset, 1, 0).texture(0f, 0f).color(1f, 1f, 1f, alpha);
 
-		BufferRenderer.drawWithGlobalProgram(buffer.end());
+		SevenElementsRenderLayer.getElements(texture).draw(buffer.end());
 	}
 }

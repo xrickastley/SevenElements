@@ -20,6 +20,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
+import net.minecraft.util.Uuids;
 import net.minecraft.util.dynamic.Codecs;
 
 /**
@@ -200,7 +201,7 @@ public abstract sealed class ElementalApplication permits DurationElementalAppli
 
 		nbt.putString("Type", this.type.toString());
 		nbt.putString("Element", this.element.toString());
-		nbt.putUuid("UUID", uuid);
+		nbt.put("UUID", Uuids.CODEC, uuid);
 		nbt.putBoolean("IsAura", this.isAura);
 		nbt.putDouble("GaugeUnits", this.gaugeUnits);
 		nbt.putDouble("CurrentGauge", this.currentGauge);

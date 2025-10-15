@@ -1,7 +1,5 @@
 package io.github.xrickastley.sevenelements.renderer;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,11 +30,15 @@ public final class WorldTextRenderer {
 		final Camera camera = context.camera();
 		final MatrixStack matrixStack = new MatrixStack();
 
+		matrixStack.push();
+
 		// Implement legacy renderWorld transforms.
 		matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
 		matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
 
-		entries.forEach(entry -> entry.render(camera, context.tickCounter().getTickDelta(false), matrixStack));
+		entries.forEach(entry -> entry.render(camera, context.tickCounter().getTickProgress(false), matrixStack));
+
+		matrixStack.pop();
 	}
 
 	public void tick(ClientWorld world) {
@@ -130,15 +132,9 @@ public final class WorldTextRenderer {
 				.multiply(1, 1, 1, alpha)
 				.asARGB();
 
-			RenderSystem.disableCull();
-			RenderSystem.disableDepthTest();
-
 			WorldTextRenderer.drawText(camera, matrices, immediate, this.text.asOrderedText(), x, y, z, color, 0.04f * (float) scale, true, 0f, true);
 
 			immediate.draw();
-
-			RenderSystem.enableCull();
-			RenderSystem.enableDepthTest();
 		}
 
 		@Override
@@ -168,8 +164,9 @@ public final class WorldTextRenderer {
 
 		@Override
 		protected void render(Camera camera, float tickDelta, MatrixStack matrices) {
-			final MinecraftClient client = MinecraftClient.getInstance();
-			final VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
+			// final MinecraftClient client = MinecraftClient.getInstance();
+			// final VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
+			final VertexConsumerProvider.Immediate immediate = SevenElementsRenderLayer.getWorldTextImmediate();
 
 			final float deltaTime = age + tickDelta;
 
@@ -186,15 +183,9 @@ public final class WorldTextRenderer {
 				.multiply(1, 1, 1, alpha)
 				.asARGB();
 
-			RenderSystem.disableCull();
-			RenderSystem.disableDepthTest();
-
 			WorldTextRenderer.drawText(camera, matrices, immediate, this.amount.asOrderedText(), x, y, z, color, 0.04f * (float) scale, true, 0f, true);
 
 			immediate.draw();
-
-			RenderSystem.enableCull();
-			RenderSystem.enableDepthTest();
 		}
 
 		@Override

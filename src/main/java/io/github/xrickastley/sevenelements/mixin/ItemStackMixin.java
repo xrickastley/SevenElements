@@ -3,16 +3,16 @@ package io.github.xrickastley.sevenelements.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
-import com.llamalad7.mixinextras.sugar.Local;
 
-import java.util.List;
+import java.util.function.Consumer;
 
+import net.minecraft.component.type.TooltipDisplayComponent;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
@@ -73,21 +73,21 @@ public abstract class ItemStackMixin implements ComponentHolder {
 	}
 
 	@Inject(
-		method = "getTooltip",
+		method = "appendTooltip",
 		at = @At(
 			value = "INVOKE",
-			target = "Ljava/util/List;add(Ljava/lang/Object;)Z",
-			ordinal = 3
+			target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V",
+			ordinal = 6
 		)
 	)
-	private void addInfusionData(Item.TooltipContext context, @Nullable PlayerEntity player, TooltipType _type, CallbackInfoReturnable<List<Text>> cir, @Local List<Text> texts) {
+	private void addInfusionData(Item.TooltipContext context, TooltipDisplayComponent displayComponent, @Nullable PlayerEntity player, TooltipType _type, Consumer<Text> textConsumer, CallbackInfo ci) {
 		final @Nullable ElementalInfusionComponent component = this.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 
 		if (component == null || !component.hasElementalInfusion()) return;
 
 		final Builder builder = component.internalCooldown();
 
-		texts.add(
+		textConsumer.accept(
 			Text.empty()
 				.append(Text.translatable("item.seven-elements.components.infusion.infusion").formatted(Formatting.WHITE))
 				.append(ElementalApplication.Builder.getText(component.elementalInfusion()))
@@ -101,7 +101,7 @@ public abstract class ItemStackMixin implements ComponentHolder {
 			? tag.getText(Formatting.DARK_GRAY)
 			: Text.literal("none").formatted(Formatting.RED);
 
-		texts.add(
+		textConsumer.accept(
 			Text.empty()
 				.append(Text.translatable("item.seven-elements.components.infusion.tag").formatted(Formatting.WHITE))
 				.append(tagText)
@@ -114,7 +114,7 @@ public abstract class ItemStackMixin implements ComponentHolder {
 			InternalCooldownType.DEFAULT
 		);
 
-		texts.add(
+		textConsumer.accept(
 			Text.empty()
 				.append(Text.translatable("item.seven-elements.components.infusion.type").formatted(Formatting.WHITE))
 				.append(type.getText(true).formatted(Formatting.DARK_GRAY))

@@ -121,9 +121,9 @@ public abstract class PlayerEntityMixin
 		method = "attack",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/LivingEntity;serverDamage(Lnet/minecraft/entity/damage/DamageSource;F)V"
+			target = "Lnet/minecraft/entity/LivingEntity;damage(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;F)Z"
 		),
-		index = 0
+		index = 1
 	)
 	private DamageSource checkForCritSweep(DamageSource source, @Local(ordinal = 2) boolean crit) {
 		if (sevenelements$critDamageSources == null) sevenelements$critDamageSources = new ArrayList<>();

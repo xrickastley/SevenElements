@@ -1,7 +1,5 @@
 package io.github.xrickastley.sevenelements.util;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -10,12 +8,11 @@ import org.apache.commons.lang3.function.TriConsumer;
 import org.joml.Matrix4f;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.Tessellator;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
+import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.util.math.Vec3d;
 
 /**
@@ -122,6 +119,8 @@ public class CircleRenderer {
 	}
 
 	private class Circle implements Renderable {
+		private static final BufferAllocator allocator = new BufferAllocator(SevenElementsRenderLayer.getTriangleFan().getExpectedBufferSize());
+		private static BufferBuilder buffer;
 		protected double radius;
 		protected double percentFilled;
 		protected int color;
@@ -134,10 +133,9 @@ public class CircleRenderer {
 
 		@Override
 		public void render(Vec3d origin, Matrix4f posMatrix) {
-			final Tessellator tessellator = Tessellator.getInstance();
-			final BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_FAN, VertexFormats.POSITION_COLOR);
+			buffer = SevenElementsRenderer.createBuffer(buffer, allocator, SevenElementsRenderPipelines.TRIANGLE_FAN);
 
-			bufferBuilder
+			buffer
 				.vertex(posMatrix, (float) origin.getX(), (float) origin.getY(), (float) origin.getZ())
 				.color(this.color);
 
@@ -147,23 +145,18 @@ public class CircleRenderer {
 				final float x = (float) (origin.getX() + (Math.cos((i * (Math.PI / 180)) + (Math.PI / 2)) * (this.radius * scaleFactor)));
 				final float y = (float) (origin.getY() - (Math.sin((i * (Math.PI / 180)) + (Math.PI / 2)) * (this.radius * scaleFactor)));
 
-				bufferBuilder
+				buffer
 					.vertex(posMatrix, x, y, (float) z)
 					.color(this.color);
 			}
 
-			RenderSystem.enableBlend();
-			RenderSystem.defaultBlendFunc();
-			RenderSystem.enableCull();
-
-			RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
-			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+			SevenElementsRenderLayer.getTriangleFan().draw(buffer.end());
 		}
 	}
 
 	private class CircleOutline extends Circle {
+		private static final BufferAllocator allocator = new BufferAllocator(SevenElementsRenderLayer.getTriangleStrip().getExpectedBufferSize());
+		private static BufferBuilder buffer;
 		protected double length;
 
 		protected CircleOutline(double radius, double length, double percentFilled, int color) {
@@ -174,8 +167,7 @@ public class CircleRenderer {
 
 		@Override
 		public void render(Vec3d origin, Matrix4f posMatrix) {
-			final Tessellator tessellator = Tessellator.getInstance();
-			final BufferBuilder bufferBuilder = tessellator.begin(VertexFormat.DrawMode.TRIANGLE_STRIP, VertexFormats.POSITION_COLOR);
+			buffer = SevenElementsRenderer.createBuffer(buffer, allocator, SevenElementsRenderPipelines.TRIANGLE_STRIP);
 
 			final float innerRadius = (float) (this.radius * scaleFactor);
 			final float totalRadius = (float) ((this.radius + this.length) * scaleFactor);
@@ -183,7 +175,7 @@ public class CircleRenderer {
 			final float x = (float) (origin.getX() + (Math.cos((0 * (Math.PI / 180)) + (Math.PI / 2)) * innerRadius));
 			final float y = (float) (origin.getY() - (Math.sin((0 * (Math.PI / 180)) + (Math.PI / 2)) * innerRadius));
 
-			bufferBuilder
+			buffer
 				.vertex(posMatrix, x, y, (float) origin.getZ())
 				.color(this.color);
 
@@ -193,7 +185,7 @@ public class CircleRenderer {
 				final float outerX = (float) (origin.getX() + (Math.cos((i * (Math.PI / 180)) + (Math.PI / 2)) * totalRadius));
 				final float outerY = (float) (origin.getY() - (Math.sin((i * (Math.PI / 180)) + (Math.PI / 2)) * totalRadius));
 
-				bufferBuilder
+				buffer
 					.vertex(posMatrix, outerX, outerY, (float) origin.getZ())
 					.color(this.color);
 
@@ -201,19 +193,12 @@ public class CircleRenderer {
 				final float innerX = (float) (origin.getX() + (Math.cos((i * (Math.PI / 180)) + (Math.PI / 2)) * innerRadius));
 				final float innerY = (float) (origin.getY() - (Math.sin((i * (Math.PI / 180)) + (Math.PI / 2)) * innerRadius));
 
-				bufferBuilder
+				buffer
 					.vertex(posMatrix, innerX, innerY, (float) origin.getZ())
 					.color(this.color);
 			}
 
-			RenderSystem.enableBlend();
-			RenderSystem.defaultBlendFunc();
-			RenderSystem.enableCull();
-
-			RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-
-			BufferRenderer.drawWithGlobalProgram(bufferBuilder.end());
+			SevenElementsRenderLayer.getTriangleFan().draw(buffer.end());
 		}
 	}
 

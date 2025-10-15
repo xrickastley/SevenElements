@@ -3,7 +3,6 @@ package io.github.xrickastley.sevenelements.mixin.client;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -28,6 +27,9 @@ import io.github.xrickastley.sevenelements.element.DurationElementalApplication;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
 import io.github.xrickastley.sevenelements.renderer.genshin.ElementEntry;
 import io.github.xrickastley.sevenelements.renderer.genshin.SpecialEffectsRenderer;
 import io.github.xrickastley.sevenelements.util.ClientConfig;
@@ -37,18 +39,15 @@ import io.github.xrickastley.sevenelements.util.SphereRenderer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.ShaderProgramKeys;
 import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.BufferRenderer;
-import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexFormat;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
+import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
@@ -65,6 +64,11 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 		throw new AssertionError();
 	}
 
+	@Unique
+	private static final BufferAllocator sevenelements$quadAllocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer::getQuads);
+	@Unique
+	private static final BufferAllocator sevenelements$linesAllocator = SevenElementsRenderer.createAllocator(RenderLayer.SOLID_BUFFER_SIZE);
+
 	@Inject(
 		method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
 		at = @At("TAIL")
@@ -72,7 +76,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	private void addRenderers(S state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
 		if (!(state.sevenelements$getEntity() instanceof final LivingEntity entity)) return;
 
-		final float tickDelta = MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false);
+		final float tickDelta = MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false);
 
 		this.sevenelements$renderElementsIfPresent(entity, matrixStack, tickDelta);
 		this.sevenelements$renderElementalGauges(entity, matrixStack, tickDelta);
@@ -168,7 +172,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 		final float GAUGE_SCALE = 0.35f;
 		final float SCALE_PER_GU = 2.5f;
 
-		final Tessellator tessellator = Tessellator.getInstance();
 		final ClientConfig config = ClientConfig.get();
 
 		matrixStack.push();
@@ -182,15 +185,13 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 			: 2 * SCALE_PER_GU;
 
 		final Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
+		final MatrixStack.Entry entry = matrixStack.peek();
 
-		BufferBuilder buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
+		BufferBuilder buffer = SevenElementsRenderer.createBuffer(sevenelements$quadAllocator, SevenElementsRenderPipelines.QUADS);
 		buffer.vertex(positionMatrix, 0 + xOffset, 0 - yOffset, 0).color(0xffffffff);
 		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 0 - yOffset, 0).color(0xffffffff);
 		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 1 - yOffset, 0).color(0xffffffff);
 		buffer.vertex(positionMatrix, 0 + xOffset, 1 - yOffset, 0).color(0xffffffff);
-
-		RenderSystem.setShader(ShaderProgramKeys.POSITION_COLOR);
-		BufferRenderer.drawWithGlobalProgram(buffer.end());
 
 		final float progress = this.sevenelements$getProgress(application, tickDelta);
 		final Color elementColor = application.getElement().getDamageColor();
@@ -198,28 +199,21 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 			? elementColor.asARGB()
 			: elementColor.multiply(1, 1, 1, 0.5).asARGB();
 
-		buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 		buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color);
 		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 0 - yOffset, 0.0001f).color(color);
 		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 1 - yOffset, 0.0001f).color(color);
 		buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color);
 
-		BufferRenderer.drawWithGlobalProgram(buffer.end());
-
 		if (application.isDuration()) {
 			final float gaugeProgress = (float) (application.getCurrentGauge() / application.getGaugeUnits());
 
-			buffer = tessellator.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
 			buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color);
 			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 0 - yOffset, 0.0001f).color(color);
 			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 1 - yOffset, 0.0001f).color(color);
 			buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color);
-
-			BufferRenderer.drawWithGlobalProgram(buffer.end());
 		}
 
-		RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
-		RenderSystem.disableCull();
+		SevenElementsRenderLayer.getQuads().draw(buffer.end());
 
 		final float scaledGauge = (float) (0.1 * gaugeWidth / application.getGaugeUnits());
 		final int splits = (int) Math.floor(gaugeWidth / (0.1 * gaugeWidth / application.getGaugeUnits()));
@@ -233,28 +227,26 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 					? 0.5f
 					: 0.25f;
 
-			final float lineWidth = c % 10 == 0
-				? 5f
-				: 2.5f;
+			final RenderLayer layer = c % 10 == 0
+				? SevenElementsRenderLayer.getThickLines()
+				: SevenElementsRenderLayer.getThinLines();
 
-			buffer = tessellator.begin(VertexFormat.DrawMode.LINES, VertexFormats.LINES);
+			final Vec3d start = new Vec3d(xOffset + i, 0 - yOffset, -0.0005f);
+			final Vec3d end = new Vec3d(xOffset + i, addedY - yOffset, -0.0005f);
+			final Vec3d normal = end.normalize();
+
+			buffer = SevenElementsRenderer.createBuffer(sevenelements$quadAllocator, SevenElementsRenderPipelines.LINES);
 			buffer
-				.vertex(positionMatrix, xOffset + i, 0 - yOffset, -0.0005f)
+				.vertex(positionMatrix, (float) start.x, (float) start.y, (float) start.z)
 				.color(0xff000000)
-				.normal(0, lineWidth, 0);
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
 			buffer
-				.vertex(positionMatrix, xOffset + i, addedY - yOffset, -0.0005f)
+				.vertex(positionMatrix, (float) end.x, (float) end.y, (float) end.z)
 				.color(0xff000000)
-				.normal(xOffset + i, lineWidth, 0);
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
 
-			float prev = RenderSystem.getShaderLineWidth();
-
-			RenderSystem.lineWidth(lineWidth);
-			BufferRenderer.drawWithGlobalProgram(buffer.end());
-			RenderSystem.lineWidth(prev);
+			layer.draw(buffer.end());
 		}
-
-		RenderSystem.enableCull();
 
 		matrixStack.pop();
 	}
@@ -283,12 +275,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 		matrixStack.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(dispatcher.camera.getYaw()));
 		matrixStack.translate(0, lengthY * 0.6, 0);
 
-		RenderSystem.disableCull();
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.enableDepthTest();
-		RenderSystem.depthMask(false);
-
 		SphereRenderer.render(
 			matrixStack,
 			new Vec3d(0, 0, 0),
@@ -297,10 +283,6 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 			config.rendering.elements.sphereResolution * 2,
 			pos -> crystallizeShield.getLeft().getDamageColor().multiply(1, 1, 1, 0.75 * Math.pow(pos.x, 4)).asARGB()
 		);
-
-		RenderSystem.depthMask(true);
-		RenderSystem.enableCull();
-		RenderSystem.disableBlend();
 
 		matrixStack.pop();
 	}
@@ -392,7 +374,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/LimbAnimator;getSpeed(F)F"
+			target = "Lnet/minecraft/entity/LimbAnimator;getAnimationProgress(F)F"
 		)
 	)
 	private float forceFrozenLimbDistance(float original, @Local(argsOnly = true) LivingEntity entity) {
@@ -403,7 +385,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/LimbAnimator;getPos(F)F"
+			target = "Lnet/minecraft/entity/LimbAnimator;getAmplitude(F)F"
 		)
 	)
 	private float forceFrozenLimbAngle(float original, @Local(argsOnly = true) LivingEntity entity) {

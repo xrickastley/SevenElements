@@ -5,18 +5,22 @@ import java.util.UUID;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.serialization.Codec;
+
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.events.ElementEvents;
 import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException.Operation;
 import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
+import io.github.xrickastley.sevenelements.util.NbtHelper;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
+import net.minecraft.util.Uuids;
 import net.minecraft.world.World;
 
 public final class DurationElementalApplication extends ElementalApplication {
@@ -29,15 +33,15 @@ public final class DurationElementalApplication extends ElementalApplication {
 	}
 
 	static ElementalApplication fromNbt(LivingEntity entity, NbtCompound nbt, long syncedAt) {
-		final Element element = Element.valueOf(nbt.getString("Element"));
-		final UUID uuid = nbt.getUuid("UUID");
-		final double gaugeUnits = nbt.getDouble("GaugeUnits");
-		final double duration = nbt.getDouble("Duration");
+		final Element element = NbtHelper.get(nbt, "Element", Element.CODEC);
+		final UUID uuid = NbtHelper.get(nbt, "UUID", Uuids.CODEC);
+		final double gaugeUnits = NbtHelper.get(nbt, "GaugeUnits", Codec.doubleRange(0, Double.MAX_VALUE));
+		final double duration = NbtHelper.get(nbt, "Duration", Codec.doubleRange(0, Double.MAX_VALUE));
 
 		final var application = new DurationElementalApplication(entity, element, uuid, gaugeUnits, duration);
 
-		application.currentGauge = nbt.getDouble("CurrentGauge");
-		application.appliedAt = nbt.getLong("AppliedAt");
+		application.currentGauge = NbtHelper.get(nbt, "CurrentGauge", Codec.doubleRange(0, Double.MAX_VALUE));
+		application.appliedAt = NbtHelper.get(nbt, "AppliedAt", Codec.LONG);
 
 		return application;
 	}

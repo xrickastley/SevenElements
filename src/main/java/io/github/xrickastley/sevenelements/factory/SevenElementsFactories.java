@@ -21,7 +21,6 @@ public class SevenElementsFactories {
 		SevenElementsEntityTypes.register();
 		SevenElementsGameRules.register();
 		SevenElementsItems.register();
-		SevenElementsParticleTypes.register();
 		SevenElementsScreenHandlers.register();
 		SevenElementsSoundEvents.register();
 		SevenElementsStatusEffects.register();

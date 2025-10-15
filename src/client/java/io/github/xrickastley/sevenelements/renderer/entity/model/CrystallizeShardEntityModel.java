@@ -50,9 +50,9 @@ public class CrystallizeShardEntityModel extends EntityModel<CrystallizeShardEnt
 	public static TexturedModelData getTexturedModelData() {
 		final ModelData modelData = new ModelData();
 		final ModelPartData modelPartData = modelData.getRoot();
-		final ModelPartData crystal = modelPartData.addChild("crystal", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 15.0F, -0.5F));
+		final ModelPartData crystal = modelPartData.addChild("crystal", ModelPartBuilder.create(), ModelTransform.origin(0.0F, 15.0F, -0.5F));
 
-		final ModelPartData shard = crystal.addChild("shard", ModelPartBuilder.create(), ModelTransform.pivot(0.0F, 0.0F, 0.0F));
+		final ModelPartData shard = crystal.addChild("shard", ModelPartBuilder.create(), ModelTransform.origin(0.0F, 0.0F, 0.0F));
 
 		shard.addChild("shard_r1", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -1.0F, -3.0F, 4.0F, 4.0F, 4.0F, new Dilation(0.0F)), ModelTransform.of(-1.5F, -1.0F, 1.25F, 0.4656F, 0.422F, -0.6879F));
 		crystal.addChild("particle1", ModelPartBuilder.create().uv(10, 14).cuboid(-1.2313F, -1.0783F, -7.0F, 3.0F, 1.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, -0.5F, 0.5F, 0.0F, -1.0908F, 0.5672F));

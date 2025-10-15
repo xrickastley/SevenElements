@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
 import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException.Operation;
+import io.github.xrickastley.sevenelements.util.NbtHelper;
 import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException;
 
 import net.minecraft.entity.LivingEntity;
@@ -62,7 +63,7 @@ public class ElementalApplications {
 	public static ElementalApplication fromNbt(LivingEntity entity, NbtElement nbt, long syncedAt) {
 		if (!(nbt instanceof final NbtCompound compound)) throw new ElementalApplicationOperationException(Operation.INVALID_NBT_DATA, null, null);
 
-		final Type type = Type.valueOf(compound.getString("Type"));
+		final Type type = NbtHelper.get(compound, "Type", ElementalApplication.Type.CODEC);
 
 		return type == Type.GAUGE_UNIT
 			? GaugeUnitElementalApplication.fromNbt(entity, compound, syncedAt)

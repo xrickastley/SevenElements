@@ -18,7 +18,6 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Arm;
-import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
 // Base class for all "special" entities: Crystallize Shard and Dendro Core
@@ -53,11 +52,6 @@ public sealed class SevenElementsEntity
 	@Override
 	public EntityPose getPose() {
 		return EntityPose.STANDING;
-	}
-
-	@Override
-	public Iterable<ItemStack> getArmorItems() {
-		return DefaultedList.of();
 	}
 
 	@Override

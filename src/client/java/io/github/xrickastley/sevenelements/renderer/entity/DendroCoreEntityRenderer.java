@@ -56,7 +56,7 @@ public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEnt
 	protected void scale(DendroCoreEntityState state, MatrixStack matrices) {
 		super.scale(state, matrices);
 
-		final float delta = MinecraftClient.getInstance().getRenderTickCounter().getTickDelta(false);
+		final float delta = MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false);
 		final double explodeProgress = Ease.IN_QUAD.applyLerp(MathHelper2.endOffset(state.age + delta, 2, 0, 120), 0, 1.5);
 		final float scale = !state.isHyperbloom()
 			? 0.5f + (float) (explodeProgress * 5)
