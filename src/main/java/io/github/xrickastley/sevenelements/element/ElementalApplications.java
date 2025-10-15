@@ -4,8 +4,8 @@ import java.util.UUID;
 
 import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
 import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException.Operation;
-import io.github.xrickastley.sevenelements.util.NbtHelper;
 import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException;
+import io.github.xrickastley.sevenelements.util.NbtHelper;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;

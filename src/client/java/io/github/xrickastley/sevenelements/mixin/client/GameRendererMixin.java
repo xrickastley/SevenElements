@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
+
 import net.minecraft.client.render.GameRenderer;
 
 @Mixin(GameRenderer.class)

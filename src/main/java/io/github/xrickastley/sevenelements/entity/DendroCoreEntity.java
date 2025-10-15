@@ -24,6 +24,7 @@ import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.NbtHelper;
+
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;

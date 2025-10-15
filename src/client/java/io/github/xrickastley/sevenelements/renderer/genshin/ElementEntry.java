@@ -38,7 +38,7 @@ public final class ElementEntry {
 	public static ElementEntry of(ElementalApplication application, float tickDelta) {
 		return new ElementEntry(application.getElement(), (application.getRemainingTicks() - tickDelta) / 20.0, application.getAppliedAt(), tickDelta);
 	}
-	
+
 	public Element getElement() {
 		return element;
 	}
@@ -78,7 +78,7 @@ public final class ElementEntry {
 	}
 
 	private void draw(final MatrixStack matrixStack, final Camera camera, final float offset, final float alpha) {
-		final Identifier texture = 
+		final Identifier texture =
 			this.element.getTexture();
 			// SevenElements.identifier("textures/element/hydro.png");
 

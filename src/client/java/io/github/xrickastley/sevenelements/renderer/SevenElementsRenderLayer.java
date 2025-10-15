@@ -4,17 +4,18 @@ import java.util.OptionalDouble;
 import java.util.SequencedMap;
 import java.util.function.Function;
 
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.RenderLayer.MultiPhaseParameters;
 import net.minecraft.client.render.RenderLayer.OutlineMode;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase.LineWidth;
+import net.minecraft.client.render.RenderPhase;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.TriState;
 import net.minecraft.util.Util;
+
+import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 
 public class SevenElementsRenderLayer {
 	private static final RenderLayer TRIANGLES = RenderLayer.of(

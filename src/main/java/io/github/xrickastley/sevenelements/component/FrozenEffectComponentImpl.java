@@ -4,6 +4,7 @@ import com.mojang.serialization.Codec;
 
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 import io.github.xrickastley.sevenelements.util.NbtHelper;
+
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;

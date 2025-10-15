@@ -1,12 +1,12 @@
 package io.github.xrickastley.sevenelements.element;
 
+import com.mojang.serialization.Codec;
+
 import java.text.DecimalFormat;
 import java.util.UUID;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
-
-import com.mojang.serialization.Codec;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.events.ElementEvents;

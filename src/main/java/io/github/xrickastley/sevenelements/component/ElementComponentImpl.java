@@ -1,5 +1,7 @@
 package io.github.xrickastley.sevenelements.component;
 
+import com.mojang.serialization.Codec;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,8 +17,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
-
-import com.mojang.serialization.Codec;
 
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementHolder;
@@ -40,6 +40,7 @@ import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.ImmutablePair;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.NbtHelper;
+
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -533,8 +534,8 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		private static @Nullable CrystallizeShield ofNbt(final Optional<NbtCompound> nbt) {
 			return nbt.map(tag -> new CrystallizeShield(
-				NbtHelper.get(tag, "Element", Element.CODEC), 
-				NbtHelper.get(tag, "Amount", Codec.DOUBLE), 
+				NbtHelper.get(tag, "Element", Element.CODEC),
+				NbtHelper.get(tag, "Amount", Codec.DOUBLE),
 				NbtHelper.get(tag, "AppliedAt", Codec.LONG)
 			)).orElse(null);
 		}

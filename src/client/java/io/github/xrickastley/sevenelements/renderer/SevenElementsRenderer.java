@@ -1,13 +1,15 @@
 package io.github.xrickastley.sevenelements.renderer;
 
+import com.mojang.blaze3d.pipeline.RenderPipeline;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
+
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.blaze3d.pipeline.RenderPipeline;
-
 import io.github.xrickastley.sevenelements.mixin.client.BufferBuilderAccessor;
+
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.BufferAllocator;
@@ -24,7 +26,7 @@ public class SevenElementsRenderer {
 			? new BufferBuilder(allocator, pipeline.getVertexFormatMode(), pipeline.getVertexFormat())
 			: buffer;
 	}
-	
+
 	public static BufferAllocator createAllocator(final Supplier<RenderLayer> layer) {
 		return SevenElementsRenderer.createAllocator(layer.get());
 	}

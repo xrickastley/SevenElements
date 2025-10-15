@@ -1,12 +1,12 @@
 package io.github.xrickastley.sevenelements.util;
 
+import com.mojang.serialization.Codec;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 import org.slf4j.helpers.MessageFormatter;
-
-import com.mojang.serialization.Codec;
 
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -32,13 +32,13 @@ public class NbtHelper {
 				.resultOrPartial(createErrorConsumer("Failed to read entry at array[{}] ({})", i, element))
 				.ifPresent(result::add);
 		}
-		
+
 		return result;
 	}
 
 	public static <T> void putList(NbtCompound nbt, String key, Codec<T> entryCodec, List<T> list) {
 		final NbtList result = new NbtList();
-		
+
 		for (int i = 0; i < list.size(); i++) {
 			final T element = list.get(i);
 
@@ -47,7 +47,7 @@ public class NbtHelper {
 				.resultOrPartial(createErrorConsumer("Failed to write entry at array[{}] ({})", i, element))
 				.ifPresent(result::add);
 		}
-		
+
 		nbt.put(key, result);
 	}
 
