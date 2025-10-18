@@ -23,7 +23,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.SpawnReason;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
@@ -31,6 +30,8 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Uuids;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -71,19 +72,19 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	}
 
 	@Override
-	public void writeCustomDataToNbt(NbtCompound nbt) {
-		super.writeCustomDataToNbt(nbt);
+	public void writeCustomData(WriteView view) {
+		super.writeCustomData(view);
 
-		nbt.put("Element", Element.CODEC, this.element);
-		nbt.putNullable("Owner", Uuids.CODEC, this.owner);
+		view.put("Element", Element.CODEC, this.element);
+		view.putNullable("Owner", Uuids.CODEC, this.owner);
 	}
 
 	@Override
-	public void readCustomDataFromNbt(NbtCompound nbt) {
-		super.readCustomDataFromNbt(nbt);
+	public void readCustomData(ReadView view) {
+		super.readCustomData(view);
 
-		this.element = nbt.get("Element", Element.CODEC).orElse(this.element);
-		this.owner = nbt.get("Owner", Uuids.CODEC).orElse(this.owner);
+		this.element = view.read("Element", Element.CODEC).orElse(this.element);
+		this.owner = view.read("Owner", Uuids.CODEC).orElse(this.owner);
 	}
 
 	@Override

@@ -37,23 +37,24 @@ import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistries;
 import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
+import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.ImmutablePair;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
-import io.github.xrickastley.sevenelements.util.NbtHelper;
+import io.github.xrickastley.sevenelements.util.ViewHelper;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.registry.entry.RegistryEntry.Reference;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.storage.ReadView.ListReadView;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView.ListView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 
@@ -241,66 +242,63 @@ public final class ElementComponentImpl implements ElementComponent {
 	}
 
 	@Override
-	public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
-		final NbtList list = new NbtList();
+	public void writeData(WriteView view) {
+		final ListView list = view.getList("AppliedElements");
 
 		this.getAppliedElements()
-			.forEach(application -> list.add(application.asNbt()));
+			.forEach(Functions.withArgument(ElementalApplication::writeData, list.add()));
 
-		tag.put("AppliedElements", list);
-		tag.putLong("SyncedAt", owner.getWorld().getTime());
-		tag.putLong("ElectroChargedCooldown", electroChargedCooldown);
-		tag.putLong("BurningCooldown", burningCooldown);
+		view.putLong("SyncedAt", owner.getWorld().getTime());
+		view.putLong("ElectroChargedCooldown", electroChargedCooldown);
+		view.putLong("BurningCooldown", burningCooldown);
 
-		final NbtCompound freezeDecayHandler = new NbtCompound();
-		this.freezeDecayHandler.writeToNbt(freezeDecayHandler);
-		tag.put("FreezeDecay", freezeDecayHandler);
+		final WriteView freezeDecayHandler = view.get("FreezeDecay");
+		this.freezeDecayHandler.writeData(freezeDecayHandler);
 
 		if (this.lastReaction.getLeft() != null) {
-			final NbtCompound lastReaction = new NbtCompound();
+			final WriteView lastReaction = view.get("LastReaction");
 
 			lastReaction.putString("Id", this.lastReaction.getLeft().getId().toString());
 			lastReaction.putLong("Time", this.lastReaction.getRight());
-
-			tag.put("LastReaction", lastReaction);
 		}
 
 		if (this.crystallizeShield != null && !this.crystallizeShield.isEmpty())
-			crystallizeShield.writeToNbt(tag);
+			crystallizeShield.writeData(view);
 	}
 
 	@Override
-	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
-		this.electroChargedCooldown = NbtHelper.get(tag, "ElectroChargedCooldown", Codec.LONG);
-		this.burningCooldown = NbtHelper.get(tag, "BurningCooldown", Codec.LONG);
+	public void readData(ReadView view) {
+		this.electroChargedCooldown = view.getLong("ElectroChargedCooldown", this.electroChargedCooldown);
+		this.burningCooldown = view.getLong("BurningCooldown", this.burningCooldown);
 
-		tag.getCompound("LastReaction").ifPresent(lastReaction -> {
+		view.getOptionalReadView("LastReaction").ifPresent(lastReaction -> {
 			this.lastReaction = new Pair<>(
-				SevenElementsRegistries.ELEMENTAL_REACTION.get(NbtHelper.get(lastReaction, "Id", Identifier.CODEC)),
-				NbtHelper.get(lastReaction, "Time", Codec.LONG)
+				SevenElementsRegistries.ELEMENTAL_REACTION.get(ViewHelper.get(lastReaction, "Id", Identifier.CODEC)),
+				ViewHelper.get(lastReaction, "Time", Codec.LONG)
 			);
 		});
 
-		this.crystallizeShield = CrystallizeShield.ofNbt(tag.getCompound("CrystallizeShield"));
+		this.crystallizeShield = CrystallizeShield.readData(view.getOptionalReadView("CrystallizeShield"));
 
-		final NbtList list = tag.getListOrEmpty("AppliedElements");
-		final long syncedAt = NbtHelper.get(tag, "SyncedAt", Codec.LONG);
+		final ListReadView list = view.getListReadView("AppliedElements");
+		final long syncedAt = view.getLong("SyncedAt", this.owner.getWorld().getTime());
 
 		this.elementHolders
 			.values()
 			.forEach(holder -> holder.setElementalApplication(null));
 
-		for (final NbtElement nbt : list) {
-			if (!(nbt instanceof final NbtCompound compound)) return;
+		for (final ReadView appData : list) {
+			// Somehow this has to be added, even though I expected list to NOT have anything when it's empty...
+			if (appData.read("Type", ElementalApplication.Type.CODEC).isEmpty()) continue;
 
-			final ElementalApplication application = ElementalApplications.fromNbt(owner, compound, syncedAt);
+			final ElementalApplication application = ElementalApplications.fromData(owner, appData, syncedAt);
 
 			this.getElementHolder(application.getElement())
 				.setElementalApplication(application);
 		}
 
-		this.freezeDecayHandler.readFromNbt(
-			tag.getCompound("FreezeDecay"),
+		this.freezeDecayHandler.readData(
+			view.getOptionalReadView("FreezeDecay"),
 			this.owner.getWorld().getTime() - syncedAt
 		);
  	}
@@ -532,11 +530,11 @@ public final class ElementComponentImpl implements ElementComponent {
 			this.amount = amount;
 		}
 
-		private static @Nullable CrystallizeShield ofNbt(final Optional<NbtCompound> nbt) {
-			return nbt.map(tag -> new CrystallizeShield(
-				NbtHelper.get(tag, "Element", Element.CODEC),
-				NbtHelper.get(tag, "Amount", Codec.DOUBLE),
-				NbtHelper.get(tag, "AppliedAt", Codec.LONG)
+		private static @Nullable CrystallizeShield readData(final Optional<ReadView> view) {
+			return view.map(tag -> new CrystallizeShield(
+				ViewHelper.get(tag, "Element", Element.CODEC),
+				ViewHelper.get(tag, "Amount", Codec.DOUBLE),
+				ViewHelper.get(tag, "AppliedAt", Codec.LONG)
 			)).orElse(null);
 		}
 
@@ -554,14 +552,12 @@ public final class ElementComponentImpl implements ElementComponent {
 			return (float) dmgTakenByShield;
 		}
 
-		private void writeToNbt(NbtCompound tag) {
-			final NbtCompound crystallizeShield = new NbtCompound();
+		private void writeData(WriteView view) {
+			final WriteView crystallizeShield = view.get("CrystallizeShield");
 
 			crystallizeShield.putString("Element", this.element.toString());
 			crystallizeShield.putDouble("Amount", this.amount);
 			crystallizeShield.putLong("AppliedAt", this.appliedAt);
-
-			tag.put("CrystallizeShield", crystallizeShield);
 		}
 
 		private boolean isEmpty() {
@@ -615,26 +611,26 @@ public final class ElementComponentImpl implements ElementComponent {
 			ElementComponent.sync(impl.owner);
 		}
 
-		public void writeToNbt(NbtCompound tag) {
-			tag.putBoolean("FreezeReapplied", isFreezeReapplied);
-			tag.putLong("FreezeReappliedAt", freezeReappliedAt);
-			tag.putInt("FreezeTicks", freezeTicks);
-			tag.putInt("UnfreezeTicks", unfreezeTicks);
+		public void writeData(WriteView view) {
+			view.putBoolean("FreezeReapplied", isFreezeReapplied);
+			view.putLong("FreezeReappliedAt", freezeReappliedAt);
+			view.putInt("FreezeTicks", freezeTicks);
+			view.putInt("UnfreezeTicks", unfreezeTicks);
 		}
 
-		public void readFromNbt(Optional<NbtCompound> tag, long syncDiff) {
-			if (tag.isEmpty()) return;
+		public void readData(Optional<ReadView> optionalView, long syncDiff) {
+			if (optionalView.isEmpty()) return;
 
-			final NbtCompound nbt = tag.get();
+			final ReadView view = optionalView.get();
 
-			this.isFreezeReapplied = NbtHelper.get(nbt, "FreezeReapplied", Codec.BOOL);
-			this.freezeReappliedAt = NbtHelper.get(nbt, "FreezeReappliedAt", Codec.LONG);
-			this.freezeTicks = NbtHelper.get(nbt, "FreezeTicks", Codec.intRange(0, Integer.MAX_VALUE));
+			this.isFreezeReapplied = ViewHelper.get(view, "FreezeReapplied", Codec.BOOL);
+			this.freezeReappliedAt = ViewHelper.get(view, "FreezeReappliedAt", Codec.LONG);
+			this.freezeTicks = ViewHelper.get(view, "FreezeTicks", Codec.intRange(0, Integer.MAX_VALUE));
 
 			final @Nullable ElementalApplication freezeApp = impl.getElementalApplication(Element.FREEZE);
 			final int syncUnfrozenTicks = JavaScriptUtil.nullishCoalesing(ClassInstanceUtil.mapOrNull(freezeApp, ElementalApplication::getRemainingTicks), 0);
 
-			this.unfreezeTicks = NbtHelper.get(nbt, "UnfreezeTicks", Codec.intRange(0, Integer.MAX_VALUE))
+			this.unfreezeTicks = ViewHelper.get(view, "UnfreezeTicks", Codec.intRange(0, Integer.MAX_VALUE))
 				+ (int) Math.max(0, syncDiff - syncUnfrozenTicks);
 		}
 

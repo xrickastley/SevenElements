@@ -13,12 +13,12 @@ import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperati
 import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
-import io.github.xrickastley.sevenelements.util.NbtHelper;
 import io.github.xrickastley.sevenelements.util.TextHelper;
+import io.github.xrickastley.sevenelements.util.ViewHelper;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.text.Text;
 import net.minecraft.util.Uuids;
 import net.minecraft.world.World;
@@ -32,16 +32,16 @@ public final class DurationElementalApplication extends ElementalApplication {
 		this.duration = duration;
 	}
 
-	static ElementalApplication fromNbt(LivingEntity entity, NbtCompound nbt, long syncedAt) {
-		final Element element = NbtHelper.get(nbt, "Element", Element.CODEC);
-		final UUID uuid = NbtHelper.get(nbt, "UUID", Uuids.CODEC);
-		final double gaugeUnits = NbtHelper.get(nbt, "GaugeUnits", Codec.doubleRange(0, Double.MAX_VALUE));
-		final double duration = NbtHelper.get(nbt, "Duration", Codec.doubleRange(0, Double.MAX_VALUE));
+	static ElementalApplication fromData(LivingEntity entity, ReadView view, long syncedAt) {
+		final Element element = ViewHelper.get(view, "Element", Element.CODEC);
+		final UUID uuid = ViewHelper.get(view, "UUID", Uuids.CODEC);
+		final double gaugeUnits = ViewHelper.get(view, "GaugeUnits", Codec.doubleRange(0, Double.MAX_VALUE));
+		final double duration = ViewHelper.get(view, "Duration", Codec.doubleRange(0, Double.MAX_VALUE));
 
 		final var application = new DurationElementalApplication(entity, element, uuid, gaugeUnits, duration);
 
-		application.currentGauge = NbtHelper.get(nbt, "CurrentGauge", Codec.doubleRange(0, Double.MAX_VALUE));
-		application.appliedAt = NbtHelper.get(nbt, "AppliedAt", Codec.LONG);
+		application.currentGauge = ViewHelper.get(view, "CurrentGauge", Codec.doubleRange(0, Double.MAX_VALUE));
+		application.appliedAt = ViewHelper.get(view, "AppliedAt", Codec.LONG);
 
 		return application;
 	}
@@ -142,19 +142,17 @@ public final class DurationElementalApplication extends ElementalApplication {
 	}
 
 	@Override
-	public NbtCompound asNbt()	{
-		final NbtCompound nbt = super.asNbt();
+	public void writeData(WriteView view) {
+		super.writeData(view);
 
-		nbt.putDouble("Duration", this.duration);
-
-		return nbt;
+		view.putDouble("Duration", this.duration);
 	}
 
 	@Override
-	public void updateFromNbt(NbtElement nbt, long syncedAt) {
-		super.updateFromNbt(nbt, syncedAt);
+	public void updateFromData(ReadView view, long syncedAt) {
+		super.updateFromData(view, syncedAt);
 
-		final ElementalApplication application = ElementalApplications.fromNbt(entity, nbt, syncedAt);
+		final ElementalApplication application = ElementalApplications.fromData(entity, view, syncedAt);
 
 		this.duration = ((DurationElementalApplication) application).duration;
 		this.appliedAt = application.appliedAt;

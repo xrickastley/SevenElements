@@ -11,6 +11,7 @@ import net.minecraft.client.model.ModelPartData;
 import net.minecraft.client.model.ModelTransform;
 import net.minecraft.client.model.TexturedModelData;
 import net.minecraft.client.render.entity.animation.Animation;
+import net.minecraft.client.render.entity.animation.AnimationDefinition;
 import net.minecraft.client.render.entity.animation.AnimationHelper;
 import net.minecraft.client.render.entity.animation.Keyframe;
 import net.minecraft.client.render.entity.animation.Transformation;
@@ -20,7 +21,7 @@ import net.minecraft.client.render.entity.model.EntityModelLayer;
 public class CrystallizeShardEntityModel extends EntityModel<CrystallizeShardEntityState> {
 	public static final EntityModelLayer MODEL_LAYER = new EntityModelLayer(SevenElements.identifier("crystallize_shard"), "crystal");
 
-	private static final Animation IDLE_ANIMATION = Animation.Builder.create(3.0F).looping()
+	private static final AnimationDefinition IDLE_ANIMATION = AnimationDefinition.Builder.create(3.0F).looping()
 		.addBoneAnimation("crystal", new Transformation(Transformation.Targets.ROTATE,
 			new Keyframe(0.0F, AnimationHelper.createRotationalVector(0.0F, 0.0F, 0.0F), Transformation.Interpolations.LINEAR),
 			new Keyframe(3.0F, AnimationHelper.createRotationalVector(0.0F, 360.0F, 0.0F), Transformation.Interpolations.LINEAR)
@@ -43,8 +44,12 @@ public class CrystallizeShardEntityModel extends EntityModel<CrystallizeShardEnt
 		))
 		.build();
 
+	private final Animation idleAnimation;
+
 	public CrystallizeShardEntityModel(ModelPart root) {
 		super(root);
+
+		this.idleAnimation = CrystallizeShardEntityModel.IDLE_ANIMATION.createAnimation(root);
 	}
 
 	public static TexturedModelData getTexturedModelData() {
@@ -76,6 +81,6 @@ public class CrystallizeShardEntityModel extends EntityModel<CrystallizeShardEnt
 	public void setAngles(CrystallizeShardEntityState state) {
 		super.setAngles(state);
 
-		this.animate(state.idleAnimationState, IDLE_ANIMATION, state.age, 1.5f);
+		this.idleAnimation.apply(state.idleAnimationState, state.age);
 	}
 }

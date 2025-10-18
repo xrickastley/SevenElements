@@ -9,7 +9,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
@@ -21,9 +20,8 @@ import net.minecraft.entity.Ownable;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtOps;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.world.World;
 
 @Mixin(ProjectileEntity.class)
@@ -57,30 +55,21 @@ public abstract class ProjectileEntityMixin
 	}
 
 	@Inject(
-		method = "writeCustomDataToNbt",
+		method = "writeCustomData",
 		at = @At("TAIL")
 	)
-	public void writeInfusionToNbt(NbtCompound nbt, CallbackInfo ci) {
+	public void writeInfusionToNbt(WriteView view, CallbackInfo ci) {
 		if (this.sevenelements$infusionComponent == null) return;
 
-		final NbtElement componentNbt = ElementalInfusionComponent.CODEC
-			.encodeStart(NbtOps.INSTANCE, this.sevenelements$infusionComponent)
-			.resultOrPartial(SevenElements.sublogger()::error)
-			.orElseThrow();
-
-		nbt.put("seven-elements:elemental_infusion", componentNbt);
+		view.put("seven-elements:elemental_infusion", ElementalInfusionComponent.CODEC, this.sevenelements$infusionComponent);
 	}
 
 	@Inject(
-		method = "readCustomDataFromNbt",
+		method = "readCustomData",
 		at = @At("TAIL")
 	)
-	public void readInfusionFromNbt(NbtCompound nbt, CallbackInfo ci) {
-		if (!nbt.contains("seven-elements:elemental_infusion")) return;
-
-		this.sevenelements$infusionComponent = ElementalInfusionComponent.CODEC
-			.parse(NbtOps.INSTANCE, nbt.get("seven-elements:elemental_infusion"))
-			.resultOrPartial(SevenElements.sublogger()::error)
-			.orElseThrow();
+	public void readInfusionFromNbt(ReadView view, CallbackInfo ci) {
+		this.sevenelements$infusionComponent = view.read("seven-elements:elemental_infusion", ElementalInfusionComponent.CODEC)
+				.orElse(this.sevenelements$infusionComponent);
 	}
 }

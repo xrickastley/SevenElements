@@ -3,13 +3,12 @@ package io.github.xrickastley.sevenelements.component;
 import com.mojang.serialization.Codec;
 
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
-import io.github.xrickastley.sevenelements.util.NbtHelper;
 
 import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.MathHelper;
 
 public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
@@ -31,29 +30,29 @@ public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
 	}
 
 	@Override
-	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
-		this.isFrozen = NbtHelper.get(tag, "IsFrozen", Codec.BOOL);
-		this.hadNoAi = NbtHelper.get(tag, "HadNoAi", Codec.BOOL);
-		this.forcePose = NbtHelper.get(tag, "ForcePose", ENTITY_POSE_CODEC);
-		this.forceHeadYaw = NbtHelper.get(tag, "ForceHeadYaw", Codec.FLOAT);
-		this.forceBodyYaw = NbtHelper.get(tag, "ForceBodyYaw", Codec.FLOAT);
-		this.forcePitch = NbtHelper.get(tag, "ForcePitch", Codec.FLOAT);
-		this.forceLimbAngle = NbtHelper.get(tag, "ForceLimbAngle", Codec.FLOAT);
-		this.forceLimbDistance = NbtHelper.get(tag, "ForceLimbDistance", Codec.FLOAT);
-		this.ticksFrozen = NbtHelper.get(tag, "TicksFrozen", Codec.INT);
+	public void readData(ReadView view) {
+		this.isFrozen = view.getBoolean("IsFrozen", this.isFrozen);
+		this.hadNoAi = view.getBoolean("HadNoAi", this.hadNoAi);
+		this.forcePose = view.read("ForcePose", ENTITY_POSE_CODEC).orElse(this.forcePose);
+		this.forceHeadYaw = view.getFloat("ForceHeadYaw", this.forceHeadYaw);
+		this.forceBodyYaw = view.getFloat("ForceBodyYaw", this.forceBodyYaw);
+		this.forcePitch = view.getFloat("ForcePitch", this.forcePitch);
+		this.forceLimbAngle = view.getFloat("ForceLimbAngle", this.forceLimbAngle);
+		this.forceLimbDistance = view.getFloat("ForceLimbDistance", this.forceLimbDistance);
+		this.ticksFrozen = view.getInt("TicksFrozen", this.ticksFrozen);
 	}
 
 	@Override
-	public void writeToNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
-		tag.putBoolean("IsFrozen", this.isFrozen);
-		tag.putBoolean("HadNoAi", this.hadNoAi);
-		tag.put("ForcePose", ENTITY_POSE_CODEC, this.forcePose);
-		tag.putFloat("ForceHeadYaw", this.forceHeadYaw);
-		tag.putFloat("ForceBodyYaw", this.forceBodyYaw);
-		tag.putFloat("ForcePitch", this.forcePitch);
-		tag.putFloat("ForceLimbAngle", this.forceLimbAngle);
-		tag.putFloat("ForceLimbDistance", this.forceLimbDistance);
-		tag.putInt("TicksFrozen", this.ticksFrozen);
+	public void writeData(WriteView view) {
+		view.putBoolean("IsFrozen", this.isFrozen);
+		view.putBoolean("HadNoAi", this.hadNoAi);
+		view.put("ForcePose", ENTITY_POSE_CODEC, this.forcePose);
+		view.putFloat("ForceHeadYaw", this.forceHeadYaw);
+		view.putFloat("ForceBodyYaw", this.forceBodyYaw);
+		view.putFloat("ForcePitch", this.forcePitch);
+		view.putFloat("ForceLimbAngle", this.forceLimbAngle);
+		view.putFloat("ForceLimbDistance", this.forceLimbDistance);
+		view.putInt("TicksFrozen", this.ticksFrozen);
 	}
 
 	@Override

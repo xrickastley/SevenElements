@@ -88,7 +88,7 @@ public sealed class SevenElementsEntity
 	}
 
 	@Override
-	public boolean isCollidable() {
+	public boolean isCollidable(Entity entity) {
 		return false;
 	}
 

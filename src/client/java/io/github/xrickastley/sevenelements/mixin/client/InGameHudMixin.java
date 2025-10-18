@@ -17,14 +17,14 @@ import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
 import io.github.xrickastley.sevenelements.util.Array;
-import io.github.xrickastley.sevenelements.util.CircleRenderer;
 import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
@@ -66,7 +66,7 @@ public class InGameHudMixin {
 
 		final ElementComponent component = ElementComponent.KEY.get(player);
 
-		final double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
+		// final double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
 		final Set<Identifier> existing = new HashSet<>();
 		final Array<Identifier> appliedElements = component
 			.getAppliedElements()
@@ -79,13 +79,9 @@ public class InGameHudMixin {
 		for (int i = 0; i < appliedElements.length(); i++) {
 			final Identifier texture = appliedElements.get(i);
 			final int x1 = x + (i * 10);
-			final CircleRenderer circleRenderer = new CircleRenderer((x1 + 4.5) * scaleFactor, (y + 4.5) * scaleFactor, 0);
 
-			circleRenderer
-				.add(4.5 * scaleFactor, 1, 0x7F646464)
-				.draw(context.getMatrices().peek().getPositionMatrix());
-
-			context.drawTexture(RenderLayer::getGuiTextured, texture, x1, y, 0, 0, 9, 9, 9, 9);
+			context.sevenelements$drawCircle(SevenElementsRenderPipelines.CIRCLE, x1 + 4.5f, y + 4.5f, 4.5f, 0x7F646464);
+			context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, x1, y, 0, 0, 9, 9, 9, 9);
 		}
 	}
 

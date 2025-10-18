@@ -23,7 +23,7 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
-import io.github.xrickastley.sevenelements.util.NbtHelper;
+import io.github.xrickastley.sevenelements.util.ViewHelper;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -31,7 +31,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.RegistryByteBuf;
 import net.minecraft.network.codec.PacketCodec;
 import net.minecraft.network.codec.PacketCodecs;
@@ -39,6 +38,8 @@ import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.util.Uuids;
 import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.util.math.Box;
@@ -131,24 +132,24 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	}
 
 	@Override
-	public void writeCustomDataToNbt(NbtCompound nbt) {
-		super.writeCustomDataToNbt(nbt);
+	public void writeCustomData(WriteView view) {
+		super.writeCustomData(view);
 
-		nbt.put("Type", DendroCoreEntity.Type.CODEC, this.type);
-		nbt.putNullable("Target", Uuids.CODEC, target);
+		view.put("Type", DendroCoreEntity.Type.CODEC, this.type);
+		view.putNullable("Target", Uuids.CODEC, target);
 
-		NbtHelper.putList(nbt, "Owners", Uuids.CODEC, this.owners);
+		ViewHelper.putList(view, "Owners", Uuids.CODEC, this.owners);
 	}
 
 	@Override
-	public void readCustomDataFromNbt(NbtCompound nbt) {
-		super.readCustomDataFromNbt(nbt);
+	public void readCustomData(ReadView view) {
+		super.readCustomData(view);
 
-		this.type = nbt.get("Type", DendroCoreEntity.Type.CODEC).orElse(Type.NORMAL);
-		this.target = nbt.get("Target", Uuids.CODEC).orElse(null);
+		this.type = view.read("Type", DendroCoreEntity.Type.CODEC).orElse(Type.NORMAL);
+		this.target = view.read("Target", Uuids.CODEC).orElse(null);
 
 		this.owners.clear();
-		this.owners.addAll(NbtHelper.getList(nbt, "Owners", Uuids.CODEC));
+		this.owners.addAll(ViewHelper.getList(view, "Owners", Uuids.CODEC));
 	}
 
 	private void doHyperbloom() {

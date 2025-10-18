@@ -3,6 +3,8 @@ package io.github.xrickastley.sevenelements.renderer;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.platform.DepthTestFunction;
+import com.mojang.blaze3d.platform.DestFactor;
+import com.mojang.blaze3d.platform.SourceFactor;
 import com.mojang.blaze3d.vertex.VertexFormat.DrawMode;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
@@ -22,20 +24,6 @@ public class SevenElementsRenderPipelines {
 			.build()
 	);
 
-	public static final RenderPipeline TRIANGLE_FAN = RenderPipelines.register(
-		RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
-			.withLocation(SevenElements.identifier("pipeline/triangle_fan"))
-			.withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLE_FAN)
-			.build()
-	);
-
-	public static final RenderPipeline TRIANGLE_STRIP = RenderPipelines.register(
-		RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
-			.withLocation(SevenElements.identifier("pipeline/triangle_strip"))
-			.withVertexFormat(VertexFormats.POSITION_COLOR, VertexFormat.DrawMode.TRIANGLE_STRIP)
-			.build()
-	);
-
 	public static final RenderPipeline QUADS = RenderPipelines.register(
 		RenderPipeline.builder(RenderPipelines.POSITION_COLOR_SNIPPET)
 			.withLocation(SevenElements.identifier("pipeline/quads"))
@@ -49,6 +37,13 @@ public class SevenElementsRenderPipelines {
 			.withVertexFormat(VertexFormats.POSITION_COLOR_NORMAL, VertexFormat.DrawMode.LINES)
 			.withoutBlend()
 			.withCull(false)
+			.build()
+	);
+
+	public static final RenderPipeline CIRCLE = RenderPipelines.register(
+		RenderPipeline.builder(RenderPipelines.POSITION_TEX_COLOR_SNIPPET)
+			.withLocation(SevenElements.identifier("pipeline/circle"))
+			.withFragmentShader(SevenElements.identifier("circle"))
 			.build()
 	);
 
@@ -82,7 +77,7 @@ public class SevenElementsRenderPipelines {
 		RenderPipeline.builder(SevenElementsRenderPipelines.TRIANGLES_SNIPPET)
 			.withLocation(SevenElements.identifier("pipeline/sphere"))
 			.withCull(false)
-			.withBlend(BlendFunction.PANORAMA)
+			.withBlend(new BlendFunction(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO))
 			.withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
 			.withDepthWrite(false)
 			.build()

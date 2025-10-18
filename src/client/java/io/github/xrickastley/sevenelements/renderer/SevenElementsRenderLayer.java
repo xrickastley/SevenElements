@@ -12,7 +12,6 @@ import net.minecraft.client.render.RenderPhase;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.TriState;
 import net.minecraft.util.Util;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
@@ -22,20 +21,6 @@ public class SevenElementsRenderLayer {
 		"seven-elements:triangles",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.TRIANGLES,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
-	);
-
-	private static final RenderLayer TRIANGLE_FAN = RenderLayer.of(
-		"seven-elements:triangle_fan",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.TRIANGLE_FAN,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
-	);
-
-	private static final RenderLayer TRIANGLE_STRIP = RenderLayer.of(
-		"seven-elements:triangle_strip",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.TRIANGLE_STRIP,
 		MultiPhaseParameters.builder().build(OutlineMode.NONE)
 	);
 
@@ -67,7 +52,7 @@ public class SevenElementsRenderLayer {
 	private static final Function<Identifier, RenderLayer> ELEMENTS = Util.memoize(
 		texture -> {
 			MultiPhaseParameters multiPhaseParameters = MultiPhaseParameters.builder()
-				.texture(new RenderPhase.Texture(texture, TriState.FALSE, false))
+				.texture(new RenderPhase.Texture(texture, false))
 				.build(OutlineMode.NONE);
 
 			return RenderLayer.of(
@@ -119,14 +104,6 @@ public class SevenElementsRenderLayer {
 
 	public static RenderLayer getTriangles() {
 		return SevenElementsRenderLayer.TRIANGLES;
-	}
-
-	public static RenderLayer getTriangleFan() {
-		return SevenElementsRenderLayer.TRIANGLE_FAN;
-	}
-
-	public static RenderLayer getTriangleStrip() {
-		return SevenElementsRenderLayer.TRIANGLE_STRIP;
 	}
 
 	public static RenderLayer getQuads() {

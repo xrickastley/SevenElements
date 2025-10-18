@@ -17,15 +17,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
 import io.github.xrickastley.sevenelements.util.Array;
-import io.github.xrickastley.sevenelements.util.CircleRenderer;
 import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gl.RenderPipelines;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.BossBarHud;
 import net.minecraft.client.gui.hud.ClientBossBar;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.entity.boss.BossBar;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.profiler.Profilers;
@@ -58,7 +58,7 @@ public class BossBarHudMixin {
 	private void renderAppliedElements(DrawContext context, int x, int y, BossBar bossBar, int width, Identifier[] textures, Identifier[] notchedTextures, CallbackInfo ci) {
 		if (bossBar.sevenelements$getEntity() == null || bossBar.sevenelements$getEntity().isDead()) return;
 
-		final double RADIUS = 5;
+		final int RADIUS = 5;
 		final int BOUND = (int) (RADIUS * 2);
 		final int SHIFT = 1;
 		final int INNER_BOUND = (int) ((RADIUS - SHIFT) * 2);
@@ -67,7 +67,6 @@ public class BossBarHudMixin {
 
 		y += 6;
 
-		final double scaleFactor = MinecraftClient.getInstance().getWindow().getScaleFactor();
 		final Set<Identifier> existing = new HashSet<>();
 		final Array<Identifier> appliedElements = ElementComponent.KEY
 			.get(bossBar.sevenelements$getEntity())
@@ -78,13 +77,16 @@ public class BossBarHudMixin {
 		for (int i = 0; i < appliedElements.length(); i++) {
 			final Identifier texture = appliedElements.get(i);
 			final int x1 = x + (i * (BOUND + 1));
+			/*
 			final CircleRenderer circleRenderer = new CircleRenderer((x1 + RADIUS) * scaleFactor, (y + RADIUS) * scaleFactor, 0);
 
 			circleRenderer
 				.add(RADIUS * scaleFactor, 1, 0x7F646464)
 				.draw(context.getMatrices().peek().getPositionMatrix());
+			*/
 
-			context.drawTexture(RenderLayer::getGuiTextured, texture, x1 + SHIFT, y + SHIFT, 0, 0, INNER_BOUND, INNER_BOUND, INNER_BOUND, INNER_BOUND);
+			context.sevenelements$drawCircle(SevenElementsRenderPipelines.CIRCLE, x1 + RADIUS, y + RADIUS, RADIUS, 0x7F646464);
+			context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, x1 + SHIFT, y + SHIFT, 0, 0, INNER_BOUND, INNER_BOUND, INNER_BOUND, INNER_BOUND);
 		}
 	}
 }

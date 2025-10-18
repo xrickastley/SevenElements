@@ -3,13 +3,10 @@ package io.github.xrickastley.sevenelements.element;
 import java.util.UUID;
 
 import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
-import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException.Operation;
-import io.github.xrickastley.sevenelements.exception.ElementalApplicationOperationException;
-import io.github.xrickastley.sevenelements.util.NbtHelper;
+import io.github.xrickastley.sevenelements.util.ViewHelper;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import net.minecraft.storage.ReadView;
 import net.minecraft.text.Text;
 
 public class ElementalApplications {
@@ -46,28 +43,17 @@ public class ElementalApplications {
 	}
 
 	/**
-	 * Creates an Elemental Application from an NBT.
+	 * Creates an Elemental Application from a {@code ReadView}'s data.
 	 * @param entity The entity to create an Elemental Application for.
-	 * @param nbt The NBT to create the Elemental Application from.
-	 */
-	public static ElementalApplication fromNbt(LivingEntity entity, NbtElement nbt) {
-		return ElementalApplications.fromNbt(entity, nbt, entity.getWorld().getTime());
-	}
-
-	/**
-	 * Creates an Elemental Application from an NBT.
-	 * @param entity The entity to create an Elemental Application for.
-	 * @param nbt The NBT to create the Elemental Application from.
+	 * @param view The NBT to create the Elemental Application from.
 	 * @param syncedAt The world time this Elemental Application was last synced at.
 	 */
-	public static ElementalApplication fromNbt(LivingEntity entity, NbtElement nbt, long syncedAt) {
-		if (!(nbt instanceof final NbtCompound compound)) throw new ElementalApplicationOperationException(Operation.INVALID_NBT_DATA, null, null);
-
-		final Type type = NbtHelper.get(compound, "Type", ElementalApplication.Type.CODEC);
+	public static ElementalApplication fromData(LivingEntity entity, ReadView view, long syncedAt) {
+		final Type type = ViewHelper.get(view, "Type", ElementalApplication.Type.CODEC);
 
 		return type == Type.GAUGE_UNIT
-			? GaugeUnitElementalApplication.fromNbt(entity, compound, syncedAt)
-			: DurationElementalApplication.fromNbt(entity, compound, syncedAt);
+			? GaugeUnitElementalApplication.fromData(entity, view, syncedAt)
+			: DurationElementalApplication.fromData(entity, view, syncedAt);
 	}
 
 	/**
