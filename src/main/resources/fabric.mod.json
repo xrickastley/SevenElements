@@ -36,8 +36,8 @@
 		}
 	],
 	"depends": {
-		"fabricloader": ">=0.16.10",
-		"minecraft": "~1.21.5",
+		"fabricloader": ">=0.16.13",
+		"minecraft": ">=1.21.6 <=1.21.8",
 		"java": ">=21",
 		"fabric-api": "*",
 		"cloth-config": "*"	
@@ -61,6 +61,9 @@
 			],
 			"net/minecraft/class_10017": [
 				"io/github/xrickastley/sevenelements/interfaces/EntityAwareRenderState"
+			],
+			"net/minecraft/class_332": [
+				"io/github/xrickastley/sevenelements/interfaces/ExtendedDrawContext"
 			]
 		},
 		"cardinal-components": [
