@@ -37,7 +37,6 @@ import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistries;
 import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
-import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.ImmutablePair;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.ViewHelper;
@@ -246,7 +245,7 @@ public final class ElementComponentImpl implements ElementComponent {
 		final ListView list = view.getList("AppliedElements");
 
 		this.getAppliedElements()
-			.forEach(Functions.withArgument(ElementalApplication::writeData, list.add()));
+			.forEach(application -> application.writeData(list.add()));
 
 		view.putLong("SyncedAt", owner.getWorld().getTime());
 		view.putLong("ElectroChargedCooldown", electroChargedCooldown);
