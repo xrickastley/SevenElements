@@ -151,7 +151,7 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isEmpty()" class="member-name-link">isEmpty</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static @Nullable <a href="ElementComponentImpl.CrystallizeShield.html" title="class in io.github.xrickastley.sevenelements.component">ElementComponentImpl.CrystallizeShield</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#readData(java.util.Optional)" class="member-name-link">readData</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://maven.fabricmc.net/docs/yarn-1.21.6+build.1/net/minecraft/storage/ReadView.html" title="class or interface in net.minecraft.storage" class="external-link">ReadView</a>&gt;&nbsp;view)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#ofNbt(java.util.Optional)" class="member-name-link">ofNbt</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/net/minecraft/nbt/NbtCompound.html" title="class or interface in net.minecraft.nbt" class="external-link">NbtCompound</a>&gt;&nbsp;nbt)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private float</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#reduce(io.github.xrickastley.sevenelements.element.ElementalDamageSource,float)" class="member-name-link">reduce</a><wbr>(<a href="../element/ElementalDamageSource.html" title="class in io.github.xrickastley.sevenelements.element">ElementalDamageSource</a>&nbsp;source,
@@ -161,7 +161,7 @@ loadScripts(document, 'script');</script>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#tick(io.github.xrickastley.sevenelements.component.ElementComponentImpl)" class="member-name-link">tick</a><wbr>(<a href="ElementComponentImpl.html" title="class in io.github.xrickastley.sevenelements.component">ElementComponentImpl</a>&nbsp;impl)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>private void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#writeData(net.minecraft.storage.WriteView)" class="member-name-link">writeData</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21.6+build.1/net/minecraft/storage/WriteView.html" title="class or interface in net.minecraft.storage" class="external-link">WriteView</a>&nbsp;view)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#writeToNbt(net.minecraft.nbt.NbtCompound)" class="member-name-link">writeToNbt</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/net/minecraft/nbt/NbtCompound.html" title="class or interface in net.minecraft.nbt" class="external-link">NbtCompound</a>&nbsp;tag)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
@@ -223,10 +223,10 @@ loadScripts(document, 'script');</script>
 <h2>Method Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="readData(java.util.Optional)">
-<h3>readData</h3>
+<section class="detail" id="ofNbt(java.util.Optional)">
+<h3>ofNbt</h3>
 <div class="member-signature"><span class="annotations">@Nullable
-</span><span class="modifiers">private static</span>&nbsp;<span class="return-type">@Nullable <a href="ElementComponentImpl.CrystallizeShield.html" title="class in io.github.xrickastley.sevenelements.component">ElementComponentImpl.CrystallizeShield</a></span>&nbsp;<span class="element-name">readData</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://maven.fabricmc.net/docs/yarn-1.21.6+build.1/net/minecraft/storage/ReadView.html" title="class or interface in net.minecraft.storage" class="external-link">ReadView</a>&gt;&nbsp;view)</span></div>
+</span><span class="modifiers">private static</span>&nbsp;<span class="return-type">@Nullable <a href="ElementComponentImpl.CrystallizeShield.html" title="class in io.github.xrickastley.sevenelements.component">ElementComponentImpl.CrystallizeShield</a></span>&nbsp;<span class="element-name">ofNbt</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a>&lt;<a href="https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/net/minecraft/nbt/NbtCompound.html" title="class or interface in net.minecraft.nbt" class="external-link">NbtCompound</a>&gt;&nbsp;nbt)</span></div>
 </section>
 </li>
 <li>
@@ -237,9 +237,9 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
-<section class="detail" id="writeData(net.minecraft.storage.WriteView)">
-<h3>writeData</h3>
-<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">writeData</span><wbr><span class="parameters">(<a href="https://maven.fabricmc.net/docs/yarn-1.21.6+build.1/net/minecraft/storage/WriteView.html" title="class or interface in net.minecraft.storage" class="external-link">WriteView</a>&nbsp;view)</span></div>
+<section class="detail" id="writeToNbt(net.minecraft.nbt.NbtCompound)">
+<h3>writeToNbt</h3>
+<div class="member-signature"><span class="modifiers">private</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">writeToNbt</span><wbr><span class="parameters">(<a href="https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/net/minecraft/nbt/NbtCompound.html" title="class or interface in net.minecraft.nbt" class="external-link">NbtCompound</a>&nbsp;tag)</span></div>
 </section>
 </li>
 <li>
