@@ -8,8 +8,9 @@
 		"_xRickAstley"
 	],
 	"contact": {
-		"sources": "https://github.com/xrickastley/seven-elements",
-		"issues": "https://github.com/xrickastley/seven-elements/issues"
+		"homepage": "https://xrickastley.github.io/SevenElements/wiki/",
+		"sources": "https://github.com/xrickastley/SevenElements",
+		"issues": "https://github.com/xrickastley/SevenElements/issues"
 	},
 	"license": "ARR",
 	"icon": "assets/seven-elements/icon.png",
