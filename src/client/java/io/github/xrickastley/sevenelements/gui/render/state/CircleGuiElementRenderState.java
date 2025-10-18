@@ -28,11 +28,11 @@ public record CircleGuiElementRenderState(RenderPipeline pipeline, Matrix3x2f ma
 	}
 
 	@Override
-	public void setupVertices(VertexConsumer vertices, float depth) {
-		vertices.vertex(this.matrix, this.x - this.radius, this.y + this.radius, depth).texture(0, 0).color(this.color);
-		vertices.vertex(this.matrix, this.x + this.radius, this.y + this.radius, depth).texture(1, 0).color(this.color);
-		vertices.vertex(this.matrix, this.x + this.radius, this.y - this.radius, depth).texture(1, 1).color(this.color);
-		vertices.vertex(this.matrix, this.x - this.radius, this.y - this.radius, depth).texture(0, 1).color(this.color);
+	public void setupVertices(VertexConsumer vertices) {
+		vertices.vertex(this.matrix, this.x - this.radius, this.y + this.radius).texture(0, 0).color(this.color);
+		vertices.vertex(this.matrix, this.x + this.radius, this.y + this.radius).texture(1, 0).color(this.color);
+		vertices.vertex(this.matrix, this.x + this.radius, this.y - this.radius).texture(1, 1).color(this.color);
+		vertices.vertex(this.matrix, this.x - this.radius, this.y - this.radius).texture(0, 1).color(this.color);
 	}
 
 	@Override

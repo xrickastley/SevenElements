@@ -49,7 +49,7 @@ public abstract sealed class ElementalApplication permits DurationElementalAppli
 
 		this.gaugeUnits = gaugeUnits;
 		this.currentGauge = gaugeUnits;
-		this.appliedAt = entity.getWorld().getTime();
+		this.appliedAt = entity.getEntityWorld().getTime();
 	}
 
 	/**
@@ -90,7 +90,7 @@ public abstract sealed class ElementalApplication permits DurationElementalAppli
 	 * Gets the number of ticks this Elemental Application has been applied for.
 	 */
 	public long getAppliedTicks() {
-		return this.entity.getWorld().getTime() - this.appliedAt;
+		return this.entity.getEntityWorld().getTime() - this.appliedAt;
 	}
 
 	/**

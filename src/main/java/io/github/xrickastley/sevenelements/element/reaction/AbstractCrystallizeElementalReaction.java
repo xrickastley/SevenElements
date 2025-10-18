@@ -36,11 +36,11 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		final World world = entity.getWorld();
+		final World world = entity.getEntityWorld();
 
 		if (!(world instanceof final ServerWorld serverWorld)) return;
 
-		final Vec3d spawnPos = this.clampToGround(entity.getWorld(), this.toAbsolutePos(entity, new Vec3d(0, 0, 1)));
+		final Vec3d spawnPos = this.clampToGround(entity.getEntityWorld(), this.toAbsolutePos(entity, new Vec3d(0, 0, 1)));
 		final CrystallizeShardEntity crystallizeShard = new CrystallizeShardEntity(SevenElementsEntityTypes.CRYSTALLIZE_SHARD, serverWorld, this.getAuraElement(), origin);
 
 		crystallizeShard.setPosition(spawnPos);
@@ -50,7 +50,7 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 	// Taken from LookingPosArgument#toAbsolutePos
 	private Vec3d toAbsolutePos(final LivingEntity entity, final Vec3d lookingPos) {
 		final Vec2f vec2f = entity.getRotationClient();
-		final Vec3d vec3d = entity.getPos();
+		final Vec3d vec3d = entity.getEntityPos();
 
 		float f = MathHelper.cos((vec2f.y + 90.0F) * 0.017453292F);
 		float g = MathHelper.sin((vec2f.y + 90.0F) * 0.017453292F);

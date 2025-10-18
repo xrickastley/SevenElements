@@ -153,13 +153,13 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	}
 
 	private void doHyperbloom() {
-		if (!(this.getWorld() instanceof final ServerWorld world)) return;
+		if (!(this.getEntityWorld() instanceof final ServerWorld world)) return;
 
 		final int hyperbloomTick = this.age - this.hyperbloomAge;
 		final LivingEntity target = ClassInstanceUtil.castOrNull(world.getEntity(this.target), LivingEntity.class);
 
 		if (target != null) {
-			final Vec3d targetPos = target.getEyePos().subtract(this.getPos());
+			final Vec3d targetPos = target.getEyePos().subtract(this.getEntityPos());
 			final double distance = Math.sqrt(targetPos.x * targetPos.x + targetPos.z * targetPos.z);
 			final int ticks = Math.max(1, (int) (distance / DendroCoreEntity.SPRAWLING_SHOT_SPEED));
 
@@ -174,7 +174,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 			final Box boundingBox = target.getBoundingBox();
 
-			if (!boundingBox.contains(this.getPos())) return;
+			if (!boundingBox.contains(this.getEntityPos())) return;
 
 			this.curTicksInHitbox++;
 
@@ -185,7 +185,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 			this.remove(RemovalReason.KILLED);
 
-			this.getWorld()
+			this.getEntityWorld()
 				.playSound(null, this.getBlockPos(), SevenElementsSoundEvents.SPRAWLING_SHOT_HIT, SoundCategory.PLAYERS, 0.5f, 1.0f);
 		} else {
 			super.setVelocity(new Vec3d(0, 0.5, 0));
@@ -233,10 +233,10 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	}
 
 	private void removeOldDendroCores() {
-		if (!(this.getWorld() instanceof final ServerWorld world)) return;
+		if (!(this.getEntityWorld() instanceof final ServerWorld world)) return;
 
 		final Box box = Box.of(this.getLerpedPos(1f), DendroCoreEntity.DENDRO_CORES_IN_RADIUS, DendroCoreEntity.DENDRO_CORES_IN_RADIUS, DendroCoreEntity.DENDRO_CORES_IN_RADIUS);
-		final List<DendroCoreEntity> dendroCores = this.getWorld().getEntitiesByClass(DendroCoreEntity.class, box, dc -> true);
+		final List<DendroCoreEntity> dendroCores = this.getEntityWorld().getEntitiesByClass(DendroCoreEntity.class, box, dc -> true);
 
 		if (dendroCores.size() <= 5) return;
 
@@ -248,14 +248,14 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	}
 
 	private boolean explode(final double reactionMultiplier) {
-		if (!(this.getWorld() instanceof final ServerWorld world)) return false;
+		if (!(this.getEntityWorld() instanceof final ServerWorld world)) return false;
 
 		if (this.exploded) return false;
 
 		this.exploded = true;
 		this.age = 117;
 
-		if (!this.getWorld().isClient) this.sendSyncPayload();
+		if (!this.getEntityWorld().isClient()) this.sendSyncPayload();
 
 		final @Nullable LivingEntity recentOwner = this.getRecentOwner();
 
@@ -271,14 +271,14 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			target.damage(world, source, damage);
 		}
 
-		this.getWorld()
+		this.getEntityWorld()
 			.playSound(null, this.getBlockPos(), SevenElementsSoundEvents.DENDRO_CORE_EXPLOSION, SoundCategory.PLAYERS, 0.5f, 1.0f);
 
 		return true;
 	}
 
 	private @Nullable LivingEntity getRecentOwner() {
-		return !owners.isEmpty() && this.getWorld() instanceof ServerWorld
+		return !owners.isEmpty() && this.getEntityWorld() instanceof ServerWorld
 			? this.getEntityFromUUID(owners.get(owners.size() - 1))
 			: null;
 	}
@@ -291,7 +291,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 	private ElementalDamageSource createDamageSource(final LivingEntity target, final LivingEntity recentOwner) {
 		return new ElementalDamageSource(
-			this.getWorld()
+			this.getEntityWorld()
 				.getDamageSources()
 				.create(SevenElementsDamageTypes.DENDRO_CORE, this, recentOwner),
 			ElementalApplications.gaugeUnits(target, Element.DENDRO, 0.0),

@@ -44,7 +44,7 @@ public final class ElementEntry {
 	}
 
 	private long getAppliedTicks(final Entity entity) {
-		return entity.getWorld().getTime() - this.appliedAt;
+		return entity.getEntityWorld().getTime() - this.appliedAt;
 	}
 
 	public void render(final LivingEntity entity, final MatrixStack matrixStack, final Camera camera, final float offset) {

@@ -117,7 +117,7 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 	}
 
 	default boolean hasValidLastReaction() {
-		return this.hasLastReaction() && this.getLastReaction().getRight() + 10 >= this.getOwner().getWorld().getTime();
+		return this.hasLastReaction() && this.getLastReaction().getRight() + 10 >= this.getOwner().getEntityWorld().getTime();
 	}
 
 	public boolean isElectroChargedOnCD();
@@ -295,7 +295,7 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 	public Array<ElementalApplication> getPrioritizedElements();
 
 	public static void sync(Entity entity) {
-		if (entity.getWorld().isClient) return;
+		if (entity.getEntityWorld().isClient()) return;
 
 		ElementComponent.KEY.sync(entity);
 	}

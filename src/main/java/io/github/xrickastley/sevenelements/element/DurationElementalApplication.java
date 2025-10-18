@@ -57,7 +57,7 @@ public final class DurationElementalApplication extends ElementalApplication {
 
 	@Override
 	public int getRemainingTicks() {
-		return (int) (appliedAt + duration - entity.getWorld().getTime());
+		return (int) (appliedAt + duration - entity.getEntityWorld().getTime());
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public final class DurationElementalApplication extends ElementalApplication {
 	 */
 	@Override
 	public boolean isEmpty() {
-		return this.currentGauge <= 0 || entity.getWorld().getTime() >= (this.appliedAt + this.duration);
+		return this.currentGauge <= 0 || entity.getEntityWorld().getTime() >= (this.appliedAt + this.duration);
 	}
 
 	@Override

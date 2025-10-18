@@ -488,17 +488,17 @@ public enum Element {
 
 		private void render(LivingEntity entity) {
 			// ServerWorld has no impl. for addParticle.
-			if (!entity.getWorld().isClient) return;
+			if (!entity.getEntityWorld().isClient()) return;
 
 			final Box box = entity.getBoundingBox();
-			final Vec3d pos = entity.getPos().add(relativePos.multiply(box.getLengthX(), box.getLengthY(), box.getLengthZ()));
+			final Vec3d pos = entity.getEntityPos().add(relativePos.multiply(box.getLengthX(), box.getLengthY(), box.getLengthZ()));
 
 			if (count == 0) this.addSingleParticle(entity, pos);
 			else this.addMultipleParticles(entity, pos);
 		}
 
 		private void addSingleParticle(LivingEntity entity, Vec3d pos) {
-			final World world = entity.getWorld();
+			final World world = entity.getEntityWorld();
 
 			double velX = speed * delta.x;
 			double velY = speed * delta.y;
@@ -508,7 +508,7 @@ public enum Element {
 		}
 
 		private void addMultipleParticles(LivingEntity entity, Vec3d pos) {
-			final World world = entity.getWorld();
+			final World world = entity.getEntityWorld();
 
 			for (int i = 0; i < count; ++i) {
 				double randX = random.nextGaussian() * delta.x;

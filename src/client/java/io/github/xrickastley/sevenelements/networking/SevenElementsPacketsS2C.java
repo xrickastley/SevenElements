@@ -96,7 +96,7 @@ public class SevenElementsPacketsS2C {
 		final World world = MinecraftClient
 			.getInstance()
 			.player
-			.getWorld();
+			.getEntityWorld();
 
 		final Entity entity = world.getEntityById(payload.entityId());
 
@@ -109,7 +109,7 @@ public class SevenElementsPacketsS2C {
 		final World world = MinecraftClient
 			.getInstance()
 			.player
-			.getWorld();
+			.getEntityWorld();
 
 		final Entity entity = world.getEntityById(payload.entityId());
 

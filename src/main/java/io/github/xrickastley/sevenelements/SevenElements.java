@@ -101,7 +101,7 @@ public class SevenElements implements ModInitializer {
 	}
 
 	public static float getLevelMultiplier(Entity entity) {
-		return entity.getWorld() instanceof final ServerWorld world
+		return entity.getEntityWorld() instanceof final ServerWorld world
 			? SevenElements.getLevelMultiplier(world)
 			: 5.0f;
 	}

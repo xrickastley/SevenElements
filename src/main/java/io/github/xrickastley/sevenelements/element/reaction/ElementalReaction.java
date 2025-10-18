@@ -92,7 +92,7 @@ public abstract class ElementalReaction {
 
 	public static List<LivingEntity> getEntitiesInAoE(LivingEntity target, double radius, Predicate<LivingEntity> filter) {
 		final List<LivingEntity> targets = target
-			.getWorld()
+			.getEntityWorld()
 			.getNonSpectatingEntities(LivingEntity.class, Box.of(target.getLerpedPos(1f), radius * 2, radius * 2, radius * 2));
 
 		targets.removeIf(entity -> entity.squaredDistanceTo(target) >= radius * radius || filter.negate().test(entity));
@@ -255,7 +255,7 @@ public abstract class ElementalReaction {
 			.onReactionTriggered(this, reducedGauge, entity, origin);
 
 		entity
-			.getWorld()
+			.getEntityWorld()
 			.playSound(null, entity.getBlockPos(), SevenElementsSoundEvents.REACTION, SoundCategory.PLAYERS, 1.0f, 1.0f);
 	}
 
@@ -264,7 +264,7 @@ public abstract class ElementalReaction {
 	}
 
 	protected void displayReaction(LivingEntity target) {
-		if (target.getWorld().isClient) return;
+		if (target.getEntityWorld().isClient()) return;
 
 		final Box boundingBox = target.getBoundingBox();
 

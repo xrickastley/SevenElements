@@ -34,7 +34,7 @@ import net.minecraft.world.World;
 @Mixin(value = Entity.class, priority = Integer.MIN_VALUE)
 public abstract class EntityMixin {
 	@Shadow
-	public abstract World getWorld();
+	public abstract World getEntityWorld();
 
 	@ModifyReturnValue(
 		method = "handleAttack",

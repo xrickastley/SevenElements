@@ -30,7 +30,7 @@ public abstract class LivingEntityMixin extends Entity {
 	)
 	public void addEffectRendering(CallbackInfo ci) {
 		// Sanity check for isClient in case
-		if (!this.getWorld().isClient || !ClientConfig.getEffectRenderType().allowsNormalEffects() || !SpecialEffectsRenderer.shouldRender(this)) return;
+		if (!this.getEntityWorld().isClient() || !ClientConfig.getEffectRenderType().allowsNormalEffects() || !SpecialEffectsRenderer.shouldRender(this)) return;
 
 		final ElementComponent component = ElementComponent.KEY.get(this);
 

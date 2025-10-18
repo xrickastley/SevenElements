@@ -10,7 +10,7 @@ import io.github.xrickastley.sevenelements.util.Color;
 import io.github.xrickastley.sevenelements.util.Ease;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer.TextLayerType;
 import net.minecraft.client.font.TextRenderer;

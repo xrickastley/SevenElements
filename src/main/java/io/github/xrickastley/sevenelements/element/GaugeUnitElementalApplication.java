@@ -43,7 +43,7 @@ public final class GaugeUnitElementalApplication extends ElementalApplication {
 
 		final var application = new GaugeUnitElementalApplication(entity, element, uuid, gaugeUnits, isAura);
 
-		final double syncedGaugeDeduction = Math.max(entity.getWorld().getTime() - syncedAt, 0) * application.getDecayRate();
+		final double syncedGaugeDeduction = Math.max(entity.getEntityWorld().getTime() - syncedAt, 0) * application.getDecayRate();
 		application.currentGauge = MathHelper.clamp(currentGauge - syncedGaugeDeduction, 0, application.gaugeUnits);
 		application.appliedAt = ViewHelper.get(view, "AppliedAt", Codec.LONG);
 

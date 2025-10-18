@@ -17,7 +17,7 @@ public abstract class AdditiveElementalReaction extends ElementalReaction {
 	}
 
 	public float applyAmplifier(LivingEntity entity, float damage) {
-		return entity.getWorld() instanceof final ServerWorld world
+		return entity.getEntityWorld() instanceof final ServerWorld world
 			? (float) applyAmplifier(world, (double) damage)
 			: damage;
 	}
@@ -27,7 +27,7 @@ public abstract class AdditiveElementalReaction extends ElementalReaction {
 	}
 
 	public double applyAmplifier(LivingEntity entity, double damage) {
-		return entity.getWorld() instanceof final ServerWorld world
+		return entity.getEntityWorld() instanceof final ServerWorld world
 			? applyAmplifier(world, (double) damage)
 			: damage;
 	}

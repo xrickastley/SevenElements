@@ -53,7 +53,7 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 
 	@Override
 	public boolean trigger(LivingEntity entity, @Nullable LivingEntity origin) {
-		if (!isTriggerable(entity) || entity.getWorld().isClient) return false;
+		if (!isTriggerable(entity) || entity.getEntityWorld().isClient()) return false;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getLeft());
@@ -69,7 +69,7 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
 
 		final ElementComponent entityComponent = ElementComponent.KEY.get(entity);
 
@@ -123,7 +123,7 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 		at = @At("HEAD")
 	)
 	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity) {
-		if (!ElementalReactions.ELECTRO_CHARGED.isTriggerable(entity) || entity.getWorld().isClient || entity.isDead()) return;
+		if (!ElementalReactions.ELECTRO_CHARGED.isTriggerable(entity) || entity.getEntityWorld().isClient() || entity.isDead()) return;
 
 		ElementalReactions.ELECTRO_CHARGED.trigger(entity);
 

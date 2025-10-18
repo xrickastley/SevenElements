@@ -11,6 +11,7 @@ import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
+import io.github.xrickastley.sevenelements.mixin.WorldAccessor;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 import io.github.xrickastley.sevenelements.util.NonEntityDamagingExplosion;
 import io.github.xrickastley.sevenelements.util.TextHelper;
@@ -38,7 +39,7 @@ public class OverloadedElementalReaction extends ElementalReaction {
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
 
 		final float power = 3;
 
@@ -46,7 +47,7 @@ public class OverloadedElementalReaction extends ElementalReaction {
 			world,
 			null,
 			new ExplosionBehavior(),
-			entity.getPos(),
+			entity.getEntityPos(),
 			power,
 			true,
 			world.getGameRules().getBoolean(SevenElementsGameRules.OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS)
@@ -60,14 +61,17 @@ public class OverloadedElementalReaction extends ElementalReaction {
 			.forEach(e -> damage(e, origin));
 
 		for (ServerPlayerEntity serverPlayerEntity : world.getPlayers()) {
-			if (serverPlayerEntity.squaredDistanceTo(entity.getPos()) >= 4096.0) continue;
+			if (serverPlayerEntity.squaredDistanceTo(entity.getEntityPos()) >= 4096.0) continue;
 
 			serverPlayerEntity.networkHandler.sendPacket(
 				new ExplosionS2CPacket(
-					entity.getPos(),
+					entity.getEntityPos(),
+					explosion.getPower(),
+					0,
 					Optional.ofNullable(explosion.getKnockbackByPlayer().get(serverPlayerEntity)),
 					explosion.isSmall() ? ParticleTypes.EXPLOSION : ParticleTypes.EXPLOSION_EMITTER,
-					SoundEvents.ENTITY_GENERIC_EXPLODE
+					SoundEvents.ENTITY_GENERIC_EXPLODE,
+					WorldAccessor.getExplosionBlockParticles()
 				)
 			);
 		}
@@ -76,7 +80,7 @@ public class OverloadedElementalReaction extends ElementalReaction {
 	private void damage(Entity entity, @Nullable Entity origin) {
 		if (!(entity instanceof final LivingEntity living)) return;
 
-		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
 
 		final ElementalApplication application = ElementalApplications.gaugeUnits(living, Element.PYRO, 0);
 		final ElementalDamageSource source = new ElementalDamageSource(

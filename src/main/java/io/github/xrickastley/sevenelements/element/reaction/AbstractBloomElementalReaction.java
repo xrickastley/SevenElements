@@ -21,13 +21,13 @@ public abstract sealed class AbstractBloomElementalReaction
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		final World world = entity.getWorld();
+		final World world = entity.getEntityWorld();
 
 		if (!(world instanceof final ServerWorld serverWorld)) return;
 
 		final DendroCoreEntity dendroCore = SevenElementsEntityTypes.DENDRO_CORE.create(serverWorld, SpawnReason.TRIGGERED);
 		dendroCore.addOwner(origin);
-		dendroCore.setPosition(entity.getPos());
+		dendroCore.setPosition(entity.getEntityPos());
 
 		serverWorld.spawnNewEntityAndPassengers(dendroCore);
 	}

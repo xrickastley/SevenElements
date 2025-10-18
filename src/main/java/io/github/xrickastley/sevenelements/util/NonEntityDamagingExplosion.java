@@ -91,7 +91,7 @@ public class NonEntityDamagingExplosion implements Explosion {
 						double o = MathHelper.lerp(l, box.minY, box.maxY);
 						double p = MathHelper.lerp(m, box.minZ, box.maxZ);
 						Vec3d vec3d = new Vec3d(n + g, o, p + h);
-						if (entity.getWorld().raycast(new RaycastContext(vec3d, pos, ShapeType.COLLIDER, FluidHandling.NONE, entity)).getType() == HitResult.Type.MISS) {
+						if (entity.getEntityWorld().raycast(new RaycastContext(vec3d, pos, ShapeType.COLLIDER, FluidHandling.NONE, entity)).getType() == HitResult.Type.MISS) {
 							++i;
 						}
 

@@ -9,6 +9,7 @@ import io.github.xrickastley.sevenelements.util.ClientConfig;
 import io.github.xrickastley.sevenelements.util.MathHelper2;
 
 import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.player.PlayerEntity;
@@ -112,12 +113,12 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 	}
 
 	@Override
-	public boolean mouseClicked(double mouseX, double mouseY, int button) {
-		return this.checkMouseClick(mouseX, mouseY, button)
-			|| super.mouseClicked(mouseX, mouseY, button);
+	public boolean mouseClicked(Click click, boolean doubled) {
+		return this.checkMouseClick(click, doubled)
+			|| super.mouseClicked(click, doubled);
 	}
 
-	private boolean checkMouseClick(double mouseX, double mouseY, int button) {
+	private boolean checkMouseClick(Click click, boolean doubled) {
 		final int x = (width - backgroundWidth) / 2;
 		final int y = (height - backgroundHeight) / 2;
 
@@ -126,7 +127,7 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 		final int x2 = x1 + 90;
 		final int y2 = y1 + 19;
 
-		if (!MathHelper2.inRange(mouseX, x1, x2) || !MathHelper2.inRange(mouseY, y1, y2)) return false;
+		if (!MathHelper2.inRange(click.x(), x1, x2) || !MathHelper2.inRange(click.y(), y1, y2)) return false;
 
 		if (!this.isEnabled()) return false;
 
@@ -143,14 +144,14 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 
 	private void lock() {
 		this.locked = true;
-		this.lockedAt = player.getWorld().getTime();
+		this.lockedAt = player.getEntityWorld().getTime();
 		this.handler.getResultSlot().lock();
 	}
 
 	private void unlock() {
 		this.locked = false;
 		this.handler.getResultSlot().unlock();
-		this.tooltipDisplayedAt = player.getWorld().getTime();
+		this.tooltipDisplayedAt = player.getEntityWorld().getTime();
 	}
 
 	private boolean isEnabled() {
@@ -158,14 +159,14 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 	}
 
 	private boolean isLocked() {
-		return locked || this.lockedAt + ElementalInfusionScreen.LOCK_TICKS >= this.player.getWorld().getTime();
+		return locked || this.lockedAt + ElementalInfusionScreen.LOCK_TICKS >= this.player.getEntityWorld().getTime();
 	}
 
 	private boolean displayTooltip() {
 		final ClientConfig config = ClientConfig.get();
 
 		return config.rendering.text.displayTooltipAfterInfusion
-			&& this.tooltipDisplayedAt + config.rendering.text.tooltipDisplayTicks >= this.player.getWorld().getTime()
+			&& this.tooltipDisplayedAt + config.rendering.text.tooltipDisplayTicks >= this.player.getEntityWorld().getTime()
 			&& (this.focusedSlot == null || !this.focusedSlot.hasStack());
 	}
 }

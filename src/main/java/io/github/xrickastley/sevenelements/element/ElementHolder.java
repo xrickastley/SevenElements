@@ -85,7 +85,7 @@ public final class ElementHolder {
 	}
 
 	public boolean shouldDoElements() {
-		return !(owner.getWorld() instanceof final ServerWorld world)
+		return !(owner.getEntityWorld() instanceof final ServerWorld world)
 			|| world.getGameRules().getBoolean(SevenElementsGameRules.DO_ELEMENTS);
 	}
 

@@ -31,7 +31,7 @@ import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.Context;
-import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderContext;
+import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;
@@ -78,7 +78,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 	@Override
 	public void receive(ShowElectroChargeS2CPayload payload, Context context) {
 		final ClientPlayerEntity player = context.player();
-		final World world = player.getWorld();
+		final World world = player.getEntityWorld();
 		final Entity mainEntity = world.getEntityById(payload.mainEntity());
 
 		if (mainEntity == null) {
@@ -315,7 +315,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		}
 
 		private Vec3d entityPos(Entity entity) {
-			return entity.getPos().add(0, entity.getHeight() * 0.5, 0);
+			return entity.getEntityPos().add(0, entity.getHeight() * 0.5, 0);
 		}
 	}
 
@@ -368,7 +368,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		}
 
 		private Vec3d entityPos(Entity entity) {
-			return entity.getPos().add(0, entity.getHeight() * 0.5, 0);
+			return entity.getEntityPos().add(0, entity.getHeight() * 0.5, 0);
 		}
 	}
 
@@ -379,20 +379,20 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		private @Nullable Color color = null;
 
 		private ChargeLinePositions(Vec3d initialPos, Vec3d finalPos, Entity relativeTo) {
-			final Vec3d entityPos = relativeTo.getPos();
+			final Vec3d entityPos = relativeTo.getEntityPos();
 
 			this.initialPos = initialPos.subtract(entityPos);
 			this.finalPos = finalPos.subtract(entityPos);
 		}
 
 		private Vec3d getInitialPos(Entity relativeTo) {
-			return this.initialPos.add(relativeTo.getPos());
+			return this.initialPos.add(relativeTo.getEntityPos());
 		}
 
 		private List<Vec3d> generatePositions(SpecialEffectsRenderer renderer, Entity relativeTo) {
 			if (this.positions != null) return this.positions;
 
-			final Vec3d entityPos = relativeTo.getPos();
+			final Vec3d entityPos = relativeTo.getEntityPos();
 			final List<Vec3d> positions = renderer.generatePositions(Vec3d.ZERO, initialPos.subtract(finalPos));
 
 			Vec3d randomVec = Vec3d.ZERO;

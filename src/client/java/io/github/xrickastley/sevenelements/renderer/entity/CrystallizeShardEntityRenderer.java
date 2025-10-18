@@ -8,11 +8,11 @@ import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity;
 import io.github.xrickastley.sevenelements.renderer.entity.model.CrystallizeShardEntityModel;
 import io.github.xrickastley.sevenelements.renderer.entity.state.CrystallizeShardEntityState;
 
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class CrystallizeShardEntityRenderer extends LivingEntityRenderer<CrystallizeShardEntity, CrystallizeShardEntityState, CrystallizeShardEntityModel> {
@@ -51,15 +51,15 @@ public class CrystallizeShardEntityRenderer extends LivingEntityRenderer<Crystal
 	}
 
 	@Override
-	public void render(CrystallizeShardEntityState state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
+	public void render(CrystallizeShardEntityState state, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CameraRenderState cameraRenderState) {
 		if (state.element == null) return;
 
 		this.shadowOpacity = 0f;
 		this.shadowRadius = 0f;
 
-		super.render(state, matrixStack, vertexConsumerProvider, i);
+		super.render(state, matrixStack, orderedRenderCommandQueue, cameraRenderState);
 	}
 
 	@Override
-	protected void renderLabelIfPresent(CrystallizeShardEntityState state, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {}
+	protected void renderLabelIfPresent(CrystallizeShardEntityState state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraRenderState) {}
 }

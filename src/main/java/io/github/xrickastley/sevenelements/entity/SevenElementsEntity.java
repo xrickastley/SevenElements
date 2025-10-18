@@ -104,7 +104,7 @@ public sealed class SevenElementsEntity
 	public void takeKnockback(double strength, double x, double z) {}
 
 	protected final @Nullable LivingEntity getEntityFromUUID(UUID uuid) {
-		return this.getWorld() instanceof final ServerWorld world
+		return this.getEntityWorld() instanceof final ServerWorld world
 			? ClassInstanceUtil.castOrNull(world.getEntity(uuid), LivingEntity.class)
 			: null;
 	}

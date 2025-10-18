@@ -79,7 +79,7 @@ public abstract class PlayerEntityMixin
 		final float finalAmount = amount - component.reduceCrystallizeShield(source, amount);
 
 		if (finalAmount < amount)
-			this.getWorld().playSound(null, this.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_HIT, SoundCategory.PLAYERS, 1.0f, 1.0f);
+			this.getEntityWorld().playSound(null, this.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_HIT, SoundCategory.PLAYERS, 1.0f, 1.0f);
 
 		if (finalAmount <= 0) this.sevenelements$setBlockedByCrystallizeShield(true);
 
@@ -195,7 +195,7 @@ public abstract class PlayerEntityMixin
 
 		if (element != Element.PYRO && element != Element.ELECTRO) return;
 
-		this.getWorld()
+		this.getEntityWorld()
 			.getEntitiesByClass(DendroCoreEntity.class, BoxUtil.multiplyBox(this.getBoundingBox(), 2), dc -> true)
 			.forEach(dc -> dc.damage(world, source, 1));
 	}

@@ -8,11 +8,11 @@ import io.github.xrickastley.sevenelements.util.Ease;
 import io.github.xrickastley.sevenelements.util.MathHelper2;
 
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
+import net.minecraft.client.render.state.CameraRenderState;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEntity, DendroCoreEntityState, DendroCoreEntityModel> {
@@ -44,12 +44,13 @@ public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEnt
 
 		state.apply(dendroCore);
 	}
+	
 	@Override
-	public void render(DendroCoreEntityState livingEntityRenderState, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
+	public void render(DendroCoreEntityState livingEntityRenderState, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CameraRenderState cameraRenderState) {
 		this.shadowOpacity = 0f;
 		this.shadowRadius = 0f;
-
-		super.render(livingEntityRenderState, matrixStack, vertexConsumerProvider, i);
+		
+		super.render(livingEntityRenderState, matrixStack, orderedRenderCommandQueue, cameraRenderState);
 	}
 
 	@Override
@@ -67,5 +68,5 @@ public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEnt
 	}
 
 	@Override
-	protected void renderLabelIfPresent(DendroCoreEntityState state, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {}
+	protected void renderLabelIfPresent(DendroCoreEntityState state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraRenderState) {}
 }

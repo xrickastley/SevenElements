@@ -53,7 +53,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	public CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, World world, Element element, @Nullable LivingEntity owner) {
 		super(entityType, world);
 
-		this.element = this.getWorld().isClient ? null : JavaScriptUtil.nullishCoalesing(element, Element.GEO);
+		this.element = this.getEntityWorld().isClient() ? null : JavaScriptUtil.nullishCoalesing(element, Element.GEO);
 		this.owner = ClassInstanceUtil.mapOrNull(owner, LivingEntity::getUuid);
 	}
 
@@ -119,7 +119,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	}
 
 	public void syncToPlayers() {
-		if (!(this.getWorld() instanceof ServerWorld)) return;
+		if (!(this.getEntityWorld() instanceof ServerWorld)) return;
 
 		final SyncCrystallizeShardTypeS2CPayload packet = new SyncCrystallizeShardTypeS2CPayload(this.getId(), this.element);
 
@@ -128,7 +128,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	}
 
 	private void checkCrystallizeShield() {
-		if (this.getWorld().isClient) return;
+		if (this.getEntityWorld().isClient()) return;
 
 		final List<LivingEntity> entities = ElementalReaction.getEntitiesInAoE(this, 1.0, e -> !(e instanceof SevenElementsEntity || e.getType().isIn(SevenElementsEntityTypeTags.IGNORED_TARGETS)));
 		final @Nullable LivingEntity owner = this.getEntityFromUUID(this.owner);
@@ -152,7 +152,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 
 		component.setCrystallizeShield(element, SevenElements.getLevelMultiplier(this));
 
-		this.getWorld()
+		this.getEntityWorld()
 			.playSound(null, this.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD, SoundCategory.PLAYERS, 1.0f, 1.0f);
 
 		this.remove(RemovalReason.KILLED);

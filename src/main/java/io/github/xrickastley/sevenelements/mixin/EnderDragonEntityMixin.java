@@ -43,7 +43,7 @@ public abstract class EnderDragonEntityMixin
 		at = @At("HEAD")
 	)
 	private void sendDragonUpdates(CallbackInfo ci) {
-		if (!(this.getWorld() instanceof final ServerWorld world)) return;
+		if (!(this.getEntityWorld() instanceof final ServerWorld world)) return;
 
 		((IEnderDragonFight) world.getEnderDragonFight())
 			.sevenelements$setDragon(ClassInstanceUtil.cast(this));

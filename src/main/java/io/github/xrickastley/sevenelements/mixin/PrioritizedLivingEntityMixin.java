@@ -238,7 +238,7 @@ public abstract class PrioritizedLivingEntityMixin
 		final boolean damageCooldown = this.timeUntilRegen > 10.0F && !source.isIn(DamageTypeTags.BYPASSES_COOLDOWN) && amount <= this.lastDamageTaken;
 
 		// do **not** apply an element **if** DMG cannot be applied.
-		if (this.isInvulnerable() || this.getWorld().isClient || this.isDead() || fireResistance || damageCooldown) return amount;
+		if (this.isInvulnerable() || this.getEntityWorld().isClient() || this.isDead() || fireResistance || damageCooldown) return amount;
 
 		final ElementalDamageSource eds = source instanceof final ElementalDamageSource eds2
 			? eds2
@@ -258,7 +258,7 @@ public abstract class PrioritizedLivingEntityMixin
 
 		if (doShatter) {
 			this.sevenelements$reactions.add(ElementalReactions.SHATTER);
-			((ElementComponentImpl) component).setLastReaction(new Pair<>(ElementalReactions.SHATTER, this.getWorld().getTime()));
+			((ElementComponentImpl) component).setLastReaction(new Pair<>(ElementalReactions.SHATTER, this.getEntityWorld().getTime()));
 
 			ElementalReactions.SHATTER.trigger((LivingEntity)(Entity) this, ClassInstanceUtil.castOrNull(source.getAttacker(), LivingEntity.class));
 		}

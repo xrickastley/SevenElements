@@ -46,7 +46,7 @@ public abstract sealed class AbstractShatterElementalReaction
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
 
 		final float damage = ElementalReaction.getReactionDamage(entity, 3.0);
 		final ElementalDamageSource source = new ElementalDamageSource(

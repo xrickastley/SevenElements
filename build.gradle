@@ -58,8 +58,6 @@ dependencies {
     include modImplementation ("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cca_version}")
     include modImplementation ("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
 	include modImplementation ("org.ladysnake.cardinal-components-api:cardinal-components-item:${project.cca_version}")
-
-	include modImplementation (annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0"))
 }
 
 processResources {

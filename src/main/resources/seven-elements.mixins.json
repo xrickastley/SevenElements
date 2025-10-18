@@ -27,7 +27,8 @@
     "ServerBossBarMixin",
     "StatusEffectMixin",
     "WindChargeItemMixin",
-    "WitherEntityMixin"
+    "WitherEntityMixin",
+    "WorldAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

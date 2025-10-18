@@ -40,7 +40,6 @@ import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.ImmutablePair;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.ViewHelper;
-
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -87,22 +86,22 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	@Override
 	public boolean isElectroChargedOnCD() {
-		return this.owner.getWorld().getTime() < this.electroChargedCooldown;
+		return this.owner.getEntityWorld().getTime() < this.electroChargedCooldown;
 	}
 
 	@Override
 	public boolean isBurningOnCD() {
-		return this.owner.getWorld().getTime() < this.burningCooldown;
+		return this.owner.getEntityWorld().getTime() < this.burningCooldown;
 	}
 
 	@Override
 	public void resetElectroChargedCD() {
-		this.electroChargedCooldown = this.owner.getWorld().getTime() + 20;
+		this.electroChargedCooldown = this.owner.getEntityWorld().getTime() + 20;
 	}
 
 	@Override
 	public void resetBurningCD() {
-		this.burningCooldown = this.owner.getWorld().getTime() + 5;
+		this.burningCooldown = this.owner.getEntityWorld().getTime() + 5;
 	}
 
 	@Override
@@ -131,7 +130,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	@Override
 	public void setCrystallizeShield(Element element, double amount) {
-		this.crystallizeShield = new CrystallizeShield(element, amount, this.owner.getWorld().getTime());
+		this.crystallizeShield = new CrystallizeShield(element, amount, this.owner.getEntityWorld().getTime());
 
 		ElementComponent.sync(owner);
 	}
@@ -157,7 +156,7 @@ public final class ElementComponentImpl implements ElementComponent {
 		if (reduced > 0) this.crystallizeShieldReducedAt = this.owner.age;
 
 		if (this.crystallizeShield == null || this.crystallizeShield.isEmpty()) {
-			this.owner.getWorld()
+			this.owner.getEntityWorld()
 				.playSound(null, this.owner.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_BREAK, SoundCategory.PLAYERS, 1.0f, 1.0f);
 		}
 
@@ -200,7 +199,7 @@ public final class ElementComponentImpl implements ElementComponent {
 	@Override
 	public List<ElementalReaction> addElementalApplication(ElementalApplication application, InternalCooldownContext icdContext) {
 		// Only do this on the server || Only do this when doElements is true.
-		if (!(application.getEntity().getWorld() instanceof final ServerWorld world)
+		if (!(application.getEntity().getEntityWorld() instanceof final ServerWorld world)
 			|| !world.getGameRules().getBoolean(SevenElementsGameRules.DO_ELEMENTS)) return Collections.emptyList();
 
 		if (application.isGaugeUnits() && !application.isAuraElement() && this.getAppliedElements().isEmpty())
@@ -247,7 +246,7 @@ public final class ElementComponentImpl implements ElementComponent {
 		this.getAppliedElements()
 			.forEach(application -> application.writeData(list.add()));
 
-		view.putLong("SyncedAt", owner.getWorld().getTime());
+		view.putLong("SyncedAt", owner.getEntityWorld().getTime());
 		view.putLong("ElectroChargedCooldown", electroChargedCooldown);
 		view.putLong("BurningCooldown", burningCooldown);
 
@@ -280,7 +279,7 @@ public final class ElementComponentImpl implements ElementComponent {
 		this.crystallizeShield = CrystallizeShield.readData(view.getOptionalReadView("CrystallizeShield"));
 
 		final ListReadView list = view.getListReadView("AppliedElements");
-		final long syncedAt = view.getLong("SyncedAt", this.owner.getWorld().getTime());
+		final long syncedAt = view.getLong("SyncedAt", this.owner.getEntityWorld().getTime());
 
 		this.elementHolders
 			.values()
@@ -298,7 +297,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		this.freezeDecayHandler.readData(
 			view.getOptionalReadView("FreezeDecay"),
-			this.owner.getWorld().getTime() - syncedAt
+			this.owner.getEntityWorld().getTime() - syncedAt
 		);
  	}
 
@@ -502,7 +501,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		final Optional<ElementalReaction> firstReaction = triggeredReactions.stream().findFirst();
 
-		firstReaction.ifPresent(elementalReaction -> this.lastReaction = new Pair<>(elementalReaction, this.owner.getWorld().getTime()));
+		firstReaction.ifPresent(elementalReaction -> this.lastReaction = new Pair<>(elementalReaction, this.owner.getEntityWorld().getTime()));
 
 		final boolean cantBeAura = !context.getElement().canBeAura();
 		final boolean hasTriggeredReactions = !triggeredReactions.isEmpty();
@@ -564,11 +563,11 @@ public final class ElementComponentImpl implements ElementComponent {
 		}
 
 		private void tick(ElementComponentImpl impl) {
-			if ((this.appliedAt + 300 >= impl.owner.getWorld().getTime() && !this.isEmpty()) || impl.crystallizeShield == null) return;
+			if ((this.appliedAt + 300 >= impl.owner.getEntityWorld().getTime() && !this.isEmpty()) || impl.crystallizeShield == null) return;
 
 			impl.crystallizeShield = null;
 
-			impl.owner.getWorld()
+			impl.owner.getEntityWorld()
 				.playSound(null, impl.owner.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_BREAK, SoundCategory.PLAYERS, 1.0f, 1.0f);
 
 			ElementComponent.sync(impl.owner);
@@ -639,7 +638,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 				final ElementComponentImpl component = (ElementComponentImpl) ElementComponent.KEY.get(result.getEntity());
 
-				component.freezeDecayHandler.freezeReappliedAt = component.owner.getWorld().getTime();
+				component.freezeDecayHandler.freezeReappliedAt = component.owner.getEntityWorld().getTime();
 				component.freezeDecayHandler.isFreezeReapplied = true;
 			});
 		}

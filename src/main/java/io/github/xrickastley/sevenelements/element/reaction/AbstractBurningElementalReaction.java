@@ -85,7 +85,7 @@ public abstract sealed class AbstractBurningElementalReaction
 
 	static {
 		ElementEvents.APPLIED.register((element, application) -> {
-			if (application.getEntity().getWorld().isClient || element != Element.BURNING) return;
+			if (application.getEntity().getEntityWorld().isClient() || element != Element.BURNING) return;
 
 			final ElementComponent component = ElementComponent.KEY.get(application.getEntity());
 
@@ -138,11 +138,11 @@ public abstract sealed class AbstractBurningElementalReaction
 		at = @At("HEAD")
 	)
 	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity) {
-		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 
-		if (!component.hasElementalApplication(Element.BURNING) || component.isBurningOnCD() || entity.getWorld().isClient) return;
+		if (!component.hasElementalApplication(Element.BURNING) || component.isBurningOnCD() || entity.getEntityWorld().isClient()) return;
 
 		if (!component.hasElementalApplication(Element.DENDRO) && !component.hasElementalApplication(Element.QUICKEN)) {
 			component

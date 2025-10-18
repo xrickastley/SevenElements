@@ -4,6 +4,7 @@ import io.github.xrickastley.sevenelements.SevenElements;
 
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
+import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -15,7 +16,7 @@ public final class TextHelper {
 	}
 
 	public static MutableText font(MutableText text, Identifier font) {
-		return text.setStyle(text.getStyle().withFont(font));
+		return text.setStyle(text.getStyle().withFont(new StyleSpriteSource.Font(font)));
 	}
 
 	public static MutableText gradient(String text, int start, int end) {
