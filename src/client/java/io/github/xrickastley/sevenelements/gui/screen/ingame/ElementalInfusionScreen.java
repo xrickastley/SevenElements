@@ -61,10 +61,6 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 	}
 
 	private void drawElements(DrawContext context, final int x, final int y) {
-		// RenderSystem.enableBlend();
-		// RenderSystem.defaultBlendFunc();
-		// RenderSystem.enableCull();
-
 		context.drawTexture(RenderLayer::getGuiTextured, Element.PYRO.getTexture(), x + 76, y + 18, 0, 0, 24, 24, 24, 24);
 		context.drawTexture(RenderLayer::getGuiTextured, Element.HYDRO.getTexture(), x + 107, y + 33, 0, 0, 24, 24, 24, 24);
 		context.drawTexture(RenderLayer::getGuiTextured, Element.ANEMO.getTexture(), x + 115, y + 63, 0, 0, 24, 24, 24, 24);
@@ -72,9 +68,6 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 		context.drawTexture(RenderLayer::getGuiTextured, Element.DENDRO.getTexture(), x + 59, y + 92, 0, 0, 24, 24, 24, 24);
 		context.drawTexture(RenderLayer::getGuiTextured, Element.CRYO.getTexture(), x + 37, y + 63, 0, 0, 24, 24, 24, 24);
 		context.drawTexture(RenderLayer::getGuiTextured, Element.GEO.getTexture(), x + 45, y + 33, 0, 0, 24, 24, 24, 24);
-
-		// RenderSystem.disableBlend();
-		// RenderSystem.disableCull();
 	}
 
 	private void drawInfuseButton(DrawContext context, final int x, final int y, final int mouseX, final int mouseY) {
@@ -99,11 +92,9 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 			? Colors.YELLOW
 			: 0x685E4A;
 
-		// RenderSystem.enableBlend();
 		context.drawGuiTexture(RenderLayer::getGuiTextured, texture, x1, y1, 90, 19);
 		context.drawGuiTexture(RenderLayer::getGuiTextured, expTexture, x2 - 24, y2 - 16, 24, 16);
 		context.drawText(this.textRenderer, Text.translatable("container.seven-elements.infusion_table.infuse"), x1 + 6, y1 + 6, color, false);
-		// RenderSystem.disableBlend();
 	}
 
 	@Override

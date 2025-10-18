@@ -104,13 +104,6 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		entries.forEach(Functions.withArgument(Entry::render, context, this));
 
 		this.renderEffects(context);
-		this.debugRender(context);
-	}
-
-	private void debugRender(WorldRenderContext context) {
-//		final List<Vec3d> positions = generatePositions(new Vec3d(-4, -60, -4), new Vec3d(4, -60, 4));
-
-		// this.renderChargeLine(context, new Vec3d(-4, -58, -4), new Vec3d(4, -58, 4), Colors.HYDRO, Colors.PHYSICAL);
 	}
 
 	public void tick(ClientWorld world) {

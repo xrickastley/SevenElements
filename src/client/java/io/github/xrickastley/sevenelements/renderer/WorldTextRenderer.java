@@ -164,8 +164,6 @@ public final class WorldTextRenderer {
 
 		@Override
 		protected void render(Camera camera, float tickDelta, MatrixStack matrices) {
-			// final MinecraftClient client = MinecraftClient.getInstance();
-			// final VertexConsumerProvider.Immediate immediate = client.getBufferBuilders().getEntityVertexConsumers();
 			final VertexConsumerProvider.Immediate immediate = SevenElementsRenderLayer.getWorldTextImmediate();
 
 			final float deltaTime = age + tickDelta;
