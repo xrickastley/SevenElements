@@ -1,6 +1,7 @@
 package io.github.xrickastley.sevenelements.events;
 
 import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContext;
+
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
 

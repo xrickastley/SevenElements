@@ -29,9 +29,9 @@ import io.github.xrickastley.sevenelements.util.Colors;
 import io.github.xrickastley.sevenelements.util.Ease;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
+import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContext;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.Context;
-import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContext;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.BufferBuilder;

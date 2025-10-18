@@ -1,7 +1,7 @@
 
 package io.github.xrickastley.sevenelements.mixin.client;
+import com.mojang.blaze3d.buffers.GpuBufferSlice;
 
-import io.github.xrickastley.sevenelements.events.WorldRenderEnd;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
 import org.joml.Vector4f;
@@ -12,11 +12,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.mojang.blaze3d.buffers.GpuBufferSlice;
-
+import io.github.xrickastley.sevenelements.events.WorldRenderEnd;
 import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContext;
 import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContextImpl;
 import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRendererHooks;
+
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.WorldRenderer;

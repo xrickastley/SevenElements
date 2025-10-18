@@ -44,12 +44,12 @@ public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEnt
 
 		state.apply(dendroCore);
 	}
-	
+
 	@Override
 	public void render(DendroCoreEntityState livingEntityRenderState, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CameraRenderState cameraRenderState) {
 		this.shadowOpacity = 0f;
 		this.shadowRadius = 0f;
-		
+
 		super.render(livingEntityRenderState, matrixStack, orderedRenderCommandQueue, cameraRenderState);
 	}
 
