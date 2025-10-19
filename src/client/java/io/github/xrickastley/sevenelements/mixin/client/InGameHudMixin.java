@@ -1,7 +1,5 @@
 package io.github.xrickastley.sevenelements.mixin.client;
 
-import com.llamalad7.mixinextras.sugar.Local;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,8 +22,10 @@ import io.github.xrickastley.sevenelements.util.Functions;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
@@ -36,6 +36,18 @@ public class InGameHudMixin {
 	@Shadow
 	@Final
 	private static Identifier POWDER_SNOW_OUTLINE;
+
+	@Shadow
+	private int renderHealthValue;
+	@Shadow
+	private int scaledWidth;
+	@Shadow
+	private int scaledHeight;
+
+	@Shadow
+	private PlayerEntity getCameraPlayer() {
+		throw new AssertionError();
+	}
 
 	@Shadow
 	private void renderOverlay(DrawContext context, Identifier texture, float opacity) {
@@ -51,7 +63,24 @@ public class InGameHudMixin {
 			ordinal = 0
 		)
 	)
-	private void renderAppliedElements(DrawContext context, CallbackInfo ci, @Local PlayerEntity player, @Local(ordinal = 3) int x, @Local(ordinal = 9) int y) {
+	private void renderAppliedElements(DrawContext context, CallbackInfo ci) {
+		final PlayerEntity player = this.getCameraPlayer();
+
+		if (player == null) return;
+
+		// Moved computations for Connector compat.
+		int _i = MathHelper.ceil(player.getHealth());
+		int j = this.renderHealthValue;
+
+		final int x = this.scaledWidth / 2 - 91;
+
+		int o = this.scaledHeight - 39;
+		float f = Math.max((float) player.getAttributeValue(EntityAttributes.GENERIC_MAX_HEALTH), Math.max(j, _i));
+		int p = MathHelper.ceil(player.getAbsorptionAmount());
+		int q = MathHelper.ceil((f + p) / 2.0F / 10.0F);
+		int r = Math.max(10 - (q - 2), 3);
+		int y = o - (q - 1) * r - 10;
+
 		this.client.getProfiler().swap("origins-genshin:elements");
 
 		int offset = 0;
