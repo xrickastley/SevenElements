@@ -13,8 +13,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
+import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
 import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
@@ -176,9 +176,7 @@ public abstract class LivingEntityMixin
 
 		if (!source.sevenelements$displayDamage()) return;
 
-		final ElementalDamageSource eds = source instanceof final ElementalDamageSource eds2
-			? eds2
-			: new ElementalDamageSource(source, ElementalApplications.gaugeUnits((LivingEntity)(Entity) this, Element.PHYSICAL, 0), InternalCooldownContext.ofNone(source.getAttacker()));
+		final ElementalDamageSource eds = ElementComponentImpl.resolve(source, (LivingEntity)(Entity) this);
 
 		sevenelements$subdamage += amount;
 
@@ -224,7 +222,7 @@ public abstract class LivingEntityMixin
 
 	@Unique
 	private void sevenelements$triggerDendroCoreReactions(final DamageSource source) {
-		if (!(source instanceof final ElementalDamageSource eds)) return;
+		final ElementalDamageSource eds = ElementComponentImpl.resolve(source, (LivingEntity)(Entity) this);
 
 		final Element element = eds.getElementalApplication().getElement();
 

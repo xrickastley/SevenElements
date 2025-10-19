@@ -26,6 +26,17 @@ repositories {
 	maven { 
 		url = "https://maven.terraformersmc.com/releases/"
 	}
+    exclusiveContent {
+        forRepository {
+            maven {
+                name = "Modrinth"
+                url = "https://api.modrinth.com/maven"
+            }
+        }
+        filter {
+            includeGroup "maven.modrinth"
+        }
+    }
 }
 
 loom {
@@ -60,6 +71,9 @@ dependencies {
 	include modImplementation ("org.ladysnake.cardinal-components-api:cardinal-components-item:${project.cca_version}")
 
 	include modImplementation (annotationProcessor("io.github.llamalad7:mixinextras-fabric:0.5.0"))
+
+	// Spell Power Attributes by ZsoltMolnarr, for compatibility.
+	modCompileOnly("maven.modrinth:spell-power:${project.spell_power_version}")
 }
 
 processResources {

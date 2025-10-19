@@ -18,12 +18,12 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
+import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
 import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
-import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
+import io.github.xrickastley.sevenelements.interfaces.DamageSourceWrapper;
 import io.github.xrickastley.sevenelements.interfaces.IPlayerEntity;
 import io.github.xrickastley.sevenelements.networking.ShowElementalDamageS2CPayload;
 import io.github.xrickastley.sevenelements.util.BoxUtil;
@@ -112,7 +112,11 @@ public abstract class PlayerEntityMixin
 	private DamageSource checkForCritMain(DamageSource source, @Local(ordinal = 2) boolean crit) {
 		if (sevenelements$critDamageSources == null) sevenelements$critDamageSources = new ArrayList<>();
 
-		if (crit) sevenelements$critDamageSources.add(source);
+		if (crit) {
+			sevenelements$critDamageSources.add(
+				source instanceof final DamageSourceWrapper wrapper ? wrapper.getOriginalSource() : source
+			);
+		}
 
 		return source;
 	}
@@ -153,9 +157,7 @@ public abstract class PlayerEntityMixin
 
 		if (!source.sevenelements$displayDamage()) return;
 
-		final ElementalDamageSource eds = source instanceof final ElementalDamageSource eds2
-			? eds2
-			: new ElementalDamageSource(source, ElementalApplications.gaugeUnits(this, Element.PHYSICAL, 0), InternalCooldownContext.ofNone(source.getAttacker()));
+		final ElementalDamageSource eds = ElementComponentImpl.resolve(source, this);
 
 		sevenelements$subdamage += amount;
 
