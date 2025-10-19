@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.element.Element;
@@ -22,6 +23,7 @@ import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
+import io.github.xrickastley.sevenelements.element.PartialElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.reaction.AbstractBurningElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.ElectroChargedElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
@@ -68,9 +70,18 @@ public final class ElementComponentImpl implements ElementComponent {
 	private CrystallizeShield crystallizeShield = null;
 	private int crystallizeShieldReducedAt = -1;
 
-	// TO BE USED ONLY INTERNALLY.
+	@ApiStatus.Internal
 	public static <T extends LivingEntity> boolean canApplyElement(Class<T> entityClass) {
 		return !ElementComponentImpl.DENIED_ENTITIES.contains(entityClass);
+	}
+
+	@ApiStatus.Internal
+	public static ElementalDamageSource resolve(DamageSource source, LivingEntity target) {
+		return source instanceof final ElementalDamageSource eds
+			? eds
+			: source instanceof PartialElementalDamageSource partialEds
+				? partialEds.resolve(target)
+				: ElementalDamageSource.of(source, target);
 	}
 
 	public ElementComponentImpl(LivingEntity owner) {

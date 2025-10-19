@@ -23,10 +23,7 @@ import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
 import io.github.xrickastley.sevenelements.effect.ElementalStatusEffect;
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
-import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
-import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.reaction.AdditiveElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.AmplifyingElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
@@ -212,9 +209,7 @@ public abstract class PrioritizedLivingEntityMixin
 		// do **not** apply an element **if** DMG cannot be applied.
 		if (this.isInvulnerableTo(source) || this.getWorld().isClient || this.isDead() || fireResistance || damageCooldown) return amount;
 
-		final ElementalDamageSource eds = source instanceof final ElementalDamageSource eds2
-			? eds2
-			: new ElementalDamageSource(source, ElementalApplications.gaugeUnits((LivingEntity)(Entity) this, Element.PHYSICAL, 0.00), InternalCooldownContext.ofNone(source.getAttacker()));
+		final ElementalDamageSource eds = ElementComponentImpl.resolve(source, (LivingEntity)(Entity) this);
 
 		final ElementComponent component = ElementComponent.KEY.get(this);
 		this.sevenelements$reactions = new ArrayList<>(component.applyFromDamageSource(eds));
