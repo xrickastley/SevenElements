@@ -4,6 +4,7 @@ io.github.xrickastley.sevenelements.annotation
 io.github.xrickastley.sevenelements.annotation.mixin
 io.github.xrickastley.sevenelements.block
 io.github.xrickastley.sevenelements.command
+io.github.xrickastley.sevenelements.compat
 io.github.xrickastley.sevenelements.component
 io.github.xrickastley.sevenelements.effect
 io.github.xrickastley.sevenelements.element
@@ -14,6 +15,8 @@ io.github.xrickastley.sevenelements.exception
 io.github.xrickastley.sevenelements.factory
 io.github.xrickastley.sevenelements.interfaces
 io.github.xrickastley.sevenelements.mixin
+io.github.xrickastley.sevenelements.mixin.compat
+io.github.xrickastley.sevenelements.mixin.plugin
 io.github.xrickastley.sevenelements.networking
 io.github.xrickastley.sevenelements.particle
 io.github.xrickastley.sevenelements.registry
