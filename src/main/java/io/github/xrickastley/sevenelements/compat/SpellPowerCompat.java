@@ -6,6 +6,7 @@ import java.util.Map;
 import org.jetbrains.annotations.ApiStatus;
 
 import io.github.xrickastley.sevenelements.element.Element;
+import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
@@ -13,8 +14,8 @@ import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.InternalCooldownTag;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.element.PartialElementalDamageSource;
-import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
+
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -30,7 +31,7 @@ public class SpellPowerCompat {
 	 */
 	public static void registerInfusion(Identifier spellSchoolId, Element element) {
 		SpellPowerCompat.registerInfusion(
-			spellSchoolId, 
+			spellSchoolId,
 			ElementalApplications.builder()
 				.setElement(element)
 				.setType(Type.GAUGE_UNIT)
@@ -91,16 +92,16 @@ public class SpellPowerCompat {
 	private static final record Entry(ElementalApplication.Builder infusionBuilder, InternalCooldownContext.Builder icdBuilder) {
 		public ElementalDamageSource create(LivingEntity target, DamageSource source) {
 			return new ElementalDamageSource(
-				source, 
-				infusionBuilder.build(target), 
+				source,
+				infusionBuilder.build(target),
 				icdBuilder.build(ClassInstanceUtil.castOrNull(source.getAttacker(), LivingEntity.class))
 			);
 		}
 
 		public PartialElementalDamageSource create(DamageSource source) {
 			return new PartialElementalDamageSource(
-				source, 
-				infusionBuilder, 
+				source,
+				infusionBuilder,
 				icdBuilder.build(ClassInstanceUtil.castOrNull(source.getAttacker(), LivingEntity.class))
 			);
 		}

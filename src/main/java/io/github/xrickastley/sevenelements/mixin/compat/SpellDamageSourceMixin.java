@@ -1,17 +1,17 @@
 package io.github.xrickastley.sevenelements.mixin.compat;
 
-import io.github.xrickastley.sevenelements.annotation.mixin.Local;
-import io.github.xrickastley.sevenelements.compat.SpellPowerCompat;
-import net.minecraft.entity.damage.DamageSource;
-import net.spell_power.api.SpellSchool;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Pseudo;
 import org.spongepowered.asm.mixin.injection.At;
 
-import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import io.github.xrickastley.sevenelements.annotation.mixin.Local;
+import io.github.xrickastley.sevenelements.compat.SpellPowerCompat;
 
+import net.minecraft.entity.damage.DamageSource;
 import net.spell_power.api.SpellDamageSource;
+import net.spell_power.api.SpellSchool;
 
 @Pseudo
 @Mixin(SpellDamageSource.class)

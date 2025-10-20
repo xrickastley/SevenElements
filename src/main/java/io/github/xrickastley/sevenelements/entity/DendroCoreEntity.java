@@ -210,7 +210,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	@Override
 	public boolean damage(DamageSource source, float amount) {
 		if (!this.isNormal()) return false;
-		
+
 		final ElementalDamageSource eds = ElementComponent.applyElementalInfusions(source, this);
 		final Element element = eds.getElementalApplication().getElement();
 

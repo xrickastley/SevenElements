@@ -46,7 +46,7 @@ public class SevenElementsMixinPlugin implements IMixinConfigPlugin {
 	/**
 	 * Adds an arbitrary amount of conditional mixins that are only loaded when the provided mod
 	 * exists.
-	 * 
+	 *
 	 * @param modId The required mod for all specified mixins to be loaded.
 	 * @param mixins The conditional mixins to load. This must be {@code Strings} containing the
 	 * full package name and the class name, i.e. {@code io.github.xrickastley.sevenelements.mixin.ExampleOptionalMixin}
@@ -58,14 +58,14 @@ public class SevenElementsMixinPlugin implements IMixinConfigPlugin {
 	/**
 	 * Adds an arbitrary amount of conditional mixins that are only loaded when the provided mod
 	 * exists.
-	 * 
+	 *
 	 * @param modId The required mod for all specified mixins to be loaded.
 	 * @param mixins The conditional mixins to load. This must be a {@code List} of {@code Strings}
-	 * containing the full package name and the class name, i.e. 
+	 * containing the full package name and the class name, i.e.
 	 * {@code io.github.xrickastley.sevenelements.mixin.ExampleOptionalMixin}
 	 */
 	public static void addConditionalMixins(String modId, List<String> mixins) {
-		mixins.forEach(mixin -> 
+		mixins.forEach(mixin ->
 			SevenElementsMixinPlugin.MOD_CONDITIONAL_MIXINS.put(mixin, modId)
 		);
 	}
