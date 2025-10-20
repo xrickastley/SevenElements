@@ -22,6 +22,7 @@ export default defineConfig({
     sidebar: {
       "guide": [
         { text: 'Getting Started', link: '/guide' },
+        { text: 'Installation', link: '/guide/installation.md' },
         {
           text: 'Workstations',
           items: [
