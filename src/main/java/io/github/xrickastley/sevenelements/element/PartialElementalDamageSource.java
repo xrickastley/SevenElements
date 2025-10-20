@@ -4,6 +4,7 @@ import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
 import io.github.xrickastley.sevenelements.interfaces.DamageSourceWrapper;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -14,11 +15,11 @@ import net.minecraft.util.math.Vec3d;
 /**
  * A version of {@link ElementalDamageSource} used when the target can't quite be determined
  * during the creation of the {@link DamageSource}. <br> <br>
- * 
+ *
  * When a {@code PartialElementalDamageSource} is dealt to an entity, it is resolved via the
  * {@link ElementComponentImpl}
  */
-public final class PartialElementalDamageSource 
+public final class PartialElementalDamageSource
 	extends DamageSource
 	implements DamageSourceWrapper
 {

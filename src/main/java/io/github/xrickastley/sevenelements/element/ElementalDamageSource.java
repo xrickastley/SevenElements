@@ -3,6 +3,7 @@ package io.github.xrickastley.sevenelements.element;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.interfaces.DamageSourceWrapper;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -10,7 +11,7 @@ import net.minecraft.entity.damage.DamageType;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.Vec3d;
 
-public final class ElementalDamageSource 
+public final class ElementalDamageSource
 	extends DamageSource
 	implements DamageSourceWrapper
 {
