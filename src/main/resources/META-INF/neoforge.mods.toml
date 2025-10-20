@@ -1,0 +1,42 @@
+modLoader="javafml"
+license="ARR"
+
+[properties]
+"connector:placeholder"=true
+
+[[mods]]
+modId="seven_elements"
+version="${version}"
+displayName="Seven Elements"
+authors="_xRickAstley"
+description='''
+A Minecraft mod that brings a faithful implementation of Genshin Impact's Elemental Combat system in Minecraft
+'''
+
+[[dependencies.seven_elements]]
+modId="neoforge"
+type="required"
+versionRange="[21.1.97,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.seven_elements]]
+modId="minecraft"
+type="required"
+versionRange="[1.21, 1.21.1]"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.seven_elements]]
+modId="connector"
+type="required"
+versionRange="*"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.seven_elements]]
+modId="mixinextras-neoforge"
+type="required"
+versionRange=">=0.5.0"
+ordering="BEFORE"
+side="BOTH"

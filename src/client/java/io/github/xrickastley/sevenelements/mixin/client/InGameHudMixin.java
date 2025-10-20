@@ -1,7 +1,5 @@
 package io.github.xrickastley.sevenelements.mixin.client;
 
-import com.llamalad7.mixinextras.sugar.Local;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,8 +23,10 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.render.RenderTickCounter;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 @Mixin(InGameHud.class)
 public class InGameHudMixin {
@@ -37,6 +37,14 @@ public class InGameHudMixin {
 	@Shadow
 	@Final
 	private static Identifier POWDER_SNOW_OUTLINE;
+
+	@Shadow
+	private int renderHealthValue;
+
+	@Shadow
+	private PlayerEntity getCameraPlayer() {
+		throw new AssertionError();
+	}
 
 	@Shadow
 	private void renderOverlay(DrawContext context, Identifier texture, float opacity) {
@@ -51,7 +59,21 @@ public class InGameHudMixin {
 			shift = At.Shift.AFTER
 		)
 	)
-	private void renderAppliedElements(DrawContext context, CallbackInfo ci, @Local PlayerEntity player, @Local(ordinal = 4) int y, @Local(ordinal = 2) int x, @Local(ordinal = 6) int p, @Local(ordinal = 7) int lines) {
+	private void renderAppliedElements(DrawContext context, CallbackInfo ci) {
+		final PlayerEntity player = this.getCameraPlayer();
+
+		if (player == null) return;
+
+        int _i = MathHelper.ceil(player.getHealth());
+        int j = this.renderHealthValue;
+
+		int y = context.getScaledWindowHeight() - 39;
+		int x = context.getScaledWindowWidth() / 2 - 91;
+        float f = Math.max((float) player.getAttributeValue(EntityAttributes.GENERIC_MAX_HEALTH), (float)Math.max(j, _i));
+        int o = MathHelper.ceil(player.getAbsorptionAmount());
+        int p = MathHelper.ceil((f + (float) o) / 2.0F / 10.0F);
+		int lines = Math.max(10 - (p - 2), 3);
+
 		this.client.getProfiler().swap("seven-elements:elements");
 
 		y -= (p - 1) * lines;

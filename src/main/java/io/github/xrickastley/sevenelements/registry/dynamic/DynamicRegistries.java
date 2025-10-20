@@ -20,8 +20,7 @@ public final class DynamicRegistries {
 			new SevenElementsRegistryLoader.Entry<>(entryClass, key, elementCodec, requiredNonEmpty)
 		);
 
-		DynamicRegistriesImpl.register(key, elementCodec);
-		DynamicRegistriesImpl.addSyncedRegistry(key, elementCodec);
+		net.fabricmc.fabric.api.event.registry.DynamicRegistries.registerSynced(key, elementCodec);
 		DynamicRegistriesImpl.FABRIC_DYNAMIC_REGISTRY_KEYS.remove(key);
 	}
 
@@ -34,8 +33,7 @@ public final class DynamicRegistries {
 			new SevenElementsRegistryLoader.IdentifiedEntry<>(resultClass, key, builderCodec, resultFn, requiredNonEmpty)
 		);
 
-		DynamicRegistriesImpl.register(key, elementCodec);
-		DynamicRegistriesImpl.addSyncedRegistry(key, elementCodec);
+		net.fabricmc.fabric.api.event.registry.DynamicRegistries.registerSynced(key, elementCodec);
 		DynamicRegistriesImpl.FABRIC_DYNAMIC_REGISTRY_KEYS.remove(key);
 	}
 
