@@ -147,17 +147,21 @@ loadScripts(document, 'script');</script>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#registerInfusion(net.minecraft.util.Identifier,io.github.xrickastley.sevenelements.element.Element)" class="member-name-link">registerInfusion</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.20.1+build.10/net/minecraft/util/Identifier.html" title="class or interface in net.minecraft.util" class="external-link">Identifier</a>&nbsp;spellSchoolId,
  <a href="../element/Element.html" title="enum class in io.github.xrickastley.sevenelements.element">Element</a>&nbsp;element)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
-<div class="block">Registers a simple elemental infusion for a Spell Power.</div>
+<div class="block">Registers a simple elemental infusion for a Spell School.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#registerInfusion(net.minecraft.util.Identifier,io.github.xrickastley.sevenelements.element.ElementalApplication.Builder)" class="member-name-link">registerInfusion</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.20.1+build.10/net/minecraft/util/Identifier.html" title="class or interface in net.minecraft.util" class="external-link">Identifier</a>&nbsp;spellSchoolId,
  <a href="../element/ElementalApplication.Builder.html" title="class in io.github.xrickastley.sevenelements.element">ElementalApplication.Builder</a>&nbsp;infusionBuilder)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Registers a complex elemental infusion for a Spell School.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#registerInfusion(net.minecraft.util.Identifier,io.github.xrickastley.sevenelements.element.ElementalApplication.Builder,io.github.xrickastley.sevenelements.element.InternalCooldownContext.Builder)" class="member-name-link">registerInfusion</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.20.1+build.10/net/minecraft/util/Identifier.html" title="class or interface in net.minecraft.util" class="external-link">Identifier</a>&nbsp;spellSchoolId,
  <a href="../element/ElementalApplication.Builder.html" title="class in io.github.xrickastley.sevenelements.element">ElementalApplication.Builder</a>&nbsp;infusionBuilder,
  <a href="../element/InternalCooldownContext.Builder.html" title="class in io.github.xrickastley.sevenelements.element">InternalCooldownContext.Builder</a>&nbsp;icdBuilder)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Registers a complex elemental infusion for a Spell School.</div>
+</div>
 </div>
 </div>
 </div>
@@ -208,11 +212,11 @@ loadScripts(document, 'script');</script>
 <h3>registerInfusion</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">registerInfusion</span><wbr><span class="parameters">(<a href="https://maven.fabricmc.net/docs/yarn-1.20.1+build.10/net/minecraft/util/Identifier.html" title="class or interface in net.minecraft.util" class="external-link">Identifier</a>&nbsp;spellSchoolId,
  <a href="../element/Element.html" title="enum class in io.github.xrickastley.sevenelements.element">Element</a>&nbsp;element)</span></div>
-<div class="block">Registers a simple elemental infusion for a Spell Power.</div>
+<div class="block">Registers a simple elemental infusion for a Spell School.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>spellSchoolId</code> - </dd>
-<dd><code>element</code> - </dd>
+<dd><code>spellSchoolId</code> - The Spell School's identifier.</dd>
+<dd><code>element</code> - The element this Spell School applies.</dd>
 </dl>
 </section>
 </li>
@@ -221,6 +225,13 @@ loadScripts(document, 'script');</script>
 <h3>registerInfusion</h3>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">registerInfusion</span><wbr><span class="parameters">(<a href="https://maven.fabricmc.net/docs/yarn-1.20.1+build.10/net/minecraft/util/Identifier.html" title="class or interface in net.minecraft.util" class="external-link">Identifier</a>&nbsp;spellSchoolId,
  <a href="../element/ElementalApplication.Builder.html" title="class in io.github.xrickastley.sevenelements.element">ElementalApplication.Builder</a>&nbsp;infusionBuilder)</span></div>
+<div class="block">Registers a complex elemental infusion for a Spell School.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>spellSchoolId</code> - The Spell School's identifier.</dd>
+<dd><code>infusionBuilder</code> - The Elemental Application builder to use in creating the Elemental
+ Application this Spell School applies.</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -229,6 +240,15 @@ loadScripts(document, 'script');</script>
 <div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">registerInfusion</span><wbr><span class="parameters">(<a href="https://maven.fabricmc.net/docs/yarn-1.20.1+build.10/net/minecraft/util/Identifier.html" title="class or interface in net.minecraft.util" class="external-link">Identifier</a>&nbsp;spellSchoolId,
  <a href="../element/ElementalApplication.Builder.html" title="class in io.github.xrickastley.sevenelements.element">ElementalApplication.Builder</a>&nbsp;infusionBuilder,
  <a href="../element/InternalCooldownContext.Builder.html" title="class in io.github.xrickastley.sevenelements.element">InternalCooldownContext.Builder</a>&nbsp;icdBuilder)</span></div>
+<div class="block">Registers a complex elemental infusion for a Spell School.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>spellSchoolId</code> - The Spell School's identifier.</dd>
+<dd><code>infusionBuilder</code> - The Elemental Application builder to use in creating the Elemental
+ Application this Spell School applies.</dd>
+<dd><code>icdBuilder</code> - The Internal Cooldown Context builder to use in creating the Internal
+ Cooldown context of this Spell School's Elemental Application.</dd>
+</dl>
 </section>
 </li>
 <li>
