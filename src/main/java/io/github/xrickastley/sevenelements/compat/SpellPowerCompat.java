@@ -10,6 +10,8 @@ import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
+import io.github.xrickastley.sevenelements.element.InternalCooldownTag;
+import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.element.PartialElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
@@ -22,9 +24,9 @@ public class SpellPowerCompat {
 	private static final Map<Identifier, Entry> SPELL_INFUSIONS = new HashMap<>();
 
 	/**
-	 * Registers a simple elemental infusion for a Spell Power.
-	 * @param spellSchoolId
-	 * @param element
+	 * Registers a simple elemental infusion for a Spell School.
+	 * @param spellSchoolId The Spell School's identifier.
+	 * @param element The element this Spell School applies.
 	 */
 	public static void registerInfusion(Identifier spellSchoolId, Element element) {
 		SpellPowerCompat.registerInfusion(
@@ -36,10 +38,30 @@ public class SpellPowerCompat {
 		);
 	}
 
+	/**
+	 * Registers a complex elemental infusion for a Spell School.
+	 * @param spellSchoolId The Spell School's identifier.
+	 * @param infusionBuilder The Elemental Application builder to use in creating the Elemental
+	 * Application this Spell School applies.
+	 */
 	public static void registerInfusion(Identifier spellSchoolId, ElementalApplication.Builder infusionBuilder) {
-		SpellPowerCompat.registerInfusion(spellSchoolId, infusionBuilder, InternalCooldownContext.Builder.ofNone());
+		SpellPowerCompat.registerInfusion(
+			spellSchoolId,
+			infusionBuilder,
+			InternalCooldownContext.builder()
+				.setTag(InternalCooldownTag.of("spell_power:spell_school"))
+				.setType(InternalCooldownType.DEFAULT)
+		);
 	}
 
+	/**
+	 * Registers a complex elemental infusion for a Spell School.
+	 * @param spellSchoolId The Spell School's identifier.
+	 * @param infusionBuilder The Elemental Application builder to use in creating the Elemental
+	 * Application this Spell School applies.
+	 * @param icdBuilder The Internal Cooldown Context builder to use in creating the Internal
+	 * Cooldown context of this Spell School's Elemental Application.
+	 */
 	public static void registerInfusion(Identifier spellSchoolId, ElementalApplication.Builder infusionBuilder, InternalCooldownContext.Builder icdBuilder) {
 		if (SpellPowerCompat.SPELL_INFUSIONS.containsKey(spellSchoolId))
 			throw new IllegalStateException("The provided Spell Power id: " + spellSchoolId + " has already been registered!");
