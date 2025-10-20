@@ -37,7 +37,7 @@ public final class ElementalInfusionComponent extends ItemComponent {
 		try {
 			if (source.isIndirect() || !(target instanceof final LivingEntity livingTarget) || !(source.getAttacker() instanceof final LivingEntity attacker)) return Optional.empty();
 
-			final ElementalInfusionComponent component = ElementalInfusionComponent.KEY.get(attacker.getMainHandStack());
+			final ElementalInfusionComponent component = ElementalInfusionComponent.get(attacker.getMainHandStack());
 
 			if (component == null || !component.hasElementalInfusion()) return Optional.empty();
 
@@ -69,6 +69,8 @@ public final class ElementalInfusionComponent extends ItemComponent {
 
 		final ElementalInfusionComponent component = ElementalInfusionComponent.get(stack);
 
+		if (component == null) return false;
+
 		component.remove("elemental_infusion");
 		component.remove("internal_cooldown");
 
@@ -76,13 +78,14 @@ public final class ElementalInfusionComponent extends ItemComponent {
 	}
 
 	public static boolean hasInfusion(ItemStack stack) {
-		return ElementalInfusionComponent
-			.get(stack)
-			.hasElementalInfusion();
+		return Optional
+			.of(ElementalInfusionComponent.get(stack))
+			.map(ElementalInfusionComponent::hasElementalInfusion)
+			.orElse(false);
 	}
 
-	public static ElementalInfusionComponent get(ItemStack stack) {
-		return ElementalInfusionComponent.KEY.get(stack);
+	public static @Nullable ElementalInfusionComponent get(ItemStack stack) {
+		return ElementalInfusionComponent.KEY.maybeGet(stack).orElse(null);
 	}
 
 	public @Nullable ElementalApplication.Builder elementalInfusion() {
