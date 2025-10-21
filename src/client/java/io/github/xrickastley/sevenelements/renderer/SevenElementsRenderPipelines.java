@@ -52,7 +52,8 @@ public class SevenElementsRenderPipelines {
 			.withLocation(SevenElements.identifier("pipeline/elements"))
 			.withVertexFormat(VertexFormats.POSITION_TEXTURE_COLOR, DrawMode.QUADS)
 			.withBlend(BlendFunction.TRANSLUCENT)
-			.withCull(false)
+			.withDepthTestFunction(DepthTestFunction.LEQUAL_DEPTH_TEST)
+			.withCull(true)
 			.build()
 	);
 
