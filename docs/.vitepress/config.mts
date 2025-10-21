@@ -50,6 +50,7 @@ export default defineConfig({
       ],
       "developer": [
         { text: 'Getting Started', link: '/developer' },
+        { text: 'Dependency', link: '/developer/dependency.md' },
         {
           text: 'Data pack',
           items: [

@@ -1,4 +1,9 @@
-# Installing the Mod
+---
+prev: false
+next: false
+---
+
+# Installing Seven Elements
 
 This page will guide you on installing the Seven Elements mod depending on your mod loader.
 
