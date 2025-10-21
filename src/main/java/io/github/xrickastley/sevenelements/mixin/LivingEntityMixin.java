@@ -92,7 +92,7 @@ public abstract class LivingEntityMixin
 	private void applyNaturalElements(CallbackInfo ci) {
 		if (!(this.getWorld() instanceof final ServerWorld world)) return;
 
-		if (this.isTouchingWater() && world.getGameRules().getBoolean(SevenElementsGameRules.HYDRO_FROM_WATER)) {
+		if (this.sevenelements$isWet() && world.getGameRules().getBoolean(SevenElementsGameRules.HYDRO_FROM_WATER)) {
 			final ElementComponent component = ElementComponent.KEY.get(this);
 
 			component.addElementalApplication(
@@ -239,5 +239,11 @@ public abstract class LivingEntityMixin
 	@Override
 	public void sevenelements$setBlockedByCrystallizeShield(boolean blocked) {
 		this.sevenelements$blockedByCrystallizeShield = blocked;
+	}
+
+	@Unique
+	@Override
+	public boolean sevenelements$isWet() {
+		return this.isTouchingWaterOrRain() || this.getBlockStateAtPos().isOf(Blocks.BUBBLE_COLUMN);
 	}
 }
