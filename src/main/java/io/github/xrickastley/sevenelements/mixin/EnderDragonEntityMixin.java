@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.github.xrickastley.sevenelements.interfaces.IEnderDragonFight;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
-
+import io.github.xrickastley.sevenelements.util.Functions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonFight;
@@ -34,8 +34,11 @@ public abstract class EnderDragonEntityMixin
 		at = @At("HEAD")
 	)
 	private void addEnderDragonEntityToFight(EnderDragonFight fight, CallbackInfo ci) {
-		((IEnderDragonFight) fight).sevenelements$setDragon(ClassInstanceUtil.cast(this));
-
+		ClassInstanceUtil.ifPresentMapped(
+			fight,
+			IEnderDragonFight.class::cast, 
+			Functions.withArgument(IEnderDragonFight::sevenelements$setDragon, ClassInstanceUtil.cast(this))
+		);
 	}
 
 	@Inject(
@@ -45,8 +48,11 @@ public abstract class EnderDragonEntityMixin
 	private void sendDragonUpdates(CallbackInfo ci) {
 		if (!(this.getWorld() instanceof final ServerWorld world)) return;
 
-		((IEnderDragonFight) world.getEnderDragonFight())
-			.sevenelements$setDragon(ClassInstanceUtil.cast(this));
+		ClassInstanceUtil.ifPresentMapped(
+			world.getEnderDragonFight(),
+			IEnderDragonFight.class::cast, 
+			Functions.withArgument(IEnderDragonFight::sevenelements$setDragon, ClassInstanceUtil.cast(this))
+		);
 	}
 
 	@Inject(
@@ -57,7 +63,10 @@ public abstract class EnderDragonEntityMixin
 		)
 	)
 	private void setDragonOnFightUpdate(CallbackInfo ci, @Local EnderDragonFight enderDragonFight) {
-		((IEnderDragonFight) enderDragonFight)
-			.sevenelements$setDragon(ClassInstanceUtil.cast(this));
+		ClassInstanceUtil.ifPresentMapped(
+			enderDragonFight,
+			IEnderDragonFight.class::cast, 
+			Functions.withArgument(IEnderDragonFight::sevenelements$setDragon, ClassInstanceUtil.cast(this))
+		);
 	}
 }
