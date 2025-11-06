@@ -166,11 +166,11 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 		final ClientConfig config = ClientConfig.get();
 
 		matrixStack.push();
-		matrixStack.translate(0f, entity.getBoundingBox().getYLength() * 1.15, 0f);
+		matrixStack.translate(0f, entity.getBoundingBox().getLengthY() * 1.15, 0f);
 		matrixStack.multiplyPositionMatrix(new Matrix4f().rotation(dispatcher.camera.getRotation()));
 		matrixStack.scale(-GAUGE_SCALE, GAUGE_SCALE * 0.5f, GAUGE_SCALE);
 
-		final float xOffset = (float) (entity.getBoundingBox().getXLength() * 1.5f) / GAUGE_SCALE;
+		final float xOffset = (float) (entity.getBoundingBox().getLengthX() * 1.5f) / GAUGE_SCALE;
 		final float gaugeWidth = application.isGaugeUnits()
 			? (float) Math.min(SCALE_PER_GU * application.getGaugeUnits(), SCALE_PER_GU * 4)
 			: 2 * SCALE_PER_GU;
@@ -193,10 +193,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 			: elementColor.multiply(1, 1, 1, 0.5).asARGB();
 
 		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-		buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color).next();
-		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 0 - yOffset, 0.0001f).color(color).next();
-		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 1 - yOffset, 0.0001f).color(color).next();
-		buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, xOffset, 0 - yOffset, -0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 0 - yOffset, -0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 1 - yOffset, -0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, xOffset, 1 - yOffset, -0.0001f).color(color).next();
 
 		tessellator.draw();
 
@@ -204,10 +204,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 			final float gaugeProgress = (float) (application.getCurrentGauge() / application.getGaugeUnits());
 
 			buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-			buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color).next();
-			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 0 - yOffset, 0.0001f).color(color).next();
-			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 1 - yOffset, 0.0001f).color(color).next();
-			buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color).next();
+			buffer.vertex(positionMatrix, xOffset, 0 - yOffset, -0.0001f).color(color).next();
+			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 0 - yOffset, -0.0001f).color(color).next();
+			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 1 - yOffset, -0.0001f).color(color).next();
+			buffer.vertex(positionMatrix, xOffset, 1 - yOffset, -0.0001f).color(color).next();
 
 			tessellator.draw();
 		}
@@ -273,7 +273,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
 		if (crystallizeShield == null) return;
 
-		final double lengthY = entity.getBoundingBox().getYLength();
+		final double lengthY = entity.getBoundingBox().getLengthY();
 
 		matrixStack.push();
 		matrixStack.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(dispatcher.camera.getYaw()));

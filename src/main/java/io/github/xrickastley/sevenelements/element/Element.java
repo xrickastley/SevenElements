@@ -483,7 +483,7 @@ public enum Element {
 			if (!entity.getWorld().isClient) return;
 
 			final Box box = entity.getBoundingBox();
-			final Vec3d pos = entity.getPos().add(relativePos.multiply(box.getXLength(), box.getYLength(), box.getZLength()));
+			final Vec3d pos = entity.getPos().add(relativePos.multiply(box.getLengthX(), box.getLengthY(), box.getLengthZ()));
 
 			if (count == 0) this.addSingleParticle(entity, pos);
 			else this.addMultipleParticles(entity, pos);

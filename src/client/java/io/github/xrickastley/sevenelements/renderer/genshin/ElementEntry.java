@@ -52,7 +52,7 @@ public final class ElementEntry {
 		final float intervalSplit = blinkInterval / 2f;
 
 		matrixStack.push();
-		matrixStack.translate(0, entity.getBoundingBox().getYLength() * 1.1, 0);
+		matrixStack.translate(0, entity.getBoundingBox().getLengthY() * 1.1, 0);
 		matrixStack.multiplyPositionMatrix(new Matrix4f().rotation(camera.getRotation()));
 		matrixStack.scale(-0.50F, 0.50F, 0.50F);
 

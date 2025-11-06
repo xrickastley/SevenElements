@@ -11,6 +11,6 @@ public class SevenElementsCriteria {
 	}
 
 	private static void register(Criterion<?> criterion) {
-		Criteria.register(criterion);
+		Criteria.register(SevenElementsCriteria.ELEMENTAL_INFUSION.getId().toString(), criterion);
 	}
 }

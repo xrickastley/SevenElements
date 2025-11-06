@@ -22,16 +22,13 @@ import net.minecraft.util.Identifier;
 public class ElementalInfusionCriterion extends AbstractCriterion<ElementalInfusionCriterion.Conditions> {
 	public static final Identifier ID = SevenElements.identifier("elemental_infusion");
 
-	@Override
 	public Identifier getId() {
 		return ID;
 	}
 
 	@Override
-	protected Conditions conditionsFromJson(JsonObject obj, LootContextPredicate playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
-		final Optional<ItemPredicate> item = Optional.ofNullable(
-			ClassInstanceUtil.mapOrNull(obj.get("item"), ItemPredicate::fromJson)
-		);
+	protected Conditions conditionsFromJson(JsonObject obj, Optional<LootContextPredicate> playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
+		final Optional<ItemPredicate> item = ItemPredicate.fromJson(obj.get("item"));
 
 		final Optional<Element> element = Optional.ofNullable(
 			ClassInstanceUtil.mapOrNull(obj.get("element"), Functions.compose(JsonElement::getAsString, s -> Element.valueOf(s)))
@@ -48,8 +45,8 @@ public class ElementalInfusionCriterion extends AbstractCriterion<ElementalInfus
 		private final Optional<ItemPredicate> item;
 		private final Optional<Element> element;
 
-		private Conditions(LootContextPredicate player, Optional<ItemPredicate> item, Optional<Element> element) {
-			super(ElementalInfusionCriterion.ID, player);
+		private Conditions(Optional<LootContextPredicate> player, Optional<ItemPredicate> item, Optional<Element> element) {
+			super(player);
 
 			this.item = item;
 			this.element = element;

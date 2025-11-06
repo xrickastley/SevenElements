@@ -177,9 +177,9 @@ public abstract class PlayerEntityMixin
 
 		final Box boundingBox = this.getBoundingBox();
 
-		final double x = this.getX() + (boundingBox.getXLength() * 1.25 * Math.random());
-		final double y = this.getY() + (boundingBox.getYLength() * 0.50 * Math.random()) + 0.50;
-		final double z = this.getZ() + (boundingBox.getZLength() * 1.25 * Math.random());
+		final double x = this.getX() + (boundingBox.getLengthX() * 1.25 * Math.random());
+		final double y = this.getY() + (boundingBox.getLengthY() * 0.50 * Math.random()) + 0.50;
+		final double z = this.getZ() + (boundingBox.getLengthZ() * 1.25 * Math.random());
 		final Vec3d pos = new Vec3d(x, y, z);
 		final boolean isCrit = eds.getOriginalSource() != null
 			&& source.getAttacker() instanceof final PlayerEntity player

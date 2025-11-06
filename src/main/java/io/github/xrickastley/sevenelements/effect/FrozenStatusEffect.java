@@ -4,7 +4,6 @@ import io.github.xrickastley.sevenelements.component.FrozenEffectComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectCategory;
@@ -19,17 +18,10 @@ public final class FrozenStatusEffect extends ElementalStatusEffect {
 	}
 
 	@Override
-	public void onApplied(LivingEntity entity, AttributeContainer container, int amplifier) {
-		super.onApplied(entity, container, amplifier);
+	public void onApplied(LivingEntity entity, int amplifier) {
+		super.onApplied(entity, amplifier);
 
 		FrozenEffectComponent.KEY.get(entity).freeze();
-	}
-
-	@Override
-	public void onRemoved(LivingEntity entity, AttributeContainer attributes, int amplifier) {
-		super.onRemoved(entity, attributes, amplifier);
-
-		FrozenEffectComponent.KEY.get(entity).unfreeze();
 	}
 
 	@Override

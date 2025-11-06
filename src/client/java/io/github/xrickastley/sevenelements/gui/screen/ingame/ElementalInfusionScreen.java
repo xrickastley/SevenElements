@@ -113,7 +113,7 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderBackground(context);
+		this.renderBackground(context, mouseX, mouseY, delta);
 		super.render(context, mouseX, mouseY, delta);
 		this.drawMouseoverTooltip(context, mouseX, mouseY);
 	}
