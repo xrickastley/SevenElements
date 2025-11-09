@@ -6,8 +6,8 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -24,6 +24,7 @@ import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
+import io.github.xrickastley.sevenelements.interfaces.DamageSourceWrapper;
 import io.github.xrickastley.sevenelements.interfaces.IPlayerEntity;
 import io.github.xrickastley.sevenelements.networking.ShowElementalDamageS2CPayload;
 import io.github.xrickastley.sevenelements.util.BoxUtil;
@@ -57,12 +58,14 @@ public abstract class PlayerEntityMixin
 	private float sevenelements$subdamage;
 
 	@Unique
-	private List<DamageSource> sevenelements$critDamageSources = new ArrayList<>();
+	private Set<DamageSource> sevenelements$critDamageSources = new HashSet<>();
 
 	@Unique
 	@Override
 	public boolean sevenelements$isCrit(DamageSource source) {
-		return this.sevenelements$critDamageSources != null && this.sevenelements$critDamageSources.contains(source);
+		return this.sevenelements$critDamageSources != null 
+			&& DamageSourceWrapper.getDamageSources(source)
+				.anyMatch(this.sevenelements$critDamageSources::contains);
 	}
 
 	@ModifyVariable(
@@ -110,7 +113,7 @@ public abstract class PlayerEntityMixin
 		index = 0
 	)
 	private DamageSource checkForCritMain(DamageSource source, @Local(ordinal = 2) boolean crit) {
-		if (sevenelements$critDamageSources == null) sevenelements$critDamageSources = new ArrayList<>();
+		if (sevenelements$critDamageSources == null) sevenelements$critDamageSources = new HashSet<>();
 
 		if (crit) sevenelements$critDamageSources.add(source);
 
@@ -126,7 +129,7 @@ public abstract class PlayerEntityMixin
 		index = 1
 	)
 	private DamageSource checkForCritSweep(DamageSource source, @Local(ordinal = 2) boolean crit) {
-		if (sevenelements$critDamageSources == null) sevenelements$critDamageSources = new ArrayList<>();
+		if (sevenelements$critDamageSources == null) sevenelements$critDamageSources = new HashSet<>();
 
 		if (crit) sevenelements$critDamageSources.add(source);
 
@@ -141,14 +144,14 @@ public abstract class PlayerEntityMixin
 		if (sevenelements$critDamageSources != null)
 			sevenelements$critDamageSources.clear();
 		else
-			sevenelements$critDamageSources = new ArrayList<>();
+			sevenelements$critDamageSources = new HashSet<>();
 	}
 
 	@Inject(
 		method = "applyDamage",
 		at = @At("TAIL")
 	)
-	private void damageHandlers_elements(ServerWorld world, DamageSource source, float amount, CallbackInfo ci) {
+	private void elementDamageHandler(ServerWorld world, DamageSource source, float amount, CallbackInfo ci) {
 		this.sevenelements$triggerDendroCoreReactions(world, source);
 
 		if (!source.sevenelements$displayDamage()) return;
@@ -171,9 +174,8 @@ public abstract class PlayerEntityMixin
 		final double y = this.getY() + (boundingBox.getLengthY() * 0.50 * Math.random()) + 0.50;
 		final double z = this.getZ() + (boundingBox.getLengthZ() * 1.25 * Math.random());
 		final Vec3d pos = new Vec3d(x, y, z);
-		final boolean isCrit = eds.getOriginalSource() != null
-			&& source.getAttacker() instanceof final PlayerEntity player
-			&& ((IPlayerEntity) player).sevenelements$isCrit(eds.getOriginalSource());
+		final boolean isCrit = source.getAttacker() instanceof final PlayerEntity player 
+			&& ((IPlayerEntity) player).sevenelements$isCrit(eds);
 
 		final Element element = eds.getElementalApplication().getElement();
 		final ShowElementalDamageS2CPayload showElementalDMGPacket = new ShowElementalDamageS2CPayload(pos, element, sevenelements$subdamage, isCrit);

@@ -15,7 +15,7 @@ import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
 import io.github.xrickastley.sevenelements.util.Color;
 import io.github.xrickastley.sevenelements.util.Colors;
-
+import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtException;
@@ -24,6 +24,7 @@ import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.particle.ParticleTypes;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
@@ -206,6 +207,13 @@ public enum Element {
 		final String fallback = string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
 
 		return Text.translatableWithFallback("seven-elements.element." + string.toLowerCase(), fallback);
+	}
+
+	public Text getText(boolean withColor) {
+		return withColor
+			? ((MutableText) this.getText())
+				.withColor(JavaScriptUtil.nullishCoalesing(this.getDamageColor(), Colors.PHYSICAL).asARGB())
+			: this.getText();
 	}
 
 	public String getString() {

@@ -18,10 +18,9 @@ public class InternalCooldownTagType implements ArgumentType<Holder<String>> {
 		return new InternalCooldownTagType();
 	}
 
-	@SuppressWarnings("unchecked")
 	public static InternalCooldownTag getTag(final CommandContext<?> context, final String name) {
 		return context
-			.getArgument(name, (Class<Holder<String>>) ClassInstanceUtil.cast(Holder.class))
+			.getArgument(name, ClassInstanceUtil.<Class<Holder<String>>>cast(Holder.class))
 			.map(InternalCooldownTag::of);
 	}
 
