@@ -2,6 +2,8 @@ package io.github.xrickastley.sevenelements.element;
 
 import org.jetbrains.annotations.Nullable;
 
+import io.github.xrickastley.sevenelements.interfaces.DamageSourceWrapper;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
@@ -9,7 +11,10 @@ import net.minecraft.entity.damage.DamageType;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.Vec3d;
 
-public final class ElementalDamageSource extends DamageSource {
+public final class ElementalDamageSource
+	extends DamageSource
+	implements DamageSourceWrapper
+{
 	private final @Nullable DamageSource original;
 	private final ElementalApplication application;
 	private final InternalCooldownContext icdContext;
@@ -170,6 +175,7 @@ public final class ElementalDamageSource extends DamageSource {
 	 * Returns the {@code DamageSource} that was used to create this {@code ElementalDamageSource},
 	 * or {@code null} if a {@code DamageSource} wasn't used.
 	 */
+	@Override
 	public @Nullable DamageSource getOriginalSource() {
 		return this.original;
 	}
