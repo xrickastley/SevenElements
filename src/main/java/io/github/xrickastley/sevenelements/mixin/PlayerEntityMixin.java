@@ -44,7 +44,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
-@Debug(export = true)
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin
 	extends LivingEntity
