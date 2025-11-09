@@ -16,7 +16,6 @@ import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GrindstoneScreenHandler;
 
-@Debug(export = true)
 @Mixin(GrindstoneScreenHandler.class)
 public class GrindstoneScreenHandlerMixin {
 	@Inject(
