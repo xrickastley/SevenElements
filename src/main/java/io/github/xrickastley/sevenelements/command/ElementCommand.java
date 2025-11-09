@@ -8,6 +8,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -82,6 +83,7 @@ public class ElementCommand {
 					literal("remove")
 					.then(
 						argument("target", EntityArgumentType.entity())
+						.executes(ElementCommand::removeAllElements)
 						.then(
 							argument("element", ElementArgumentType.element())
 							.executes(ElementCommand::removeElement)
@@ -178,10 +180,9 @@ public class ElementCommand {
 		final ElementalApplication application = ElementalApplications.gaugeUnits(target, element, gaugeUnits, aura);
 		final List<ElementalReaction> reactions = component.addElementalApplication(application, InternalCooldownContext.ofNone());
 
-		if (reactions.isEmpty())
-			return CommandUtils.sendFeedback(context, Text.translatable("commands.element.apply", application.getText(), entity.getDisplayName()), true);
-		else
-			return CommandUtils.sendFeedback(context, Text.translatable("commands.element.apply.reactions", application.getText(), entity.getDisplayName(), Texts.join(reactions, Functions.compose(ElementalReaction::getId, Identifier::toString, Text::literal))), true);
+		return reactions.isEmpty()
+			? CommandUtils.sendFeedback(context, Text.translatable("commands.element.apply", application.getText(), entity.getDisplayName()), true)
+			: CommandUtils.sendFeedback(context, Text.translatable("commands.element.apply.reactions", application.getText(), entity.getDisplayName(), Texts.join(reactions, Functions.compose(ElementalReaction::getId, Identifier::toString, Text::literal))), true);
 	}
 
 	private static int applyDuration(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -197,10 +198,31 @@ public class ElementCommand {
 		final ElementalApplication application = ElementalApplications.duration(target, element, gaugeUnits, duration);
 		final List<ElementalReaction> reactions = component.addElementalApplication(application, InternalCooldownContext.ofNone());
 
-		if (reactions.isEmpty())
-			return CommandUtils.sendFeedback(context, Text.translatable("commands.element.apply", element.getText(), entity.getDisplayName()), true);
-		else
-			return CommandUtils.sendFeedback(context, Text.translatable("commands.element.apply.reactions", element.getText(), entity.getDisplayName(), Texts.join(reactions, Functions.compose(ElementalReaction::getId, Identifier::toString, Text::literal))), true);
+		return reactions.isEmpty()
+			? CommandUtils.sendFeedback(context, Text.translatable("commands.element.apply", element.getText(true), entity.getDisplayName()), true)
+			: CommandUtils.sendFeedback(context, Text.translatable("commands.element.apply.reactions", element.getText(true), entity.getDisplayName(), Texts.join(reactions, Functions.compose(ElementalReaction::getId, Identifier::toString, Text::literal))), true);
+	}
+
+	private static int removeAllElements(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		final Entity entity = EntityArgumentType.getEntity(context, "target");
+
+		if (!(entity instanceof final LivingEntity target))
+			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity.getDisplayName()));
+
+		final ElementComponent component = ElementComponent.KEY.get(target);
+		final int removedElements = component
+			.getAppliedElements()
+			.stream()
+			.map(Functions.compose(ElementalApplication::getElement, component::getElementHolder))
+			.peek(Functions.withArgument(ElementHolder::setElementalApplication, null))
+			// Apparently Stream#count can choose to NOT traverse the Stream elements.
+			.collect(Collectors.summingInt(h -> 1));
+
+		ElementComponent.sync(target);
+
+		return removedElements > 0
+			? CommandUtils.sendFeedback(context, Text.translatable("commands.element.remove.multiple.success", entity.getDisplayName(), removedElements), true)
+			: CommandUtils.sendError(context, Text.translatable("commands.element.remove.multiple.none", entity.getDisplayName()));
 	}
 
 	private static int removeElement(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -214,13 +236,13 @@ public class ElementCommand {
 		final ElementHolder holder = component.getElementHolder(element);
 
 		if (!holder.hasElementalApplication())
-			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.none", entity.getDisplayName(), element.getText()));
+			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.none", entity.getDisplayName(), element.getText(true)));
 
 		holder.setElementalApplication(null);
 
 		ElementComponent.sync(entity);
 
-		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.remove", element.getText(), entity.getDisplayName()), true);
+		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.remove", element.getText(true), entity.getDisplayName()), true);
 	}
 
 	private static int reduceElement(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -229,13 +251,13 @@ public class ElementCommand {
 		final double gaugeUnits = DoubleArgumentType.getDouble(context, "gaugeUnits");
 
 		if (!(entity instanceof final LivingEntity target))
-			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity));
+			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", entity.getDisplayName()));
 
 		final ElementComponent component = ElementComponent.KEY.get(target);
 		final ElementHolder holder = component.getElementHolder(element);
 
 		if (!holder.hasElementalApplication())
-			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.none", entity.getDisplayName(), element.getText()));
+			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.none", entity.getDisplayName(), element.getText(true)));
 
 		final double reducedGauge = holder
 			.getElementalApplication()
@@ -243,7 +265,7 @@ public class ElementCommand {
 
 		ElementComponent.sync(entity);
 
-		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.reduce", element.getText(), reducedGauge), true);
+		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.reduce", entity.getDisplayName(), element.getText(true), reducedGauge), true);
 	}
 
 	private static int queryElements(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -272,7 +294,7 @@ public class ElementCommand {
 		final @Nullable ElementalApplication application = component.getElementHolder(element).getElementalApplication();
 
 		if (application == null)
-			return CommandUtils.sendError(context, Text.translatable("commands.element.query.single.none", entity.getDisplayName(), element.getText()));
+			return CommandUtils.sendError(context, Text.translatable("commands.element.query.single.none", entity.getDisplayName(), element.getText(true)));
 
 		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.query.single.success", entity.getDisplayName(), ElementalApplications.getTimerText(application)), true);
 	}
