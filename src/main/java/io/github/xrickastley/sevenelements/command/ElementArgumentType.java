@@ -32,7 +32,13 @@ public class ElementArgumentType implements ArgumentType<Element> {
 	public Element parse(final StringReader stringReader) throws CommandSyntaxException {
 		final String string = stringReader.readUnquotedString();
 
-		return Element.valueOf(string.toUpperCase());
+		try {
+			return Element.valueOf(string.toUpperCase());
+		} catch (Exception e) {
+			throw CommandSyntaxException.BUILT_IN_EXCEPTIONS
+				.dispatcherUnknownArgument()
+				.createWithContext(stringReader);
+		}
 	}
 
 	public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder) {
