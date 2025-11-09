@@ -94,6 +94,6 @@ public final class FrozenElementalReaction extends ElementalReaction {
 		final ElementalApplication freezeApp = component.getElementalApplication(Element.FREEZE);
 
 		// Allow Frozen Swirl (Double Swirl with both reactions) if this is a Hydro aura applied BEFORE Frozen.
-		return hydroApp.getAppliedAt() < freezeApp.getAppliedAt();
+		return original && hydroApp.getAppliedAt() < freezeApp.getAppliedAt();
 	}
 }
