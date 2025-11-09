@@ -11,7 +11,7 @@ import net.minecraft.entity.damage.DamageType;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.Vec3d;
 
-public final class ElementalDamageSource
+public final class ElementalDamageSource 
 	extends DamageSource
 	implements DamageSourceWrapper
 {
