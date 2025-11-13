@@ -26,7 +26,13 @@ Once a Dendro Core's duration expires, it explodes, dealing <span class="dendro"
 
 When it receives <span class="pyro">**Pyro DMG**</span> or <span class="electro">**Electro DMG**</span>, the [Hyperbloom](#hyperbloom) and [Burgeon](#burgeon) Elemental Reactions can be triggered on the Dendro Core.
 
-DMG dealt to the "owners" of all Bloom-related reactions are **5%** of the original DMG dealt. An entity is considered to have "owned" the core if they: triggered the **Bloom** reaction responsible for the Dendro Core or, if they triggered the secondary **Hyperbloom**/**Burgeon** reaction. A Dendro Core may have multiple entities as its owner, where the DMG is attributed to the most recent owner.
+DMG dealt to the "owners" of all Bloom-related reactions will always be **2%** of the original DMG dealt.
+
+An entity is considered to have "owned" the core if they triggered: 
+- the [Bloom](#bloom) reaction responsible for the Dendro Core or, 
+- the secondary [Hyperbloom](#hyperbloom)/[Burgeon](#burgeon) reaction. 
+
+A Dendro Core may have multiple entities as its owner, but its DMG will be attributed to the most recent owner.
 
 ### Internal Data
 
