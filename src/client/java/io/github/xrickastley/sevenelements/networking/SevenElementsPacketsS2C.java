@@ -7,6 +7,7 @@ import io.github.xrickastley.sevenelements.SevenElementsClient;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity.SyncCrystallizeShardTypeS2CPayload;
 import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity;
+import io.github.xrickastley.sevenelements.entity.DendroCoreEntity.SyncDendroCoreStateS2CPayload;
 import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
 import io.github.xrickastley.sevenelements.gui.screen.ingame.ElementalInfusionScreen;
 import io.github.xrickastley.sevenelements.renderer.WorldTextRenderer.DamageText;
@@ -53,7 +54,7 @@ public class SevenElementsPacketsS2C {
 	private static void onPlayInit(ClientPlayNetworkHandler handler, MinecraftClient client) {
 		ClientPlayNetworking.registerGlobalReceiver(ShowElementalReactionS2CPayload.ID, SevenElementsPacketsS2C::onElementalReactionShow);
 		ClientPlayNetworking.registerGlobalReceiver(ShowElementalDamageS2CPayload.ID, SevenElementsPacketsS2C::onElementalDamageShow);
-		ClientPlayNetworking.registerGlobalReceiver(SyncDendroCoreAgeS2CPayload.ID, SevenElementsPacketsS2C::onSyncDendroCoreAge);
+		ClientPlayNetworking.registerGlobalReceiver(SyncDendroCoreStateS2CPayload.ID, SevenElementsPacketsS2C::onSyncDendroCoreState);
 		ClientPlayNetworking.registerGlobalReceiver(SyncCrystallizeShardTypeS2CPayload.ID, SevenElementsPacketsS2C::onSyncCrystallizeShardElement);
 		ClientPlayNetworking.registerGlobalReceiver(FinishElementalInfusionS2CPayload.ID, SevenElementsPacketsS2C::onFinishElementalInfusion);
 
@@ -91,7 +92,7 @@ public class SevenElementsPacketsS2C {
 		);
 	}
 
-	private static void onSyncDendroCoreAge(SyncDendroCoreAgeS2CPayload payload, Context context) {
+	private static void onSyncDendroCoreState(SyncDendroCoreStateS2CPayload payload, Context context) {
 		final World world = MinecraftClient
 			.getInstance()
 			.player
@@ -101,7 +102,7 @@ public class SevenElementsPacketsS2C {
 
 		if (!(entity instanceof final DendroCoreEntity dendroCore)) return;
 
-		dendroCore.age = payload.age();
+		dendroCore.syncFromPacket(payload);
 	}
 
 	private static void onSyncCrystallizeShardElement(SyncCrystallizeShardTypeS2CPayload payload, Context context) {
