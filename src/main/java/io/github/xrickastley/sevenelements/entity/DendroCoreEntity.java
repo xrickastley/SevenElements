@@ -62,6 +62,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	private boolean exploded = false;
 	private int hyperbloomAge = 0;
 	private int curTicksInHitbox = 0;
+	private boolean direct = false;
 
 	public DendroCoreEntity(EntityType<? extends LivingEntity> entityType, World world) {
 		this(entityType, world, null);
@@ -133,6 +134,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		super.writeCustomDataToNbt(nbt);
 
 		nbt.putString("Type", this.type.toString());
+		nbt.putBoolean("Direct", this.direct);
 
 		if (target != null) nbt.putUuid("Target", target);
 
@@ -160,6 +162,10 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			? nbt.getUuid("Target")
 			: null;
 
+		this.direct = nbt.contains("Direct")
+			? nbt.getBoolean("Direct")
+			: false;
+
 		this.owners.clear();
 
 		nbt.getList("Owners", NbtElement.LIST_TYPE)
@@ -179,10 +185,14 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			final double distance = Math.sqrt(targetPos.x * targetPos.x + targetPos.z * targetPos.z);
 			final int ticks = Math.max(1, (int) (distance / DendroCoreEntity.SPRAWLING_SHOT_SPEED));
 
+			if (ticks <= 5) this.direct = true;
+
 			// y value is derived from y(t) = y_0 + v_yt + \frac{1}{2}ay \times t^2
 			final Vec3d velocity = new Vec3d(
 				targetPos.x / ticks,
-				(targetPos.y - 0.5 * DendroCoreEntity.SPRAWLING_SHOT_GRAVITY * ticks * ticks) / ticks,
+				direct 
+					? targetPos.y / ticks
+					: (targetPos.y - 0.5 * DendroCoreEntity.SPRAWLING_SHOT_GRAVITY * ticks * ticks) / ticks,
 				targetPos.z / ticks
 			);
 
