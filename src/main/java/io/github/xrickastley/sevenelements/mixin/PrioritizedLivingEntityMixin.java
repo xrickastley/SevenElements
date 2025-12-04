@@ -24,6 +24,8 @@ import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
 import io.github.xrickastley.sevenelements.effect.ElementalStatusEffect;
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 import io.github.xrickastley.sevenelements.element.Element;
+import io.github.xrickastley.sevenelements.element.ElementHolder;
+import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
@@ -128,10 +130,18 @@ public abstract class PrioritizedLivingEntityMixin
 			target = "Lnet/minecraft/entity/LivingEntity;setPose(Lnet/minecraft/entity/EntityPose;)V"
 		)
 	)
-	private void removeForcedEffectsOnDeath(DamageSource damageSource, CallbackInfo ci) {
+	private void applyOnDeathEffects(DamageSource damageSource, CallbackInfo ci) {
 		ElementalStatusEffect
 			.getElementEffects()
 			.forEach(this::removeStatusEffect);
+
+		final ElementComponent component = ElementComponent.KEY.get(this);
+
+		component
+			.getAppliedElements()
+			.stream()
+			.map(Functions.compose(ElementalApplication::getElement, component::getElementHolder))
+			.forEach(ElementHolder::reset);
 	}
 
 	@Inject(
