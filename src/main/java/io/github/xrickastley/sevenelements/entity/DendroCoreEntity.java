@@ -99,7 +99,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		final @Nullable LivingEntity target = ElementalReaction
 			.getEntitiesInAoE(this, DendroCoreEntity.SPRAWLING_SHOT_RADIUS)
 			.stream()
-			.filter(e -> !(this.owners.contains(e.getUuid()) || e.isDead() || e instanceof SevenElementsEntity || e.getType().isIn(SevenElementsEntityTypeTags.IGNORED_TARGETS)))
+			.filter(e -> !(this.owners.contains(e.getUuid()) || e.isDead() || e instanceof SevenElementsEntity || e.getType().isIn(SevenElementsEntityTypeTags.IGNORED_TARGETS) || e.isInCreativeMode()))
 			.min(Comparator.comparing(e -> e.squaredDistanceTo(this)))
 			.orElse(null);
 
