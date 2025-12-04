@@ -13,11 +13,11 @@ public interface DamageSourceWrapper {
 	/**
 	 * Recursively gets the possible {@code DamageSource} instances of the provided
 	 * {@code DamageSource} and return them as a {@code Stream}. <br> <br>
-	 * 
-	 * The {@code Stream} will terminate when 
+	 *
+	 * The {@code Stream} will terminate when
 	 * {@link DamageSourceWrapper#getOriginalSource DamageSourceWrapper#getOriginalSource} returns
-	 * a value that is not an instance of {@code DamageSource}, normally {@code null}. 
-	 * 
+	 * a value that is not an instance of {@code DamageSource}, normally {@code null}.
+	 *
 	 * @param source The {@code DamageSource} to recursively get all possible {@code DamageSource} instances of.
 	 */
 	public static Stream<DamageSource> getDamageSources(final DamageSource source) {
