@@ -17,6 +17,7 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsParticleTypes;
 import io.github.xrickastley.sevenelements.util.Color;
 import io.github.xrickastley.sevenelements.util.Colors;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
+
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtException;
