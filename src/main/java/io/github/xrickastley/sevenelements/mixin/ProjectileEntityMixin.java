@@ -34,8 +34,8 @@ public abstract class ProjectileEntityMixin
 	@Unique
 	private ElementalInfusionComponent sevenelements$infusionComponent;
 
-   	public ProjectileEntityMixin(EntityType<? extends ProjectileEntity> entityType, World world) {
-   		super(entityType, world);
+	public ProjectileEntityMixin(EntityType<? extends ProjectileEntity> entityType, World world) {
+		super(entityType, world);
 
 		throw new AssertionError();
 	}

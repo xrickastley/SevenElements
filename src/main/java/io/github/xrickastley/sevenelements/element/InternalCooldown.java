@@ -77,4 +77,9 @@ public final class InternalCooldown {
 			return false;
 		}
 	}
+
+	void reset() {
+		this.cooldown = 0;
+		this.totalHits = 0;
+	}
 }

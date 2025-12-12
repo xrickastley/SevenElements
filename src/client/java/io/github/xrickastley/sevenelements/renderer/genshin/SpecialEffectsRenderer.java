@@ -191,17 +191,17 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 	}
 
 	private void renderChargeLine(WorldRenderContext context, Vec3d origin, List<Vec3d> positions, Color outerColor, Color innerColor) {
-	    final Camera camera = context.camera();
-	    final Vec3d camPos = camera.getPos();
+		final Camera camera = context.camera();
+		final Vec3d camPos = camera.getPos();
 
-	    final MatrixStack matrices = new MatrixStack();
-	    matrices.push();
+		final MatrixStack matrices = new MatrixStack();
+		matrices.push();
 		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
-	    matrices.translate(origin.x - camPos.x, origin.y - camPos.y, origin.z - camPos.z);
+		matrices.translate(origin.x - camPos.x, origin.y - camPos.y, origin.z - camPos.z);
 
-	    final Matrix4f posMat = matrices.peek().getPositionMatrix();
-	    final MatrixStack.Entry entry = matrices.peek();
+		final Matrix4f posMat = matrices.peek().getPositionMatrix();
+		final MatrixStack.Entry entry = matrices.peek();
 
 		final BufferBuilder outerLineBuffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.CHARGE_LINE);
 
@@ -210,13 +210,15 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 			final Vec3d end = positions.get(i);
 			Vec3d normal = end.normalize();
 
-		    outerLineBuffer.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
-		       .color(outerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
+			outerLineBuffer
+				.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
+				.color(outerColor.asARGB())
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
 
-		    outerLineBuffer.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
-		       .color(outerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
+			outerLineBuffer
+				.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
+				.color(outerColor.asARGB())
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
 		}
 
 		SevenElementsRenderLayer.getOuterChargeLine().draw(outerLineBuffer.end());
@@ -228,18 +230,20 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 			final Vec3d end = positions.get(i);
 			Vec3d normal = end.normalize();
 
-		    innerLineBuffer.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
-		       .color(innerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
+			innerLineBuffer
+				.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
+				.color(innerColor.asARGB())
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
 
-		    innerLineBuffer.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
-		       .color(innerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
+			innerLineBuffer
+				.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
+				.color(innerColor.asARGB())
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
 		}
 
 		SevenElementsRenderLayer.getInnerChargeLine().draw(innerLineBuffer.end());
 
-	    matrices.pop();
+		matrices.pop();
 	}
 
 	private List<Vec3d> generatePositions(final Vec3d initialPos, final Vec3d finalPos) {
