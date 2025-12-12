@@ -111,7 +111,7 @@ public final class InfusionTableBlock extends HorizontalFacingBlock {
 
 		if (serverWorld.getGameRules().getValue(SevenElementsGameRules.INFUSION_TABLE)) {
 			player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
-		} else  {
+		} else {
 			player.sendMessage(
 				Text.translatable("container.seven-elements.infusion_table.fail_by_gamerule").withColor(Colors.LIGHT_RED),
 				false

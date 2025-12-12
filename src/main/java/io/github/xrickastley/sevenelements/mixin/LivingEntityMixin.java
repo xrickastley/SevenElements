@@ -198,7 +198,7 @@ public abstract class LivingEntityMixin
 		final double y = this.getY() + (boundingBox.getLengthY() * 0.50 * Math.random()) + 0.50;
 		final double z = this.getZ() + (boundingBox.getLengthZ() * 1.25 * Math.random());
 		final Vec3d pos = new Vec3d(x, y, z);
-		final boolean isCrit = source.getAttacker() instanceof final PlayerEntity player 
+		final boolean isCrit = source.getAttacker() instanceof final PlayerEntity player
 			&& ((IPlayerEntity) player).sevenelements$isCrit(eds);
 
 		final Element element = eds.getElementalApplication().getElement();

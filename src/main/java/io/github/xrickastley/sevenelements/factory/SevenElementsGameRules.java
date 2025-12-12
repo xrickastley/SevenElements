@@ -22,7 +22,7 @@ public class SevenElementsGameRules {
 
 	public static final GameRule<Boolean> OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS
 		 = GameRuleBuilder
-			.forBoolean(true)
+			.forBoolean(false)
 			.category(ELEMENTS_CATEGORY)
 			.buildAndRegister(SevenElements.identifier("overloaded_block_destruction"));
 

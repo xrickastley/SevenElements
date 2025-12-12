@@ -77,9 +77,11 @@ public class SevenElementsRenderLayer {
 
 	private static final SequencedMap<RenderLayer, BufferAllocator> WORLD_TEXT_SEQUENCED_MAP = Util.make(
 		new Object2ObjectLinkedOpenHashMap<>(), map -> {
-			map.put(SevenElementsRenderLayer.WORLD_TEXT, new BufferAllocator(786432));
+			map.put(SevenElementsRenderLayer.WORLD_TEXT, SevenElementsRenderer.createAllocator(786432));
 		}
 	);
+
+	private static final VertexConsumerProvider.Immediate WORLD_TEXT_IMMEDIATE = VertexConsumerProvider.immediate(WORLD_TEXT_SEQUENCED_MAP, SevenElementsRenderer.createAllocator(1536));
 
 	public static RenderLayer getTriangles() {
 		return SevenElementsRenderLayer.TRIANGLES;
@@ -114,6 +116,6 @@ public class SevenElementsRenderLayer {
 	}
 
 	public static VertexConsumerProvider.Immediate getWorldTextImmediate() {
-		return VertexConsumerProvider.immediate(WORLD_TEXT_SEQUENCED_MAP, new BufferAllocator(RenderLayer.field_64009));
+		return WORLD_TEXT_IMMEDIATE;
 	}
 }

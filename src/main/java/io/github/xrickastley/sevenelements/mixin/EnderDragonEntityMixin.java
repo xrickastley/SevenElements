@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import io.github.xrickastley.sevenelements.interfaces.IEnderDragonFight;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Functions;
+
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.boss.dragon.EnderDragonEntity;
 import net.minecraft.entity.boss.dragon.EnderDragonFight;
@@ -36,7 +37,7 @@ public abstract class EnderDragonEntityMixin
 	private void addEnderDragonEntityToFight(EnderDragonFight fight, CallbackInfo ci) {
 		ClassInstanceUtil.ifPresentMapped(
 			fight,
-			IEnderDragonFight.class::cast, 
+			IEnderDragonFight.class::cast,
 			Functions.withArgument(IEnderDragonFight::sevenelements$setDragon, ClassInstanceUtil.cast(this))
 		);
 	}
@@ -50,7 +51,7 @@ public abstract class EnderDragonEntityMixin
 
 		ClassInstanceUtil.ifPresentMapped(
 			world.getEnderDragonFight(),
-			IEnderDragonFight.class::cast, 
+			IEnderDragonFight.class::cast,
 			Functions.withArgument(IEnderDragonFight::sevenelements$setDragon, ClassInstanceUtil.cast(this))
 		);
 	}
@@ -65,7 +66,7 @@ public abstract class EnderDragonEntityMixin
 	private void setDragonOnFightUpdate(CallbackInfo ci, @Local EnderDragonFight enderDragonFight) {
 		ClassInstanceUtil.ifPresentMapped(
 			enderDragonFight,
-			IEnderDragonFight.class::cast, 
+			IEnderDragonFight.class::cast,
 			Functions.withArgument(IEnderDragonFight::sevenelements$setDragon, ClassInstanceUtil.cast(this))
 		);
 	}
