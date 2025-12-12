@@ -33,7 +33,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.profiler.Profilers;
-import net.minecraft.world.GameRules;
 import net.minecraft.world.RaycastContext.FluidHandling;
 import net.minecraft.world.RaycastContext.ShapeType;
 import net.minecraft.world.RaycastContext;
@@ -41,7 +40,7 @@ import net.minecraft.world.event.GameEvent;
 import net.minecraft.world.explosion.EntityExplosionBehavior;
 import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
-
+import net.minecraft.world.rule.GameRules;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 /**
@@ -322,12 +321,12 @@ public class NonEntityDamagingExplosion implements Explosion {
 		if (this.destructionType != DestructionType.TRIGGER_BLOCK) {
 			return false;
 		} else {
-			return this.entity != null && this.entity.getType() == EntityType.BREEZE_WIND_CHARGE ? this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING) : true;
+			return this.entity != null && this.entity.getType() == EntityType.BREEZE_WIND_CHARGE ? this.world.getGameRules().getValue(GameRules.DO_MOB_GRIEFING) : true;
 		}
 	}
 
 	public boolean preservesDecorativeEntities() {
-		boolean bl = this.world.getGameRules().getBoolean(GameRules.DO_MOB_GRIEFING);
+		boolean bl = this.world.getGameRules().getValue(GameRules.DO_MOB_GRIEFING);
 		boolean bl2 = this.entity == null || !this.entity.isTouchingWater();
 		boolean bl3 = this.entity == null || this.entity.getType() != EntityType.BREEZE_WIND_CHARGE && this.entity.getType() != EntityType.WIND_CHARGE;
 		if (bl) {

@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
@@ -35,6 +36,7 @@ import io.github.xrickastley.sevenelements.element.reaction.AmplifyingElementalR
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReactions;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
+import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.interfaces.ILivingEntity;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Functions;
@@ -46,6 +48,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.server.world.ServerWorld;
@@ -226,6 +229,24 @@ public abstract class PrioritizedLivingEntityMixin
 	private DamageSource applyElementalInfusions(DamageSource source) {
 		return ElementComponent.applyElementalInfusions(source, (LivingEntity)(Entity) this);
 	}
+
+	@ModifyExpressionValue(
+		method = "pierce",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/item/ItemStack;getDamageSource(Lnet/minecraft/entity/LivingEntity;Ljava/util/function/Supplier;)Lnet/minecraft/entity/damage/DamageSource;"
+		)
+	)
+	private DamageSource applyElementalInfusionsOnPierce(DamageSource source, @Local(argsOnly = true) Entity target, @Local ItemStack itemStack) {
+		final Optional<ElementalDamageSource> infusedSource = itemStack
+			.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT)
+			.apply(source, target);
+
+		return infusedSource.isPresent()
+			? infusedSource.get().shouldInfuse(false)
+			: source;
+	}
+
 
 	@ModifyVariable(
 		method = "damage",

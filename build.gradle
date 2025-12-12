@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version "${loom_version}"
+	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -37,6 +37,8 @@ loom {
 			sourceSet sourceSets.client
 		}
 	}
+	
+	accessWidenerPath = file("src/main/resources/seven-elements.classtweaker")
 }
 
 dependencies {
@@ -105,11 +107,11 @@ jar {
 }
 
 tasks.named('remapJar') {
-    archiveFileName.set("${project.archivesBaseName}-${project.version}+${project.minecraft_version}.jar")
+    archiveFileName.set("${project.archives_base_name}-${project.version}+${project.minecraft_version}.jar")
 }
 
 tasks.named('remapSourcesJar') {
-    archiveFileName.set("${project.archivesBaseName}-${project.version}+${project.minecraft_version}-sources.jar")
+    archiveFileName.set("${project.archives_base_name}-${project.version}+${project.minecraft_version}-sources.jar")
 }
 
 // configure the maven publication

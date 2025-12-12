@@ -68,7 +68,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	@Unique
 	private static final BufferAllocator sevenelements$quadAllocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer::getQuads);
 	@Unique
-	private static final BufferAllocator sevenelements$linesAllocator = SevenElementsRenderer.createAllocator(RenderLayer.SOLID_BUFFER_SIZE);
+	private static final BufferAllocator sevenelements$linesAllocator = SevenElementsRenderer.createAllocator(RenderLayer.field_64008);
 
 	@Inject(
 		method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V",
@@ -228,9 +228,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 					? 0.5f
 					: 0.25f;
 
-			final RenderLayer layer = c % 10 == 0
-				? SevenElementsRenderLayer.getThickLines()
-				: SevenElementsRenderLayer.getThinLines();
+			final int lineWidth = c % 10 == 0 
+				? 10 
+				: 5;
 
 			final Vec3d start = new Vec3d(xOffset + i, 0 - yOffset, -0.0005f);
 			final Vec3d end = new Vec3d(xOffset + i, addedY - yOffset, -0.0005f);
@@ -240,13 +240,15 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 			buffer
 				.vertex(positionMatrix, (float) start.x, (float) start.y, (float) start.z)
 				.color(0xff000000)
-				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.lineWidth(lineWidth);
 			buffer
 				.vertex(positionMatrix, (float) end.x, (float) end.y, (float) end.z)
 				.color(0xff000000)
-				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.lineWidth(lineWidth);
 
-			layer.draw(buffer.end());
+			SevenElementsRenderLayer.getChargeLine().draw(buffer.end());
 		}
 
 		matrixStack.pop();

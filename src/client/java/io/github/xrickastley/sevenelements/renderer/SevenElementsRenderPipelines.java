@@ -34,7 +34,6 @@ public class SevenElementsRenderPipelines {
 	public static final RenderPipeline LINES = RenderPipelines.register(
 		RenderPipeline.builder(RenderPipelines.RENDERTYPE_LINES_SNIPPET)
 			.withLocation(SevenElements.identifier("pipeline/lines"))
-			.withVertexFormat(VertexFormats.POSITION_COLOR_NORMAL, VertexFormat.DrawMode.LINES)
 			.withoutBlend()
 			.withCull(false)
 			.build()

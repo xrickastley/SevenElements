@@ -50,7 +50,7 @@ public class ElementCommand {
 		dispatcher.register(
 			CommandManager
 				.literal("element")
-				.requires(cs -> cs.hasPermissionLevel(2))
+				.requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK))
 				.then(
 					literal("apply")
 					.then(

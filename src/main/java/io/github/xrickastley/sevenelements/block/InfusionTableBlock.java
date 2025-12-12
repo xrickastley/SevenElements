@@ -109,7 +109,7 @@ public final class InfusionTableBlock extends HorizontalFacingBlock {
 	protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
 		if (!(world instanceof final ServerWorld serverWorld)) return ActionResult.SUCCESS;
 
-		if (serverWorld.getGameRules().getBoolean(SevenElementsGameRules.INFUSION_TABLE)) {
+		if (serverWorld.getGameRules().getValue(SevenElementsGameRules.INFUSION_TABLE)) {
 			player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
 		} else  {
 			player.sendMessage(

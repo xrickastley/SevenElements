@@ -1,14 +1,11 @@
 package io.github.xrickastley.sevenelements.renderer;
 
-import java.util.OptionalDouble;
 import java.util.SequencedMap;
 import java.util.function.Function;
 
-import net.minecraft.client.render.RenderLayer.MultiPhaseParameters;
-import net.minecraft.client.render.RenderLayer.OutlineMode;
 import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderPhase.LineWidth;
-import net.minecraft.client.render.RenderPhase;
+import net.minecraft.client.render.RenderSetup.OutlineMode;
+import net.minecraft.client.render.RenderSetup;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.util.Identifier;
@@ -19,86 +16,68 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 public class SevenElementsRenderLayer {
 	private static final RenderLayer TRIANGLES = RenderLayer.of(
 		"seven-elements:triangles",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.TRIANGLES,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+		RenderSetup
+			.builder(SevenElementsRenderPipelines.TRIANGLES)
+			.outlineMode(OutlineMode.NONE)
+			.build()
 	);
 
 	private static final RenderLayer QUADS = RenderLayer.of(
 		"seven-elements:quads",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.QUADS,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+		RenderSetup
+			.builder(SevenElementsRenderPipelines.QUADS)
+			.outlineMode(OutlineMode.NONE)
+			.build()
 	);
 
-	private static final RenderLayer THIN_LINES = RenderLayer.of(
-		"seven-elements:thin_lines",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.LINES,
-		MultiPhaseParameters.builder()
-			.lineWidth(new LineWidth(OptionalDouble.of(5)))
-			.build(OutlineMode.NONE)
-	);
-
-	private static final RenderLayer THICK_LINES = RenderLayer.of(
-		"seven-elements:thick_lines",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.LINES,
-		MultiPhaseParameters.builder()
-			.lineWidth(new LineWidth(OptionalDouble.of(10)))
-			.build(OutlineMode.NONE)
+	private static final RenderLayer RULER_LINES = RenderLayer.of(
+		"seven-elements:ruler_lines",
+		RenderSetup
+			.builder(SevenElementsRenderPipelines.LINES)
+			.outlineMode(OutlineMode.NONE)
+			.build()
 	);
 
 	private static final Function<Identifier, RenderLayer> ELEMENTS = Util.memoize(
 		texture -> {
-			MultiPhaseParameters multiPhaseParameters = MultiPhaseParameters.builder()
-				.texture(new RenderPhase.Texture(texture, false))
-				.build(OutlineMode.NONE);
-
 			return RenderLayer.of(
 				"seven-elements:elements",
-				RenderLayer.SOLID_BUFFER_SIZE,
-				SevenElementsRenderPipelines.ELEMENTS,
-				multiPhaseParameters
+				RenderSetup
+					.builder(SevenElementsRenderPipelines.ELEMENTS)
+					.outlineMode(OutlineMode.NONE)
+					.texture("Sampler0", texture)
+					.build()
 			);
 		}
 	);
 
 	private static final RenderLayer WORLD_TEXT = RenderLayer.of(
 		"seven-elements:world/text",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.WORLD_TEXT,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+		RenderSetup
+			.builder(SevenElementsRenderPipelines.WORLD_TEXT)
+			.outlineMode(OutlineMode.NONE)
+			.build()
 	);
 
-	private static final RenderLayer INNER_CHARGE_LINE = RenderLayer.of(
-		"seven-elements:world/charge_line/inner",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.CHARGE_LINE,
-		MultiPhaseParameters.builder()
-			.lineWidth(new LineWidth(OptionalDouble.of(2.0)))
-			.build(OutlineMode.NONE)
-	);
-
-	private static final RenderLayer OUTER_CHARGE_LINE = RenderLayer.of(
-		"seven-elements:world/charge_line/outer",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.CHARGE_LINE,
-		MultiPhaseParameters.builder()
-			.lineWidth(new LineWidth(OptionalDouble.of(6.0)))
-			.build(OutlineMode.NONE)
+	private static final RenderLayer CHARGE_LINE = RenderLayer.of(
+		"seven-elements:world/charge_line",
+		RenderSetup
+			.builder(SevenElementsRenderPipelines.CHARGE_LINE)
+			.outlineMode(OutlineMode.NONE)
+			.build()
 	);
 
 	private static final RenderLayer SPHERE = RenderLayer.of(
 		"seven-elements:sphere",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.SPHERE,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+		RenderSetup
+			.builder(SevenElementsRenderPipelines.SPHERE)
+			.outlineMode(OutlineMode.NONE)
+			.build()
 	);
 
 	private static final SequencedMap<RenderLayer, BufferAllocator> WORLD_TEXT_SEQUENCED_MAP = Util.make(
 		new Object2ObjectLinkedOpenHashMap<>(), map -> {
-			map.put(SevenElementsRenderLayer.WORLD_TEXT, new BufferAllocator(RenderLayer.SOLID_BUFFER_SIZE));
+			map.put(SevenElementsRenderLayer.WORLD_TEXT, new BufferAllocator(786432));
 		}
 	);
 
@@ -110,12 +89,8 @@ public class SevenElementsRenderLayer {
 		return SevenElementsRenderLayer.QUADS;
 	}
 
-	public static RenderLayer getThinLines() {
-		return SevenElementsRenderLayer.THIN_LINES;
-	}
-
-	public static RenderLayer getThickLines() {
-		return SevenElementsRenderLayer.THICK_LINES;
+	public static RenderLayer getLines() {
+		return SevenElementsRenderLayer.RULER_LINES;
 	}
 
 	public static Function<Identifier, RenderLayer> getElements() {
@@ -130,12 +105,8 @@ public class SevenElementsRenderLayer {
 		return SevenElementsRenderLayer.WORLD_TEXT;
 	}
 
-	public static RenderLayer getInnerChargeLine() {
-		return SevenElementsRenderLayer.INNER_CHARGE_LINE;
-	}
-
-	public static RenderLayer getOuterChargeLine() {
-		return SevenElementsRenderLayer.OUTER_CHARGE_LINE;
+	public static RenderLayer getChargeLine() {
+		return SevenElementsRenderLayer.CHARGE_LINE;
 	}
 
 	public static RenderLayer getSphere() {
@@ -143,6 +114,6 @@ public class SevenElementsRenderLayer {
 	}
 
 	public static VertexConsumerProvider.Immediate getWorldTextImmediate() {
-		return VertexConsumerProvider.immediate(WORLD_TEXT_SEQUENCED_MAP, new BufferAllocator(RenderLayer.CUTOUT_BUFFER_SIZE));
+		return VertexConsumerProvider.immediate(WORLD_TEXT_SEQUENCED_MAP, new BufferAllocator(RenderLayer.field_64009));
 	}
 }

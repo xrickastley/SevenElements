@@ -1,52 +1,54 @@
 package io.github.xrickastley.sevenelements.factory;
 
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
-import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
-import net.fabricmc.fabric.api.gamerule.v1.rule.DoubleRule;
-import net.minecraft.world.GameRules;
+import io.github.xrickastley.sevenelements.SevenElements;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
+import net.minecraft.world.rule.GameRule;
+import net.minecraft.world.rule.GameRuleCategory;
 
 public class SevenElementsGameRules {
-	public static final GameRules.Key<GameRules.BooleanRule> DO_ELEMENTS = GameRuleRegistry.register(
-		"doElements",
-		GameRules.Category.MISC,
-		GameRuleFactory.createBooleanRule(true)
-	);
+	private static final GameRuleCategory ELEMENTS_CATEGORY = GameRuleCategory.register(SevenElements.identifier("elements"));
 
-	public static final GameRules.Key<DoubleRule> LEVEL_MULTIPLIER = GameRuleRegistry.register(
-		"levelMultiplier",
-		GameRules.Category.MISC,
-		GameRuleFactory.createDoubleRule(5)
-	);
+	public static final GameRule<Boolean> DO_ELEMENTS
+		 = GameRuleBuilder
+			.forBoolean(true)
+			.category(ELEMENTS_CATEGORY)
+			.buildAndRegister(SevenElements.identifier("do_elements"));
 
-	public static final GameRules.Key<GameRules.BooleanRule> OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS = GameRuleRegistry.register(
-		"overloadedBlockDestruction",
-		GameRules.Category.MISC,
-		GameRuleFactory.createBooleanRule(true)
-	);
+	public static final GameRule<Double> LEVEL_MULTIPLIER
+		 = GameRuleBuilder
+			.forDouble(5)
+			.category(ELEMENTS_CATEGORY)
+			.buildAndRegister(SevenElements.identifier("level_multiplier"));
 
-	public static final GameRules.Key<GameRules.BooleanRule> PYRO_FROM_FIRE = GameRuleRegistry.register(
-		"pyroFromFire",
-		GameRules.Category.MISC,
-		GameRuleFactory.createBooleanRule(true)
-	);
+	public static final GameRule<Boolean> OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS
+		 = GameRuleBuilder
+			.forBoolean(true)
+			.category(ELEMENTS_CATEGORY)
+			.buildAndRegister(SevenElements.identifier("overloaded_block_destruction"));
 
-	public static final GameRules.Key<GameRules.BooleanRule> HYDRO_FROM_WATER = GameRuleRegistry.register(
-		"hydroFromWater",
-		GameRules.Category.MISC,
-		GameRuleFactory.createBooleanRule(true)
-	);
+	public static final GameRule<Boolean> PYRO_FROM_FIRE
+		 = GameRuleBuilder
+			.forBoolean(true)
+			.category(ELEMENTS_CATEGORY)
+			.buildAndRegister(SevenElements.identifier("pyro_from_fire"));
 
-	public static final GameRules.Key<GameRules.BooleanRule> ELECTRO_FROM_LIGHTNING = GameRuleRegistry.register(
-		"electroFromLightning",
-		GameRules.Category.MISC,
-		GameRuleFactory.createBooleanRule(true)
-	);
+	public static final GameRule<Boolean> HYDRO_FROM_WATER
+		 = GameRuleBuilder
+			.forBoolean(true)
+			.category(ELEMENTS_CATEGORY)
+			.buildAndRegister(SevenElements.identifier("hydro_from_water"));
 
-	public static final GameRules.Key<GameRules.BooleanRule> INFUSION_TABLE = GameRuleRegistry.register(
-		"infusionTable",
-		GameRules.Category.MISC,
-		GameRuleFactory.createBooleanRule(true)
-	);
+	public static final GameRule<Boolean> ELECTRO_FROM_LIGHTNING
+		 = GameRuleBuilder
+			.forBoolean(true)
+			.category(ELEMENTS_CATEGORY)
+			.buildAndRegister(SevenElements.identifier("electro_from_lightning"));
+
+	public static final GameRule<Boolean> INFUSION_TABLE
+		 = GameRuleBuilder
+			.forBoolean(true)
+			.category(ELEMENTS_CATEGORY)
+			.buildAndRegister(SevenElements.identifier("infusion_table"));
 
 	public static void register() {}
 }

@@ -1,7 +1,5 @@
 package io.github.xrickastley.sevenelements.mixin;
 
-import com.llamalad7.mixinextras.expression.Definition;
-import com.llamalad7.mixinextras.expression.Expression;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.authlib.GameProfile;
@@ -90,11 +88,12 @@ public abstract class PlayerEntityMixin
 	}
 
 	// why are there two separate knockbacks :sob:
-	@Definition(id = "k", local = @Local(type = float.class, ordinal = 5))
-	@Expression("k > 0.0")
 	@ModifyExpressionValue(
 		method = "attack",
-		at = @At("MIXINEXTRAS:EXPRESSION")
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/entity/player/PlayerEntity;isSprinting()Z"
+		)
 	)
 	private boolean preventKnockbackIfCrystallize(boolean original, @Local(argsOnly = true) Entity entity) {
 		if (!(entity instanceof final LivingEntity livingEntity)) return original;
@@ -124,9 +123,9 @@ public abstract class PlayerEntityMixin
 		method = "attack",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/LivingEntity;damage(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;F)Z"
+			target = "Lnet/minecraft/entity/player/PlayerEntity;doSweepingAttack(Lnet/minecraft/entity/Entity;FLnet/minecraft/entity/damage/DamageSource;F)V"
 		),
-		index = 1
+		index = 2
 	)
 	private DamageSource checkForCritSweep(DamageSource source, @Local(ordinal = 2) boolean crit) {
 		if (sevenelements$critDamageSources == null) sevenelements$critDamageSources = new HashSet<>();

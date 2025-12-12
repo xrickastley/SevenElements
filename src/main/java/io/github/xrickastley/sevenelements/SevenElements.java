@@ -107,10 +107,10 @@ public class SevenElements implements ModInitializer {
 	}
 
 	public static float getLevelMultiplier(ServerWorld world) {
-		return (float) world
+		return world
 			.getGameRules()
-			.get(SevenElementsGameRules.LEVEL_MULTIPLIER)
-			.get();
+			.getValue(SevenElementsGameRules.LEVEL_MULTIPLIER)
+			.floatValue();
 	}
 
 	private static void onCommandRegistration(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {

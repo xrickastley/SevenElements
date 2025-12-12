@@ -57,9 +57,9 @@ public final class WorldTextRenderer {
 		final TextRenderer textRenderer = client.textRenderer;
 		final ClientConfig config = ClientConfig.get();
 
-		final double d = camera.getPos().x;
-		final double e = camera.getPos().y;
-		final double f = camera.getPos().z;
+		final double d = camera.getCameraPos().x;
+		final double e = camera.getCameraPos().y;
+		final double f = camera.getCameraPos().z;
 
 		final float scale = (float) (size * config.rendering.text.globalTextScale);
 

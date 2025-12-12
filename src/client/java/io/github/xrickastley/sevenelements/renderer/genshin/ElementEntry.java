@@ -22,7 +22,7 @@ import net.minecraft.util.math.MathHelper;
 public final class ElementEntry {
 	private static final float BLINK_SECONDS = 1.5f;
 	private static final float BLINK_COUNT = 3;
-	private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(RenderLayer.SOLID_BUFFER_SIZE);
+	private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(RenderLayer.field_64008);
 	private final Element element;
 	private final double secondsLeft;
 	private final long appliedAt;

@@ -70,7 +70,7 @@ public abstract class EntityMixin {
 		)
 	)
 	private DamageSource applyElectroOnLightning(DamageSource source, @Local(argsOnly = true) ServerWorld world) {
-		return (Entity)(Object) this instanceof final LivingEntity entity && world.getGameRules().getBoolean(SevenElementsGameRules.ELECTRO_FROM_LIGHTNING)
+		return (Entity)(Object) this instanceof final LivingEntity entity && world.getGameRules().getValue(SevenElementsGameRules.ELECTRO_FROM_LIGHTNING)
 			? new ElementalDamageSource(source, ElementalApplications.gaugeUnits(entity, Element.ELECTRO, 2.0), InternalCooldownContext.ofType(null, "seven-elements:natural_environment", InternalCooldownType.INTERVAL_ONLY).forced())
 			: source;
 	}

@@ -50,7 +50,7 @@ public class OverloadedElementalReaction extends ElementalReaction {
 			entity.getEntityPos(),
 			power,
 			true,
-			world.getGameRules().getBoolean(SevenElementsGameRules.OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS)
+			world.getGameRules().getValue(SevenElementsGameRules.OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS)
 				? DestructionType.DESTROY
 				: DestructionType.KEEP
 		);

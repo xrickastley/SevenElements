@@ -55,7 +55,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 	private static final double POISSON_DENSITY = 1.5;
 	private static final Random RANDOM = Random.create();
 	private static final int CHARGE_ITERATIONS = 4;
-	private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(RenderLayer.SOLID_BUFFER_SIZE);
+	private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(RenderLayer.field_64008);
 	private final List<Entry> entries = new ArrayList<>();
 	private final Multimap<LivingEntity, ChargeLinePositions> chargePositions = HashMultimap.create();
 
@@ -191,55 +191,63 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 	}
 
 	private void renderChargeLine(WorldRenderContext context, Vec3d origin, List<Vec3d> positions, Color outerColor, Color innerColor) {
-	    final Camera camera = context.camera();
-	    final Vec3d camPos = camera.getPos();
+		final Camera camera = context.camera();
+		final Vec3d camPos = camera.getCameraPos();
 
-	    final MatrixStack matrices = new MatrixStack();
-	    matrices.push();
+		final MatrixStack matrices = new MatrixStack();
+		matrices.push();
 		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
-	    matrices.translate(origin.x - camPos.x, origin.y - camPos.y, origin.z - camPos.z);
+		matrices.translate(origin.x - camPos.x, origin.y - camPos.y, origin.z - camPos.z);
 
-	    final Matrix4f posMat = matrices.peek().getPositionMatrix();
-	    final MatrixStack.Entry entry = matrices.peek();
+		final Matrix4f posMat = matrices.peek().getPositionMatrix();
+		final MatrixStack.Entry entry = matrices.peek();
 
-		final BufferBuilder outerLineBuffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.CHARGE_LINE);
-
-		for (int i = 1; i < positions.size(); i++) {
-			final Vec3d start = positions.get(i - 1);
-			final Vec3d end = positions.get(i);
-			Vec3d normal = end.normalize();
-
-		    outerLineBuffer.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
-		       .color(outerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
-
-		    outerLineBuffer.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
-		       .color(outerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
-		}
-
-		SevenElementsRenderLayer.getOuterChargeLine().draw(outerLineBuffer.end());
-
-		final BufferBuilder innerLineBuffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.CHARGE_LINE);
+		BufferBuilder buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.CHARGE_LINE);
 
 		for (int i = 1; i < positions.size(); i++) {
 			final Vec3d start = positions.get(i - 1);
 			final Vec3d end = positions.get(i);
 			Vec3d normal = end.normalize();
 
-		    innerLineBuffer.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
-		       .color(innerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
+			buffer
+				.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
+				.color(outerColor.asARGB())
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.lineWidth(6.0f);
 
-		    innerLineBuffer.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
-		       .color(innerColor.asARGB())
-		       .normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
+			buffer
+				.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
+				.color(outerColor.asARGB())
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.lineWidth(6.0f);
 		}
 
-		SevenElementsRenderLayer.getInnerChargeLine().draw(innerLineBuffer.end());
+		SevenElementsRenderLayer.getChargeLine().draw(buffer.end());
 
-	    matrices.pop();
+		buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.CHARGE_LINE);
+
+		for (int i = 1; i < positions.size(); i++) {
+			final Vec3d start = positions.get(i - 1);
+			final Vec3d end = positions.get(i);
+			Vec3d normal = end.normalize();
+
+			buffer
+				.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
+				.color(innerColor.asARGB())
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.lineWidth(2.0f);
+
+			buffer
+				.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
+				.color(innerColor.asARGB())
+				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.lineWidth(2.0f);
+		}
+
+		SevenElementsRenderLayer.getChargeLine().draw(buffer.end());
+
+		matrices.pop();
 	}
 
 	private List<Vec3d> generatePositions(final Vec3d initialPos, final Vec3d finalPos) {

@@ -92,7 +92,7 @@ public abstract class LivingEntityMixin
 	private void applyNaturalElements(CallbackInfo ci) {
 		if (!(this.getEntityWorld() instanceof final ServerWorld world)) return;
 
-		if (this.sevenelements$isWet() && world.getGameRules().getBoolean(SevenElementsGameRules.HYDRO_FROM_WATER)) {
+		if (this.sevenelements$isWet() && world.getGameRules().getValue(SevenElementsGameRules.HYDRO_FROM_WATER)) {
 			final ElementComponent component = ElementComponent.KEY.get(this);
 
 			component.addElementalApplication(
@@ -102,7 +102,7 @@ public abstract class LivingEntityMixin
 					.forced(),
 				1.0
 			);
-		} else if (this.getBlockStateAtPos().getBlock() == Blocks.FIRE && world.getGameRules().getBoolean(SevenElementsGameRules.PYRO_FROM_FIRE)) {
+		} else if (this.getBlockStateAtPos().getBlock() == Blocks.FIRE && world.getGameRules().getValue(SevenElementsGameRules.PYRO_FROM_FIRE)) {
 			final ElementComponent component = ElementComponent.KEY.get(this);
 
 			component.addElementalApplication(

@@ -19,7 +19,7 @@ public class BossBarCommand {
 		dispatcher.register(
 			CommandManager
 				.literal("bossbar")
-				.requires(cs -> cs.hasPermissionLevel(2))
+				.requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK))
 				.then(
 					CommandManager
 						.literal("set")
