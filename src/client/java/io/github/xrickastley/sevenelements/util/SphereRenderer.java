@@ -16,7 +16,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 public final class SphereRenderer {
-	private static final BufferAllocator allocator = new BufferAllocator(SevenElementsRenderLayer.getSphere().getExpectedBufferSize());
+	private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer.getSphere().getExpectedBufferSize());
 	private SphereRenderer() {}
 
 	/**

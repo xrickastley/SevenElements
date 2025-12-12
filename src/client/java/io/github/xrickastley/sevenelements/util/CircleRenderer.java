@@ -120,7 +120,7 @@ public class CircleRenderer {
 	}
 
 	private class Circle implements Renderable {
-		private static final BufferAllocator allocator = new BufferAllocator(SevenElementsRenderLayer.getTriangleFan().getExpectedBufferSize());
+		private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer.getTriangleFan().getExpectedBufferSize());
 		private static BufferBuilder buffer;
 		protected double radius;
 		protected double percentFilled;
@@ -156,7 +156,7 @@ public class CircleRenderer {
 	}
 
 	private class CircleOutline extends Circle {
-		private static final BufferAllocator allocator = new BufferAllocator(SevenElementsRenderLayer.getTriangleStrip().getExpectedBufferSize());
+		private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer.getTriangleStrip().getExpectedBufferSize());
 		private static BufferBuilder buffer;
 		protected double length;
 
