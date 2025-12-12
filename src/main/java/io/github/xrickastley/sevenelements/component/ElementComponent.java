@@ -46,8 +46,6 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 	public static ElementalDamageSource applyElementalInfusions(DamageSource source, LivingEntity target) {
 		if (source instanceof final ElementalDamageSource eds && (eds.getElementalApplication().getElement() != Element.PHYSICAL || !eds.shouldInfuse())) return eds;
 
-		SevenElements.sublogger().warn("At:", new RuntimeException());
-
 		@SuppressWarnings("unchecked")
 		final ElementalDamageSource infusion = JavaScriptUtil.nullishCoalesingFn(
 			Functions.map(Functions.supplier(ElementalInfusionComponent::applyToDamageSource, source, target), ElementComponent::get),
