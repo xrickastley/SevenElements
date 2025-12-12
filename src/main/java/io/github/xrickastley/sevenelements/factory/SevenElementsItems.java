@@ -26,8 +26,8 @@ public class SevenElementsItems {
 	public static final Item INFUSION_TABLE = new TallBlockItem(
 		SevenElementsBlocks.INFUSION_TABLE,
 		new Item.Settings()
-		    .useBlockPrefixedTranslationKey()
-		    .registryKey(SevenElements.registryKey(RegistryKeys.ITEM, "infusion_table"))
+			.useBlockPrefixedTranslationKey()
+			.registryKey(SevenElements.registryKey(RegistryKeys.ITEM, "infusion_table"))
 	);
 
 	public static void register() {

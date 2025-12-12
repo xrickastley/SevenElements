@@ -20,10 +20,10 @@ import net.minecraft.client.gui.render.state.GuiRenderState;
 public class DrawContextMixin implements ExtendedDrawContext {
 	@Shadow
 	@Final
-   	public ScissorStack scissorStack;
+	public ScissorStack scissorStack;
 
 	@Shadow
-   	@Final
+	@Final
 	public GuiRenderState state;
 
 	@Shadow
