@@ -26,7 +26,7 @@ public abstract sealed class AbstractSuperconductElementalReaction
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
 		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
 
-		for (final LivingEntity target  : ElementalReaction.getEntitiesInAoE(entity, 3, t -> t != origin)) {
+		for (final LivingEntity target : ElementalReaction.getEntitiesInAoE(entity, 3, t -> t != origin)) {
 			final float damage = ElementalReaction.getReactionDamage(entity, 1.5);
 			final ElementalDamageSource source = new ElementalDamageSource(
 				entity

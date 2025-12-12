@@ -9,7 +9,7 @@ public final class LockableSlot extends Slot {
 	private boolean isLocked = false;
 
 	public LockableSlot(Inventory inventory, int index, int x, int y) {
-	   super(inventory, index, x, y);
+		super(inventory, index, x, y);
 	}
 
 	public boolean lock() {

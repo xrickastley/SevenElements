@@ -32,4 +32,8 @@ public final class InternalCooldownHolder {
 	LivingEntity getOwner() {
 		return owner;
 	}
+
+	void reset() {
+		this.cooldowns.values().forEach(InternalCooldown::reset);
+	}
 }
