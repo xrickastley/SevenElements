@@ -77,13 +77,6 @@ public class BossBarHudMixin {
 		for (int i = 0; i < appliedElements.length(); i++) {
 			final Identifier texture = appliedElements.get(i);
 			final int x1 = x + (i * (BOUND + 1));
-			/*
-			final CircleRenderer circleRenderer = new CircleRenderer((x1 + RADIUS) * scaleFactor, (y + RADIUS) * scaleFactor, 0);
-
-			circleRenderer
-				.add(RADIUS * scaleFactor, 1, 0x7F646464)
-				.draw(context.getMatrices().peek().getPositionMatrix());
-			*/
 
 			context.sevenelements$drawCircle(SevenElementsRenderPipelines.CIRCLE, x1 + RADIUS, y + RADIUS, RADIUS, 0x7F646464);
 			context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, x1 + SHIFT, y + SHIFT, 0, 0, INNER_BOUND, INNER_BOUND, INNER_BOUND, INNER_BOUND);
