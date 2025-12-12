@@ -41,7 +41,7 @@ public class ClientConfig implements ConfigData {
 			@ConfigEntry.BoundedDiscrete(min = 4, max = 48)
 			public int sphereResolution = 16;
 			@ConfigEntry.Gui.Tooltip(count = 4)
-	        @ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
+			@ConfigEntry.Gui.EnumHandler(option = EnumDisplayOption.BUTTON)
 			public EffectRenderType effectRenderType = EffectRenderType.ALL;
 		}
 	}

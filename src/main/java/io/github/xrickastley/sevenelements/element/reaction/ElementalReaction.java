@@ -187,7 +187,7 @@ public abstract class ElementalReaction {
 			? this.triggeringElement.getRight()
 			: triggeringElement.equals(this.auraElement.getLeft()) && this.reversable
 				? this.auraElement.getRight()
-				:  Integer.MAX_VALUE;
+				: Integer.MAX_VALUE;
 	}
 
 	/**

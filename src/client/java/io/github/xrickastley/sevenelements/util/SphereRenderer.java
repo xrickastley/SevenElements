@@ -98,7 +98,7 @@ public final class SphereRenderer {
 	private static void vertex(BufferBuilder buffer, Matrix4f projMat, Matrix3f normalMat, Vec3d pos, int color) {
 		buffer
 			.vertex(projMat, (float)pos.x, (float)pos.y, (float)pos.z)
-		   .color(color);
+			.color(color);
 	}
 
 	private static Vec3d relativeClamp(Vec3d pos, float radius) {
