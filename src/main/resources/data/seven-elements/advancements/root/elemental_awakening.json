@@ -1,8 +1,7 @@
 {
 	"display": {
 		"icon": {
-			"item": "seven-elements:infusion_table",
-			"count": 1
+			"item": "seven-elements:infusion_table"
 		},
 		"title": {
 			"translate": "advancements.seven-elements.root.elemental_awakening"
