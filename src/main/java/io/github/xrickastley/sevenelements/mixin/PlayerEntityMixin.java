@@ -9,8 +9,9 @@ import com.mojang.authlib.GameProfile;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.spongepowered.asm.mixin.Debug;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -35,6 +36,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -54,6 +56,10 @@ public abstract class PlayerEntityMixin
 		throw new AssertionError();
 	}
 
+	@Shadow
+	@Final
+	private PlayerAbilities abilities;
+
 	@Unique
 	private float sevenelements$subdamage;
 
@@ -63,7 +69,7 @@ public abstract class PlayerEntityMixin
 	@Unique
 	@Override
 	public boolean sevenelements$isCrit(DamageSource source) {
-		return this.sevenelements$critDamageSources != null 
+		return this.sevenelements$critDamageSources != null
 			&& DamageSourceWrapper.getDamageSources(source)
 				.anyMatch(this.sevenelements$critDamageSources::contains);
 	}
@@ -180,7 +186,7 @@ public abstract class PlayerEntityMixin
 		final double y = this.getY() + (boundingBox.getYLength() * 0.50 * Math.random()) + 0.50;
 		final double z = this.getZ() + (boundingBox.getZLength() * 1.25 * Math.random());
 		final Vec3d pos = new Vec3d(x, y, z);
-		final boolean isCrit = source.getAttacker() instanceof final PlayerEntity player 
+		final boolean isCrit = source.getAttacker() instanceof final PlayerEntity player
 			&& ((IPlayerEntity) player).sevenelements$isCrit(eds);
 
 		final Element element = eds.getElementalApplication().getElement();
@@ -206,5 +212,11 @@ public abstract class PlayerEntityMixin
 		this.getWorld()
 			.getEntitiesByClass(DendroCoreEntity.class, BoxUtil.multiplyBox(this.getBoundingBox(), 2), dc -> true)
 			.forEach(dc -> dc.damage(source, 1));
+	}
+
+	@Unique
+	@Override
+	public boolean sevenelements$isInCreativeMode() {
+		return this.abilities.creativeMode;
 	}
 }

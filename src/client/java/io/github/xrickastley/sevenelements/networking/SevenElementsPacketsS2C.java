@@ -7,6 +7,7 @@ import io.github.xrickastley.sevenelements.SevenElementsClient;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity.SyncCrystallizeShardTypeS2CPayload;
 import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity;
+import io.github.xrickastley.sevenelements.entity.DendroCoreEntity.SyncDendroCoreStateS2CPayload;
 import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
 import io.github.xrickastley.sevenelements.gui.screen.ingame.ElementalInfusionScreen;
 import io.github.xrickastley.sevenelements.renderer.WorldTextRenderer.DamageText;
@@ -52,7 +53,7 @@ public class SevenElementsPacketsS2C {
 	private static void onPlayInit(ClientPlayNetworkHandler handler, MinecraftClient client) {
 		ClientPlayNetworking.registerReceiver(ShowElementalReactionS2CPayload.ID.Type(), SevenElementsPacketsS2C::onElementalReactionShow);
 		ClientPlayNetworking.registerReceiver(ShowElementalDamageS2CPayload.ID.Type(), SevenElementsPacketsS2C::onElementalDamageShow);
-		ClientPlayNetworking.registerReceiver(SyncDendroCoreAgeS2CPayload.ID.Type(), SevenElementsPacketsS2C::onSyncDendroCoreAge);
+		ClientPlayNetworking.registerReceiver(SyncDendroCoreStateS2CPayload.ID.Type(), SevenElementsPacketsS2C::onSyncDendroCoreState);
 		ClientPlayNetworking.registerReceiver(SyncCrystallizeShardTypeS2CPayload.ID.Type(), SevenElementsPacketsS2C::onSyncCrystallizeShardElement);
 		ClientPlayNetworking.registerReceiver(FinishElementalInfusionS2CPayload.ID.Type(), SevenElementsPacketsS2C::onFinishElementalInfusion);
 
@@ -90,7 +91,7 @@ public class SevenElementsPacketsS2C {
 		);
 	}
 
-	private static void onSyncDendroCoreAge(SyncDendroCoreAgeS2CPayload payload, ClientPlayerEntity player, PacketSender sender) {
+	private static void onSyncDendroCoreState(SyncDendroCoreStateS2CPayload payload, ClientPlayerEntity player, PacketSender sender) {
 		final World world = MinecraftClient
 			.getInstance()
 			.player
@@ -100,7 +101,7 @@ public class SevenElementsPacketsS2C {
 
 		if (!(entity instanceof final DendroCoreEntity dendroCore)) return;
 
-		dendroCore.age = payload.age();
+		dendroCore.syncFromPacket(payload);
 	}
 
 	private static void onSyncCrystallizeShardElement(SyncCrystallizeShardTypeS2CPayload payload, ClientPlayerEntity player, PacketSender sender) {

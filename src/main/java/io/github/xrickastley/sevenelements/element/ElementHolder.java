@@ -119,4 +119,12 @@ public final class ElementHolder {
 	public LivingEntity getOwner() {
 		return this.owner;
 	}
+
+	public void reset() {
+		this.application = null;
+
+		this.internalCooldowns
+			.values()
+			.forEach(InternalCooldownHolder::reset);
+	}
 }

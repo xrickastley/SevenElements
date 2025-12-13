@@ -40,4 +40,11 @@ public interface ILivingEntity {
 	 * {@link LivingEntity#applyDamage LivingEntity#applyDamage}.
 	 */
 	default void sevenelements$setBlockedByCrystallizeShield(boolean blocked) {}
+
+	/**
+	 * Returns if this {@code LivingEntity} is in Creative mode.
+	 */
+	default boolean sevenelements$isInCreativeMode() {
+		return false;
+	}
 }

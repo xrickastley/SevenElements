@@ -21,7 +21,7 @@ public class SevenElementsGameRules {
 	public static final GameRules.Key<GameRules.BooleanRule> OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS = GameRuleRegistry.register(
 		"overloadedBlockDestruction",
 		GameRules.Category.MISC,
-		GameRuleFactory.createBooleanRule(true)
+		GameRuleFactory.createBooleanRule(false)
 	);
 
 	public static final GameRules.Key<GameRules.BooleanRule> PYRO_FROM_FIRE = GameRuleRegistry.register(
