@@ -20,6 +20,7 @@ import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Color;
 import io.github.xrickastley.sevenelements.util.Colors;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
+
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
@@ -474,7 +475,6 @@ public enum Element {
 			this(particle, relativePos, delta, speed, count, "");
 		}
 
-		@SuppressWarnings("deprecation")
 		private ParticleEffect getParticle(World world) {
 			try {
 				return particle

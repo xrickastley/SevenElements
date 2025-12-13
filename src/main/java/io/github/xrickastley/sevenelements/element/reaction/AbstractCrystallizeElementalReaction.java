@@ -65,7 +65,7 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 		double e = vec3d2.y * lookingPos.z + vec3d3.y * lookingPos.y + vec3d4.y * lookingPos.x;
 		double l = vec3d2.z * lookingPos.z + vec3d3.z * lookingPos.y + vec3d4.z * lookingPos.x;
 		return new Vec3d(vec3d.x + d, vec3d.y + e, vec3d.z + l);
-   	}
+	}
 
 	private Vec3d clampToGround(World world, Vec3d pos) {
 		final BlockPos originPos = MathHelper2.asBlockPos(pos);

@@ -37,8 +37,8 @@ public abstract class ProjectileEntityMixin
 	@Unique
 	private Pair<ElementalApplication.Builder, InternalCooldownContext.Builder> sevenelements$infusionComponent;
 
-   	public ProjectileEntityMixin(EntityType<? extends ProjectileEntity> entityType, World world) {
-   		super(entityType, world);
+	public ProjectileEntityMixin(EntityType<? extends ProjectileEntity> entityType, World world) {
+		super(entityType, world);
 
 		throw new AssertionError();
 	}

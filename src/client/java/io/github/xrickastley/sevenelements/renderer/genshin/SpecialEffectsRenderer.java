@@ -199,8 +199,8 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
 		matrices.translate(origin.x - camPos.x, origin.y - camPos.y, origin.z - camPos.z);
 
-		final Tessellator tesselator = Tessellator.getInstance();
-		final Matrix4f posMat = matrices.peek().getPositionMatrix();
+	    final Tessellator tesselator = Tessellator.getInstance();
+	    final Matrix4f posMat = matrices.peek().getPositionMatrix();
 		final Matrix3f normMat = matrices.peek().getNormalMatrix();
 
 		BufferBuilder buffer = tesselator.getBuffer();
@@ -214,14 +214,12 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 			buffer
 				.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
 				.color(outerColor.asARGB())
-				.normal(normMat, (float) normal.x, (float) normal.y, (float) normal.z)
-				.next();
+				.normal(normMat, (float) normal.x, (float) normal.y, (float) normal.z);
 
 			buffer
 				.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
 				.color(outerColor.asARGB())
-				.normal(normMat, (float) normal.x, (float) normal.y, (float) normal.z)
-				.next();
+				.normal(normMat, (float) normal.x, (float) normal.y, (float) normal.z);
 		}
 
 		RenderSystem.enableBlend();
