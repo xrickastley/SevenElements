@@ -25,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
+import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.effect.ElementalStatusEffect;
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 import io.github.xrickastley.sevenelements.element.Element;
@@ -248,9 +249,11 @@ public abstract class PrioritizedLivingEntityMixin
 		)
 	)
 	private DamageSource applyElementalInfusionsOnPierce(DamageSource source, @Local(argsOnly = true) Entity target, @Local ItemStack itemStack) {
-		final Optional<ElementalDamageSource> infusedSource = itemStack
-			.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT)
-			.apply(source, target);
+		final ElementalInfusionComponent component = itemStack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+
+		if (component == null) return source;
+
+		final Optional<ElementalDamageSource> infusedSource = component.apply(source, target);
 
 		return infusedSource.isPresent()
 			? infusedSource.get().shouldInfuse(false)
