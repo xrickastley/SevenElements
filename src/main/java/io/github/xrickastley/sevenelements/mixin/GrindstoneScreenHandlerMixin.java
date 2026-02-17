@@ -21,8 +21,8 @@ public class GrindstoneScreenHandlerMixin {
 		method = "grind",
 		at = @At("RETURN")
 	)
-	private void includeElementInGrind(ItemStack item, int damage, int amount, CallbackInfoReturnable<ItemStack> cir) {
-		ElementalInfusionComponent.removeInfusion(item);
+	private void includeElementInGrind(ItemStack item, int damage, int amount, CallbackInfoReturnable<ItemStack> cir, @Local(ordinal = 1) ItemStack itemStack) {
+		ElementalInfusionComponent.removeInfusion(itemStack);
 	}
 
 	@WrapOperation(

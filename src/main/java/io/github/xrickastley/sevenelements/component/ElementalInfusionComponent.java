@@ -124,7 +124,7 @@ public final class ElementalInfusionComponent extends ItemComponent {
 
 	public double getGaugeUnits() {
 		return this.hasElementalInfusion()
-			? this.getGaugeUnits()
+			? this.elementalInfusion().getGaugeUnits()
 			: 0;
 	}
 
