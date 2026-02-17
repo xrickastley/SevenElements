@@ -110,7 +110,7 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 				.setType(InternalCooldownType.DEFAULT)
 		);
 
-		if (!player.isInCreativeMode()) serverPlayer.setExperienceLevel(serverPlayer.experienceLevel - REQUIRED_LEVEL);
+		if (!player.isInCreativeMode()) serverPlayer.addExperienceLevels(-REQUIRED_LEVEL);
 
 		slot.setStack(stack);
 		slot.markDirty();
