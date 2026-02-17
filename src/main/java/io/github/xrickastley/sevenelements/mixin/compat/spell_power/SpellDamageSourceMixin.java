@@ -1,4 +1,4 @@
-package io.github.xrickastley.sevenelements.mixin.compat;
+package io.github.xrickastley.sevenelements.mixin.compat.spell_power;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 

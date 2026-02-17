@@ -4,7 +4,8 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "io.github.xrickastley.sevenelements.mixin.plugin.SevenElementsMixinPlugin",
   "mixins": [
-    "SpellDamageSourceMixin"
+    "spell_power.SpellDamageSourceMixin",
+    "taxfreelevels.ElementalInfusionScreenHandlerMixin"
   ],
   "injectors": {
     "defaultRequire": 1

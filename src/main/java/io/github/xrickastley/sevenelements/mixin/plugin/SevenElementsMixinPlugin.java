@@ -72,8 +72,13 @@ public class SevenElementsMixinPlugin implements IMixinConfigPlugin {
 
 	static {
 		SevenElementsMixinPlugin.addConditionalMixins(
-			"spell_power",
-			"io.github.xrickastley.sevenelements.mixin.compat.SpellDamageSourceMixin"
+			"taxfreelevels",
+			"io.github.xrickastley.sevenelements.mixin.compat.taxfreelevels.ElementalInfusionScreenHandlerMixin"
+		);
+
+		SevenElementsMixinPlugin.addConditionalMixins(
+			"taxfreelevels",
+			"io.github.xrickastley.sevenelements.mixin.compat.taxfreelevels.ElementalInfusionScreenHandlerMixin"
 		);
 	}
 }
