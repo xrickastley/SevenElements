@@ -41,7 +41,7 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 		try {
 			if (!source.isDirect() || !(target instanceof final LivingEntity livingTarget) || !(source.getAttacker() instanceof final LivingEntity attacker)) return Optional.empty();
 
-			final @Nullable ElementalInfusionComponent component = attacker.getWeaponStack().get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+			final @Nullable ElementalInfusionComponent component = attacker.getActiveOrMainHandStack().get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 
 			if (component == null || !component.hasElementalInfusion()) return Optional.empty();
 
