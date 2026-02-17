@@ -14,6 +14,8 @@ io.github.xrickastley.sevenelements.exception
 io.github.xrickastley.sevenelements.factory
 io.github.xrickastley.sevenelements.interfaces
 io.github.xrickastley.sevenelements.mixin
+io.github.xrickastley.sevenelements.mixin.compat.taxfreelevels
+io.github.xrickastley.sevenelements.mixin.plugin
 io.github.xrickastley.sevenelements.networking
 io.github.xrickastley.sevenelements.particle
 io.github.xrickastley.sevenelements.registry
