@@ -32,6 +32,7 @@
 	"accessWidener": "seven-elements.classtweaker",
 	"mixins": [
 		"seven-elements.mixins.json",
+		"seven-elements.mixins.compat.json",
 		{
 			"config": "seven-elements.client.mixins.json",
 			"environment": "client"

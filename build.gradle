@@ -60,6 +60,8 @@ dependencies {
     include modImplementation ("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cca_version}")
     include modImplementation ("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
 	include modImplementation ("org.ladysnake.cardinal-components-api:cardinal-components-item:${project.cca_version}")
+	
+	modCompileOnly 'com.github.Fourmisain:TaxFreeLevels:loom-SNAPSHOT'
 }
 
 processResources {
