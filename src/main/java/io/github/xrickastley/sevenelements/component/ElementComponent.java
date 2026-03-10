@@ -1,7 +1,9 @@
 package io.github.xrickastley.sevenelements.component;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.Nullable;
 import org.ladysnake.cca.api.v3.component.ComponentKey;
@@ -10,6 +12,7 @@ import org.ladysnake.cca.api.v3.component.sync.AutoSyncedComponent;
 import org.ladysnake.cca.api.v3.component.tick.CommonTickingComponent;
 
 import io.github.xrickastley.sevenelements.SevenElements;
+import io.github.xrickastley.sevenelements.component.ElementComponentImpl.InfusionFunction;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementHolder;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
@@ -19,13 +22,10 @@ import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
-import io.github.xrickastley.sevenelements.util.Functions;
-import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.util.Pair;
 
 public interface ElementComponent extends AutoSyncedComponent, CommonTickingComponent {
@@ -43,69 +43,25 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 		ElementComponentImpl.DENIED_ENTITIES.add(ClassInstanceUtil.cast(entityClass));
 	}
 
+	public static void addElementalInfusionMethod(BiFunction<DamageSource, LivingEntity, Optional<ElementalDamageSource>> infusionFn, int priority) {
+		if (ElementComponentImpl.INFUSION_FUNCTIONS.containsKey(priority))
+			throw new IllegalStateException("The priority: " + priority + " already exists!");
+
+		ElementComponentImpl.INFUSION_FUNCTIONS.put(priority, new InfusionFunction(infusionFn, priority));
+	}
+
 	public static ElementalDamageSource applyElementalInfusions(DamageSource source, LivingEntity target) {
 		if (source instanceof final ElementalDamageSource eds && (eds.getElementalApplication().getElement() != Element.PHYSICAL || !eds.shouldInfuse())) return eds;
 
-		@SuppressWarnings("unchecked")
-		final ElementalDamageSource infusion = JavaScriptUtil.nullishCoalesingFn(
-			Functions.map(Functions.supplier(ElementalInfusionComponent::applyToDamageSource, source, target), ElementComponent::get),
-			Functions.map(Functions.supplier(ElementComponent::attemptDamageTypeInfusions, source, target), ElementComponent::get),
-			Functions.map(Functions.supplier(ElementComponent::attemptEntityDamageInfusions, source, target), ElementComponent::get),
-			Functions.map(Functions.supplier(ElementComponent::attemptProjectileInfusions, source, target), ElementComponent::get)
-		);
-
-		return infusion != null
-			? infusion
-			: ElementalDamageSource.of(source, target);
+		return ElementComponentImpl.INFUSION_FUNCTIONS
+			.entrySet()
+			.stream()
+			.sorted(Comparator.comparingInt(entry -> entry.getKey()))
+			.<ElementalDamageSource>mapMulti((entry, mapper) -> entry.getValue().get(source, target).ifPresent(mapper))
+			.findFirst()
+			.orElse(ElementalDamageSource.of(source, target));
 	}
-
-	private static Optional<ElementalDamageSource> attemptEntityDamageInfusions(DamageSource source, LivingEntity target) {
-		if (!(source.getAttacker() instanceof final LivingEntity attacker)) return Optional.empty();
-
-		for (final var entry : ElementComponentImpl.ENTITY_TYPE_ELEMENT_MAP.entrySet()) {
-			if (!attacker.getType().isIn(entry.getKey())) continue;
-
-			return Optional.of(
-				new ElementalDamageSource(
-					source,
-					ElementalApplications.gaugeUnits(target, entry.getValue(), 1.0),
-					InternalCooldownContext.ofDefault(attacker, "seven-elements:mob_attack")
-				)
-			);
-		}
-
-		return Optional.empty();
-	}
-
-	private static Optional<ElementalDamageSource> attemptDamageTypeInfusions(DamageSource source, LivingEntity target) {
-		for (final var entry : ElementComponentImpl.DAMAGE_TYPE_ELEMENT_MAP.entrySet()) {
-			if (!source.isIn(entry.getKey())) continue;
-
-			return Optional.of(
-				new ElementalDamageSource(
-					source,
-					ElementalApplications.gaugeUnits(target, entry.getValue(), 1.0),
-					InternalCooldownContext.ofDefault(target, "seven-elements:damage_infusion")
-				)
-			);
-		}
-
-		return Optional.empty();
-	}
-
-	private static Optional<ElementalDamageSource> attemptProjectileInfusions(DamageSource source, LivingEntity target) {
-		// Projectiles are indirect DMG sources.
-		if (source.isDirect()) return Optional.empty();
-
-		return source.getSource() instanceof final ProjectileEntity projectile
-			? projectile.sevenelements$attemptInfusion(source, target)
-			: Optional.empty();
-	}
-
-	private static <T> @Nullable T get(Optional<T> optional) {
-		return optional.orElse(null);
-	}
-
+	
 	public LivingEntity getOwner();
 
 	public ElementHolder getElementHolder(Element element);
