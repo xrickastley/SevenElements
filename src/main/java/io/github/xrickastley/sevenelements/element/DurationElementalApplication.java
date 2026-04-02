@@ -16,12 +16,12 @@ import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 import io.github.xrickastley.sevenelements.util.ViewHelper;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.Uuids;
-import net.minecraft.world.World;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public final class DurationElementalApplication extends ElementalApplication {
 	private double duration;
@@ -32,9 +32,9 @@ public final class DurationElementalApplication extends ElementalApplication {
 		this.duration = duration;
 	}
 
-	static ElementalApplication fromData(LivingEntity entity, ReadView view, long syncedAt) {
+	static ElementalApplication fromData(LivingEntity entity, ValueInput view, long syncedAt) {
 		final Element element = ViewHelper.get(view, "Element", Element.CODEC);
-		final UUID uuid = ViewHelper.get(view, "UUID", Uuids.CODEC);
+		final UUID uuid = ViewHelper.get(view, "UUID", UUIDUtil.AUTHLIB_CODEC);
 		final double gaugeUnits = ViewHelper.get(view, "GaugeUnits", Codec.doubleRange(0, Double.MAX_VALUE));
 		final double duration = ViewHelper.get(view, "Duration", Codec.doubleRange(0, Double.MAX_VALUE));
 
@@ -57,48 +57,48 @@ public final class DurationElementalApplication extends ElementalApplication {
 
 	@Override
 	public int getRemainingTicks() {
-		return (int) (appliedAt + duration - entity.getEntityWorld().getTime());
+		return (int) (appliedAt + duration - entity.level().getGameTime());
 	}
 
 	@Override
-	public Text getText(@Nullable DecimalFormat gaugeFormat, @Nullable DecimalFormat durationFormat) {
+	public Component getText(@Nullable DecimalFormat gaugeFormat, @Nullable DecimalFormat durationFormat) {
 		gaugeFormat = JavaScriptUtil.nullishCoalesing(gaugeFormat, GAUGE_UNIT_FORMAT);
 		durationFormat = JavaScriptUtil.nullishCoalesing(durationFormat, DURATION_FORMAT);
 
 		return TextHelper.color(
-			Text.translatable("formats.seven-elements.elemental_application.duration", gaugeFormat.format(this.currentGauge), this.element.getString(), durationFormat.format(this.duration / 20.0)),
+			Component.translatable("formats.seven-elements.elemental_application.duration", gaugeFormat.format(this.currentGauge), this.element.getString(), durationFormat.format(this.duration / 20.0)),
 			this.element.getDamageColor()
 		);
 	}
 
-	public Text getTimerText() {
+	public Component getTimerText() {
 		return this.getTimerText(GAUGE_UNIT_FORMAT, DURATION_FORMAT);
 	}
 
-	public Text getTimerText(@Nullable String gaugeFormat) {
+	public Component getTimerText(@Nullable String gaugeFormat) {
 		return this.getTimerText(
 			ClassInstanceUtil.mapOrNull(gaugeFormat, DecimalFormat::new),
 			DURATION_FORMAT
 		);
 	}
 
-	public Text getTimerText(@Nullable DecimalFormat gaugeFormat) {
+	public Component getTimerText(@Nullable DecimalFormat gaugeFormat) {
 		return this.getTimerText(gaugeFormat, DURATION_FORMAT);
 	}
 
-	public Text getTimerText(@Nullable String gaugeFormat, @Nullable String durationFormat) {
+	public Component getTimerText(@Nullable String gaugeFormat, @Nullable String durationFormat) {
 		return this.getTimerText(
 			ClassInstanceUtil.<String, DecimalFormat>mapOrNull(gaugeFormat, DecimalFormat::new),
 			ClassInstanceUtil.<String, DecimalFormat>mapOrNull(durationFormat, DecimalFormat::new)
 		);
 	}
 
-	public Text getTimerText(@Nullable DecimalFormat gaugeFormat, @Nullable DecimalFormat durationFormat) {
+	public Component getTimerText(@Nullable DecimalFormat gaugeFormat, @Nullable DecimalFormat durationFormat) {
 		gaugeFormat = JavaScriptUtil.nullishCoalesing(gaugeFormat, GAUGE_UNIT_FORMAT);
 		durationFormat = JavaScriptUtil.nullishCoalesing(durationFormat, DURATION_FORMAT);
 
 		return TextHelper.color(
-			Text.translatable("formats.seven-elements.elemental_application.duration.timer", gaugeFormat.format(this.currentGauge), this.element.getString(), durationFormat.format(this.getRemainingTicks() / 20.0)),
+			Component.translatable("formats.seven-elements.elemental_application.duration.timer", gaugeFormat.format(this.currentGauge), this.element.getString(), durationFormat.format(this.getRemainingTicks() / 20.0)),
 			this.element.getDamageColor()
 		);
 	}
@@ -108,11 +108,11 @@ public final class DurationElementalApplication extends ElementalApplication {
 	 *
 	 * This implementation guarantees this to be {@code true} when {@code currentGauge} reaches
 	 * {@code 0} or when the current world time, given by {@link LivingEntity#getWorld()}
-	 * {@link World#getTime() .getTime()} exceeds {@code duration + appliedAt}.
+	 * {@link Level#getGameTime() .getTime()} exceeds {@code duration + appliedAt}.
 	 */
 	@Override
 	public boolean isEmpty() {
-		return this.currentGauge <= 0 || entity.getEntityWorld().getTime() >= (this.appliedAt + this.duration);
+		return this.currentGauge <= 0 || entity.level().getGameTime() >= (this.appliedAt + this.duration);
 	}
 
 	@Override
@@ -142,14 +142,14 @@ public final class DurationElementalApplication extends ElementalApplication {
 	}
 
 	@Override
-	public void writeData(WriteView view) {
+	public void writeData(ValueOutput view) {
 		super.writeData(view);
 
 		view.putDouble("Duration", this.duration);
 	}
 
 	@Override
-	public void updateFromData(ReadView view, long syncedAt) {
+	public void updateFromData(ValueInput view, long syncedAt) {
 		super.updateFromData(view, syncedAt);
 
 		final ElementalApplication application = ElementalApplications.fromData(entity, view, syncedAt);

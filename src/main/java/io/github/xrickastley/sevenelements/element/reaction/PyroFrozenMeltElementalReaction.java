@@ -6,7 +6,7 @@ import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 
 public final class PyroFrozenMeltElementalReaction extends AbstractPyroMeltElementalReaction {
 	PyroFrozenMeltElementalReaction() {
@@ -20,6 +20,6 @@ public final class PyroFrozenMeltElementalReaction extends AbstractPyroMeltEleme
 		// The Aura element is always Freeze since "Freeze" Melt is a non-reversable Forward reaction.
 		// Remove frozen effect upon all depletion of gauge units.
 		if (auraElement.getGaugeUnits() <= 0.0)
-			entity.removeStatusEffect(SevenElementsStatusEffects.FROZEN);
+			entity.removeEffect(SevenElementsStatusEffects.FROZEN);
 	}
 }

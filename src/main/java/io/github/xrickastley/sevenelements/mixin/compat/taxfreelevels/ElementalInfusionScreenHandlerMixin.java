@@ -1,12 +1,13 @@
 package io.github.xrickastley.sevenelements.mixin.compat.taxfreelevels;
 
-import io.github.fourmisain.taxfreelevels.TaxFreeLevels;
-import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
-
-import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+
+import io.github.fourmisain.taxfreelevels.TaxFreeLevels;
+import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler;
+
+import net.minecraft.server.level.ServerPlayer;
 
 @Mixin(ElementalInfusionScreenHandler.class)
 public class ElementalInfusionScreenHandlerMixin {
@@ -14,10 +15,10 @@ public class ElementalInfusionScreenHandlerMixin {
 		method = "infuse",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/server/network/ServerPlayerEntity;addExperienceLevels(I)V"
+			target = "Lnet/minecraft/server/level/ServerPlayer;giveExperienceLevels(I)V"
 		)
 	)
-	public void applyTaxFreeLevels(ServerPlayerEntity serverPlayer, int level) {
+	public void applyTaxFreeLevels(ServerPlayer serverPlayer, int level) {
 		TaxFreeLevels.applyFlattenedXpCost(serverPlayer, -level);
 	}
 }

@@ -6,8 +6,8 @@ import org.spongepowered.asm.mixin.Unique;
 
 import io.github.xrickastley.sevenelements.interfaces.EntityAwareRenderState;
 
-import net.minecraft.client.render.entity.state.EntityRenderState;
-import net.minecraft.entity.Entity;
+import net.minecraft.client.renderer.entity.state.EntityRenderState;
+import net.minecraft.world.entity.Entity;
 
 @Mixin(EntityRenderState.class)
 public class EntityRenderStateMixin implements EntityAwareRenderState {

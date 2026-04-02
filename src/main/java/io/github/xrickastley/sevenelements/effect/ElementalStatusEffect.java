@@ -17,27 +17,27 @@ import io.github.xrickastley.sevenelements.events.ElementEvents;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Functions;
 
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectCategory;
+import net.minecraft.world.effect.MobEffectInstance;
 
 /**
- * A special subclass of {@link StatusEffect} that is tied to an {@link Element}. <br> <br>
+ * A special subclass of {@link MobEffect} that is tied to an {@link Element}. <br> <br>
  *
- * This subclass of {@link StatusEffect} will persist on the entity it is inflicted on so long as
+ * This subclass of {@link MobEffect} will persist on the entity it is inflicted on so long as
  * its corresponding element is applied onto the entity.
  */
 public abstract sealed class ElementalStatusEffect
-	extends StatusEffect
+	extends MobEffect
 	permits CryoStatusEffect, FrozenStatusEffect
 {
 	private static final Map<Element, ElementalStatusEffect> ELEMENT_EFFECTS = new HashMap<>();
 	private final Element element;
 
-	ElementalStatusEffect(StatusEffectCategory category, int color, Element element) {
+	ElementalStatusEffect(MobEffectCategory category, int color, Element element) {
 		super(category, color);
 
 		if (ELEMENT_EFFECTS.containsKey(element))
@@ -52,23 +52,23 @@ public abstract sealed class ElementalStatusEffect
 		return ElementalStatusEffect.ELEMENT_EFFECTS.get(element);
 	}
 
-	public static @Nullable RegistryEntry<StatusEffect> getEntryForElement(Element element) {
+	public static @Nullable Holder<MobEffect> getEntryForElement(Element element) {
 		final ElementalStatusEffect effect = ElementalStatusEffect.ELEMENT_EFFECTS.get(element);
 
 		if (effect == null) return null;
 
-		return Registries.STATUS_EFFECT.getEntry(effect);
+		return BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect);
 	}
 
-	public static List<RegistryEntry<StatusEffect>> getElementEffects() {
+	public static List<Holder<MobEffect>> getElementEffects() {
 		return ElementalStatusEffect.ELEMENT_EFFECTS
 			.values()
 			.stream()
-			.map(Registries.STATUS_EFFECT::getEntry)
+			.map(BuiltInRegistries.MOB_EFFECT::wrapAsHolder)
 			.toList();
 	}
 
-	public static Optional<ElementalStatusEffect> asElementEffect(RegistryEntry<StatusEffect> effect) {
+	public static Optional<ElementalStatusEffect> asElementEffect(Holder<MobEffect> effect) {
 		return Optional.ofNullable(ClassInstanceUtil.castOrNull(effect.value(), ElementalStatusEffect.class));
 	}
 
@@ -80,7 +80,7 @@ public abstract sealed class ElementalStatusEffect
 		effect.applyStatusEffect(application);
 	}
 
-	public static boolean isElementalEffect(RegistryEntry<StatusEffect> effect) {
+	public static boolean isElementalEffect(Holder<MobEffect> effect) {
 		return effect.value() instanceof ElementalStatusEffect;
 	}
 
@@ -91,9 +91,9 @@ public abstract sealed class ElementalStatusEffect
 	public void applyStatusEffect(ElementalApplication application) {
 		if (application.getElement() != this.element) return;
 
-		application.getEntity().addStatusEffect(
-			new StatusEffectInstance(
-				Registries.STATUS_EFFECT.getEntry(this),
+		application.getEntity().addEffect(
+			new MobEffectInstance(
+				BuiltInRegistries.MOB_EFFECT.wrapAsHolder(this),
 				application.getRemainingTicks(),
 				0,
 				true,
@@ -115,30 +115,30 @@ public abstract sealed class ElementalStatusEffect
 
 		@Override
 		public void onElementApplied(Element element, ElementalApplication application) {
-			if (application.getEntity() instanceof final ServerPlayerEntity player && player.networkHandler == null) return;
+			if (application.getEntity() instanceof final ServerPlayer player && player.connection == null) return;
 
 			ClassInstanceUtil.ifPresentMapped(element, ElementalStatusEffect::getEffectForElement, Functions.withArgument(ElementalStatusEffect::applyStatusEffect, application));
 		}
 
 		@Override
 		public void onElementReapplied(Element element, ElementalApplication result) {
-			if (result.getEntity() instanceof final ServerPlayerEntity player && player.networkHandler == null) return;
+			if (result.getEntity() instanceof final ServerPlayer player && player.connection == null) return;
 
 			ClassInstanceUtil.ifPresentMapped(element, ElementalStatusEffect::getEffectForElement, Functions.withArgument(ElementalStatusEffect::applyStatusEffect, result));
 		}
 
 		@Override
 		public void onElementRefreshed(Element element, ElementalApplication current, ElementalApplication previous) {
-			if (current.getEntity() instanceof final ServerPlayerEntity player && player.networkHandler == null) return;
+			if (current.getEntity() instanceof final ServerPlayer player && player.connection == null) return;
 
 			ClassInstanceUtil.ifPresentMapped(element, ElementalStatusEffect::getEffectForElement, Functions.withArgument(ElementalStatusEffect::applyStatusEffect, current));
 		}
 
 		@Override
 		public void onElementRemoved(Element element, ElementalApplication application) {
-			if (application.getEntity() instanceof final ServerPlayerEntity player && player.networkHandler == null) return;
+			if (application.getEntity() instanceof final ServerPlayer player && player.connection == null) return;
 
-			ClassInstanceUtil.ifPresentMapped(element, ElementalStatusEffect::getEffectForElement, Functions.composeConsumer(Registries.STATUS_EFFECT::getEntry, application.getEntity()::removeStatusEffect));
+			ClassInstanceUtil.ifPresentMapped(element, ElementalStatusEffect::getEffectForElement, Functions.composeConsumer(BuiltInRegistries.MOB_EFFECT::wrapAsHolder, application.getEntity()::removeEffect));
 		}
 	}
 }

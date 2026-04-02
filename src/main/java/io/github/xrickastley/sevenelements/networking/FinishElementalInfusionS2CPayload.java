@@ -3,25 +3,25 @@ package io.github.xrickastley.sevenelements.networking;
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
-public class FinishElementalInfusionS2CPayload implements CustomPayload {
-	public static final CustomPayload.Id<FinishElementalInfusionS2CPayload> ID = new CustomPayload.Id<>(
+public class FinishElementalInfusionS2CPayload implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<FinishElementalInfusionS2CPayload> ID = new CustomPacketPayload.Type<>(
 		SevenElements.identifier("s2c/finish_elemental_infusion")
 	);
 
-	public static final PacketCodec<RegistryByteBuf, FinishElementalInfusionS2CPayload> CODEC = PacketCodec.tuple(
-		PacketCodecs.INTEGER, FinishElementalInfusionS2CPayload::syncId,
+	public static final StreamCodec<RegistryFriendlyByteBuf, FinishElementalInfusionS2CPayload> CODEC = StreamCodec.composite(
+		ByteBufCodecs.INT, FinishElementalInfusionS2CPayload::syncId,
 		FinishElementalInfusionS2CPayload::new
 	);
 
 	private final int syncId;
 
 	public FinishElementalInfusionS2CPayload(ElementalInfusionScreenHandler screenHandler) {
-		this(screenHandler.syncId);
+		this(screenHandler.containerId);
 	}
 
 	private FinishElementalInfusionS2CPayload(int syncId) {
@@ -33,7 +33,7 @@ public class FinishElementalInfusionS2CPayload implements CustomPayload {
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 }

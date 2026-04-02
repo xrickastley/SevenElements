@@ -1,5 +1,7 @@
 package io.github.xrickastley.sevenelements.renderer.entity;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
 import io.github.xrickastley.sevenelements.renderer.entity.model.DendroCoreEntityModel;
@@ -7,16 +9,15 @@ import io.github.xrickastley.sevenelements.renderer.entity.state.DendroCoreEntit
 import io.github.xrickastley.sevenelements.util.Ease;
 import io.github.xrickastley.sevenelements.util.MathHelper2;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.resources.Identifier;
 
 public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEntity, DendroCoreEntityState, DendroCoreEntityModel> {
-	public DendroCoreEntityRenderer(EntityRendererFactory.Context context) {
+	public DendroCoreEntityRenderer(EntityRendererProvider.Context context) {
 		super(
 			context,
 			DendroCoreEntityRenderer.createModel(context),
@@ -24,12 +25,12 @@ public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEnt
 		);
 	}
 
-	private static DendroCoreEntityModel createModel(EntityRendererFactory.Context context) {
-		return new DendroCoreEntityModel(context.getPart(DendroCoreEntityModel.MODEL_LAYER));
+	private static DendroCoreEntityModel createModel(EntityRendererProvider.Context context) {
+		return new DendroCoreEntityModel(context.bakeLayer(DendroCoreEntityModel.MODEL_LAYER));
 	}
 
 	@Override
-	public Identifier getTexture(DendroCoreEntityState state) {
+	public Identifier getTextureLocation(DendroCoreEntityState state) {
 		return SevenElements.identifier("textures/entity/dendro_core/dendro_core.png");
 	}
 
@@ -39,26 +40,26 @@ public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEnt
 	}
 
 	@Override
-	public void updateRenderState(DendroCoreEntity dendroCore, DendroCoreEntityState state, float f) {
-		super.updateRenderState(dendroCore, state, f);
+	public void extractRenderState(DendroCoreEntity dendroCore, DendroCoreEntityState state, float f) {
+		super.extractRenderState(dendroCore, state, f);
 
 		state.apply(dendroCore);
 	}
 
 	@Override
-	public void render(DendroCoreEntityState livingEntityRenderState, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CameraRenderState cameraRenderState) {
-		this.shadowOpacity = 0f;
+	public void submit(DendroCoreEntityState livingEntityRenderState, PoseStack matrixStack, SubmitNodeCollector orderedRenderCommandQueue, CameraRenderState cameraRenderState) {
+		this.shadowStrength = 0f;
 		this.shadowRadius = 0f;
 
-		super.render(livingEntityRenderState, matrixStack, orderedRenderCommandQueue, cameraRenderState);
+		super.submit(livingEntityRenderState, matrixStack, orderedRenderCommandQueue, cameraRenderState);
 	}
 
 	@Override
-	protected void scale(DendroCoreEntityState state, MatrixStack matrices) {
+	protected void scale(DendroCoreEntityState state, PoseStack matrices) {
 		super.scale(state, matrices);
 
-		final float delta = MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false);
-		final double explodeProgress = Ease.IN_QUAD.applyLerp(MathHelper2.endOffset(state.age + delta, 2, 0, 120), 0, 1.5);
+		final float delta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
+		final double explodeProgress = Ease.IN_QUAD.applyLerp(MathHelper2.endOffset(state.ageInTicks + delta, 2, 0, 120), 0, 1.5);
 		final float scale = !state.isHyperbloom()
 			? 0.5f + (float) (explodeProgress * 5)
 			: 0.35f;
@@ -68,5 +69,5 @@ public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEnt
 	}
 
 	@Override
-	protected void renderLabelIfPresent(DendroCoreEntityState state, MatrixStack matrices, OrderedRenderCommandQueue queue, CameraRenderState cameraRenderState) {}
+	protected void submitNameTag(DendroCoreEntityState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {}
 }

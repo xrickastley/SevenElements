@@ -9,12 +9,12 @@ import org.spongepowered.asm.mixin.injection.At;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(targets = "net.minecraft.screen.GrindstoneScreenHandler$4")
-public class GrindstoneScreenHandler$4Mixin {
+@Mixin(targets = "net.minecraft.world.inventory.GrindstoneMenu$4")
+public class GrindstoneMenu$4Mixin {
 	@ModifyReturnValue(
-		method = "getExperience(Lnet/minecraft/item/ItemStack;)I",
+		method = "getExperienceFromItem(Lnet/minecraft/world/item/ItemStack;)I",
 		at = @At("RETURN")
 	)
 	public int addElementsAsExperience(int original, @Local(argsOnly = true) ItemStack stack) {

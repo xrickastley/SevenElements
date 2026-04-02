@@ -5,11 +5,11 @@ import org.spongepowered.asm.mixin.Unique;
 
 import io.github.xrickastley.sevenelements.interfaces.IBossBar;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.BossBar;
+import net.minecraft.world.BossEvent;
+import net.minecraft.world.entity.LivingEntity;
 
-@Mixin(BossBar.class)
-public abstract class BossBarMixin implements IBossBar {
+@Mixin(BossEvent.class)
+public abstract class BossEventMixin implements IBossBar {
 	@Unique
 	protected LivingEntity sevenelements$entity;
 

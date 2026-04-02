@@ -1,9 +1,10 @@
 package io.github.xrickastley.sevenelements.factory;
 
 import io.github.xrickastley.sevenelements.SevenElements;
+
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
-import net.minecraft.world.rule.GameRule;
-import net.minecraft.world.rule.GameRuleCategory;
+import net.minecraft.world.level.gamerules.GameRule;
+import net.minecraft.world.level.gamerules.GameRuleCategory;
 
 public class SevenElementsGameRules {
 	private static final GameRuleCategory ELEMENTS_CATEGORY = GameRuleCategory.register(SevenElements.identifier("elements"));

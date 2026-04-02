@@ -5,20 +5,20 @@ import java.util.stream.Collectors;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.entity.LivingEntity;
 
-public record ShowElectroChargeS2CPayload(int mainEntity, List<Integer> otherEntities) implements CustomPayload {
-	public static final CustomPayload.Id<ShowElectroChargeS2CPayload> ID = new CustomPayload.Id<>(
+public record ShowElectroChargeS2CPayload(int mainEntity, List<Integer> otherEntities) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<ShowElectroChargeS2CPayload> ID = new CustomPacketPayload.Type<>(
 		SevenElements.identifier("s2c/show_electro_charged")
 	);
 
-	public static final PacketCodec<RegistryByteBuf, ShowElectroChargeS2CPayload> CODEC = PacketCodec.tuple(
-		PacketCodecs.INTEGER, ShowElectroChargeS2CPayload::mainEntity,
-		PacketCodecs.INTEGER.collect(PacketCodecs.toList()), ShowElectroChargeS2CPayload::otherEntities,
+	public static final StreamCodec<RegistryFriendlyByteBuf, ShowElectroChargeS2CPayload> CODEC = StreamCodec.composite(
+		ByteBufCodecs.INT, ShowElectroChargeS2CPayload::mainEntity,
+		ByteBufCodecs.INT.apply(ByteBufCodecs.list()), ShowElectroChargeS2CPayload::otherEntities,
 		ShowElectroChargeS2CPayload::new
 	);
 
@@ -27,7 +27,7 @@ public record ShowElectroChargeS2CPayload(int mainEntity, List<Integer> otherEnt
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 }

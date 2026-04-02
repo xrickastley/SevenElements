@@ -8,71 +8,71 @@ import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler
 import io.github.xrickastley.sevenelements.util.ClientConfig;
 import io.github.xrickastley.sevenelements.util.MathHelper2;
 
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.Click;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.CommonColors;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
 
-public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScreenHandler> {
+public class ElementalInfusionScreen extends AbstractContainerScreen<ElementalInfusionScreenHandler> {
 	private static final Identifier TEXTURE = SevenElements.identifier("textures/gui/container/infusion_table.png");
 
-	private static final Identifier SLOT_DISABLED_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot_disabled");
-	private static final Identifier SLOT_HIGHLIGHTED_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot_highlighted");
-	private static final Identifier SLOT_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot");
+	private static final Identifier SLOT_DISABLED_TEXTURE = Identifier.withDefaultNamespace("container/enchanting_table/enchantment_slot_disabled");
+	private static final Identifier SLOT_HIGHLIGHTED_TEXTURE = Identifier.withDefaultNamespace("container/enchanting_table/enchantment_slot_highlighted");
+	private static final Identifier SLOT_TEXTURE = Identifier.withDefaultNamespace("container/enchanting_table/enchantment_slot");
 
 	private static final Identifier LEVEL_DISABLED_TEXTURE = SevenElements.identifier("container/infusion_table/level_disabled");
 	private static final Identifier LEVEL_ENABLED_TEXTURE = SevenElements.identifier("container/infusion_table/level_enabled");
 
 	private static final int LOCK_TICKS = 10;
-	private final PlayerEntity player;
+	private final Player player;
 	private boolean locked = false;
 	private long lockedAt;
 	private long tooltipDisplayedAt;
 
-	public ElementalInfusionScreen(ElementalInfusionScreenHandler handler, PlayerInventory inventory, Text title) {
+	public ElementalInfusionScreen(ElementalInfusionScreenHandler handler, Inventory inventory, Component title) {
 		super(handler, inventory, title);
 
-		this.backgroundHeight = 246;
-		this.backgroundWidth = 176;
-		this.playerInventoryTitleX = 8;
-		this.playerInventoryTitleY = this.backgroundHeight - 94;
+		this.imageHeight = 246;
+		this.imageWidth = 176;
+		this.inventoryLabelX = 8;
+		this.inventoryLabelY = this.imageHeight - 94;
 		this.player = inventory.player;
 	}
 
 	@Override
-	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
-		final int x = (width - backgroundWidth) / 2;
-		final int y = (height - backgroundHeight) / 2;
+	protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+		final int x = (width - imageWidth) / 2;
+		final int y = (height - imageHeight) / 2;
 
-		context.drawTexture(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, backgroundWidth, backgroundHeight, 256, 256);
+		context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, imageWidth, imageHeight, 256, 256);
 
 		this.drawElements(context, x, y);
 		this.drawInfuseButton(context, x, y, mouseX, mouseY);
 
-		final Slot slot = this.handler.getResultSlot();
+		final Slot slot = this.menu.getResultSlot();
 
-		if (this.displayTooltip() && slot.hasStack())
-			context.drawTooltip(this.textRenderer, this.getTooltipFromItem(slot.getStack()), x + slot.x + 16, y + slot.y + 12);
+		if (this.displayTooltip() && slot.hasItem())
+			context.setComponentTooltipForNextFrame(this.font, this.getTooltipFromContainerItem(slot.getItem()), x + slot.x + 16, y + slot.y + 12);
 	}
 
-	private void drawElements(DrawContext context, final int x, final int y) {
-		context.drawTexture(RenderPipelines.GUI_TEXTURED, Element.PYRO.getTexture(), x + 76, y + 18, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(RenderPipelines.GUI_TEXTURED, Element.HYDRO.getTexture(), x + 107, y + 33, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(RenderPipelines.GUI_TEXTURED, Element.ANEMO.getTexture(), x + 115, y + 63, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(RenderPipelines.GUI_TEXTURED, Element.ELECTRO.getTexture(), x + 94, y + 92, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(RenderPipelines.GUI_TEXTURED, Element.DENDRO.getTexture(), x + 59, y + 92, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(RenderPipelines.GUI_TEXTURED, Element.CRYO.getTexture(), x + 37, y + 63, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(RenderPipelines.GUI_TEXTURED, Element.GEO.getTexture(), x + 45, y + 33, 0, 0, 24, 24, 24, 24);
+	private void drawElements(GuiGraphics context, final int x, final int y) {
+		context.blit(RenderPipelines.GUI_TEXTURED, Element.PYRO.getTexture(), x + 76, y + 18, 0, 0, 24, 24, 24, 24);
+		context.blit(RenderPipelines.GUI_TEXTURED, Element.HYDRO.getTexture(), x + 107, y + 33, 0, 0, 24, 24, 24, 24);
+		context.blit(RenderPipelines.GUI_TEXTURED, Element.ANEMO.getTexture(), x + 115, y + 63, 0, 0, 24, 24, 24, 24);
+		context.blit(RenderPipelines.GUI_TEXTURED, Element.ELECTRO.getTexture(), x + 94, y + 92, 0, 0, 24, 24, 24, 24);
+		context.blit(RenderPipelines.GUI_TEXTURED, Element.DENDRO.getTexture(), x + 59, y + 92, 0, 0, 24, 24, 24, 24);
+		context.blit(RenderPipelines.GUI_TEXTURED, Element.CRYO.getTexture(), x + 37, y + 63, 0, 0, 24, 24, 24, 24);
+		context.blit(RenderPipelines.GUI_TEXTURED, Element.GEO.getTexture(), x + 45, y + 33, 0, 0, 24, 24, 24, 24);
 	}
 
-	private void drawInfuseButton(DrawContext context, final int x, final int y, final int mouseX, final int mouseY) {
-		if (!handler.getResultSlot().hasStack()) return;
+	private void drawInfuseButton(GuiGraphics context, final int x, final int y, final int mouseX, final int mouseY) {
+		if (!menu.getResultSlot().hasItem()) return;
 
 		final int x1 = x + 43;
 		final int y1 = y + 128;
@@ -90,37 +90,37 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 			: LEVEL_DISABLED_TEXTURE;
 
 		final int color = MathHelper2.inRange(mouseX, x1, x2) && MathHelper2.inRange(mouseY, y1, y2) && this.isEnabled()
-			? Colors.YELLOW
+			? CommonColors.YELLOW
 			: 0xFF685E4A;
 
-		context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, texture, x1, y1, 90, 19);
-		context.drawGuiTexture(RenderPipelines.GUI_TEXTURED, expTexture, x2 - 24, y2 - 16, 24, 16);
-		context.drawText(this.textRenderer, Text.translatable("container.seven-elements.infusion_table.infuse"), x1 + 6, y1 + 6, color, false);
+		context.blitSprite(RenderPipelines.GUI_TEXTURED, texture, x1, y1, 90, 19);
+		context.blitSprite(RenderPipelines.GUI_TEXTURED, expTexture, x2 - 24, y2 - 16, 24, 16);
+		context.drawString(this.font, Component.translatable("container.seven-elements.infusion_table.infuse"), x1 + 6, y1 + 6, color, false);
 	}
 
 	@Override
-	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
 		this.renderBackground(context, mouseX, mouseY, delta);
 		super.render(context, mouseX, mouseY, delta);
-		this.drawMouseoverTooltip(context, mouseX, mouseY);
+		this.renderTooltip(context, mouseX, mouseY);
 	}
 
 	@Override
 	protected void init() {
 		super.init();
 
-		titleX = (backgroundWidth - textRenderer.getWidth(title)) / 2;
+		titleLabelX = (imageWidth - font.width(title)) / 2;
 	}
 
 	@Override
-	public boolean mouseClicked(Click click, boolean doubled) {
+	public boolean mouseClicked(MouseButtonEvent click, boolean doubled) {
 		return this.checkMouseClick(click, doubled)
 			|| super.mouseClicked(click, doubled);
 	}
 
-	private boolean checkMouseClick(Click click, boolean doubled) {
-		final int x = (width - backgroundWidth) / 2;
-		final int y = (height - backgroundHeight) / 2;
+	private boolean checkMouseClick(MouseButtonEvent click, boolean doubled) {
+		final int x = (width - imageWidth) / 2;
+		final int y = (height - imageHeight) / 2;
 
 		final int x1 = x + 43;
 		final int y1 = y + 128;
@@ -132,8 +132,8 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 		if (!this.isEnabled()) return false;
 
 		this.lock();
-		this.client.interactionManager.clickButton(handler.syncId, 0);
-		this.client.player.playSound(SevenElementsSoundEvents.ITEM_INFUSION, 1f, 1f);
+		this.minecraft.gameMode.handleInventoryButtonClick(menu.containerId, 0);
+		this.minecraft.player.playSound(SevenElementsSoundEvents.ITEM_INFUSION, 1f, 1f);
 
 		return true;
 	}
@@ -144,29 +144,29 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 
 	private void lock() {
 		this.locked = true;
-		this.lockedAt = player.getEntityWorld().getTime();
-		this.handler.getResultSlot().lock();
+		this.lockedAt = player.level().getGameTime();
+		this.menu.getResultSlot().lock();
 	}
 
 	private void unlock() {
 		this.locked = false;
-		this.handler.getResultSlot().unlock();
-		this.tooltipDisplayedAt = player.getEntityWorld().getTime();
+		this.menu.getResultSlot().unlock();
+		this.tooltipDisplayedAt = player.level().getGameTime();
 	}
 
 	private boolean isEnabled() {
-		return handler.canInfuse(this.player) && !this.isLocked();
+		return menu.canInfuse(this.player) && !this.isLocked();
 	}
 
 	private boolean isLocked() {
-		return locked || this.lockedAt + ElementalInfusionScreen.LOCK_TICKS >= this.player.getEntityWorld().getTime();
+		return locked || this.lockedAt + ElementalInfusionScreen.LOCK_TICKS >= this.player.level().getGameTime();
 	}
 
 	private boolean displayTooltip() {
 		final ClientConfig config = ClientConfig.get();
 
 		return config.rendering.text.displayTooltipAfterInfusion
-			&& this.tooltipDisplayedAt + config.rendering.text.tooltipDisplayTicks >= this.player.getEntityWorld().getTime()
-			&& (this.focusedSlot == null || !this.focusedSlot.hasStack());
+			&& this.tooltipDisplayedAt + config.rendering.text.tooltipDisplayTicks >= this.player.level().getGameTime()
+			&& (this.hoveredSlot == null || !this.hoveredSlot.hasItem());
 	}
 }

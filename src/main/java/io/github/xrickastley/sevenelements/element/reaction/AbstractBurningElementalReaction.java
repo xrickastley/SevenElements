@@ -29,9 +29,9 @@ import io.github.xrickastley.sevenelements.events.ReactionTriggered;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistries;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.entry.RegistryEntry.Reference;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.core.Holder.Reference;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 
 public abstract sealed class AbstractBurningElementalReaction
 	extends ElementalReaction
@@ -40,7 +40,7 @@ public abstract sealed class AbstractBurningElementalReaction
 	private static final InternalCooldownType BURNING_PYRO_ICD = InternalCooldownType.registered(SevenElements.identifier("reactions/burning/pyro_icd"), 40, Integer.MAX_VALUE);
 	private static final Supplier<Set<ElementalReaction>> REACTIONS = Suppliers.memoize(
 		() -> SevenElementsRegistries.ELEMENTAL_REACTION
-			.streamEntries()
+			.listElements()
 			.map(Reference::value)
 			.filter(r -> !(r instanceof AbstractDendroCoreElementalReaction) && !(r.getAuraElement() == Element.PYRO || (r.getTriggeringElement() == Element.PYRO && r.reversable)))
 			.collect(Collectors.toSet())
@@ -85,7 +85,7 @@ public abstract sealed class AbstractBurningElementalReaction
 
 	static {
 		ElementEvents.APPLIED.register((element, application) -> {
-			if (application.getEntity().getEntityWorld().isClient() || element != Element.BURNING) return;
+			if (application.getEntity().level().isClientSide() || element != Element.BURNING) return;
 
 			final ElementComponent component = ElementComponent.KEY.get(application.getEntity());
 
@@ -138,11 +138,11 @@ public abstract sealed class AbstractBurningElementalReaction
 		at = @At("HEAD")
 	)
 	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity) {
-		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.level() instanceof final ServerLevel world)) return;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 
-		if (!component.hasElementalApplication(Element.BURNING) || component.isBurningOnCD() || entity.getEntityWorld().isClient()) return;
+		if (!component.hasElementalApplication(Element.BURNING) || component.isBurningOnCD() || entity.level().isClientSide()) return;
 
 		if (!component.hasElementalApplication(Element.DENDRO) && !component.hasElementalApplication(Element.QUICKEN)) {
 			component
@@ -156,8 +156,8 @@ public abstract sealed class AbstractBurningElementalReaction
 			final float damage = ElementalReaction.getReactionDamage(entity, 0.25);
 			final ElementalDamageSource source = new ElementalDamageSource(
 				entity
-					.getDamageSources()
-					.create(SevenElementsDamageTypes.BURNING, entity, component.getBurningOrigin()),
+					.damageSources()
+					.source(SevenElementsDamageTypes.BURNING, entity, component.getBurningOrigin()),
 				target == entity
 					? ElementalApplications.gaugeUnits(target, Element.PYRO, 0)
 					: ElementalApplications.gaugeUnits(target, Element.PYRO, 1),
@@ -166,9 +166,9 @@ public abstract sealed class AbstractBurningElementalReaction
 					: InternalCooldownContext.ofType(entity, "seven-elements:reactions/burning", BURNING_PYRO_ICD)
 			).shouldApplyDMGBonus(false);
 
-			target.damage(world, source, damage);
-			target.setOnFire(true);
-			target.setFireTicks(5);
+			target.hurtServer(world, source, damage);
+			target.setSharedFlagOnFire(true);
+			target.setRemainingFireTicks(5);
 
 			final ElementComponent targetComponent = ElementComponent.KEY.get(target);
 			final ElementHolder holder = targetComponent.getElementHolder(Element.PYRO);
@@ -273,7 +273,7 @@ public abstract sealed class AbstractBurningElementalReaction
 		if (!component.hasElementalApplication(Element.BURNING)) return original;
 
 		return SevenElementsRegistries.ELEMENTAL_REACTION
-			.streamEntries()
+			.listElements()
 			.map(Reference::value)
 			.filter(r -> r.isTriggerable(component.getOwner()) && (r.getAuraElement() == Element.PYRO || (r.getTriggeringElement() == Element.PYRO && r.reversable)))
 			.min(Comparator.comparing(r -> r.getPriority(application)));

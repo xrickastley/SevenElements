@@ -1,7 +1,7 @@
 package io.github.xrickastley.sevenelements.util;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 public final class MathHelper2 {
 	public static double endOffset(double value, double offset, double start, double end) {
@@ -32,7 +32,7 @@ public final class MathHelper2 {
 	 *
 	 * @param pos The position to turn into a {@code BlockPos}.
 	 */
-	public static BlockPos asBlockPos(Vec3d pos) {
+	public static BlockPos asBlockPos(Vec3 pos) {
 		return new BlockPos((int) Math.floor(pos.x), (int) Math.floor(pos.y), (int) Math.floor(pos.z));
 	}
 

@@ -1,6 +1,6 @@
-
 package io.github.xrickastley.sevenelements.mixin.client;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
+import com.mojang.blaze3d.resource.GraphicsResourceAllocator;
 
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -17,17 +17,16 @@ import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderCo
 import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContextImpl;
 import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRendererHooks;
 
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.util.ObjectAllocator;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 
-@Mixin(WorldRenderer.class)
-public class WorldRendererMixin implements WorldRendererHooks {
+@Mixin(LevelRenderer.class)
+public class LevelRendererMixin implements WorldRendererHooks {
 	@Shadow
 	@Nullable
-	private ClientWorld world;
+	private ClientLevel level;
 
 	@Unique
 	private final WorldRenderContextImpl sevenelements$worldRenderContext = new WorldRenderContextImpl();
@@ -39,16 +38,16 @@ public class WorldRendererMixin implements WorldRendererHooks {
 	}
 
 	@Inject(
-		method = "render",
+		method = "renderLevel",
 		at = @At("HEAD")
 	)
-	private void beforeRender(ObjectAllocator allocator, RenderTickCounter tickCounter, boolean renderBlockOutline, Camera camera, Matrix4f positionMatrix, Matrix4f matrix4f, Matrix4f projectionMatrix, GpuBufferSlice fogBuffer, Vector4f fogColor, boolean renderSky, CallbackInfo ci) {
+	private void beforeRender(GraphicsResourceAllocator allocator, DeltaTracker tickCounter, boolean renderBlockOutline, Camera camera, Matrix4f positionMatrix, Matrix4f matrix4f, Matrix4f projectionMatrix, GpuBufferSlice fogBuffer, Vector4f fogColor, boolean renderSky, CallbackInfo ci) {
 		this.sevenelements$worldRenderContext
-			.prepare(((WorldRenderer)(Object) this), tickCounter, camera, world);
+			.prepare(((LevelRenderer)(Object) this), tickCounter, camera, level);
 	}
 
 	@Inject(
-		method = "render",
+		method = "renderLevel",
 		at = @At("RETURN")
 	)
 	private void afterRender(CallbackInfo ci) {

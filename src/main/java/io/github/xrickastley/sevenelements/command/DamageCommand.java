@@ -16,26 +16,26 @@ import io.github.xrickastley.sevenelements.element.InternalCooldownTag;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistryKeys;
 
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.RegistryEntryReferenceArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.ResourceArgument;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
-import static net.minecraft.server.command.CommandManager.argument;
-import static net.minecraft.server.command.CommandManager.literal;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
 
 public class DamageCommand {
-	private static final SimpleCommandExceptionType INVULNERABLE_EXCEPTION = new SimpleCommandExceptionType(Text.translatable("commands.damage.invulnerable"));
+	private static final SimpleCommandExceptionType INVULNERABLE_EXCEPTION = new SimpleCommandExceptionType(Component.translatable("commands.damage.invulnerable"));
 
-	public static void register(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess) {
-		final CommandNode<ServerCommandSource> elementalDamageNode =
-			CommandManager
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess) {
+		final CommandNode<CommandSourceStack> elementalDamageNode =
+			Commands
 				.literal("element")
 				.then(
 					argument("element", ElementArgumentType.element())
@@ -44,18 +44,18 @@ public class DamageCommand {
 						.then(
 							argument("tag", InternalCooldownTagType.tag())
 							.then(
-								argument("type", RegistryEntryReferenceArgumentType.registryEntry(registryAccess, SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE))
-								.executes(context -> execute(context, EntityArgumentType.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), context.getSource().getWorld().getDamageSources().generic()))
+								argument("type", ResourceArgument.resource(registryAccess, SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE))
+								.executes(context -> execute(context, EntityArgument.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), context.getSource().getLevel().damageSources().generic()))
 								.then(
 									literal("by")
 									.then(
-										argument("entity", EntityArgumentType.entity())
-										.executes(context -> execute(context, EntityArgumentType.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), new DamageSource(RegistryEntryReferenceArgumentType.getRegistryEntry(context, "damageType", RegistryKeys.DAMAGE_TYPE), EntityArgumentType.getEntity(context, "entity"))))
+										argument("entity", EntityArgument.entity())
+										.executes(context -> execute(context, EntityArgument.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), new DamageSource(ResourceArgument.getResource(context, "damageType", Registries.DAMAGE_TYPE), EntityArgument.getEntity(context, "entity"))))
 										.then(
 											literal("from")
 											.then(
-												argument("cause", EntityArgumentType.entity())
-												.executes(context -> execute(context, EntityArgumentType.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), new DamageSource(RegistryEntryReferenceArgumentType.getRegistryEntry(context, "damageType", RegistryKeys.DAMAGE_TYPE), EntityArgumentType.getEntity(context, "entity"), EntityArgumentType.getEntity(context, "cause"))))
+												argument("cause", EntityArgument.entity())
+												.executes(context -> execute(context, EntityArgument.getEntity(context, "target"), FloatArgumentType.getFloat(context, "amount"), new DamageSource(ResourceArgument.getResource(context, "damageType", Registries.DAMAGE_TYPE), EntityArgument.getEntity(context, "entity"), EntityArgument.getEntity(context, "cause"))))
 											)
 										)
 									)
@@ -75,30 +75,30 @@ public class DamageCommand {
 			.addChild(elementalDamageNode);
 	}
 
-	private static int execute(CommandContext<ServerCommandSource> context, Entity target, float amount, DamageSource damageSource) throws CommandSyntaxException {
+	private static int execute(CommandContext<CommandSourceStack> context, Entity target, float amount, DamageSource damageSource) throws CommandSyntaxException {
 		final Element element = ElementArgumentType.getElement(context, "element");
 		final double gaugeUnits = DoubleArgumentType.getDouble(context, "gaugeUnits");
 		final InternalCooldownTag tag = InternalCooldownTagType.getTag(context, "tag");
-		final InternalCooldownType type = RegistryEntryReferenceArgumentType.getRegistryEntry(context, "type", SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE).value();
+		final InternalCooldownType type = ResourceArgument.getResource(context, "type", SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE).value();
 
 		if (!(target instanceof final LivingEntity livingTarget))
-			return CommandUtils.sendError(context, Text.translatable("commands.element.failed.entity", target.getDisplayName()));
+			return CommandUtils.sendError(context, Component.translatable("commands.element.failed.entity", target.getDisplayName()));
 
 		final ElementalDamageSource eds = new ElementalDamageSource(
 			damageSource,
 			ElementalApplications.gaugeUnits(livingTarget, element, gaugeUnits, false),
-			InternalCooldownContext.ofType(damageSource.getAttacker(), tag, type)
+			InternalCooldownContext.ofType(damageSource.getEntity(), tag, type)
 		).shouldInfuse(false);
 
-		final Text icdText = Text.empty()
+		final Component icdText = Component.empty()
 			.append(tag.getText())
 			.append("/")
 			.append(type.getText());
 
-		if (target.damage(context.getSource().getWorld(), eds, amount)) {
+		if (target.hurtServer(context.getSource().getLevel(), eds, amount)) {
 			context
 				.getSource()
-				.sendFeedback(() -> Text.translatable("commands.seven-elements.damage.success", amount, ElementalApplications.gaugeUnits(livingTarget, element, gaugeUnits, false).getText(), icdText, target.getDisplayName()), true);
+				.sendSuccess(() -> Component.translatable("commands.seven-elements.damage.success", amount, ElementalApplications.gaugeUnits(livingTarget, element, gaugeUnits, false).getText(), icdText, target.getDisplayName()), true);
 
 			return 1;
 		} else {

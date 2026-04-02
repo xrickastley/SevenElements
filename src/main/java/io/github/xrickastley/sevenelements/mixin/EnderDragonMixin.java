@@ -11,30 +11,30 @@ import io.github.xrickastley.sevenelements.interfaces.IEnderDragonFight;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Functions;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
-import net.minecraft.entity.boss.dragon.EnderDragonFight;
-import net.minecraft.entity.mob.MobEntity;
-import net.minecraft.entity.mob.Monster;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
+import net.minecraft.world.entity.monster.Enemy;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.end.EndDragonFight;
 
-@Mixin(EnderDragonEntity.class)
-public abstract class EnderDragonEntityMixin
-	extends MobEntity
-	implements Monster
+@Mixin(EnderDragon.class)
+public abstract class EnderDragonMixin
+	extends Mob
+	implements Enemy
 {
-	public EnderDragonEntityMixin(EntityType<? extends EnderDragonEntity> entityType, World world) {
+	public EnderDragonMixin(EntityType<? extends EnderDragon> entityType, Level world) {
 		super(EntityType.ENDER_DRAGON, world);
 
 		throw new AssertionError();
 	}
 
 	@Inject(
-		method = "setFight",
+		method = "setDragonFight",
 		at = @At("HEAD")
 	)
-	private void addEnderDragonEntityToFight(EnderDragonFight fight, CallbackInfo ci) {
+	private void addEnderDragonEntityToFight(EndDragonFight fight, CallbackInfo ci) {
 		ClassInstanceUtil.ifPresentMapped(
 			fight,
 			IEnderDragonFight.class::cast,
@@ -43,27 +43,27 @@ public abstract class EnderDragonEntityMixin
 	}
 
 	@Inject(
-		method = "tickMovement",
+		method = "aiStep",
 		at = @At("HEAD")
 	)
 	private void sendDragonUpdates(CallbackInfo ci) {
-		if (!(this.getEntityWorld() instanceof final ServerWorld world)) return;
+		if (!(this.level() instanceof final ServerLevel world)) return;
 
 		ClassInstanceUtil.ifPresentMapped(
-			world.getEnderDragonFight(),
+			world.getDragonFight(),
 			IEnderDragonFight.class::cast,
 			Functions.withArgument(IEnderDragonFight::sevenelements$setDragon, ClassInstanceUtil.cast(this))
 		);
 	}
 
 	@Inject(
-		method = "tickMovement",
+		method = "aiStep",
 		at = @At(
 			value = "INVOKE_ASSIGN",
-			target = "Lnet/minecraft/server/world/ServerWorld;getEnderDragonFight()Lnet/minecraft/entity/boss/dragon/EnderDragonFight;"
+			target = "Lnet/minecraft/server/level/ServerLevel;getDragonFight()Lnet/minecraft/world/level/dimension/end/EndDragonFight;"
 		)
 	)
-	private void setDragonOnFightUpdate(CallbackInfo ci, @Local EnderDragonFight enderDragonFight) {
+	private void setDragonOnFightUpdate(CallbackInfo ci, @Local EndDragonFight enderDragonFight) {
 		ClassInstanceUtil.ifPresentMapped(
 			enderDragonFight,
 			IEnderDragonFight.class::cast,

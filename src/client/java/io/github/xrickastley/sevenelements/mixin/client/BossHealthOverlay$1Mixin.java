@@ -7,10 +7,10 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import io.github.xrickastley.sevenelements.SevenElementsClient;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
-@Mixin(targets={"net.minecraft.client.gui.hud.BossBarHud$1"})
-public class BossBarHud$1Mixin {
+@Mixin(targets={"net.minecraft.client.gui.components.BossHealthOverlay$1"})
+public class BossHealthOverlay$1Mixin {
 	@ModifyArg(
-		method = "add(Ljava/util/UUID;Lnet/minecraft/text/Text;FLnet/minecraft/entity/boss/BossBar$Color;Lnet/minecraft/entity/boss/BossBar$Style;ZZZ)V",
+		method = "add",
 		at = @At(
 			value = "INVOKE",
 			target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"

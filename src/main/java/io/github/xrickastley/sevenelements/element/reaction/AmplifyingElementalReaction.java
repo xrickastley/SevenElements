@@ -4,7 +4,7 @@ import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 
 public abstract class AmplifyingElementalReaction extends ElementalReaction {
 	final double amplifier;

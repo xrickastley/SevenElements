@@ -18,23 +18,23 @@ import io.github.xrickastley.sevenelements.util.MathHelper2;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.AnimationState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.AnimationState;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.Vec3;
 
 // Should technically extend Entity, but extends LivingEntity instead to NOT deal with more Networking and Spawn Packets.
 public final class CrystallizeShardEntity extends SevenElementsEntity {
@@ -42,27 +42,27 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	private @Nullable Element element;
 	private @Nullable UUID owner;
 
-	CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, World world) {
+	CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, Level world) {
 		this(entityType, world, null, null);
 	}
 
-	public CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, World world, Element element) {
+	public CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, Level world, Element element) {
 		this(entityType, world, element, null);
 	}
 
-	public CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, World world, Element element, @Nullable LivingEntity owner) {
+	public CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, Level world, Element element, @Nullable LivingEntity owner) {
 		super(entityType, world);
 
-		this.element = this.getEntityWorld().isClient() ? null : JavaScriptUtil.nullishCoalesing(element, Element.GEO);
-		this.owner = ClassInstanceUtil.mapOrNull(owner, LivingEntity::getUuid);
+		this.element = this.level().isClientSide() ? null : JavaScriptUtil.nullishCoalesing(element, Element.GEO);
+		this.owner = ClassInstanceUtil.mapOrNull(owner, LivingEntity::getUUID);
 	}
 
-	public static CrystallizeShardEntity create(ServerWorld world, @Nullable LivingEntity owner, Element element, Vec3d pos, SpawnReason reason) {
+	public static CrystallizeShardEntity create(ServerLevel world, @Nullable LivingEntity owner, Element element, Vec3 pos, EntitySpawnReason reason) {
 		return SevenElementsEntityTypes.CRYSTALLIZE_SHARD.create(
 			world,
 			shard -> {
 				shard.element = element;
-				shard.owner = ClassInstanceUtil.mapOrNull(owner, LivingEntity::getUuid);
+				shard.owner = ClassInstanceUtil.mapOrNull(owner, LivingEntity::getUUID);
 			},
 			MathHelper2.asBlockPos(pos),
 			reason,
@@ -72,33 +72,33 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	}
 
 	@Override
-	public void writeCustomData(WriteView view) {
-		super.writeCustomData(view);
+	public void addAdditionalSaveData(ValueOutput view) {
+		super.addAdditionalSaveData(view);
 
-		view.put("Element", Element.CODEC, this.element);
-		view.putNullable("Owner", Uuids.CODEC, this.owner);
+		view.store("Element", Element.CODEC, this.element);
+		view.storeNullable("Owner", UUIDUtil.AUTHLIB_CODEC, this.owner);
 	}
 
 	@Override
-	public void readCustomData(ReadView view) {
-		super.readCustomData(view);
+	public void readAdditionalSaveData(ValueInput view) {
+		super.readAdditionalSaveData(view);
 
 		this.element = view.read("Element", Element.CODEC).orElse(this.element);
-		this.owner = view.read("Owner", Uuids.CODEC).orElse(this.owner);
+		this.owner = view.read("Owner", UUIDUtil.AUTHLIB_CODEC).orElse(this.owner);
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
 
-		this.idleAnimationState.startIfNotRunning(this.age);
+		this.idleAnimationState.startIfStopped(this.tickCount);
 
 		this.checkCrystallizeShield();
 		this.syncToPlayers();
 	}
 
 	@Override
-	public boolean collidesWith(Entity other) {
+	public boolean canCollideWith(Entity other) {
 		return other instanceof CrystallizeShardEntity;
 	}
 
@@ -119,27 +119,27 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	}
 
 	public void syncToPlayers() {
-		if (!(this.getEntityWorld() instanceof ServerWorld)) return;
+		if (!(this.level() instanceof ServerLevel)) return;
 
 		final SyncCrystallizeShardTypeS2CPayload packet = new SyncCrystallizeShardTypeS2CPayload(this.getId(), this.element);
 
-		for (final ServerPlayerEntity otherPlayer : PlayerLookup.tracking(this))
+		for (final ServerPlayer otherPlayer : PlayerLookup.tracking(this))
 			ServerPlayNetworking.send(otherPlayer, packet);
 	}
 
 	private void checkCrystallizeShield() {
-		if (this.getEntityWorld().isClient()) return;
+		if (this.level().isClientSide()) return;
 
-		final List<LivingEntity> entities = ElementalReaction.getEntitiesInAoE(this, 1.0, e -> !(e instanceof SevenElementsEntity || e.getType().isIn(SevenElementsEntityTypeTags.IGNORED_TARGETS)));
+		final List<LivingEntity> entities = ElementalReaction.getEntitiesInAoE(this, 1.0, e -> !(e instanceof SevenElementsEntity || e.getType().is(SevenElementsEntityTypeTags.IGNORED_TARGETS)));
 		final @Nullable LivingEntity owner = this.getEntityFromUUID(this.owner);
 
 		@Nullable LivingEntity target = null;
 
-		if (this.age > 300) {
+		if (this.tickCount > 300) {
 			this.remove(RemovalReason.KILLED);
-		} else if (this.age <= 150 && entities.contains(owner)) {
+		} else if (this.tickCount <= 150 && entities.contains(owner)) {
 			target = owner;
-		} else if (this.owner == null || this.age > 150) {
+		} else if (this.owner == null || this.tickCount > 150) {
 			target = entities
 				.stream()
 				.min(Comparator.comparingDouble(this::distanceTo))
@@ -152,8 +152,8 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 
 		component.setCrystallizeShield(element, SevenElements.getLevelMultiplier(this));
 
-		this.getEntityWorld()
-			.playSound(null, this.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD, SoundCategory.PLAYERS, 1.0f, 1.0f);
+		this.level()
+			.playSound(null, this.blockPosition(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD, SoundSource.PLAYERS, 1.0f, 1.0f);
 
 		this.remove(RemovalReason.KILLED);
 	}
@@ -162,14 +162,14 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 		ElementComponent.denyElementsFor(CrystallizeShardEntity.class);
 	}
 
-	public static class SyncCrystallizeShardTypeS2CPayload implements CustomPayload {
-		public static final CustomPayload.Id<SyncCrystallizeShardTypeS2CPayload> ID = new CustomPayload.Id<>(
+	public static class SyncCrystallizeShardTypeS2CPayload implements CustomPacketPayload {
+		public static final CustomPacketPayload.Type<SyncCrystallizeShardTypeS2CPayload> ID = new CustomPacketPayload.Type<>(
 			SevenElements.identifier("s2c/sync_crystallize_shard_type")
 		);
 
-		public static final PacketCodec<RegistryByteBuf, SyncCrystallizeShardTypeS2CPayload> CODEC = PacketCodec.tuple(
-			PacketCodecs.INTEGER, SyncCrystallizeShardTypeS2CPayload::entityId,
-			PacketCodecs.codec(Element.CODEC), inst -> inst.element,
+		public static final StreamCodec<RegistryFriendlyByteBuf, SyncCrystallizeShardTypeS2CPayload> CODEC = StreamCodec.composite(
+			ByteBufCodecs.INT, SyncCrystallizeShardTypeS2CPayload::entityId,
+			ByteBufCodecs.fromCodec(Element.CODEC), inst -> inst.element,
 			SyncCrystallizeShardTypeS2CPayload::new
 		);
 
@@ -182,7 +182,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 		}
 
 		@Override
-		public Id<? extends CustomPayload> getId() {
+		public Type<? extends CustomPacketPayload> type() {
 			return ID;
 		}
 

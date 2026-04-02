@@ -11,7 +11,7 @@ import io.github.xrickastley.sevenelements.component.FrozenEffectComponent;
 import io.github.xrickastley.sevenelements.component.FrozenEffectComponentImpl;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 
 
 public class SevenElementsCCAComponents implements EntityComponentInitializer, ItemComponentInitializer {

@@ -8,12 +8,12 @@ import org.spongepowered.asm.mixin.injection.At;
 
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(targets = { "net.minecraft.screen.GrindstoneScreenHandler$3", "net.minecraft.screen.GrindstoneScreenHandler$2" })
-public class GrindstoneScreenHandler$23Mixin {
+@Mixin(targets = {"net.minecraft.world.inventory.GrindstoneMenu$3", "net.minecraft.world.inventory.GrindstoneMenu$2"})
+public class GrindstoneMenu$23Mixin {
 	@ModifyReturnValue(
-		method = "canInsert(Lnet/minecraft/item/ItemStack;)Z",
+		method = "mayPlace",
 		at = @At("RETURN")
 	)
 	public boolean allowInfusionsForGrindstone(boolean original, @Local(argsOnly = true) ItemStack stack) {

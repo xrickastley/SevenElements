@@ -12,14 +12,14 @@ import io.github.xrickastley.sevenelements.renderer.genshin.SpecialEffectsRender
 import io.github.xrickastley.sevenelements.util.ClientConfig;
 import io.github.xrickastley.sevenelements.util.Functions;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
-	public LivingEntityMixin(final EntityType<? extends LivingEntity> entityType, final World world) {
+	public LivingEntityMixin(final EntityType<? extends LivingEntity> entityType, final Level world) {
 		super(entityType, world);
 		throw new AssertionError();
 	}
@@ -30,7 +30,7 @@ public abstract class LivingEntityMixin extends Entity {
 	)
 	public void addEffectRendering(CallbackInfo ci) {
 		// Sanity check for isClient in case
-		if (!this.getEntityWorld().isClient() || !ClientConfig.getEffectRenderType().allowsNormalEffects() || !SpecialEffectsRenderer.shouldRender(this)) return;
+		if (!this.level().isClientSide() || !ClientConfig.getEffectRenderType().allowsNormalEffects() || !SpecialEffectsRenderer.shouldRender(this)) return;
 
 		final ElementComponent component = ElementComponent.KEY.get(this);
 

@@ -11,14 +11,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.entity.projectile.WindChargeEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.WindChargeItem;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.Position;
-import net.minecraft.world.World;
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.WindCharge;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.WindChargeItem;
+import net.minecraft.world.level.Level;
 
 @Mixin(WindChargeItem.class)
 public class WindChargeItemMixin {
@@ -26,10 +26,10 @@ public class WindChargeItemMixin {
 		method = "method_61665",
 		at = @At("RETURN")
 	)
-	private static WindChargeEntity setElementalInfusion1(WindChargeEntity original, @Local(argsOnly = true) PlayerEntity user) {
+	private static WindCharge setElementalInfusion1(WindCharge original, @Local(argsOnly = true) Player user) {
 		final @Nullable ItemStack stack = JavaScriptUtil.nullishCoalesing(
-			user.getMainHandStack(),
-			user.getOffHandStack()
+			user.getMainHandItem(),
+			user.getOffhandItem()
 		);
 
 		// Unable to resolve Wind Charge stack.
@@ -40,13 +40,13 @@ public class WindChargeItemMixin {
 	}
 
 	@Inject(
-		method = "createEntity",
+		method = "asProjectile",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/projectile/WindChargeEntity;setVelocity(Lnet/minecraft/util/math/Vec3d;)V"
+			target = "Lnet/minecraft/world/entity/projectile/hurtingprojectile/windcharge/WindCharge;setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V"
 		)
 	)
-	private void setElementalInfusion2(World world, Position pos, ItemStack stack, Direction direction, CallbackInfoReturnable<ProjectileEntity> cir, @Local WindChargeEntity windCharge) {
+	private void setElementalInfusion2(Level world, Position pos, ItemStack stack, Direction direction, CallbackInfoReturnable<Projectile> cir, @Local WindCharge windCharge) {
 		windCharge.sevenelements$setOriginStack(stack);
 	}
 }

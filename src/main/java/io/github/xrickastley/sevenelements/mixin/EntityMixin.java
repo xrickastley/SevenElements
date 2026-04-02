@@ -23,60 +23,60 @@ import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 // Prioritized since Frozen **MUST** disable movement.
 @Mixin(value = Entity.class, priority = Integer.MIN_VALUE)
 public abstract class EntityMixin {
 	@Shadow
-	public abstract World getEntityWorld();
+	public abstract Level level();
 
 	@ModifyReturnValue(
-		method = "handleAttack",
+		method = "skipAttackInteraction",
 		at = @At("RETURN")
 	)
 	private boolean noAttackIfAttackerFrozen(boolean original, @Local(argsOnly = true) Entity attacker) {
 		final boolean attackerHasFrozenEffect = attacker instanceof final LivingEntity livingAttacker
-			&& livingAttacker.hasStatusEffect(SevenElementsStatusEffects.FROZEN);
+			&& livingAttacker.hasEffect(SevenElementsStatusEffects.FROZEN);
 
 		return original || attackerHasFrozenEffect;
 	}
 
 	@ModifyVariable(
-		method = "setVelocity(Lnet/minecraft/util/math/Vec3d;)V",
+		method = "setDeltaMovement(Lnet/minecraft/world/phys/Vec3;)V",
 		at = @At("HEAD"),
 		argsOnly = true,
 		ordinal = 0
 	)
-	private Vec3d frozenPreventsMovement(Vec3d original) {
+	private Vec3 frozenPreventsMovement(Vec3 original) {
 		final @Nullable LivingEntity entity = ClassInstanceUtil.castOrNull(this, LivingEntity.class);
 
-		return entity != null && entity.hasStatusEffect(SevenElementsStatusEffects.FROZEN)
-			? new Vec3d(0, original.y, 0)
+		return entity != null && entity.hasEffect(SevenElementsStatusEffects.FROZEN)
+			? new Vec3(0, original.y, 0)
 			: original;
 	}
 
 	@Final
 	@ModifyArg(
-		method = "onStruckByLightning",
+		method = "thunderHit",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/Entity;damage(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/entity/damage/DamageSource;F)Z"
+			target = "Lnet/minecraft/world/entity/Entity;hurtServer(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/world/damagesource/DamageSource;F)Z"
 		)
 	)
-	private DamageSource applyElectroOnLightning(DamageSource source, @Local(argsOnly = true) ServerWorld world) {
-		return (Entity)(Object) this instanceof final LivingEntity entity && world.getGameRules().getValue(SevenElementsGameRules.ELECTRO_FROM_LIGHTNING)
+	private DamageSource applyElectroOnLightning(DamageSource source, @Local(argsOnly = true) ServerLevel world) {
+		return (Entity)(Object) this instanceof final LivingEntity entity && world.getGameRules().get(SevenElementsGameRules.ELECTRO_FROM_LIGHTNING)
 			? new ElementalDamageSource(source, ElementalApplications.gaugeUnits(entity, Element.ELECTRO, 2.0), InternalCooldownContext.ofType(null, "seven-elements:natural_environment", InternalCooldownType.INTERVAL_ONLY).forced())
 			: source;
 	}
 
 	@Inject(
-		method = "setPos",
+		method = "setPosRaw",
 		at = @At("TAIL")
 	)
 	private void syncOnPosChangeIfCrystallizeShard(double x, double y, double z, CallbackInfo ci) {

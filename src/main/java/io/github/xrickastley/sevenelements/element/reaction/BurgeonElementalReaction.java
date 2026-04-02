@@ -7,7 +7,7 @@ import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
 import io.github.xrickastley.sevenelements.util.Colors;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 
 public final class BurgeonElementalReaction extends AbstractDendroCoreElementalReaction {
 	BurgeonElementalReaction() {

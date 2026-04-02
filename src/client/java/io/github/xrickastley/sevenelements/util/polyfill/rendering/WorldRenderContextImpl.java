@@ -17,22 +17,22 @@
 
 package io.github.xrickastley.sevenelements.util.polyfill.rendering;
 
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 
 public final class WorldRenderContextImpl implements WorldRenderContext {
-	private WorldRenderer worldRenderer;
-	private RenderTickCounter tickCounter;
+	private LevelRenderer worldRenderer;
+	private DeltaTracker tickCounter;
 	private Camera camera;
-	private ClientWorld world;
+	private ClientLevel world;
 
 	public void prepare(
-			WorldRenderer worldRenderer,
-			RenderTickCounter tickCounter,
-			Camera camera,
-			ClientWorld world
+		LevelRenderer worldRenderer,
+		DeltaTracker tickCounter,
+		Camera camera,
+		ClientLevel world
 	) {
 		this.worldRenderer = worldRenderer;
 		this.tickCounter = tickCounter;
@@ -41,12 +41,12 @@ public final class WorldRenderContextImpl implements WorldRenderContext {
 	}
 
 	@Override
-	public WorldRenderer worldRenderer() {
+	public LevelRenderer worldRenderer() {
 		return worldRenderer;
 	}
 
 	@Override
-	public RenderTickCounter tickCounter() {
+	public DeltaTracker tickCounter() {
 		return this.tickCounter;
 	}
 
@@ -56,7 +56,7 @@ public final class WorldRenderContextImpl implements WorldRenderContext {
 	}
 
 	@Override
-	public ClientWorld world() {
+	public ClientLevel world() {
 		return world;
 	}
 }

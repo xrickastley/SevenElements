@@ -29,25 +29,25 @@ import io.github.xrickastley.sevenelements.util.BoxUtil;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
-@Mixin(PlayerEntity.class)
-public abstract class PlayerEntityMixin
+@Mixin(Player.class)
+public abstract class PlayerMixin
 	extends LivingEntity
 	implements IPlayerEntity
 {
-	public PlayerEntityMixin(World world, BlockPos pos, float yaw, GameProfile gameProfile) {
+	public PlayerMixin(Level world, BlockPos pos, float yaw, GameProfile gameProfile) {
 		super(EntityType.PLAYER, world);
 		throw new AssertionError();
 	}
@@ -67,10 +67,10 @@ public abstract class PlayerEntityMixin
 	}
 
 	@ModifyVariable(
-		method = "applyDamage",
+		method = "actuallyHurt",
 		at = @At(
 			value = "INVOKE_ASSIGN",
-			target = "Lnet/minecraft/entity/player/PlayerEntity;modifyAppliedDamage(Lnet/minecraft/entity/damage/DamageSource;F)F"
+			target = "Lnet/minecraft/world/entity/player/Player;getDamageAfterMagicAbsorb(Lnet/minecraft/world/damagesource/DamageSource;F)F"
 		),
 		ordinal = 0,
 		argsOnly = true
@@ -80,7 +80,7 @@ public abstract class PlayerEntityMixin
 		final float finalAmount = amount - component.reduceCrystallizeShield(source, amount);
 
 		if (finalAmount < amount)
-			this.getEntityWorld().playSound(null, this.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_HIT, SoundCategory.PLAYERS, 1.0f, 1.0f);
+			this.level().playSound(null, this.blockPosition(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_HIT, SoundSource.PLAYERS, 1.0f, 1.0f);
 
 		if (finalAmount <= 0) this.sevenelements$setBlockedByCrystallizeShield(true);
 
@@ -92,7 +92,7 @@ public abstract class PlayerEntityMixin
 		method = "attack",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/player/PlayerEntity;isSprinting()Z"
+			target = "Lnet/minecraft/world/entity/player/Player;isSprinting()Z"
 		)
 	)
 	private boolean preventKnockbackIfCrystallize(boolean original, @Local(argsOnly = true) Entity entity) {
@@ -107,7 +107,7 @@ public abstract class PlayerEntityMixin
 		method = "attack",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/Entity;sidedDamage(Lnet/minecraft/entity/damage/DamageSource;F)Z"
+			target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z"
 		),
 		index = 0
 	)
@@ -123,7 +123,7 @@ public abstract class PlayerEntityMixin
 		method = "attack",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/player/PlayerEntity;doSweepingAttack(Lnet/minecraft/entity/Entity;FLnet/minecraft/entity/damage/DamageSource;F)V"
+			target = "Lnet/minecraft/world/entity/player/Player;doSweepAttack(Lnet/minecraft/world/entity/Entity;FLnet/minecraft/world/damagesource/DamageSource;F)V"
 		),
 		index = 2
 	)
@@ -147,17 +147,17 @@ public abstract class PlayerEntityMixin
 	}
 
 	@Inject(
-		method = "applyDamage",
+		method = "actuallyHurt",
 		at = @At("TAIL")
 	)
-	private void elementDamageHandler(ServerWorld world, DamageSource source, float amount, CallbackInfo ci) {
+	private void elementDamageHandler(ServerLevel world, DamageSource source, float amount, CallbackInfo ci) {
 		this.sevenelements$triggerDendroCoreReactions(world, source);
 
 		if (!source.sevenelements$displayDamage()) return;
 
 		final ElementalDamageSource eds = source instanceof final ElementalDamageSource eds2
 			? eds2
-			: new ElementalDamageSource(source, ElementalApplications.gaugeUnits(this, Element.PHYSICAL, 0), InternalCooldownContext.ofNone(source.getAttacker()));
+			: new ElementalDamageSource(source, ElementalApplications.gaugeUnits(this, Element.PHYSICAL, 0), InternalCooldownContext.ofNone(source.getEntity()));
 
 		sevenelements$subdamage += amount;
 
@@ -167,13 +167,13 @@ public abstract class PlayerEntityMixin
 
 		sevenelements$subdamage = (float) Math.floor(sevenelements$subdamage);
 
-		final Box boundingBox = this.getBoundingBox();
+		final AABB boundingBox = this.getBoundingBox();
 
-		final double x = this.getX() + (boundingBox.getLengthX() * 1.25 * Math.random());
-		final double y = this.getY() + (boundingBox.getLengthY() * 0.50 * Math.random()) + 0.50;
-		final double z = this.getZ() + (boundingBox.getLengthZ() * 1.25 * Math.random());
-		final Vec3d pos = new Vec3d(x, y, z);
-		final boolean isCrit = source.getAttacker() instanceof final PlayerEntity player
+		final double x = this.getX() + (boundingBox.getXsize() * 1.25 * Math.random());
+		final double y = this.getY() + (boundingBox.getYsize() * 0.50 * Math.random()) + 0.50;
+		final double z = this.getZ() + (boundingBox.getZsize() * 1.25 * Math.random());
+		final Vec3 pos = new Vec3(x, y, z);
+		final boolean isCrit = source.getEntity() instanceof final Player player
 			&& ((IPlayerEntity) player).sevenelements$isCrit(eds);
 
 		final Element element = eds.getElementalApplication().getElement();
@@ -181,7 +181,7 @@ public abstract class PlayerEntityMixin
 
 		sevenelements$subdamage = extra;
 
-		for (final ServerPlayerEntity player : PlayerLookup.tracking(this)) {
+		for (final ServerPlayer player : PlayerLookup.tracking(this)) {
 			if (player.getId() == this.getId()) return;
 
 			ServerPlayNetworking.send(player, showElementalDMGPacket);
@@ -189,15 +189,15 @@ public abstract class PlayerEntityMixin
 	}
 
 	@Unique
-	private void sevenelements$triggerDendroCoreReactions(final ServerWorld world, final DamageSource source) {
+	private void sevenelements$triggerDendroCoreReactions(final ServerLevel world, final DamageSource source) {
 		if (!(source instanceof final ElementalDamageSource eds)) return;
 
 		final Element element = eds.getElementalApplication().getElement();
 
 		if (element != Element.PYRO && element != Element.ELECTRO) return;
 
-		this.getEntityWorld()
-			.getEntitiesByClass(DendroCoreEntity.class, BoxUtil.multiplyBox(this.getBoundingBox(), 2), dc -> true)
-			.forEach(dc -> dc.damage(world, source, 1));
+		this.level()
+			.getEntitiesOfClass(DendroCoreEntity.class, BoxUtil.multiplyBox(this.getBoundingBox(), 2), dc -> true)
+			.forEach(dc -> dc.hurtServer(world, source, 1));
 	}
 }

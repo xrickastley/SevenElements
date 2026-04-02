@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.Unique;
 
 import io.github.xrickastley.sevenelements.interfaces.IDamageSource;
 
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 
 @Mixin(DamageSource.class)
 public class DamageSourceMixin implements IDamageSource {

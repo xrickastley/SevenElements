@@ -2,9 +2,9 @@ package io.github.xrickastley.sevenelements.registry;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageType;
 
 public final class SevenElementsDamageTypeTags {
 	public static final TagKey<DamageType> PREVENTS_COOLDOWN_TRIGGER = SevenElementsDamageTypeTags.of("prevents_cooldown_trigger");
@@ -17,6 +17,6 @@ public final class SevenElementsDamageTypeTags {
 	public static final TagKey<DamageType> HAS_GEO_INFUSION = SevenElementsDamageTypeTags.of("has_geo_infusion");
 
 	private static TagKey<DamageType> of(String path) {
-		return TagKey.of(RegistryKeys.DAMAGE_TYPE, SevenElements.identifier(path));
+		return TagKey.create(Registries.DAMAGE_TYPE, SevenElements.identifier(path));
 	}
 }

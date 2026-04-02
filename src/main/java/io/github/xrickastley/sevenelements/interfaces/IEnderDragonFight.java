@@ -1,7 +1,7 @@
 package io.github.xrickastley.sevenelements.interfaces;
 
-import net.minecraft.entity.boss.dragon.EnderDragonEntity;
+import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 
 public interface IEnderDragonFight {
-	public void sevenelements$setDragon(EnderDragonEntity entity);
+	public void sevenelements$setDragon(EnderDragon entity);
 }

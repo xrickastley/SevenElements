@@ -3,18 +3,18 @@
   "package": "io.github.xrickastley.sevenelements.mixin.client",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
-    "BossBarHud$1Mixin",
-    "BossBarHudAccessor",
-    "BossBarHudMixin",
+    "BossHealthOverlay$1Mixin",
+    "BossHealthOverlayAccessor",
+    "BossHealthOverlayMixin",
     "BufferBuilderAccessor",
-    "DrawContextMixin",
+    "GuiGraphicsMixin",
     "EntityRendererMixin",
     "EntityRenderStateMixin",
     "GameRendererMixin",
-    "InGameHudMixin",
+    "GuiMixin",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
-    "WorldRendererMixin"
+    "LevelRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

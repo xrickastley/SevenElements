@@ -41,21 +41,21 @@ import io.github.xrickastley.sevenelements.util.ImmutablePair;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.ViewHelper;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.entity.decoration.ArmorStandEntity;
-import net.minecraft.registry.entry.RegistryEntry.Reference;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.storage.ReadView.ListReadView;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView.ListView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
+import net.minecraft.core.Holder.Reference;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.level.storage.ValueInput.ValueInputList;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput.ValueOutputList;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public final class ElementComponentImpl implements ElementComponent {
 	static final Set<Class<LivingEntity>> DENIED_ENTITIES = new HashSet<>();
@@ -65,7 +65,7 @@ public final class ElementComponentImpl implements ElementComponent {
 	private final LivingEntity owner;
 	private final Map<Element, ElementHolder> elementHolders = new ConcurrentHashMap<>();
 	private final FreezeDecayHandler freezeDecayHandler;
-	private Pair<ElementalReaction, Long> lastReaction = new Pair<>(null, -1L);
+	private Tuple<ElementalReaction, Long> lastReaction = new Tuple<>(null, -1L);
 	private long electroChargedCooldown = -1;
 	private @Nullable LivingEntity electroChargedOrigin = null;
 	private long burningCooldown = -1;
@@ -87,22 +87,22 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	@Override
 	public boolean isElectroChargedOnCD() {
-		return this.owner.getEntityWorld().getTime() < this.electroChargedCooldown;
+		return this.owner.level().getGameTime() < this.electroChargedCooldown;
 	}
 
 	@Override
 	public boolean isBurningOnCD() {
-		return this.owner.getEntityWorld().getTime() < this.burningCooldown;
+		return this.owner.level().getGameTime() < this.burningCooldown;
 	}
 
 	@Override
 	public void resetElectroChargedCD() {
-		this.electroChargedCooldown = this.owner.getEntityWorld().getTime() + 20;
+		this.electroChargedCooldown = this.owner.level().getGameTime() + 20;
 	}
 
 	@Override
 	public void resetBurningCD() {
-		this.burningCooldown = this.owner.getEntityWorld().getTime() + 5;
+		this.burningCooldown = this.owner.level().getGameTime() + 5;
 	}
 
 	@Override
@@ -131,16 +131,16 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	@Override
 	public void setCrystallizeShield(Element element, double amount) {
-		this.crystallizeShield = new CrystallizeShield(element, amount, this.owner.getEntityWorld().getTime());
+		this.crystallizeShield = new CrystallizeShield(element, amount, this.owner.level().getGameTime());
 
 		ElementComponent.sync(owner);
 	}
 
 	@Override
-	public @Nullable Pair<Element, Double> getCrystallizeShield() {
+	public @Nullable Tuple<Element, Double> getCrystallizeShield() {
 		return this.crystallizeShield == null
 			? null
-			: new Pair<>(this.crystallizeShield.element, this.crystallizeShield.amount);
+			: new Tuple<>(this.crystallizeShield.element, this.crystallizeShield.amount);
 	}
 
 	@Override
@@ -154,11 +154,11 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		final float reduced = this.crystallizeShield.reduce(eds, amount);
 
-		if (reduced > 0) this.crystallizeShieldReducedAt = this.owner.age;
+		if (reduced > 0) this.crystallizeShieldReducedAt = this.owner.tickCount;
 
 		if (this.crystallizeShield == null || this.crystallizeShield.isEmpty()) {
-			this.owner.getEntityWorld()
-				.playSound(null, this.owner.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_BREAK, SoundCategory.PLAYERS, 1.0f, 1.0f);
+			this.owner.level()
+				.playSound(null, this.owner.blockPosition(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_BREAK, SoundSource.PLAYERS, 1.0f, 1.0f);
 		}
 
 		return reduced;
@@ -166,7 +166,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	@Override
 	public boolean reducedCrystallizeShield() {
-		return this.crystallizeShieldReducedAt == this.owner.age;
+		return this.crystallizeShieldReducedAt == this.owner.tickCount;
 	}
 
 	@Override
@@ -180,12 +180,12 @@ public final class ElementComponentImpl implements ElementComponent {
 	}
 
 	@Override
-	public Pair<ElementalReaction, Long> getLastReaction() {
+	public Tuple<ElementalReaction, Long> getLastReaction() {
 		return ImmutablePair.of(this.lastReaction);
 	}
 
 	// TO BE USED ONLY INTERNALLY.
-	public void setLastReaction(Pair<ElementalReaction, Long> lastReaction) {
+	public void setLastReaction(Tuple<ElementalReaction, Long> lastReaction) {
 		this.lastReaction = lastReaction;
 	}
 
@@ -200,8 +200,8 @@ public final class ElementComponentImpl implements ElementComponent {
 	@Override
 	public List<ElementalReaction> addElementalApplication(ElementalApplication application, InternalCooldownContext icdContext) {
 		// Only do this on the server || Only do this when doElements is true.
-		if (!(application.getEntity().getEntityWorld() instanceof final ServerWorld world)
-			|| !world.getGameRules().getValue(SevenElementsGameRules.DO_ELEMENTS)) return Collections.emptyList();
+		if (!(application.getEntity().level() instanceof final ServerLevel world)
+			|| !world.getGameRules().get(SevenElementsGameRules.DO_ELEMENTS)) return Collections.emptyList();
 
 		if (application.isGaugeUnits() && !application.isAuraElement() && this.getAppliedElements().isEmpty())
 			application = application.asAura();
@@ -241,24 +241,24 @@ public final class ElementComponentImpl implements ElementComponent {
 	}
 
 	@Override
-	public void writeData(WriteView view) {
-		final ListView list = view.getList("AppliedElements");
+	public void writeData(ValueOutput view) {
+		final ValueOutputList list = view.childrenList("AppliedElements");
 
 		this.getAppliedElements()
-			.forEach(application -> application.writeData(list.add()));
+			.forEach(application -> application.writeData(list.addChild()));
 
-		view.putLong("SyncedAt", owner.getEntityWorld().getTime());
+		view.putLong("SyncedAt", owner.level().getGameTime());
 		view.putLong("ElectroChargedCooldown", electroChargedCooldown);
 		view.putLong("BurningCooldown", burningCooldown);
 
-		final WriteView freezeDecayHandler = view.get("FreezeDecay");
+		final ValueOutput freezeDecayHandler = view.child("FreezeDecay");
 		this.freezeDecayHandler.writeData(freezeDecayHandler);
 
-		if (this.lastReaction.getLeft() != null) {
-			final WriteView lastReaction = view.get("LastReaction");
+		if (this.lastReaction.getA() != null) {
+			final ValueOutput lastReaction = view.child("LastReaction");
 
-			lastReaction.putString("Id", this.lastReaction.getLeft().getId().toString());
-			lastReaction.putLong("Time", this.lastReaction.getRight());
+			lastReaction.putString("Id", this.lastReaction.getA().getId().toString());
+			lastReaction.putLong("Time", this.lastReaction.getB());
 		}
 
 		if (this.crystallizeShield != null && !this.crystallizeShield.isEmpty())
@@ -266,27 +266,27 @@ public final class ElementComponentImpl implements ElementComponent {
 	}
 
 	@Override
-	public void readData(ReadView view) {
-		this.electroChargedCooldown = view.getLong("ElectroChargedCooldown", this.electroChargedCooldown);
-		this.burningCooldown = view.getLong("BurningCooldown", this.burningCooldown);
+	public void readData(ValueInput view) {
+		this.electroChargedCooldown = view.getLongOr("ElectroChargedCooldown", this.electroChargedCooldown);
+		this.burningCooldown = view.getLongOr("BurningCooldown", this.burningCooldown);
 
-		view.getOptionalReadView("LastReaction").ifPresent(lastReaction -> {
-			this.lastReaction = new Pair<>(
-				SevenElementsRegistries.ELEMENTAL_REACTION.get(ViewHelper.get(lastReaction, "Id", Identifier.CODEC)),
+		view.child("LastReaction").ifPresent(lastReaction -> {
+			this.lastReaction = new Tuple<>(
+				SevenElementsRegistries.ELEMENTAL_REACTION.getValue(ViewHelper.get(lastReaction, "Id", Identifier.CODEC)),
 				ViewHelper.get(lastReaction, "Time", Codec.LONG)
 			);
 		});
 
-		this.crystallizeShield = CrystallizeShield.readData(view.getOptionalReadView("CrystallizeShield"));
+		this.crystallizeShield = CrystallizeShield.readData(view.child("CrystallizeShield"));
 
-		final ListReadView list = view.getListReadView("AppliedElements");
-		final long syncedAt = view.getLong("SyncedAt", this.owner.getEntityWorld().getTime());
+		final ValueInputList list = view.childrenListOrEmpty("AppliedElements");
+		final long syncedAt = view.getLongOr("SyncedAt", this.owner.level().getGameTime());
 
 		this.elementHolders
 			.values()
 			.forEach(holder -> holder.setElementalApplication(null));
 
-		for (final ReadView appData : list) {
+		for (final ValueInput appData : list) {
 			// Somehow this has to be added, even though I expected list to NOT have anything when it's empty...
 			if (appData.read("Type", ElementalApplication.Type.CODEC).isEmpty()) continue;
 
@@ -297,8 +297,8 @@ public final class ElementComponentImpl implements ElementComponent {
 		}
 
 		this.freezeDecayHandler.readData(
-			view.getOptionalReadView("FreezeDecay"),
-			this.owner.getEntityWorld().getTime() - syncedAt
+			view.child("FreezeDecay"),
+			this.owner.level().getGameTime() - syncedAt
 		);
  	}
 
@@ -355,7 +355,7 @@ public final class ElementComponentImpl implements ElementComponent {
 			.map(ElementalApplication::getElement);
 
 		return SevenElementsRegistries.ELEMENTAL_REACTION
-			.streamEntries()
+			.listElements()
 			.map(Reference::value)
 			.filter(reaction -> reaction.isTriggerable(owner) && reaction.hasAnyElement(validElements) && reaction.getHighestElementPriority() == priority)
 			.sorted(Comparator.comparing(reaction -> reaction.getPriority(triggeringElement)));
@@ -502,7 +502,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		final Optional<ElementalReaction> firstReaction = triggeredReactions.stream().findFirst();
 
-		firstReaction.ifPresent(elementalReaction -> this.lastReaction = new Pair<>(elementalReaction, this.owner.getEntityWorld().getTime()));
+		firstReaction.ifPresent(elementalReaction -> this.lastReaction = new Tuple<>(elementalReaction, this.owner.level().getGameTime()));
 
 		final boolean cantBeAura = !context.getElement().canBeAura();
 		final boolean hasTriggeredReactions = !triggeredReactions.isEmpty();
@@ -529,7 +529,7 @@ public final class ElementComponentImpl implements ElementComponent {
 			this.amount = amount;
 		}
 
-		private static @Nullable CrystallizeShield readData(final Optional<ReadView> view) {
+		private static @Nullable CrystallizeShield readData(final Optional<ValueInput> view) {
 			return view.map(tag -> new CrystallizeShield(
 				ViewHelper.get(tag, "Element", Element.CODEC),
 				ViewHelper.get(tag, "Amount", Codec.DOUBLE),
@@ -551,8 +551,8 @@ public final class ElementComponentImpl implements ElementComponent {
 			return (float) dmgTakenByShield;
 		}
 
-		private void writeData(WriteView view) {
-			final WriteView crystallizeShield = view.get("CrystallizeShield");
+		private void writeData(ValueOutput view) {
+			final ValueOutput crystallizeShield = view.child("CrystallizeShield");
 
 			crystallizeShield.putString("Element", this.element.toString());
 			crystallizeShield.putDouble("Amount", this.amount);
@@ -564,12 +564,12 @@ public final class ElementComponentImpl implements ElementComponent {
 		}
 
 		private void tick(ElementComponentImpl impl) {
-			if ((this.appliedAt + 300 >= impl.owner.getEntityWorld().getTime() && !this.isEmpty()) || impl.crystallizeShield == null) return;
+			if ((this.appliedAt + 300 >= impl.owner.level().getGameTime() && !this.isEmpty()) || impl.crystallizeShield == null) return;
 
 			impl.crystallizeShield = null;
 
-			impl.owner.getEntityWorld()
-				.playSound(null, impl.owner.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_BREAK, SoundCategory.PLAYERS, 1.0f, 1.0f);
+			impl.owner.level()
+				.playSound(null, impl.owner.blockPosition(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_BREAK, SoundSource.PLAYERS, 1.0f, 1.0f);
 
 			ElementComponent.sync(impl.owner);
 		}
@@ -610,17 +610,17 @@ public final class ElementComponentImpl implements ElementComponent {
 			ElementComponent.sync(impl.owner);
 		}
 
-		public void writeData(WriteView view) {
+		public void writeData(ValueOutput view) {
 			view.putBoolean("FreezeReapplied", isFreezeReapplied);
 			view.putLong("FreezeReappliedAt", freezeReappliedAt);
 			view.putInt("FreezeTicks", freezeTicks);
 			view.putInt("UnfreezeTicks", unfreezeTicks);
 		}
 
-		public void readData(Optional<ReadView> optionalView, long syncDiff) {
+		public void readData(Optional<ValueInput> optionalView, long syncDiff) {
 			if (optionalView.isEmpty()) return;
 
-			final ReadView view = optionalView.get();
+			final ValueInput view = optionalView.get();
 
 			this.isFreezeReapplied = ViewHelper.get(view, "FreezeReapplied", Codec.BOOL);
 			this.freezeReappliedAt = ViewHelper.get(view, "FreezeReappliedAt", Codec.LONG);
@@ -639,14 +639,14 @@ public final class ElementComponentImpl implements ElementComponent {
 
 				final ElementComponentImpl component = (ElementComponentImpl) ElementComponent.KEY.get(result.getEntity());
 
-				component.freezeDecayHandler.freezeReappliedAt = component.owner.getEntityWorld().getTime();
+				component.freezeDecayHandler.freezeReappliedAt = component.owner.level().getGameTime();
 				component.freezeDecayHandler.isFreezeReapplied = true;
 			});
 		}
 	}
 
 	static {
-		ElementComponent.denyElementsFor(ArmorStandEntity.class);
+		ElementComponent.denyElementsFor(ArmorStand.class);
 
 		ElementComponentImpl.ENTITY_TYPE_ELEMENT_MAP.put(SevenElementsEntityTypeTags.DEALS_PYRO_DAMAGE, Element.PYRO);
 		ElementComponentImpl.ENTITY_TYPE_ELEMENT_MAP.put(SevenElementsEntityTypeTags.DEALS_HYDRO_DAMAGE, Element.HYDRO);

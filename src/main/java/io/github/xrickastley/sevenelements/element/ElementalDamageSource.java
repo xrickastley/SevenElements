@@ -4,12 +4,12 @@ import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.interfaces.DamageSourceWrapper;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageType;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.core.Holder;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageType;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 
 public final class ElementalDamageSource
 	extends DamageSource
@@ -25,7 +25,7 @@ public final class ElementalDamageSource
 	/**
 	 * Creates an {@link ElementalDamageSource} from an already existing {@link DamageSource}.
 	 * @param source The {@code DamageSource} to turn into an {@code ElementalDamageSource}, using
-	 * its source and attacker values. For positions, use {@link #ElementalDamageSource(RegistryEntry, Vec3d, ElementalApplication, InternalCooldownContext)} instead.
+	 * its source and attacker values. For positions, use {@link #ElementalDamageSource(Holder, Vec3, ElementalApplication, InternalCooldownContext)} instead.
 	 * @param application The Elemental Application of this {@code ElementalDamageSource}. This is
 	 * the Elemental Application that will be applied to the target entity, if possible.
 	 * @param icdContext The {@code InternalCooldownContext} of this {@code ElementalDamageSource}.
@@ -33,7 +33,7 @@ public final class ElementalDamageSource
 	 * between contexts.
 	 */
 	public ElementalDamageSource(final DamageSource source, final ElementalApplication application, final InternalCooldownContext icdContext) {
-		super(source.getTypeRegistryEntry(), source.getSource(), source.getAttacker());
+		super(source.typeHolder(), source.getDirectEntity(), source.getEntity());
 
 		this.original = source;
 		this.application = application;
@@ -53,7 +53,7 @@ public final class ElementalDamageSource
 	 * This controls the Internal Cooldown of specific attacks, as Internal Cooldowns are different
 	 * between contexts.
 	 */
-	public ElementalDamageSource(final RegistryEntry<DamageType> type, @Nullable final Entity source, @Nullable final Entity attacker, final ElementalApplication application, final InternalCooldownContext icdContext) {
+	public ElementalDamageSource(final Holder<DamageType> type, @Nullable final Entity source, @Nullable final Entity attacker, final ElementalApplication application, final InternalCooldownContext icdContext) {
 		super(type, source, attacker);
 
 		this.original = null;
@@ -71,7 +71,7 @@ public final class ElementalDamageSource
 	 * This controls the Internal Cooldown of specific attacks, as Internal Cooldowns are different
 	 * between contexts.
 	 */
-	public ElementalDamageSource(final RegistryEntry<DamageType> type, final Vec3d position, final ElementalApplication application, final InternalCooldownContext icdContext) {
+	public ElementalDamageSource(final Holder<DamageType> type, final Vec3 position, final ElementalApplication application, final InternalCooldownContext icdContext) {
 		super(type, position);
 
 		this.original = null;
@@ -90,7 +90,7 @@ public final class ElementalDamageSource
 	 * This controls the Internal Cooldown of specific attacks, as Internal Cooldowns are different
 	 * between contexts.
 	 */
-	public ElementalDamageSource(final RegistryEntry<DamageType> type, @Nullable final Entity attacker, final ElementalApplication application, final InternalCooldownContext icdContext) {
+	public ElementalDamageSource(final Holder<DamageType> type, @Nullable final Entity attacker, final ElementalApplication application, final InternalCooldownContext icdContext) {
 		super(type, attacker, attacker);
 
 		this.original = null;
@@ -107,7 +107,7 @@ public final class ElementalDamageSource
 	 * This controls the Internal Cooldown of specific attacks, as Internal Cooldowns are different
 	 * between contexts.
 	 */
-	public ElementalDamageSource(final RegistryEntry<DamageType> type, final ElementalApplication application, final InternalCooldownContext icdContext) {
+	public ElementalDamageSource(final Holder<DamageType> type, final ElementalApplication application, final InternalCooldownContext icdContext) {
 		super(type);
 
 		this.original = null;

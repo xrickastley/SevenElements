@@ -11,13 +11,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.GrindstoneScreenHandler;
+import net.minecraft.world.inventory.GrindstoneMenu;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(GrindstoneScreenHandler.class)
-public class GrindstoneScreenHandlerMixin {
+@Mixin(GrindstoneMenu.class)
+public class GrindstoneMenuMixin {
 	@Inject(
-		method = "grind",
+		method = "removeNonCursesFrom",
 		at = @At("RETURN")
 	)
 	private void includeElementInGrind(ItemStack item, CallbackInfoReturnable<ItemStack> cir) {
@@ -25,10 +25,10 @@ public class GrindstoneScreenHandlerMixin {
 	}
 
 	@ModifyExpressionValue(
-		method = "getOutputStack",
+		method = "computeResult",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/enchantment/EnchantmentHelper;hasEnchantments(Lnet/minecraft/item/ItemStack;)Z"
+			target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;hasAnyEnchantments(Lnet/minecraft/world/item/ItemStack;)Z"
 		)
 	)
 	private boolean checkForElementInResult(boolean original, @Local(ordinal = 2) ItemStack stack) {
@@ -36,14 +36,14 @@ public class GrindstoneScreenHandlerMixin {
 	}
 
 	@ModifyReturnValue(
-		method = "getOutputStack",
+		method = "computeResult",
 		at = @At(
 			value = "RETURN",
 			ordinal = 1
 		)
 	)
 	private ItemStack checkForElementInStacks(ItemStack original, @Local(argsOnly = true, ordinal = 0) ItemStack firstInput, @Local(argsOnly = true, ordinal = 1) ItemStack secondInput) {
-		return (ItemStack.areItemsEqual(firstInput, secondInput) || !(firstInput.isEmpty() == secondInput.isEmpty()))
+		return (ItemStack.isSameItem(firstInput, secondInput) || !(firstInput.isEmpty() == secondInput.isEmpty()))
 			&& (firstInput.getCount() + secondInput.getCount() <= 64)
 			? new ItemStack(firstInput.getItem(), firstInput.getCount() + secondInput.getCount())
 			: original;

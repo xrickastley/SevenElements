@@ -2,7 +2,7 @@ package io.github.xrickastley.sevenelements.element.reaction;
 
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistries;
 
-import net.minecraft.registry.Registry;
+import net.minecraft.core.Registry;
 
 public class ElementalReactions {
 	// Also known as Reverse Melt, amplifies Cryo DMG by 1.5x

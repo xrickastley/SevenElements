@@ -41,18 +41,18 @@ import io.github.xrickastley.sevenelements.interfaces.ILivingEntity;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Functions;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.DamageTypeTags;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Pair;
-import net.minecraft.world.World;
+import net.minecraft.core.Holder;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.effect.MobEffect;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 
 @Mixin(value = LivingEntity.class, priority = Integer.MAX_VALUE - 1000)
 public abstract class PrioritizedLivingEntityMixin
@@ -60,19 +60,19 @@ public abstract class PrioritizedLivingEntityMixin
 	implements ILivingEntity
 {
 	@Shadow
-	protected float lastDamageTaken;
+	protected float lastHurt;
 	@Shadow
 	@Final
-	private Map<RegistryEntry<StatusEffect>, StatusEffectInstance> activeStatusEffects;
+	private Map<Holder<MobEffect>, MobEffectInstance> activeEffects;
 
 	@Shadow
-	public abstract boolean isDead();
+	public abstract boolean isDeadOrDying();
 
 	@Shadow
-	public abstract boolean hasStatusEffect(RegistryEntry<StatusEffect> effect);
+	public abstract boolean hasEffect(Holder<MobEffect> effect);
 
 	@Shadow
-	public abstract boolean removeStatusEffect(RegistryEntry<StatusEffect> effect);
+	public abstract boolean removeEffect(Holder<MobEffect> effect);
 
 	@Unique
 	private List<ElementalReaction> sevenelements$reactions = new ArrayList<>();
@@ -81,7 +81,7 @@ public abstract class PrioritizedLivingEntityMixin
 	@Unique
 	private @Nullable DamageSource sevenelements$plannedDamageSource;
 
-	public PrioritizedLivingEntityMixin(final EntityType<? extends LivingEntity> entityType, final World world) {
+	public PrioritizedLivingEntityMixin(final EntityType<? extends LivingEntity> entityType, final Level world) {
 		super(entityType, world);
 
 		throw new AssertionError();
@@ -100,23 +100,23 @@ public abstract class PrioritizedLivingEntityMixin
 	}
 
 	@Inject(
-		method = "canHaveStatusEffect",
+		method = "canBeAffected",
 		at = @At("HEAD"),
 		cancellable = true,
 		order = Integer.MIN_VALUE // Frozen and Cryo **must** persist while their respective elements are applied.
 	)
-	private void forceElementEffects(StatusEffectInstance effect, CallbackInfoReturnable<Boolean> cir) {
-		if (ElementalStatusEffect.isElementalEffect(effect.getEffectType())) cir.setReturnValue(true);
+	private void forceElementEffects(MobEffectInstance effect, CallbackInfoReturnable<Boolean> cir) {
+		if (ElementalStatusEffect.isElementalEffect(effect.getEffect())) cir.setReturnValue(true);
 	}
 
 	@Inject(
-		method = "removeStatusEffectInternal",
+		method = "removeEffectNoUpdate",
 		at = @At("HEAD"),
 		cancellable = true,
 		order = Integer.MIN_VALUE // Frozen and Cryo **must** persist while their respective elements are applied.
 	)
-	private void preventElementEffectRemoval(RegistryEntry<StatusEffect> effect, CallbackInfoReturnable<StatusEffectInstance> cir) {
-		if (this.isDead() || !ElementalStatusEffect.isElementalEffect(effect)) return;
+	private void preventElementEffectRemoval(Holder<MobEffect> effect, CallbackInfoReturnable<MobEffectInstance> cir) {
+		if (this.isDeadOrDying() || !ElementalStatusEffect.isElementalEffect(effect)) return;
 
 		final ElementalStatusEffect elementEffect = (ElementalStatusEffect) effect.value();
 		final ElementComponent component = ElementComponent.KEY.get(this);
@@ -125,16 +125,16 @@ public abstract class PrioritizedLivingEntityMixin
 	}
 
 	@Inject(
-		method = "onDeath",
+		method = "die",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/LivingEntity;setPose(Lnet/minecraft/entity/EntityPose;)V"
+			target = "Lnet/minecraft/world/entity/LivingEntity;setPose(Lnet/minecraft/world/entity/Pose;)V"
 		)
 	)
 	private void applyOnDeathEffects(DamageSource damageSource, CallbackInfo ci) {
 		ElementalStatusEffect
 			.getElementEffects()
-			.forEach(this::removeStatusEffect);
+			.forEach(this::removeEffect);
 
 		final ElementComponent component = ElementComponent.KEY.get(this);
 
@@ -155,15 +155,15 @@ public abstract class PrioritizedLivingEntityMixin
 		ElementalStatusEffect
 			.getElementEffects()
 			.stream()
-			.filter(this::hasStatusEffect)
+			.filter(this::hasEffect)
 			.filter(Predicate.not(
-				Functions.composePredicate(RegistryEntry::value, ElementalStatusEffect.class::cast, ElementalStatusEffect::getElement, component::hasElementalApplication)
+				Functions.composePredicate(Holder::value, ElementalStatusEffect.class::cast, ElementalStatusEffect::getElement, component::hasElementalApplication)
 			))
-			.forEach(this::removeStatusEffect);
+			.forEach(this::removeEffect);
 	}
 
 	@ModifyExpressionValue(
-		method = "clearStatusEffects",
+		method = "removeAllEffects",
 		at = @At(
 			value = "INVOKE",
 			target = "Lcom/google/common/collect/Maps;newHashMap(Ljava/util/Map;)Ljava/util/HashMap;",
@@ -171,8 +171,8 @@ public abstract class PrioritizedLivingEntityMixin
 		)
 	)
 	// Frozen and Cryo **must** persist while their respective elements are applied.
-	private HashMap<RegistryEntry<StatusEffect>, StatusEffectInstance> persistElementEffectsOnClearStart(HashMap<RegistryEntry<StatusEffect>, StatusEffectInstance> value, @Share(value = "savedElements", namespace = "seven-elements") LocalRef<List<StatusEffectInstance>> savedEffects) {
-		if (this.isDead()) return value;
+	private HashMap<Holder<MobEffect>, MobEffectInstance> persistElementEffectsOnClearStart(HashMap<Holder<MobEffect>, MobEffectInstance> value, @Share(value = "savedElements", namespace = "seven-elements") LocalRef<List<MobEffectInstance>> savedEffects) {
+		if (this.isDeadOrDying()) return value;
 
 		final ElementComponent component = ElementComponent.KEY.get(this);
 
@@ -194,41 +194,41 @@ public abstract class PrioritizedLivingEntityMixin
 	}
 
 	@Inject(
-		method = "clearStatusEffects",
+		method = "removeAllEffects",
 		at = @At(
 			value = "RETURN",
 			ordinal = 2
 		),
 		order = Integer.MIN_VALUE // Frozen and Cryo **must** persist while their respective elements are applied.
 	)
-	private void persistElementEffectsOnClearEnd(CallbackInfoReturnable<Boolean> cir, @Share(value = "savedElements", namespace = "seven-elements") LocalRef<List<StatusEffectInstance>> savedEffects) {
-		for (final StatusEffectInstance effect : savedEffects.get())
-			this.activeStatusEffects.put(effect.getEffectType(), effect);
+	private void persistElementEffectsOnClearEnd(CallbackInfoReturnable<Boolean> cir, @Share(value = "savedElements", namespace = "seven-elements") LocalRef<List<MobEffectInstance>> savedEffects) {
+		for (final MobEffectInstance effect : savedEffects.get())
+			this.activeEffects.put(effect.getEffect(), effect);
 	}
 
 	@Inject(
-		method = "damage",
+		method = "hurtServer",
 		at = @At("HEAD"),
 		order = Integer.MIN_VALUE // The planned attacker should be set as early as possible.
 	)
-	private void setPlannedAttacker(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-		this.sevenelements$plannedAttacker = source.getAttacker();
+	private void setPlannedAttacker(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+		this.sevenelements$plannedAttacker = source.getEntity();
 		this.sevenelements$plannedDamageSource = source;
 	}
 
 	@Inject(
-		method = "damage",
+		method = "hurtServer",
 		at = @At("HEAD"),
 		cancellable = true,
 		order = Integer.MIN_VALUE
 	)
-	private void preventDamageWhenFrozen(ServerWorld world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
-		if (source.getAttacker() instanceof final LivingEntity entity && entity.hasStatusEffect(SevenElementsStatusEffects.FROZEN))
+	private void preventDamageWhenFrozen(ServerLevel world, DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
+		if (source.getEntity() instanceof final LivingEntity entity && entity.hasEffect(SevenElementsStatusEffects.FROZEN))
 			cir.setReturnValue(false);
 	}
 
 	@ModifyVariable(
-		method = "damage",
+		method = "hurtServer",
 		at = @At("HEAD"),
 		argsOnly = true,
 		order = Integer.MIN_VALUE // Infusions need to be considered before other DMG effects.
@@ -238,21 +238,21 @@ public abstract class PrioritizedLivingEntityMixin
 	}
 
 	@ModifyVariable(
-		method = "damage",
+		method = "hurtServer",
 		at = @At("HEAD"),
 		argsOnly = true,
 		order = Integer.MIN_VALUE // Additive DMG Bonus is a Base DMG multiplier, should be applied ASAP.
 	)
-	private float applyDMGModifiers(float amount, @Local(argsOnly = true) DamageSource source, @Local(argsOnly = true) ServerWorld world) {
-		final boolean fireResistance = source.isIn(DamageTypeTags.IS_FIRE) && this.hasStatusEffect(StatusEffects.FIRE_RESISTANCE);
-		final boolean damageCooldown = this.timeUntilRegen > 10.0F && !source.isIn(DamageTypeTags.BYPASSES_COOLDOWN) && amount <= this.lastDamageTaken;
+	private float applyDMGModifiers(float amount, @Local(argsOnly = true) DamageSource source, @Local(argsOnly = true) ServerLevel world) {
+		final boolean fireResistance = source.is(DamageTypeTags.IS_FIRE) && this.hasEffect(MobEffects.FIRE_RESISTANCE);
+		final boolean damageCooldown = this.invulnerableTime > 10.0F && !source.is(DamageTypeTags.BYPASSES_COOLDOWN) && amount <= this.lastHurt;
 
 		// do **not** apply an element **if** DMG cannot be applied.
-		if (this.isInvulnerable() || this.getEntityWorld().isClient() || this.isDead() || fireResistance || damageCooldown) return amount;
+		if (this.isInvulnerable() || this.level().isClientSide() || this.isDeadOrDying() || fireResistance || damageCooldown) return amount;
 
 		final ElementalDamageSource eds = source instanceof final ElementalDamageSource eds2
 			? eds2
-			: new ElementalDamageSource(source, ElementalApplications.gaugeUnits((LivingEntity)(Entity) this, Element.PHYSICAL, 0.00), InternalCooldownContext.ofNone(source.getAttacker()));
+			: new ElementalDamageSource(source, ElementalApplications.gaugeUnits((LivingEntity)(Entity) this, Element.PHYSICAL, 0.00), InternalCooldownContext.ofNone(source.getEntity()));
 
 		final ElementComponent component = ElementComponent.KEY.get(this);
 		this.sevenelements$reactions = new ArrayList<>(component.applyFromDamageSource(eds));
@@ -268,9 +268,9 @@ public abstract class PrioritizedLivingEntityMixin
 
 		if (doShatter) {
 			this.sevenelements$reactions.add(ElementalReactions.SHATTER);
-			((ElementComponentImpl) component).setLastReaction(new Pair<>(ElementalReactions.SHATTER, this.getEntityWorld().getTime()));
+			((ElementComponentImpl) component).setLastReaction(new Tuple<>(ElementalReactions.SHATTER, this.level().getGameTime()));
 
-			ElementalReactions.SHATTER.trigger((LivingEntity)(Entity) this, ClassInstanceUtil.castOrNull(source.getAttacker(), LivingEntity.class));
+			ElementalReactions.SHATTER.trigger((LivingEntity)(Entity) this, ClassInstanceUtil.castOrNull(source.getEntity(), LivingEntity.class));
 		}
 
 		float additive = this.sevenelements$reactions != null && !this.sevenelements$reactions.isEmpty()
@@ -288,7 +288,7 @@ public abstract class PrioritizedLivingEntityMixin
 	}
 
 	@ModifyVariable(
-		method = "modifyAppliedDamage",
+		method = "getDamageAfterMagicAbsorb",
 		at = @At(
 			value = "TAIL",
 			shift = At.Shift.BEFORE

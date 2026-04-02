@@ -14,25 +14,25 @@ import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.interfaces.InfusableProjectile;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.Ownable;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.world.World;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.TraceableEntity;
+import net.minecraft.world.entity.projectile.Projectile;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
-@Mixin(ProjectileEntity.class)
-public abstract class ProjectileEntityMixin
+@Mixin(Projectile.class)
+public abstract class ProjectileMixin
 	extends Entity
-	implements Ownable, InfusableProjectile
+	implements TraceableEntity, InfusableProjectile
 {
 	@Unique
 	private ElementalInfusionComponent sevenelements$infusionComponent;
 
-	public ProjectileEntityMixin(EntityType<? extends ProjectileEntity> entityType, World world) {
+	public ProjectileMixin(EntityType<? extends Projectile> entityType, Level world) {
 		super(entityType, world);
 
 		throw new AssertionError();
@@ -55,20 +55,20 @@ public abstract class ProjectileEntityMixin
 	}
 
 	@Inject(
-		method = "writeCustomData",
+		method = "addAdditionalSaveData",
 		at = @At("TAIL")
 	)
-	public void writeInfusionToNbt(WriteView view, CallbackInfo ci) {
+	public void writeInfusionToNbt(ValueOutput view, CallbackInfo ci) {
 		if (this.sevenelements$infusionComponent == null) return;
 
-		view.put("seven-elements:elemental_infusion", ElementalInfusionComponent.CODEC, this.sevenelements$infusionComponent);
+		view.store("seven-elements:elemental_infusion", ElementalInfusionComponent.CODEC, this.sevenelements$infusionComponent);
 	}
 
 	@Inject(
-		method = "readCustomData",
+		method = "readAdditionalSaveData",
 		at = @At("TAIL")
 	)
-	public void readInfusionFromNbt(ReadView view, CallbackInfo ci) {
+	public void readInfusionFromNbt(ValueInput view, CallbackInfo ci) {
 		this.sevenelements$infusionComponent = view.read("seven-elements:elemental_infusion", ElementalInfusionComponent.CODEC)
 				.orElse(this.sevenelements$infusionComponent);
 	}

@@ -1,14 +1,14 @@
 package io.github.xrickastley.sevenelements.screen;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.slot.Slot;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
 public final class LockableSlot extends Slot {
 	private boolean isLocked = false;
 
-	public LockableSlot(Inventory inventory, int index, int x, int y) {
+	public LockableSlot(Container inventory, int index, int x, int y) {
 		super(inventory, index, x, y);
 	}
 
@@ -31,31 +31,31 @@ public final class LockableSlot extends Slot {
 	}
 
 	@Override
-	public boolean canInsert(ItemStack stack) {
-		return super.canInsert(stack) && !isLocked;
+	public boolean mayPlace(ItemStack stack) {
+		return super.mayPlace(stack) && !isLocked;
 	}
 
 	@Override
-	public boolean canTakeItems(PlayerEntity playerEntity) {
-		return super.canTakeItems(playerEntity) && !isLocked;
+	public boolean mayPickup(Player playerEntity) {
+		return super.mayPickup(playerEntity) && !isLocked;
 	}
 
 	@Override
-	public boolean canTakePartial(PlayerEntity player) {
-		return super.canTakePartial(player) && !isLocked;
+	public boolean allowModification(Player player) {
+		return super.allowModification(player) && !isLocked;
 	}
 
 	@Override
-	public ItemStack takeStack(int amount) {
+	public ItemStack remove(int amount) {
 		return this.isLocked && amount > 0
 			? ItemStack.EMPTY
-			: super.takeStack(amount);
+			: super.remove(amount);
 	}
 
 	@Override
-	public ItemStack insertStack(ItemStack stack, int count) {
+	public ItemStack safeInsert(ItemStack stack, int count) {
 		return isLocked
 			? stack
-			: super.insertStack(stack, count);
+			: super.safeInsert(stack, count);
 	}
 }

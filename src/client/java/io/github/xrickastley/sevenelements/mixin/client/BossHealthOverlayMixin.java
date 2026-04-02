@@ -21,26 +21,26 @@ import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines
 import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.Functions;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.BossBarHud;
-import net.minecraft.client.gui.hud.ClientBossBar;
-import net.minecraft.entity.boss.BossBar;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profilers;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.BossHealthOverlay;
+import net.minecraft.client.gui.components.LerpingBossEvent;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.world.BossEvent;
 
-@Mixin(BossBarHud.class)
-public class BossBarHudMixin {
+@Mixin(BossHealthOverlay.class)
+public class BossHealthOverlayMixin {
 	@Shadow
 	@Final
-	private MinecraftClient client;
+	private Minecraft minecraft;
 
 	@ModifyConstant(
 		method = "render",
 		constant = @Constant(intValue = 9, ordinal = 1)
 	)
-	private int addElementsToRender(int value, @Local ClientBossBar bossBar) {
+	private int addElementsToRender(int value, @Local LerpingBossEvent bossBar) {
 		if (bossBar.sevenelements$getEntity() == null) return value;
 
 		final int shift = ElementComponent.KEY
@@ -52,18 +52,18 @@ public class BossBarHudMixin {
 	}
 
 	@Inject(
-		method = "renderBossBar(Lnet/minecraft/client/gui/DrawContext;IILnet/minecraft/entity/boss/BossBar;I[Lnet/minecraft/util/Identifier;[Lnet/minecraft/util/Identifier;)V",
+		method = "drawBar(Lnet/minecraft/client/gui/GuiGraphics;IILnet/minecraft/world/BossEvent;I[Lnet/minecraft/resources/Identifier;[Lnet/minecraft/resources/Identifier;)V",
 		at = @At("TAIL")
 	)
-	private void renderAppliedElements(DrawContext context, int x, int y, BossBar bossBar, int width, Identifier[] textures, Identifier[] notchedTextures, CallbackInfo ci) {
-		if (bossBar.sevenelements$getEntity() == null || bossBar.sevenelements$getEntity().isDead()) return;
+	private void renderAppliedElements(GuiGraphics context, int x, int y, BossEvent bossBar, int width, Identifier[] textures, Identifier[] notchedTextures, CallbackInfo ci) {
+		if (bossBar.sevenelements$getEntity() == null || bossBar.sevenelements$getEntity().isDeadOrDying()) return;
 
 		final int RADIUS = 5;
 		final int BOUND = (int) (RADIUS * 2);
 		final int SHIFT = 1;
 		final int INNER_BOUND = (int) ((RADIUS - SHIFT) * 2);
 
-		Profilers.get().swap("seven-elements:elements");
+		Profiler.get().popPush("seven-elements:elements");
 
 		y += 6;
 
@@ -86,7 +86,7 @@ public class BossBarHudMixin {
 			*/
 
 			context.sevenelements$drawCircle(SevenElementsRenderPipelines.CIRCLE, x1 + RADIUS, y + RADIUS, RADIUS, 0x7F646464);
-			context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, x1 + SHIFT, y + SHIFT, 0, 0, INNER_BOUND, INNER_BOUND, INNER_BOUND, INNER_BOUND);
+			context.blit(RenderPipelines.GUI_TEXTURED, texture, x1 + SHIFT, y + SHIFT, 0, 0, INNER_BOUND, INNER_BOUND, INNER_BOUND, INNER_BOUND);
 		}
 	}
 }

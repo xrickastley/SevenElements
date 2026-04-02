@@ -10,9 +10,9 @@ import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.LivingEntity;
 
 public abstract sealed class AbstractSuperconductElementalReaction
 	extends ElementalReaction
@@ -24,20 +24,20 @@ public abstract sealed class AbstractSuperconductElementalReaction
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.level() instanceof final ServerLevel world)) return;
 
 		for (final LivingEntity target : ElementalReaction.getEntitiesInAoE(entity, 3, t -> t != origin)) {
 			final float damage = ElementalReaction.getReactionDamage(entity, 1.5);
 			final ElementalDamageSource source = new ElementalDamageSource(
 				entity
-					.getDamageSources()
-					.create(SevenElementsDamageTypes.SUPERCONDUCT, origin),
+					.damageSources()
+					.source(SevenElementsDamageTypes.SUPERCONDUCT, origin),
 				ElementalApplications.gaugeUnits(target, Element.CRYO, 0),
 				InternalCooldownContext.ofNone(origin)
 			).shouldApplyDMGBonus(false);
 
-			target.damage(world, source, damage);
-			target.addStatusEffect(new StatusEffectInstance(SevenElementsStatusEffects.SUPERCONDUCT, 240, 0, false, true), origin);
+			target.hurtServer(world, source, damage);
+			target.addEffect(new MobEffectInstance(SevenElementsStatusEffects.SUPERCONDUCT, 240, 0, false, true), origin);
 		}
 	}
 }

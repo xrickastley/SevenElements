@@ -11,12 +11,12 @@ import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistryKeys;
 import io.github.xrickastley.sevenelements.registry.dynamic.SevenElementsRegistryLoader;
 
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.entry.RegistryElementCodec;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryFileCodec;
+import net.minecraft.util.ExtraCodecs;
 
 /**
  * An {@code InternalCooldownType} is a class used for holding different types of Internal Cooldowns
@@ -64,11 +64,11 @@ public final class InternalCooldownType {
 
 	public static final Codec<InternalCooldownType> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		Identifier.CODEC.fieldOf("id").forGetter(InternalCooldownType::getId),
-		Codecs.rangedInt(0, Integer.MAX_VALUE).optionalFieldOf("reset_interval", 50).forGetter(InternalCooldownType::getResetInterval),
-		Codecs.rangedInt(0, Integer.MAX_VALUE).optionalFieldOf("gauge_sequence", 3).forGetter(InternalCooldownType::getGaugeSequence)
+		ExtraCodecs.intRange(0, Integer.MAX_VALUE).optionalFieldOf("reset_interval", 50).forGetter(InternalCooldownType::getResetInterval),
+		ExtraCodecs.intRange(0, Integer.MAX_VALUE).optionalFieldOf("gauge_sequence", 3).forGetter(InternalCooldownType::getGaugeSequence)
 	).apply(instance, InternalCooldownType::new));
 
-	public static final RegistryElementCodec<InternalCooldownType> REGISTRY_CODEC = RegistryElementCodec.of(SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE, InternalCooldownType.CODEC);
+	public static final RegistryFileCodec<InternalCooldownType> REGISTRY_CODEC = RegistryFileCodec.create(SevenElementsRegistryKeys.INTERNAL_COOLDOWN_TYPE, InternalCooldownType.CODEC);
 
 	private final Identifier id;
 	private final int resetInterval;
@@ -139,21 +139,21 @@ public final class InternalCooldownType {
 			&& this.resetInterval == type.resetInterval;
 	}
 
-	public MutableText getText() {
-		return Text.literal(this.id.toString());
+	public MutableComponent getText() {
+		return Component.literal(this.id.toString());
 	}
 
-	public MutableText getText(boolean addValues) {
+	public MutableComponent getText(boolean addValues) {
 		if (!addValues) return this.getText();
 
 		final String gaugeSequence = this.gaugeSequence == Integer.MAX_VALUE
 			? DecimalFormatSymbols.getInstance().getInfinity()
 			: String.valueOf(this.gaugeSequence); // no need for -inf, gauge sequence cannot and should not be less than 0.
 
-		return Text.empty()
+		return Component.empty()
 			.append(this.getText())
 			.append(" (")
-			.append(Text.translatable("formats.seven-elements.icd_type", this.resetInterval / 20.0, gaugeSequence))
+			.append(Component.translatable("formats.seven-elements.icd_type", this.resetInterval / 20.0, gaugeSequence))
 			.append(")");
 	}
 
@@ -165,7 +165,7 @@ public final class InternalCooldownType {
 	 * {@link Builder#getInstance(Identifier) Builder#getInstance} method. <br> <br>
 	 *
 	 * This is done through the
-	 * {@link io.github.xrickastley.sevenelements.registry.dynamic.DynamicRegistries#registerIdentified(Class, net.minecraft.registry.RegistryKey, Codec, Codec, java.util.function.BiFunction) DynamicRegistries#registerIdentified}
+	 * {@link io.github.xrickastley.sevenelements.registry.dynamic.DynamicRegistries#registerIdentified(Class, net.minecraft.resources.ResourceKey, Codec, Codec, java.util.function.BiFunction) DynamicRegistries#registerIdentified}
 	 * method via the
 	 * {@link SevenElementsRegistryLoader SevenElementsRegistryLoader}
 	 * class.

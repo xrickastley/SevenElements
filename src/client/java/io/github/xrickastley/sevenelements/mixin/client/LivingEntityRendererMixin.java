@@ -3,6 +3,10 @@ package io.github.xrickastley.sevenelements.mixin.client;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -38,46 +42,42 @@ import io.github.xrickastley.sevenelements.util.SphereRenderer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.command.OrderedRenderCommandQueue;
-import net.minecraft.client.render.entity.EntityRenderer;
-import net.minecraft.client.render.entity.EntityRendererFactory;
-import net.minecraft.client.render.entity.LivingEntityRenderer;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.client.render.state.CameraRenderState;
-import net.minecraft.client.util.BufferAllocator;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.Vec3;
 
 @Environment(EnvType.CLIENT)
 @Mixin(value = LivingEntityRenderer.class, priority = Integer.MAX_VALUE)
 public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extends LivingEntityRenderState, M extends EntityModel<? super S>> extends EntityRenderer<T, S> {
-	protected LivingEntityRendererMixin(EntityRendererFactory.Context context) {
+	protected LivingEntityRendererMixin(EntityRendererProvider.Context context) {
 		super(context);
 
 		throw new AssertionError();
 	}
 
 	@Unique
-	private static final BufferAllocator sevenelements$quadAllocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer::getQuads);
+	private static final ByteBufferBuilder sevenelements$quadAllocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer::getQuads);
 	@Unique
-	private static final BufferAllocator sevenelements$linesAllocator = SevenElementsRenderer.createAllocator(RenderLayer.field_64008);
+	private static final ByteBufferBuilder sevenelements$linesAllocator = SevenElementsRenderer.createAllocator(RenderType.BIG_BUFFER_SIZE);
 
 	@Inject(
-		method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V",
+		method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V",
 		at = @At("TAIL")
 	)
-	private void addRenderers(S state, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CameraRenderState cameraRenderState, CallbackInfo ci) {
+	private void addRenderers(S state, PoseStack matrixStack, SubmitNodeCollector orderedRenderCommandQueue, CameraRenderState cameraRenderState, CallbackInfo ci) {
 		if (!(state.sevenelements$getEntity() instanceof final LivingEntity entity)) return;
 
-		final float tickDelta = MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false);
+		final float tickDelta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 
 		this.sevenelements$renderElementsIfPresent(entity, matrixStack, tickDelta);
 		this.sevenelements$renderElementalGauges(entity, matrixStack, tickDelta);
@@ -85,15 +85,15 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@Unique
-	private void sevenelements$renderElementsIfPresent(final LivingEntity entity, final MatrixStack matrixStack, final float tickDelta) {
-		if (entity.isDead()) return;
+	private void sevenelements$renderElementsIfPresent(final LivingEntity entity, final PoseStack matrixStack, final float tickDelta) {
+		if (entity.isDeadOrDying()) return;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 		final List<ElementEntry> elementArray = new ArrayList<>();
 
 		if (component.hasValidLastReaction()) {
-			final ElementalReaction reaction = component.getLastReaction().getLeft();
-			final long reactionAt = component.getLastReaction().getRight();
+			final ElementalReaction reaction = component.getLastReaction().getA();
+			final long reactionAt = component.getLastReaction().getB();
 
 			reaction
 				.getReactionDisplayOrder()
@@ -117,25 +117,25 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
 		elementArray.removeIf(entry -> !entry.getElement().hasTexture() || !textures.add(entry.getElement().getTexture()));
 
-		final Iterator<Vec3d> coords = this
-			.sevenelements$generateTexturesUsingCenter(new Vec3d(0, 0, 0), 1, elementArray.size())
+		final Iterator<Vec3> coords = this
+			.sevenelements$generateTexturesUsingCenter(new Vec3(0, 0, 0), 1, elementArray.size())
 			.iterator();
 
 		final Set<Identifier> elementTexs = new HashSet<>();
 
 		elementArray.removeIf(entry -> !elementTexs.add(entry.getElement().getTexture()));
-		elementArray.forEach(entry -> entry.render(entity, matrixStack, dispatcher.camera, (float) coords.next().getZ()));
+		elementArray.forEach(entry -> entry.render(entity, matrixStack, entityRenderDispatcher.camera, (float) coords.next().z()));
 	}
 
 	@Unique
-	private ArrayList<Vec3d> sevenelements$generateTexturesUsingCenter(Vec3d center, double length, int amount) {
+	private ArrayList<Vec3> sevenelements$generateTexturesUsingCenter(Vec3 center, double length, int amount) {
 		double totalDistance = length * (amount - 1);
 		double offset = totalDistance / 2;
 
-		final ArrayList<Vec3d> result = new ArrayList<>();
-		double curDistance = center.getZ() + offset;
+		final ArrayList<Vec3> result = new ArrayList<>();
+		double curDistance = center.z() + offset;
 		for (int i = 0; i < amount; i++) {
-			result.add(new Vec3d(center.getX(), center.getY(), curDistance));
+			result.add(new Vec3(center.x(), center.y(), curDistance));
 
 			curDistance -= length;
 		}
@@ -144,7 +144,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@Unique
-	private void sevenelements$renderElementalGauges(final LivingEntity entity, final MatrixStack matrixStack, final float tickDelta) {
+	private void sevenelements$renderElementalGauges(final LivingEntity entity, final PoseStack matrixStack, final float tickDelta) {
 		final ClientConfig config = ClientConfig.get();
 
 		if (!config.developer.displayElementalGauges) return;
@@ -167,7 +167,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@Unique
-	private void sevenelements$renderElementalGauge(final LivingEntity entity, final ElementalApplication application, final float yOffset, final MatrixStack matrixStack, final float tickDelta) {
+	private void sevenelements$renderElementalGauge(final LivingEntity entity, final ElementalApplication application, final float yOffset, final PoseStack matrixStack, final float tickDelta) {
 		if (application.isEmpty()) return;
 
 		final float GAUGE_SCALE = 0.35f;
@@ -175,24 +175,24 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
 		final ClientConfig config = ClientConfig.get();
 
-		matrixStack.push();
-		matrixStack.translate(0f, entity.getBoundingBox().getLengthY() * 1.15, 0f);
-		matrixStack.multiplyPositionMatrix(new Matrix4f().rotation(dispatcher.camera.getRotation()));
+		matrixStack.pushPose();
+		matrixStack.translate(0f, entity.getBoundingBox().getYsize() * 1.15, 0f);
+		matrixStack.mulPose(new Matrix4f().rotation(entityRenderDispatcher.camera.rotation()));
 		matrixStack.scale(GAUGE_SCALE, GAUGE_SCALE * 0.5f, GAUGE_SCALE);
 
-		final float xOffset = (float) (entity.getBoundingBox().getLengthX() * 1.5f) / GAUGE_SCALE;
+		final float xOffset = (float) (entity.getBoundingBox().getXsize() * 1.5f) / GAUGE_SCALE;
 		final float gaugeWidth = application.isGaugeUnits()
 			? (float) Math.min(SCALE_PER_GU * application.getGaugeUnits(), SCALE_PER_GU * 4)
 			: 2 * SCALE_PER_GU;
 
-		final Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
-		final MatrixStack.Entry entry = matrixStack.peek();
+		final Matrix4f positionMatrix = matrixStack.last().pose();
+		final PoseStack.Pose entry = matrixStack.last();
 
 		BufferBuilder buffer = SevenElementsRenderer.createBuffer(sevenelements$quadAllocator, SevenElementsRenderPipelines.QUADS);
-		buffer.vertex(positionMatrix, 0 + xOffset, 0 - yOffset, 0).color(0xffffffff);
-		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 0 - yOffset, 0).color(0xffffffff);
-		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 1 - yOffset, 0).color(0xffffffff);
-		buffer.vertex(positionMatrix, 0 + xOffset, 1 - yOffset, 0).color(0xffffffff);
+		buffer.addVertex(positionMatrix, 0 + xOffset, 0 - yOffset, 0).setColor(0xffffffff);
+		buffer.addVertex(positionMatrix, gaugeWidth + xOffset, 0 - yOffset, 0).setColor(0xffffffff);
+		buffer.addVertex(positionMatrix, gaugeWidth + xOffset, 1 - yOffset, 0).setColor(0xffffffff);
+		buffer.addVertex(positionMatrix, 0 + xOffset, 1 - yOffset, 0).setColor(0xffffffff);
 
 		final float progress = this.sevenelements$getProgress(application, tickDelta);
 		final Color elementColor = application.getElement().getDamageColor();
@@ -200,21 +200,21 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 			? elementColor.asARGB()
 			: elementColor.multiply(1, 1, 1, 0.5).asARGB();
 
-		buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color);
-		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 0 - yOffset, 0.0001f).color(color);
-		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 1 - yOffset, 0.0001f).color(color);
-		buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color);
+		buffer.addVertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).setColor(color);
+		buffer.addVertex(positionMatrix, (gaugeWidth * progress) + xOffset, 0 - yOffset, 0.0001f).setColor(color);
+		buffer.addVertex(positionMatrix, (gaugeWidth * progress) + xOffset, 1 - yOffset, 0.0001f).setColor(color);
+		buffer.addVertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).setColor(color);
 
 		if (application.isDuration()) {
 			final float gaugeProgress = (float) (application.getCurrentGauge() / application.getGaugeUnits());
 
-			buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color);
-			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 0 - yOffset, 0.0001f).color(color);
-			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 1 - yOffset, 0.0001f).color(color);
-			buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color);
+			buffer.addVertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).setColor(color);
+			buffer.addVertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 0 - yOffset, 0.0001f).setColor(color);
+			buffer.addVertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 1 - yOffset, 0.0001f).setColor(color);
+			buffer.addVertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).setColor(color);
 		}
 
-		SevenElementsRenderLayer.getQuads().draw(buffer.end());
+		SevenElementsRenderLayer.getQuads().draw(buffer.buildOrThrow());
 
 		final float scaledGauge = (float) (0.1 * gaugeWidth / application.getGaugeUnits());
 		final int splits = (int) Math.floor(gaugeWidth / (0.1 * gaugeWidth / application.getGaugeUnits()));
@@ -228,30 +228,30 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 					? 0.5f
 					: 0.25f;
 
-			final int lineWidth = c % 10 == 0 
-				? 10 
+			final int lineWidth = c % 10 == 0
+				? 10
 				: 5;
 
-			final Vec3d start = new Vec3d(xOffset + i, 0 - yOffset, -0.0005f);
-			final Vec3d end = new Vec3d(xOffset + i, addedY - yOffset, -0.0005f);
-			final Vec3d normal = end.normalize();
+			final Vec3 start = new Vec3(xOffset + i, 0 - yOffset, -0.0005f);
+			final Vec3 end = new Vec3(xOffset + i, addedY - yOffset, -0.0005f);
+			final Vec3 normal = end.normalize();
 
 			buffer = SevenElementsRenderer.createBuffer(sevenelements$quadAllocator, SevenElementsRenderPipelines.LINES);
 			buffer
-				.vertex(positionMatrix, (float) start.x, (float) start.y, (float) start.z)
-				.color(0xff000000)
-				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
-				.lineWidth(lineWidth);
+				.addVertex(positionMatrix, (float) start.x, (float) start.y, (float) start.z)
+				.setColor(0xff000000)
+				.setNormal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.setLineWidth(lineWidth);
 			buffer
-				.vertex(positionMatrix, (float) end.x, (float) end.y, (float) end.z)
-				.color(0xff000000)
-				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
-				.lineWidth(lineWidth);
+				.addVertex(positionMatrix, (float) end.x, (float) end.y, (float) end.z)
+				.setColor(0xff000000)
+				.setNormal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.setLineWidth(lineWidth);
 
-			SevenElementsRenderLayer.getChargeLine().draw(buffer.end());
+			SevenElementsRenderLayer.getChargeLine().draw(buffer.buildOrThrow());
 		}
 
-		matrixStack.pop();
+		matrixStack.popPose();
 	}
 
 	@Unique
@@ -262,32 +262,32 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@Unique
-	private void sevenelements$renderCrystallizeShield(final LivingEntity entity, final MatrixStack matrixStack) {
+	private void sevenelements$renderCrystallizeShield(final LivingEntity entity, final PoseStack matrixStack) {
 		final ClientConfig config = ClientConfig.get();
 
 		if (!SpecialEffectsRenderer.shouldRender(entity)) return;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
-		final @Nullable Pair<Element, Double> crystallizeShield = component.getCrystallizeShield();
+		final @Nullable Tuple<Element, Double> crystallizeShield = component.getCrystallizeShield();
 
 		if (crystallizeShield == null) return;
 
-		final double lengthY = entity.getBoundingBox().getLengthY();
+		final double lengthY = entity.getBoundingBox().getYsize();
 
-		matrixStack.push();
-		matrixStack.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(dispatcher.camera.getYaw()));
+		matrixStack.pushPose();
+		matrixStack.mulPose(Axis.YN.rotationDegrees(entityRenderDispatcher.camera.yRot()));
 		matrixStack.translate(0, lengthY * 0.6, 0);
 
 		SphereRenderer.render(
 			matrixStack,
-			new Vec3d(0, 0, 0),
+			new Vec3(0, 0, 0),
 			(float) (lengthY / 2 * 1.25),
 			config.rendering.elements.sphereResolution,
 			config.rendering.elements.sphereResolution * 2,
-			pos -> crystallizeShield.getLeft().getDamageColor().multiply(1, 1, 1, 0.75 * Math.pow(pos.x, 4)).asARGB()
+			pos -> crystallizeShield.getA().getDamageColor().multiply(1, 1, 1, 0.75 * Math.pow(pos.x, 4)).asARGB()
 		);
 
-		matrixStack.pop();
+		matrixStack.popPose();
 	}
 
 	@Unique
@@ -305,17 +305,17 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@ModifyExpressionValue(
-		method = "getRenderLayer",
+		method = "getRenderType",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getTexture(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;)Lnet/minecraft/util/Identifier;"
+			target = "Lnet/minecraft/client/renderer/entity/LivingEntityRenderer;getTextureLocation(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;)Lnet/minecraft/resources/Identifier;"
 		)
 	)
 	private Identifier renderFrostedModel(Identifier original, @Local(argsOnly = true) LivingEntityRenderState state) {
 		if (!ClientConfig.getEffectRenderType().allowsSpecialEffects()) return original;
 
 		return state.sevenelements$getEntity() instanceof final LivingEntity entity
-			? this.sevenelements$ifFrozen(entity, c -> Identifier.of("minecraft", "textures/block/ice.png"), original)
+			? this.sevenelements$ifFrozen(entity, c -> Identifier.fromNamespaceAndPath("minecraft", "textures/block/ice.png"), original)
 			: original;
 	}
 
@@ -329,10 +329,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@Inject(
-		method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/command/OrderedRenderCommandQueue;Lnet/minecraft/client/render/state/CameraRenderState;)V",
+		method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V",
 		at = @At("HEAD")
 	)
-	private void forceFrozenPose(S state, MatrixStack matrixStack, OrderedRenderCommandQueue orderedRenderCommandQueue, CameraRenderState cameraRenderState, CallbackInfo ci) {
+	private void forceFrozenPose(S state, PoseStack matrixStack, SubmitNodeCollector orderedRenderCommandQueue, CameraRenderState cameraRenderState, CallbackInfo ci) {
 		if (!(state.sevenelements$getEntity() instanceof final LivingEntity entity)) return;
 
 		final FrozenEffectComponent component = FrozenEffectComponent.KEY.get(entity);
@@ -341,10 +341,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@ModifyExpressionValue(
-		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
+		method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;clampBodyYaw(Lnet/minecraft/entity/LivingEntity;FF)F"
+			target = "Lnet/minecraft/client/renderer/entity/LivingEntityRenderer;solveBodyRot(Lnet/minecraft/world/entity/LivingEntity;FF)F"
 		)
 	)
 	private float forceFrozenBodyYaw(float original, @Local(argsOnly = true) LivingEntity entity) {
@@ -352,10 +352,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@ModifyExpressionValue(
-		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
+		method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/util/math/MathHelper;lerpAngleDegrees(FFF)F"
+			target = "Lnet/minecraft/util/Mth;rotLerp(FFF)F"
 		)
 	)
 	private float forceFrozenHeadYaw(float original, @Local(argsOnly = true) LivingEntity entity) {
@@ -363,10 +363,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@ModifyExpressionValue(
-		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
+		method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;clampBodyYaw(Lnet/minecraft/entity/LivingEntity;FF)F"
+			target = "Lnet/minecraft/client/renderer/entity/LivingEntityRenderer;solveBodyRot(Lnet/minecraft/world/entity/LivingEntity;FF)F"
 		)
 	)
 	private float forceFrozenPitch(float original, @Local(argsOnly = true) LivingEntity entity) {
@@ -374,10 +374,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@ModifyExpressionValue(
-		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
+		method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/LimbAnimator;getAnimationProgress(F)F"
+			target = "Lnet/minecraft/world/entity/WalkAnimationState;position(F)F"
 		)
 	)
 	private float forceFrozenLimbDistance(float original, @Local(argsOnly = true) LivingEntity entity) {
@@ -385,10 +385,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@ModifyExpressionValue(
-		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
+		method = "extractRenderState(Lnet/minecraft/world/entity/LivingEntity;Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;F)V",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/LimbAnimator;getAmplitude(F)F"
+			target = "Lnet/minecraft/world/entity/WalkAnimationState;speed(F)F"
 		)
 	)
 	private float forceFrozenLimbAngle(float original, @Local(argsOnly = true) LivingEntity entity) {

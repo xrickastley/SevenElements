@@ -9,8 +9,8 @@ import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 
 public abstract sealed class AbstractSwirlElementalReaction
 	extends ElementalReaction
@@ -84,7 +84,7 @@ public abstract sealed class AbstractSwirlElementalReaction
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.level() instanceof final ServerLevel world)) return;
 
 		final double gaugeOriginAura = auraElement.getCurrentGauge() + reducedGauge;
 		final double gaugeAnemo = triggeringElement.getCurrentGauge() + reducedGauge;
@@ -108,13 +108,13 @@ public abstract sealed class AbstractSwirlElementalReaction
 
 			final ElementalDamageSource source = new ElementalDamageSource(
 				entity
-					.getDamageSources()
-					.create(SevenElementsDamageTypes.SWIRL, origin),
+					.damageSources()
+					.source(SevenElementsDamageTypes.SWIRL, origin),
 				ElementalApplications.gaugeUnits(target, swirlElement, target == entity ? 0f : gaugeSwirlAttack, true),
 				InternalCooldownContext.ofNone(origin)
 			).shouldApplyDMGBonus(false);
 
-			target.damage(world, source, damage);
+			target.hurtServer(world, source, damage);
 		}
 	}
 }

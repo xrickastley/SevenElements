@@ -4,16 +4,16 @@ import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 
 public final class SevenElementsRegistryKeys {
-	public static final RegistryKey<Registry<ElementalReaction>> ELEMENTAL_REACTION = createRegistryKey("elemental_reaction");
-	public static final RegistryKey<Registry<InternalCooldownType>> INTERNAL_COOLDOWN_TYPE = createRegistryKey("internal_cooldowns");
+	public static final ResourceKey<Registry<ElementalReaction>> ELEMENTAL_REACTION = createRegistryKey("elemental_reaction");
+	public static final ResourceKey<Registry<InternalCooldownType>> INTERNAL_COOLDOWN_TYPE = createRegistryKey("internal_cooldowns");
 
 	public static void load() {}
 
-	private static <T> RegistryKey<Registry<T>> createRegistryKey(String path) {
-		return RegistryKey.ofRegistry(SevenElements.identifier(path));
+	private static <T> ResourceKey<Registry<T>> createRegistryKey(String path) {
+		return ResourceKey.createRegistryKey(SevenElements.identifier(path));
 	}
 }

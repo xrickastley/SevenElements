@@ -19,14 +19,14 @@ package io.github.xrickastley.sevenelements.util.polyfill.rendering;
 
 import com.google.common.base.Preconditions;
 
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.client.world.ClientWorld;
+import net.minecraft.client.Camera;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.LevelRenderer;
 
 /**
  * Except as noted below, the properties exposed here match the parameters passed to
- * {@link WorldRenderer#render}.
+ * {@link LevelRenderer#renderLevel}.
  */
 public interface WorldRenderContext {
 	/**
@@ -38,7 +38,7 @@ public interface WorldRenderContext {
 	 * @return The world render context for the world renderer
 	 * @throws IllegalStateException If not currently rendering the world
 	 */
-	static WorldRenderContext getInstance(WorldRenderer worldRenderer) {
+	static WorldRenderContext getInstance(LevelRenderer worldRenderer) {
 		Preconditions.checkNotNull(worldRenderer, "worldRenderer");
 		return ((WorldRendererHooks) worldRenderer).sevenelements$getWorldRenderContext();
 	}
@@ -48,9 +48,9 @@ public interface WorldRenderContext {
 	 *
 	 * @return WorldRenderer instance invoking the event
 	 */
-	WorldRenderer worldRenderer();
+	LevelRenderer worldRenderer();
 
-	RenderTickCounter tickCounter();
+	DeltaTracker tickCounter();
 
 	Camera camera();
 
@@ -59,5 +59,5 @@ public interface WorldRenderContext {
 	 *
 	 * @return world renderer's client world instance
 	 */
-	ClientWorld world();
+	ClientLevel world();
 }

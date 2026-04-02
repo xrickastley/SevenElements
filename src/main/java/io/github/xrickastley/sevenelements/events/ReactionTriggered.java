@@ -8,7 +8,7 @@ import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 
 @ExpectedEnvironment(EnvType.SERVER)
 @FunctionalInterface

@@ -45,7 +45,7 @@ public final class InternalCooldown {
 	 * @see InternalCooldown#handleInternalCooldown
 	 */
 	public boolean isInInternalCooldown() {
-		return tag.getTag() != null && holder.getOwner().age >= cooldown || totalHits > type.getGaugeSequence();
+		return tag.getTag() != null && holder.getOwner().tickCount >= cooldown || totalHits > type.getGaugeSequence();
 	}
 
 	/**
@@ -62,8 +62,8 @@ public final class InternalCooldown {
 	public boolean handleInternalCooldown() {
 		if (tag.getTag() == null) return true;
 
- 		if (holder.getOwner().age >= cooldown) {
-			cooldown = holder.getOwner().age + type.getResetInterval();
+ 		if (holder.getOwner().tickCount >= cooldown) {
+			cooldown = holder.getOwner().tickCount + type.getResetInterval();
 			totalHits = 1;
 
 			return true;

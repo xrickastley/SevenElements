@@ -2,10 +2,10 @@ package io.github.xrickastley.sevenelements.factory;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.util.Identifier;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.sounds.SoundEvent;
 
 public class SevenElementsSoundEvents {
 	public static final SoundEvent REACTION = register("reaction");
@@ -28,6 +28,6 @@ public class SevenElementsSoundEvents {
 	}
 
 	private static SoundEvent register(Identifier id, Identifier soundId) {
-		return Registry.register(Registries.SOUND_EVENT, id, SoundEvent.of(soundId));
+		return Registry.register(BuiltInRegistries.SOUND_EVENT, id, SoundEvent.createVariableRangeEvent(soundId));
 	}
 }

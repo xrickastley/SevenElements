@@ -2,7 +2,7 @@ package io.github.xrickastley.sevenelements.util;
 
 import java.util.function.Function;
 
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 public enum Ease {
 	LINEAR				(x -> x),
@@ -30,12 +30,12 @@ public enum Ease {
 	}
 
 	public double applyLerp(double delta, double start, double end) {
-		return MathHelper.lerp(easeFunction.apply(MathHelper.clamp(delta, 0, 1)), start, end);
+		return Mth.lerp(easeFunction.apply(Mth.clamp(delta, 0, 1)), start, end);
 	}
 
 	public double applyLerpProgress(double value, double start, double end) {
 		return easeFunction.apply(
-			MathHelper.clamp(MathHelper.getLerpProgress(value, start, end), 0, 1)
+			Mth.clamp(Mth.inverseLerp(value, start, end), 0, 1)
 		);
 	}
 }

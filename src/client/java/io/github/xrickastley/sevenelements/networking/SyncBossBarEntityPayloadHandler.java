@@ -7,32 +7,32 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.SevenElements;
-import io.github.xrickastley.sevenelements.mixin.client.BossBarHudAccessor;
+import io.github.xrickastley.sevenelements.mixin.client.BossHealthOverlayAccessor;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.Context;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.hud.ClientBossBar;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.packet.CustomPayload.Id;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.LerpingBossEvent;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload.Type;
+import net.minecraft.world.entity.LivingEntity;
 
 public class SyncBossBarEntityPayloadHandler implements PayloadHandler<SyncBossBarEntityS2CPayload> {
 	private final Map<UUID, LivingEntity> deferredEntities = new HashMap<>();
 
 	@Override
-	public Id<SyncBossBarEntityS2CPayload> getPayloadId() {
+	public Type<SyncBossBarEntityS2CPayload> getPayloadId() {
 		return SyncBossBarEntityS2CPayload.ID;
 	}
 
 	@Override
 	public void receive(SyncBossBarEntityS2CPayload packet, Context context) {
-		final MinecraftClient client = MinecraftClient.getInstance();
-		final Map<UUID, ClientBossBar> bossBarMap = ((BossBarHudAccessor) client.inGameHud.getBossBarHud())
-			.getBossBars();
+		final Minecraft client = Minecraft.getInstance();
+		final Map<UUID, LerpingBossEvent> bossBarMap = ((BossHealthOverlayAccessor) client.gui.getBossOverlay())
+			.getEvents();
 
-		final @Nullable ClientBossBar bossBar = bossBarMap.get(packet.uuid());
+		final @Nullable LerpingBossEvent bossBar = bossBarMap.get(packet.uuid());
 		final @Nullable LivingEntity entity = packet.hasEntity()
-			? ClassInstanceUtil.castOrNull(client.world.getEntityById(packet.entityId()), LivingEntity.class)
+			? ClassInstanceUtil.castOrNull(client.level.getEntity(packet.entityId()), LivingEntity.class)
 			: null;
 
 		// set to map and call on add action (basically defer)
@@ -59,8 +59,8 @@ public class SyncBossBarEntityPayloadHandler implements PayloadHandler<SyncBossB
 		bossBar.sevenelements$setEntity(entity);
 	}
 
-	public ClientBossBar setPossibleEntity(ClientBossBar bossBar) {
-		bossBar.sevenelements$setEntity(this.deferredEntities.get(bossBar.getUuid()));
+	public LerpingBossEvent setPossibleEntity(LerpingBossEvent bossBar) {
+		bossBar.sevenelements$setEntity(this.deferredEntities.get(bossBar.getId()));
 
 		return bossBar;
 	}

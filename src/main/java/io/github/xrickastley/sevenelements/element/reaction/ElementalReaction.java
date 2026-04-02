@@ -20,24 +20,24 @@ import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public abstract class ElementalReaction {
 	protected final String name;
 	protected final Identifier id;
-	protected final @Nullable Text text;
+	protected final @Nullable Component text;
 	protected final double reactionCoefficient;
-	protected final Pair<Element, Integer> auraElement;
-	protected final Pair<Element, Integer> triggeringElement;
+	protected final Tuple<Element, Integer> auraElement;
+	protected final Tuple<Element, Integer> triggeringElement;
 	protected final boolean reversable;
 	protected final boolean applyResultAsAura;
 	protected final boolean endsReactionTrigger;
@@ -60,14 +60,14 @@ public abstract class ElementalReaction {
 		this.preventsReactionsAfter = settings.preventsReactionsAfter;
 
 		final Stream<Element> reactionDisplayOrder = settings.reactionDisplayOrder.isEmpty()
-			? Stream.of(ClassInstanceUtil.mapOrNull(settings.auraElement, Pair::getLeft), ClassInstanceUtil.mapOrNull(settings.triggeringElement, Pair::getLeft))
+			? Stream.of(ClassInstanceUtil.mapOrNull(settings.auraElement, Tuple::getA), ClassInstanceUtil.mapOrNull(settings.triggeringElement, Tuple::getA))
 			: settings.reactionDisplayOrder.stream();
 
 		this.reactionDisplayOrder = reactionDisplayOrder
 			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
 
-		SevenElementsRegistries.ELEMENTAL_REACTION.createEntry(this);
+		SevenElementsRegistries.ELEMENTAL_REACTION.createIntrusiveHolder(this);
 	}
 
 	public static float getReactionDamage(Entity entity, double reactionMultiplier) {
@@ -78,11 +78,11 @@ public abstract class ElementalReaction {
 		return SevenElements.getLevelMultiplier(entity) * reactionMultiplier;
 	}
 
-	public static float getReactionDamage(ServerWorld world, double reactionMultiplier) {
+	public static float getReactionDamage(ServerLevel world, double reactionMultiplier) {
 		return ElementalReaction.getReactionDamage(world, (float) reactionMultiplier);
 	}
 
-	public static float getReactionDamage(ServerWorld world, float reactionMultiplier) {
+	public static float getReactionDamage(ServerLevel world, float reactionMultiplier) {
 		return SevenElements.getLevelMultiplier(world) * reactionMultiplier;
 	}
 
@@ -92,16 +92,16 @@ public abstract class ElementalReaction {
 
 	public static List<LivingEntity> getEntitiesInAoE(LivingEntity target, double radius, Predicate<LivingEntity> filter) {
 		final List<LivingEntity> targets = target
-			.getEntityWorld()
-			.getNonSpectatingEntities(LivingEntity.class, Box.of(target.getLerpedPos(1f), radius * 2, radius * 2, radius * 2));
+			.level()
+			.getEntitiesOfClass(LivingEntity.class, AABB.ofSize(target.getPosition(1f), radius * 2, radius * 2, radius * 2));
 
-		targets.removeIf(entity -> entity.squaredDistanceTo(target) >= radius * radius || filter.negate().test(entity));
+		targets.removeIf(entity -> entity.distanceToSqr(target) >= radius * radius || filter.negate().test(entity));
 
 		return targets;
 	}
 
 	public boolean hasElement(Element element) {
-		return element == this.auraElement.getLeft() || element == this.triggeringElement.getLeft();
+		return element == this.auraElement.getA() || element == this.triggeringElement.getA();
 	}
 
 	public boolean hasAnyElement(Collection<Element> elements) {
@@ -113,33 +113,33 @@ public abstract class ElementalReaction {
 	}
 
 	public Element getAuraElement() {
-		return auraElement.getLeft();
+		return auraElement.getA();
 	}
 
 	public Element getTriggeringElement() {
-		return triggeringElement.getLeft();
+		return triggeringElement.getA();
 	}
 
 	public int getAuraElementPriority() {
-		return auraElement.getRight();
+		return auraElement.getB();
 	}
 
 	public int getTriggeringElementPriority() {
-		return triggeringElement.getRight();
+		return triggeringElement.getB();
 	}
 
 	public int getHighestElementPriority() {
-		return Math.min(this.auraElement.getLeft().getPriority(), this.triggeringElement.getLeft().getPriority());
+		return Math.min(this.auraElement.getA().getPriority(), this.triggeringElement.getA().getPriority());
 	}
 
-	public @Nullable Text getText() {
+	public @Nullable Component getText() {
 		return text;
 	}
 
-	public Pair<Element, Integer> getElementPair(Element element) {
-		return element == auraElement.getLeft()
+	public Tuple<Element, Integer> getElementPair(Element element) {
+		return element == auraElement.getA()
 			? auraElement
-			: element == triggeringElement.getLeft()
+			: element == triggeringElement.getA()
 				? triggeringElement
 				: null;
 	}
@@ -183,10 +183,10 @@ public abstract class ElementalReaction {
 	 * @return The priority of this Elemental Reaction.
 	 */
 	public int getPriority(Element triggeringElement) {
-		return triggeringElement.equals(this.triggeringElement.getLeft())
-			? this.triggeringElement.getRight()
-			: triggeringElement.equals(this.auraElement.getLeft()) && this.reversable
-				? this.auraElement.getRight()
+		return triggeringElement.equals(this.triggeringElement.getA())
+			? this.triggeringElement.getB()
+			: triggeringElement.equals(this.auraElement.getA()) && this.reversable
+				? this.auraElement.getB()
 				: Integer.MAX_VALUE;
 	}
 
@@ -211,8 +211,8 @@ public abstract class ElementalReaction {
 	public boolean isTriggerable(LivingEntity entity) {
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 
-		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getLeft());
-		final ElementalApplication trigElement = component.getElementalApplication(this.triggeringElement.getLeft());
+		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getA());
+		final ElementalApplication trigElement = component.getElementalApplication(this.triggeringElement.getA());
 
 		return reversable
 			// Any of the elements can be an Aura element.
@@ -229,8 +229,8 @@ public abstract class ElementalReaction {
 		if (!isTriggerable(entity)) return false;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
-		ElementalApplication applicationAE = component.getElementalApplication(auraElement.getLeft());
-		ElementalApplication applicationTE = component.getElementalApplication(triggeringElement.getLeft());
+		ElementalApplication applicationAE = component.getElementalApplication(auraElement.getA());
+		ElementalApplication applicationTE = component.getElementalApplication(triggeringElement.getA());
 
 		if (applicationTE.isAuraElement() && !applicationAE.isAuraElement()) {
 			ElementalApplication a = applicationTE;
@@ -255,8 +255,8 @@ public abstract class ElementalReaction {
 			.onReactionTriggered(this, reducedGauge, entity, origin);
 
 		entity
-			.getEntityWorld()
-			.playSound(null, entity.getBlockPos(), SevenElementsSoundEvents.REACTION, SoundCategory.PLAYERS, 1.0f, 1.0f);
+			.level()
+			.playSound(null, entity.blockPosition(), SevenElementsSoundEvents.REACTION, SoundSource.PLAYERS, 1.0f, 1.0f);
 	}
 
 	public boolean idEquals(ElementalReaction reaction) {
@@ -264,21 +264,21 @@ public abstract class ElementalReaction {
 	}
 
 	protected void displayReaction(LivingEntity target) {
-		if (target.getEntityWorld().isClient()) return;
+		if (target.level().isClientSide()) return;
 
-		final Box boundingBox = target.getBoundingBox();
+		final AABB boundingBox = target.getBoundingBox();
 
-		final double x = target.getX() + (boundingBox.getLengthX() * 1.50 * Math.random());
-		final double y = target.getY() + (boundingBox.getLengthY() * (0.25 + (Math.random() / 2.0)));
-		final double z = target.getZ() + (boundingBox.getLengthZ() * 1.50 * Math.random());
+		final double x = target.getX() + (boundingBox.getXsize() * 1.50 * Math.random());
+		final double y = target.getY() + (boundingBox.getYsize() * (0.25 + (Math.random() / 2.0)));
+		final double z = target.getZ() + (boundingBox.getZsize() * 1.50 * Math.random());
 
-		final Vec3d pos = new Vec3d(x, y, z);
+		final Vec3 pos = new Vec3(x, y, z);
 
 		final ShowElementalReactionS2CPayload packet = new ShowElementalReactionS2CPayload(pos, this);
 
-		if (target instanceof final ServerPlayerEntity serverPlayer) ServerPlayNetworking.send(serverPlayer, packet);
+		if (target instanceof final ServerPlayer serverPlayer) ServerPlayNetworking.send(serverPlayer, packet);
 
-		for (final ServerPlayerEntity otherPlayer : PlayerLookup.tracking(target)) {
+		for (final ServerPlayer otherPlayer : PlayerLookup.tracking(target)) {
 			if (otherPlayer.getId() == target.getId()) continue;
 
 			ServerPlayNetworking.send(otherPlayer, packet);
@@ -288,10 +288,10 @@ public abstract class ElementalReaction {
 	public static final class Settings {
 		private final String name;
 		private final Identifier id;
-		private final @Nullable Text text;
+		private final @Nullable Component text;
 		private double reactionCoefficient = 1.0;
-		private Pair<Element, Integer> auraElement;
-		private Pair<Element, Integer> triggeringElement;
+		private Tuple<Element, Integer> auraElement;
+		private Tuple<Element, Integer> triggeringElement;
 		private boolean reversable = false;
 		private boolean applyResultAsAura = false;
 		private boolean endsReactionTrigger = false;
@@ -299,7 +299,7 @@ public abstract class ElementalReaction {
 		private Set<Identifier> preventsReactionsAfter = new HashSet<>();
 		private List<Element> reactionDisplayOrder = new ArrayList<>();
 
-		public Settings(String name, Identifier id, @Nullable Text text) {
+		public Settings(String name, Identifier id, @Nullable Component text) {
 			this.name = name;
 			this.id = id;
 			this.text = text;
@@ -338,7 +338,7 @@ public abstract class ElementalReaction {
 		 * triggering element.
 		 */
 		public Settings setAuraElement(Element element, int priority) {
-			this.auraElement = new Pair<>(element, priority);
+			this.auraElement = new Tuple<>(element, priority);
 
 			return this;
 		}
@@ -362,7 +362,7 @@ public abstract class ElementalReaction {
 		 * @param priority The priority of this reaction triggering when {@code triggeringElement} is the triggering element.
 		 */
 		public Settings setTriggeringElement(Element element, int priority) {
-			this.triggeringElement = new Pair<>(element, priority);
+			this.triggeringElement = new Tuple<>(element, priority);
 
 			return this;
 		}
@@ -379,7 +379,7 @@ public abstract class ElementalReaction {
 		public Settings setReactionDisplayOrder(Element... elementOrder) {
 			this.reactionDisplayOrder = List.of(elementOrder);
 
-			final Set<Element> onlyElements = Set.of(this.auraElement.getLeft(), this.triggeringElement.getLeft());
+			final Set<Element> onlyElements = Set.of(this.auraElement.getA(), this.triggeringElement.getA());
 			final List<Element> invalidElements = this.reactionDisplayOrder
 				.stream()
 				.filter(Predicate.not(onlyElements::contains))
@@ -470,18 +470,18 @@ public abstract class ElementalReaction {
 		 *
 		 * @param reactions The reactions to prevent from triggering <b>directly after</b> this reaction.
 		 */
-		public Settings preventsReactionsAfter(Identifier ...reactions) {
+		public Settings preventsReactionsAfter(Identifier...reactions) {
 			this.preventsReactionsAfter = Set.of(reactions);
 
 			return this;
 		}
 
 		public Element getAuraElement() {
-			return auraElement.getLeft();
+			return auraElement.getA();
 		}
 
 		public Element getTriggeringElement() {
-			return triggeringElement.getLeft();
+			return triggeringElement.getA();
 		}
 	}
 }

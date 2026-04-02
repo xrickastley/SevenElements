@@ -23,15 +23,15 @@ import io.github.xrickastley.sevenelements.registry.dynamic.DynamicRegistryLoadE
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.minecraft.command.CommandRegistryAccess;
-import net.minecraft.command.argument.serialize.ConstantArgumentSerializer;
-import net.minecraft.entity.Entity;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 
 public class SevenElements implements ModInitializer {
 	public static final String MOD_ID = "seven-elements";
@@ -63,23 +63,23 @@ public class SevenElements implements ModInitializer {
 		ArgumentTypeRegistry.registerArgumentType(
 			SevenElements.identifier("element"),
 			ElementArgumentType.class,
-			ConstantArgumentSerializer.of(ElementArgumentType::new)
+			SingletonArgumentInfo.contextFree(ElementArgumentType::new)
 		);
 
 		ArgumentTypeRegistry.registerArgumentType(
 			SevenElements.identifier("internal_cooldown_tag"),
 			InternalCooldownTagType.class,
-			ConstantArgumentSerializer.of(InternalCooldownTagType::new)
+			SingletonArgumentInfo.contextFree(InternalCooldownTagType::new)
 		);
 
 	}
 
 	public static Identifier identifier(String path) {
-		return Identifier.of(MOD_ID, path);
+		return Identifier.fromNamespaceAndPath(MOD_ID, path);
 	}
 
-	public static <T> RegistryKey<T> registryKey(RegistryKey<? extends Registry<T>> registry, String path) {
-		return RegistryKey.of(registry, SevenElements.identifier(path));
+	public static <T> ResourceKey<T> registryKey(ResourceKey<? extends Registry<T>> registry, String path) {
+		return ResourceKey.create(registry, SevenElements.identifier(path));
 	}
 
 	public static Logger sublogger() {
@@ -101,19 +101,19 @@ public class SevenElements implements ModInitializer {
 	}
 
 	public static float getLevelMultiplier(Entity entity) {
-		return entity.getEntityWorld() instanceof final ServerWorld world
+		return entity.level() instanceof final ServerLevel world
 			? SevenElements.getLevelMultiplier(world)
 			: 5.0f;
 	}
 
-	public static float getLevelMultiplier(ServerWorld world) {
+	public static float getLevelMultiplier(ServerLevel world) {
 		return world
 			.getGameRules()
-			.getValue(SevenElementsGameRules.LEVEL_MULTIPLIER)
+			.get(SevenElementsGameRules.LEVEL_MULTIPLIER)
 			.floatValue();
 	}
 
-	private static void onCommandRegistration(CommandDispatcher<ServerCommandSource> dispatcher, CommandRegistryAccess registryAccess, CommandManager.RegistrationEnvironment environment) {
+	private static void onCommandRegistration(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext registryAccess, Commands.CommandSelection environment) {
 		BossBarCommand.register(dispatcher);
 		ElementCommand.register(dispatcher, registryAccess);
 		DamageCommand.register(dispatcher, registryAccess);
@@ -126,7 +126,7 @@ public class SevenElements implements ModInitializer {
 
 		final Registry<InternalCooldownType> registry = context.registry();
 
-		if (registry.containsId(InternalCooldownType.DEFAULT.getId())) return;
+		if (registry.containsKey(InternalCooldownType.DEFAULT.getId())) return;
 
 		InternalCooldownType.onBeforeRegistryLoad(registry);
 	}

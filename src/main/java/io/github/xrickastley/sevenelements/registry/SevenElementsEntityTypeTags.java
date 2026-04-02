@@ -2,9 +2,9 @@ package io.github.xrickastley.sevenelements.registry;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EntityType;
 
 public final class SevenElementsEntityTypeTags {
 	public static final TagKey<EntityType<?>> DEALS_PYRO_DAMAGE = SevenElementsEntityTypeTags.of("deals_pyro_damage");
@@ -17,6 +17,6 @@ public final class SevenElementsEntityTypeTags {
 	public static final TagKey<EntityType<?>> IGNORED_TARGETS = SevenElementsEntityTypeTags.of("ignored_targets");
 
 	private static TagKey<EntityType<?>> of(String path) {
-		return TagKey.of(RegistryKeys.ENTITY_TYPE, SevenElements.identifier(path));
+		return TagKey.create(Registries.ENTITY_TYPE, SevenElements.identifier(path));
 	}
 }

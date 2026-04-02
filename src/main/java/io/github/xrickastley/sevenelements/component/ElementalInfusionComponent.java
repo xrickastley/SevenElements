@@ -20,18 +20,18 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
-import net.minecraft.component.ComponentsAccess;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.Item.TooltipContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipAppender;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.Item.TooltipContext;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipProvider;
 
-public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder elementalInfusion, @Nullable InternalCooldownContext.Builder internalCooldown) implements TooltipAppender {
+public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder elementalInfusion, @Nullable InternalCooldownContext.Builder internalCooldown) implements TooltipProvider {
 	public static final Codec<ElementalInfusionComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ElementalApplication.Builder.CODEC.fieldOf("elemental_infusion").forGetter(ElementalInfusionComponent::elementalInfusion),
 		InternalCooldownContext.Builder.CODEC.optionalFieldOf("internal_cooldown", InternalCooldownContext.Builder.ofNone()).forGetter(ElementalInfusionComponent::internalCooldown)
@@ -39,9 +39,9 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 
 	public static Optional<ElementalDamageSource> applyToDamageSource(DamageSource source, Entity target) {
 		try {
-			if (!source.isDirect() || !(target instanceof final LivingEntity livingTarget) || !(source.getAttacker() instanceof final LivingEntity attacker)) return Optional.empty();
+			if (!source.isDirect() || !(target instanceof final LivingEntity livingTarget) || !(source.getEntity() instanceof final LivingEntity attacker)) return Optional.empty();
 
-			final @Nullable ElementalInfusionComponent component = attacker.getActiveOrMainHandStack().get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+			final @Nullable ElementalInfusionComponent component = attacker.getActiveItem().get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 
 			if (component == null || !component.hasElementalInfusion()) return Optional.empty();
 
@@ -108,7 +108,7 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 	}
 
 	public Optional<ElementalDamageSource> apply(DamageSource source, Entity target) {
-		if (!(target instanceof final LivingEntity livingTarget) || !(source.getAttacker() instanceof final LivingEntity attacker) || !this.hasElementalInfusion())
+		if (!(target instanceof final LivingEntity livingTarget) || !(source.getEntity() instanceof final LivingEntity attacker) || !this.hasElementalInfusion())
 			return Optional.empty();
 
 		return Optional.of(
@@ -131,7 +131,7 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 	}
 
 	@Override
-	public void appendTooltip(TooltipContext context, Consumer<Text> textConsumer, TooltipType tooltipType, ComponentsAccess components) {
+	public void addToTooltip(TooltipContext context, Consumer<Component> textConsumer, TooltipFlag tooltipType, DataComponentGetter components) {
 		if (!tooltipType.isAdvanced()) return;
 
 		final @Nullable ElementalInfusionComponent component = components.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
@@ -141,8 +141,8 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 		final Builder builder = component.internalCooldown();
 
 		textConsumer.accept(
-			Text.empty()
-				.append(Text.translatable("item.seven-elements.components.infusion.infusion").formatted(Formatting.WHITE))
+			Component.empty()
+				.append(Component.translatable("item.seven-elements.components.infusion.infusion").withStyle(ChatFormatting.WHITE))
 				.append(ElementalApplication.Builder.getText(component.elementalInfusion()))
 		);
 
@@ -150,13 +150,13 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 
 		@Nullable InternalCooldownTag tag = ClassInstanceUtil.mapOrNull(builder, Builder::getTag);
 
-		final Text tagText = tag != null
-			? tag.getText(Formatting.DARK_GRAY)
-			: Text.literal("none").formatted(Formatting.RED);
+		final Component tagText = tag != null
+			? tag.getText(ChatFormatting.DARK_GRAY)
+			: Component.literal("none").withStyle(ChatFormatting.RED);
 
 		textConsumer.accept(
-			Text.empty()
-				.append(Text.translatable("item.seven-elements.components.infusion.tag").formatted(Formatting.WHITE))
+			Component.empty()
+				.append(Component.translatable("item.seven-elements.components.infusion.tag").withStyle(ChatFormatting.WHITE))
 				.append(tagText)
 		);
 
@@ -168,9 +168,9 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 		);
 
 		textConsumer.accept(
-			Text.empty()
-				.append(Text.translatable("item.seven-elements.components.infusion.type").formatted(Formatting.WHITE))
-				.append(type.getText(true).formatted(Formatting.DARK_GRAY))
+			Component.empty()
+				.append(Component.translatable("item.seven-elements.components.infusion.type").withStyle(ChatFormatting.WHITE))
+				.append(type.getText(true).withStyle(ChatFormatting.DARK_GRAY))
 		);
 	}
 }

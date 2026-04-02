@@ -7,23 +7,23 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.util.ActionResult;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.context.BlockPlaceContext;
 
 // Prioritized since Frozen **MUST** disable actions.
 @Mixin(value = BlockItem.class, priority = Integer.MIN_VALUE)
 public class BlockItemMixin {
 	@Inject(
-		method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;",
+		method = "place(Lnet/minecraft/world/item/context/BlockPlaceContext;)Lnet/minecraft/world/InteractionResult;",
 		at = @At("HEAD"),
 		cancellable = true
 	)
-	private void frozenPreventsItemUse(ItemPlacementContext context, CallbackInfoReturnable<ActionResult> cir) {
-		final PlayerEntity player = context.getPlayer();
+	private void frozenPreventsItemUse(BlockPlaceContext context, CallbackInfoReturnable<InteractionResult> cir) {
+		final Player player = context.getPlayer();
 
-		if (player != null && player.hasStatusEffect(SevenElementsStatusEffects.FROZEN))
-			cir.setReturnValue(ActionResult.FAIL);
+		if (player != null && player.hasEffect(SevenElementsStatusEffects.FROZEN))
+			cir.setReturnValue(InteractionResult.FAIL);
 	}
 }

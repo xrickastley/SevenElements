@@ -6,8 +6,8 @@ import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 
 public final class DynamicRegistryLoadEvents {
 	public static final Event<BeforeLoad> BEFORE_LOAD = EventFactory.createArrayBacked(BeforeLoad.class,
@@ -43,10 +43,10 @@ public final class DynamicRegistryLoadEvents {
 	}
 
 	public interface RegistryContext<T> {
-		public RegistryKey<? extends Registry<T>> registryKey();
+		public ResourceKey<? extends Registry<T>> registryKey();
 		public Registry<T> registry();
 
-		default <R> @Nullable RegistryContext<R> asKey(RegistryKey<? extends Registry<R>> key) {
+		default <R> @Nullable RegistryContext<R> asKey(ResourceKey<? extends Registry<R>> key) {
 			return this.registryKey().equals(key)
 				? ClassInstanceUtil.cast(this)
 				: null;
@@ -60,7 +60,7 @@ public final class DynamicRegistryLoadEvents {
 	public interface RegistryEntryContext<T> extends RegistryContext<T> {
 		public T entry();
 
-		default <R> @Nullable RegistryEntryContext<R> asKey(RegistryKey<? extends Registry<R>> key) {
+		default <R> @Nullable RegistryEntryContext<R> asKey(ResourceKey<? extends Registry<R>> key) {
 			return this.registryKey().equals(key)
 				? ClassInstanceUtil.cast(this)
 				: null;
@@ -72,15 +72,15 @@ public final class DynamicRegistryLoadEvents {
 	}
 
 	static class RegistryContextImpl<T> implements RegistryContext<T> {
-		private final RegistryKey<? extends Registry<T>> registryKey;
+		private final ResourceKey<? extends Registry<T>> registryKey;
 		private final Registry<T> registry;
 
-		RegistryContextImpl(RegistryKey<? extends Registry<T>> registryKey, Registry<T> registry) {
+		RegistryContextImpl(ResourceKey<? extends Registry<T>> registryKey, Registry<T> registry) {
 			this.registryKey = registryKey;
 			this.registry = registry;
 		}
 
-		public RegistryKey<? extends Registry<T>> registryKey() {
+		public ResourceKey<? extends Registry<T>> registryKey() {
 			return registryKey;
 		}
 
@@ -92,10 +92,10 @@ public final class DynamicRegistryLoadEvents {
 
 	static class RegistryEntryContextImpl<T> implements RegistryEntryContext<T> {
 		private final T entry;
-		private final RegistryKey<? extends Registry<T>> registryKey;
+		private final ResourceKey<? extends Registry<T>> registryKey;
 		private final Registry<T> registry;
 
-		RegistryEntryContextImpl(T entry, RegistryKey<? extends Registry<T>> registryKey, Registry<T> registry) {
+		RegistryEntryContextImpl(T entry, ResourceKey<? extends Registry<T>> registryKey, Registry<T> registry) {
 			this.entry = entry;
 			this.registryKey = registryKey;
 			this.registry = registry;
@@ -106,7 +106,7 @@ public final class DynamicRegistryLoadEvents {
 			return entry;
 		}
 
-		public RegistryKey<? extends Registry<T>> registryKey() {
+		public ResourceKey<? extends Registry<T>> registryKey() {
 			return registryKey;
 		}
 

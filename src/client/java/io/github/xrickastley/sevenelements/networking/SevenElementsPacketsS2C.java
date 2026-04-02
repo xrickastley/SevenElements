@@ -20,25 +20,25 @@ import io.github.xrickastley.sevenelements.util.Colors;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.Context;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public class SevenElementsPacketsS2C {
-	private static final List<PayloadHandler<? extends CustomPayload>> HANDLERS = new ArrayList<>();
+	private static final List<PayloadHandler<? extends CustomPacketPayload>> HANDLERS = new ArrayList<>();
 	private static boolean registered = false;
 
 	public static void register() {
 		ClientPlayConnectionEvents.INIT.register(SevenElementsPacketsS2C::onPlayInit);
 	}
 
-	public static void registerHandler(final PayloadHandler<? extends CustomPayload> handler) {
+	public static void registerHandler(final PayloadHandler<? extends CustomPacketPayload> handler) {
 		if (registered) throw new IllegalStateException("All ClientPlayConnectionEvents.INIT handlers have already been registered!");
 
 		SevenElementsPacketsS2C.HANDLERS.add(handler);
@@ -47,11 +47,11 @@ public class SevenElementsPacketsS2C {
 	private static void registerHandlers() {
 		registered = true;
 
-		for (final PayloadHandler<? extends CustomPayload> handler : SevenElementsPacketsS2C.HANDLERS)
+		for (final PayloadHandler<? extends CustomPacketPayload> handler : SevenElementsPacketsS2C.HANDLERS)
 			ClientPlayNetworking.registerGlobalReceiver(handler.getPayloadId(), ClassInstanceUtil.cast(handler));
 	}
 
-	private static void onPlayInit(ClientPlayNetworkHandler handler, MinecraftClient client) {
+	private static void onPlayInit(ClientPacketListener handler, Minecraft client) {
 		ClientPlayNetworking.registerGlobalReceiver(ShowElementalReactionS2CPayload.ID, SevenElementsPacketsS2C::onElementalReactionShow);
 		ClientPlayNetworking.registerGlobalReceiver(ShowElementalDamageS2CPayload.ID, SevenElementsPacketsS2C::onElementalDamageShow);
 		ClientPlayNetworking.registerGlobalReceiver(SyncDendroCoreStateS2CPayload.ID, SevenElementsPacketsS2C::onSyncDendroCoreState);
@@ -62,7 +62,7 @@ public class SevenElementsPacketsS2C {
 	}
 
 	private static void onElementalReactionShow(ShowElementalReactionS2CPayload payload, Context context) {
-		final Vec3d pos = payload.pos();
+		final Vec3 pos = payload.pos();
 		final ElementalReaction reaction = payload.reaction();
 
 		if (reaction == null || reaction.getText() == null) return;
@@ -77,7 +77,7 @@ public class SevenElementsPacketsS2C {
 
 		if (!config.rendering.text.showDamageText) return;
 
-		final Vec3d pos = payload.pos();
+		final Vec3 pos = payload.pos();
 		final Color color = payload.element() != null && payload.element().hasDamageColor()
 			? payload.element().getDamageColor()
 			: Colors.PHYSICAL;
@@ -93,12 +93,12 @@ public class SevenElementsPacketsS2C {
 	}
 
 	private static void onSyncDendroCoreState(SyncDendroCoreStateS2CPayload payload, Context context) {
-		final World world = MinecraftClient
+		final Level world = Minecraft
 			.getInstance()
 			.player
-			.getEntityWorld();
+			.level();
 
-		final Entity entity = world.getEntityById(payload.entityId());
+		final Entity entity = world.getEntity(payload.entityId());
 
 		if (!(entity instanceof final DendroCoreEntity dendroCore)) return;
 
@@ -106,12 +106,12 @@ public class SevenElementsPacketsS2C {
 	}
 
 	private static void onSyncCrystallizeShardElement(SyncCrystallizeShardTypeS2CPayload payload, Context context) {
-		final World world = MinecraftClient
+		final Level world = Minecraft
 			.getInstance()
 			.player
-			.getEntityWorld();
+			.level();
 
-		final Entity entity = world.getEntityById(payload.entityId());
+		final Entity entity = world.getEntity(payload.entityId());
 
 		if (!(entity instanceof final CrystallizeShardEntity crystallizeShard)) return;
 
@@ -119,12 +119,12 @@ public class SevenElementsPacketsS2C {
 	}
 
 	private static void onFinishElementalInfusion(FinishElementalInfusionS2CPayload payload, Context context) {
-		final PlayerEntity playerEntity = context.player();
-		final ScreenHandler screenHandler = playerEntity.currentScreenHandler;
-		final Screen currentScreen = context.client().currentScreen;
+		final Player playerEntity = context.player();
+		final AbstractContainerMenu screenHandler = playerEntity.containerMenu;
+		final Screen currentScreen = context.client().screen;
 
 		if (screenHandler != null
-			&& screenHandler.syncId == payload.syncId()
+			&& screenHandler.containerId == payload.syncId()
 			&& currentScreen instanceof final ElementalInfusionScreen screen
 		) {
 			screen.finishElementalInfusion(payload);

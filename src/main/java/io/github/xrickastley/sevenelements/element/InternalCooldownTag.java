@@ -11,8 +11,8 @@ import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 
 /**
  * An {@code InternalCooldownTag} is a class used for holding unique instances of Internal Cooldown
@@ -104,13 +104,13 @@ public final class InternalCooldownTag {
 		return this.tag.equals(tag.tag);
 	}
 
-	public Text getText() {
-		return this.getText(Formatting.WHITE);
+	public Component getText() {
+		return this.getText(ChatFormatting.WHITE);
 	}
 
-	public Text getText(Formatting... formatting) {
+	public Component getText(ChatFormatting... formatting) {
 		return this != InternalCooldownTag.NONE
-			? Text.literal(this.tag).formatted(formatting)
-			: Text.literal("none").formatted(Formatting.RED);
+			? Component.literal(this.tag).withStyle(formatting)
+			: Component.literal("none").withStyle(ChatFormatting.RED);
 	}
 }

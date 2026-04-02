@@ -2,7 +2,7 @@ package io.github.xrickastley.sevenelements.interfaces;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 
 /**
  * A class that allows access to the entity tied to the provided render state. <br> <br>

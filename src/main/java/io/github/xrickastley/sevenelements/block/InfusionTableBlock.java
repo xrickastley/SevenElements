@@ -8,179 +8,179 @@ import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler;
 
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HorizontalFacingBlock;
-import net.minecraft.block.ShapeContext;
-import net.minecraft.block.enums.DoubleBlockHalf;
-import net.minecraft.block.piston.PistonBehavior;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.state.StateManager.Builder;
-import net.minecraft.state.property.EnumProperty;
-import net.minecraft.state.property.Properties;
-import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Colors;
-import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockView;
-import net.minecraft.world.World;
-import net.minecraft.world.WorldView;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.CommonColors;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.HorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-public final class InfusionTableBlock extends HorizontalFacingBlock {
-	public static final MapCodec<InfusionTableBlock> CODEC = createCodec(InfusionTableBlock::new);
-	public static final EnumProperty<Direction> FACING = HorizontalFacingBlock.FACING;
-	public static final EnumProperty<DoubleBlockHalf> HALF = Properties.DOUBLE_BLOCK_HALF;
+public final class InfusionTableBlock extends HorizontalDirectionalBlock {
+	public static final MapCodec<InfusionTableBlock> CODEC = simpleCodec(InfusionTableBlock::new);
+	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
+	public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
 	private static final VoxelShape LOWER;
 	private static final VoxelShape UPPER;
 	private static final VoxelShape SHAPE;
 
 	InfusionTableBlock() {
 		this(
-			AbstractBlock.Settings.create()
-				.registryKey(SevenElements.registryKey(RegistryKeys.BLOCK, "infusion_table"))
+			BlockBehaviour.Properties.of()
+				.setId(SevenElements.registryKey(Registries.BLOCK, "infusion_table"))
 		);
 	}
 
-	private InfusionTableBlock(AbstractBlock.Settings settings) {
+	private InfusionTableBlock(BlockBehaviour.Properties settings) {
 		super(
 			settings
-				.requiresTool()
+				.requiresCorrectToolForDrops()
 				.strength(3, 4)
-				.pistonBehavior(PistonBehavior.BLOCK)
+				.pushReaction(PushReaction.BLOCK)
 		);
 
-		this.setDefaultState(
-			this.stateManager.getDefaultState()
-				.with(FACING, Direction.NORTH)
-				.with(HALF, DoubleBlockHalf.LOWER)
+		this.registerDefaultState(
+			this.stateDefinition.any()
+				.setValue(FACING, Direction.NORTH)
+				.setValue(HALF, DoubleBlockHalf.LOWER)
 		);
 	}
 
 	@Override
-	public BlockState getPlacementState(ItemPlacementContext ctx) {
-		return super.getPlacementState(ctx)
-			.with(FACING, ctx.getHorizontalPlayerFacing());
+	public BlockState getStateForPlacement(BlockPlaceContext ctx) {
+		return super.getStateForPlacement(ctx)
+			.setValue(FACING, ctx.getHorizontalDirection());
 	}
 
 	@Override
-	public void onPlaced(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
-		final BlockPos blockPos = pos.up();
+	public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack itemStack) {
+		final BlockPos blockPos = pos.above();
 
-		world.setBlockState(blockPos, this.getDefaultState().with(HALF, DoubleBlockHalf.UPPER));
+		world.setBlockAndUpdate(blockPos, this.defaultBlockState().setValue(HALF, DoubleBlockHalf.UPPER));
 	}
 
 	@Override
-	public BlockState onBreak(World world, BlockPos pos, BlockState state, PlayerEntity player) {
-		if (state.get(HALF) == DoubleBlockHalf.LOWER && state.getBlock() == this) {
-			if (world.getBlockState(pos.up()).getBlock() == this) world.removeBlock(pos.up(), false);
-		} else if (state.get(HALF) == DoubleBlockHalf.UPPER && state.getBlock() == this) {
-			if (world.getBlockState(pos.down()).getBlock() == this) world.removeBlock(pos.down(), false);
+	public BlockState playerWillDestroy(Level world, BlockPos pos, BlockState state, Player player) {
+		if (state.getValue(HALF) == DoubleBlockHalf.LOWER && state.getBlock() == this) {
+			if (world.getBlockState(pos.above()).getBlock() == this) world.removeBlock(pos.above(), false);
+		} else if (state.getValue(HALF) == DoubleBlockHalf.UPPER && state.getBlock() == this) {
+			if (world.getBlockState(pos.below()).getBlock() == this) world.removeBlock(pos.below(), false);
 		}
 
-		return super.onBreak(world, pos, state, player);
+		return super.playerWillDestroy(world, pos, state, player);
 	}
 
 	@Override
-	protected MapCodec<? extends HorizontalFacingBlock> getCodec() {
+	protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
 		return CODEC;
 	}
 
 	@Override
-	protected void appendProperties(Builder<Block, BlockState> builder) {
-		super.appendProperties(builder);
+	protected void createBlockStateDefinition(Builder<Block, BlockState> builder) {
+		super.createBlockStateDefinition(builder);
 
 		builder.add(FACING, HALF);
 	}
 
 	@Override
-	protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
-		if (!(world instanceof final ServerWorld serverWorld)) return ActionResult.SUCCESS;
+	protected InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
+		if (!(world instanceof final ServerLevel serverWorld)) return InteractionResult.SUCCESS;
 
-		if (serverWorld.getGameRules().getValue(SevenElementsGameRules.INFUSION_TABLE)) {
-			player.openHandledScreen(state.createScreenHandlerFactory(world, pos));
+		if (serverWorld.getGameRules().get(SevenElementsGameRules.INFUSION_TABLE)) {
+			player.openMenu(state.getMenuProvider(world, pos));
 		} else {
-			player.sendMessage(
-				Text.translatable("container.seven-elements.infusion_table.fail_by_gamerule").withColor(Colors.LIGHT_RED),
+			player.displayClientMessage(
+				Component.translatable("container.seven-elements.infusion_table.fail_by_gamerule").withColor(CommonColors.SOFT_RED),
 				false
 			);
 		}
 
-		return ActionResult.CONSUME;
+		return InteractionResult.CONSUME;
 	}
 
 	@Override
-	protected @Nullable NamedScreenHandlerFactory createScreenHandlerFactory(BlockState state, World world, BlockPos pos) {
-		return new SimpleNamedScreenHandlerFactory(
-			(syncId, inventory, player) -> new ElementalInfusionScreenHandler(syncId, inventory, ScreenHandlerContext.create(world, pos)),
-			Text.translatable("container.seven-elements.infusion_table")
+	protected @Nullable MenuProvider getMenuProvider(BlockState state, Level world, BlockPos pos) {
+		return new SimpleMenuProvider(
+			(syncId, inventory, player) -> new ElementalInfusionScreenHandler(syncId, inventory, ContainerLevelAccess.create(world, pos)),
+			Component.translatable("container.seven-elements.infusion_table")
 		);
 	}
 
 	@Override
-	protected boolean hasSidedTransparency(BlockState state) {
+	protected boolean useShapeForLightOcclusion(BlockState state) {
 		return true;
 	}
 
 	@Override
-	protected VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		return state.get(HALF) == DoubleBlockHalf.UPPER
-			? UPPER.offset(0, -1, 0)
+	protected VoxelShape getCollisionShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+		return state.getValue(HALF) == DoubleBlockHalf.UPPER
+			? UPPER.move(0, -1, 0)
 			: LOWER;
 	}
 
 	@Override
-	protected VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-		return state.get(HALF) == DoubleBlockHalf.UPPER
-			? world.getBlockState(pos.down()).getBlock() != this
-				? UPPER.offset(0, -1, 0)
-				: VoxelShapes.empty()
-			: world.getBlockState(pos.up()).getBlock() != this
+	protected VoxelShape getShape(BlockState state, BlockGetter world, BlockPos pos, CollisionContext context) {
+		return state.getValue(HALF) == DoubleBlockHalf.UPPER
+			? world.getBlockState(pos.below()).getBlock() != this
+				? UPPER.move(0, -1, 0)
+				: Shapes.empty()
+			: world.getBlockState(pos.above()).getBlock() != this
 				? LOWER
 				: SHAPE;
 	}
 
 	@Override
-	protected boolean canPlaceAt(BlockState state, WorldView world, BlockPos pos) {
-		if (state.get(HALF) != DoubleBlockHalf.UPPER)
-			return super.canPlaceAt(state, world, pos);
+	protected boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
+		if (state.getValue(HALF) != DoubleBlockHalf.UPPER)
+			return super.canSurvive(state, world, pos);
 
-		final BlockState blockState = world.getBlockState(pos.down());
+		final BlockState blockState = world.getBlockState(pos.below());
 
-		return blockState.isOf(this) && blockState.get(HALF) == DoubleBlockHalf.LOWER;
+		return blockState.is(this) && blockState.getValue(HALF) == DoubleBlockHalf.LOWER;
 	}
 
 	static {
-		LOWER = VoxelShapes.union(
-			Block.createCuboidShape(0, 0, 0, 16, 2, 16),
-			VoxelShapes.union(
-				Block.createCuboidShape(3, 2, 3, 13, 4, 13),
-				Block.createCuboidShape(2, 2, 2, 4, 4, 4),
-				Block.createCuboidShape(12, 2, 2, 14, 4, 4),
-				Block.createCuboidShape(2, 2, 14, 4, 4, 14),
-				Block.createCuboidShape(12, 2, 12, 14, 4, 14)
+		LOWER = Shapes.or(
+			Block.box(0, 0, 0, 16, 2, 16),
+			Shapes.or(
+				Block.box(3, 2, 3, 13, 4, 13),
+				Block.box(2, 2, 2, 4, 4, 4),
+				Block.box(12, 2, 2, 14, 4, 4),
+				Block.box(2, 2, 14, 4, 4, 14),
+				Block.box(12, 2, 12, 14, 4, 14)
 			),
-			Block.createCuboidShape(5, 4, 5, 11, 14, 11),
-			Block.createCuboidShape(0, 14, 0, 16, 16, 16)
+			Block.box(5, 4, 5, 11, 14, 11),
+			Block.box(0, 14, 0, 16, 16, 16)
 		);
 
-		UPPER = VoxelShapes.union(
-			Block.createCuboidShape(3, 16, 3, 13, 18, 13),
-			Block.createCuboidShape(0, 18, 0, 16, 20, 16)
+		UPPER = Shapes.or(
+			Block.box(3, 16, 3, 13, 18, 13),
+			Block.box(0, 18, 0, 16, 20, 16)
 		);
 
-		SHAPE = VoxelShapes.union(LOWER, UPPER);
+		SHAPE = Shapes.or(LOWER, UPPER);
 	}
 }

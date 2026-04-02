@@ -2,25 +2,25 @@ package io.github.xrickastley.sevenelements.util;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 
 public final class TextHelper {
 	public static final Identifier GENSHIN_FONT = SevenElements.identifier("genshin");
 
-	public static MutableText font(String text, Identifier font) {
-		return font(Text.literal(text), font);
+	public static MutableComponent font(String text, Identifier font) {
+		return font(Component.literal(text), font);
 	}
 
-	public static MutableText font(MutableText text, Identifier font) {
-		return text.setStyle(text.getStyle().withFont(new StyleSpriteSource.Font(font)));
+	public static MutableComponent font(MutableComponent text, Identifier font) {
+		return text.setStyle(text.getStyle().withFont(new FontDescription.Resource(font)));
 	}
 
-	public static MutableText gradient(String text, int start, int end) {
-		final MutableText result = Text.empty();
+	public static MutableComponent gradient(String text, int start, int end) {
+		final MutableComponent result = Component.empty();
 
 		final int startR = (start >>> 16) & 0xFF;
 		final int startG = (start >>> 8) & 0xFF;
@@ -40,48 +40,48 @@ public final class TextHelper {
 			final int color = (r << 16) | (g << 8) | b;
 
 			result.append(
-				Text.literal(String.valueOf(text.charAt(i)))
-					.fillStyle(Style.EMPTY.withColor(color))
+				Component.literal(String.valueOf(text.charAt(i)))
+					.withStyle(Style.EMPTY.withColor(color))
 			);
 		}
 
 		return result;
 	}
 
-	public static MutableText reaction(String translationKey, String color) {
+	public static MutableComponent reaction(String translationKey, String color) {
 		return TextHelper.reaction(translationKey, Color.fromRGBAHex(color));
 	}
 
-	public static MutableText reaction(String translationKey, Color color) {
+	public static MutableComponent reaction(String translationKey, Color color) {
 		return TextHelper
-			.font(Text.translatable(translationKey), TextHelper.GENSHIN_FONT)
-			.fillStyle(Style.EMPTY.withColor(color.asRGB()));
+			.font(Component.translatable(translationKey), TextHelper.GENSHIN_FONT)
+			.withStyle(Style.EMPTY.withColor(color.asRGB()));
 	}
 
-	public static MutableText color(String text, Color color) {
+	public static MutableComponent color(String text, Color color) {
 		return TextHelper.color(text, color.asRGB());
 	}
 
-	public static MutableText color(String text, int rgbColor) {
-		return Text.literal(text).fillStyle(Style.EMPTY.withColor(rgbColor));
+	public static MutableComponent color(String text, int rgbColor) {
+		return Component.literal(text).withStyle(Style.EMPTY.withColor(rgbColor));
 	}
 
-	public static MutableText color(MutableText text, Color color) {
+	public static MutableComponent color(MutableComponent text, Color color) {
 		return TextHelper.color(text, color.asRGB());
 	}
 
-	public static MutableText color(MutableText text, int rgbColor) {
-		return text.fillStyle(text.getStyle().withColor(rgbColor));
+	public static MutableComponent color(MutableComponent text, int rgbColor) {
+		return text.withStyle(text.getStyle().withColor(rgbColor));
 	}
 
-	public static MutableText noModifiers(MutableText text) {
+	public static MutableComponent noModifiers(MutableComponent text) {
 		return text.setStyle(
 			text.getStyle()
 				.withBold(false)
 				.withItalic(false)
 				.withStrikethrough(false)
 				.withObfuscated(false)
-				.withUnderline(false)
+				.withUnderlined(false)
 		);
 	}
 }

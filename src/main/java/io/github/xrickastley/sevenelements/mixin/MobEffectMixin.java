@@ -4,7 +4,7 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import io.github.xrickastley.sevenelements.interfaces.EntityAwareEffect;
 
-import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.world.effect.MobEffect;
 
-@Mixin(StatusEffect.class)
-public class StatusEffectMixin implements EntityAwareEffect {}
+@Mixin(MobEffect.class)
+public class MobEffectMixin implements EntityAwareEffect {}

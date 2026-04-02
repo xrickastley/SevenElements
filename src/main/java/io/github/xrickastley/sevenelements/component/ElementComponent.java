@@ -22,11 +22,11 @@ import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.util.Pair;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.Projectile;
 
 public interface ElementComponent extends AutoSyncedComponent, CommonTickingComponent {
 	public static final ComponentKey<ElementComponent> KEY = ComponentRegistry.getOrCreate(SevenElements.identifier("elements"), ElementComponent.class);
@@ -60,10 +60,10 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 	}
 
 	private static Optional<ElementalDamageSource> attemptEntityDamageInfusions(DamageSource source, LivingEntity target) {
-		if (!(source.getAttacker() instanceof final LivingEntity attacker)) return Optional.empty();
+		if (!(source.getEntity() instanceof final LivingEntity attacker)) return Optional.empty();
 
 		for (final var entry : ElementComponentImpl.ENTITY_TYPE_ELEMENT_MAP.entrySet()) {
-			if (!attacker.getType().isIn(entry.getKey())) continue;
+			if (!attacker.getType().is(entry.getKey())) continue;
 
 			return Optional.of(
 				new ElementalDamageSource(
@@ -79,7 +79,7 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 
 	private static Optional<ElementalDamageSource> attemptDamageTypeInfusions(DamageSource source, LivingEntity target) {
 		for (final var entry : ElementComponentImpl.DAMAGE_TYPE_ELEMENT_MAP.entrySet()) {
-			if (!source.isIn(entry.getKey())) continue;
+			if (!source.is(entry.getKey())) continue;
 
 			return Optional.of(
 				new ElementalDamageSource(
@@ -97,7 +97,7 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 		// Projectiles are indirect DMG sources.
 		if (source.isDirect()) return Optional.empty();
 
-		return source.getSource() instanceof final ProjectileEntity projectile
+		return source.getDirectEntity() instanceof final Projectile projectile
 			? projectile.sevenelements$attemptInfusion(source, target)
 			: Optional.empty();
 	}
@@ -110,14 +110,14 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 
 	public ElementHolder getElementHolder(Element element);
 
-	public Pair<ElementalReaction, Long> getLastReaction();
+	public Tuple<ElementalReaction, Long> getLastReaction();
 
 	default boolean hasLastReaction() {
-		return this.getLastReaction().getLeft() != null;
+		return this.getLastReaction().getA() != null;
 	}
 
 	default boolean hasValidLastReaction() {
-		return this.hasLastReaction() && this.getLastReaction().getRight() + 10 >= this.getOwner().getEntityWorld().getTime();
+		return this.hasLastReaction() && this.getLastReaction().getB() + 10 >= this.getOwner().level().getGameTime();
 	}
 
 	public boolean isElectroChargedOnCD();
@@ -177,7 +177,7 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 	/**
 	 * Gets the current Crystallize Shield of this entity.
 	 */
-	public @Nullable Pair<Element, Double> getCrystallizeShield();
+	public @Nullable Tuple<Element, Double> getCrystallizeShield();
 
 	/**
 	 * Reduces the Crystallize shield and returns the effective amount of DMG reduced.
@@ -295,7 +295,7 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 	public Array<ElementalApplication> getPrioritizedElements();
 
 	public static void sync(Entity entity) {
-		if (entity.getEntityWorld().isClient()) return;
+		if (entity.level().isClientSide()) return;
 
 		ElementComponent.KEY.sync(entity);
 	}

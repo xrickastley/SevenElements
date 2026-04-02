@@ -4,8 +4,8 @@ import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 
 public abstract class AdditiveElementalReaction extends ElementalReaction {
 	final double amplifier;
@@ -17,22 +17,22 @@ public abstract class AdditiveElementalReaction extends ElementalReaction {
 	}
 
 	public float applyAmplifier(LivingEntity entity, float damage) {
-		return entity.getEntityWorld() instanceof final ServerWorld world
+		return entity.level() instanceof final ServerLevel world
 			? (float) applyAmplifier(world, (double) damage)
 			: damage;
 	}
 
-	public float applyAmplifier(ServerWorld world, float damage) {
+	public float applyAmplifier(ServerLevel world, float damage) {
 		return (float) applyAmplifier(world, (double) damage);
 	}
 
 	public double applyAmplifier(LivingEntity entity, double damage) {
-		return entity.getEntityWorld() instanceof final ServerWorld world
+		return entity.level() instanceof final ServerLevel world
 			? applyAmplifier(world, (double) damage)
 			: damage;
 	}
 
-	public double applyAmplifier(ServerWorld world, double damage) {
+	public double applyAmplifier(ServerLevel world, double damage) {
 		return getDamageBonus(world) + damage;
 	}
 
@@ -40,7 +40,7 @@ public abstract class AdditiveElementalReaction extends ElementalReaction {
 		return this.amplifier;
 	}
 
-	public double getDamageBonus(ServerWorld world) {
+	public double getDamageBonus(ServerLevel world) {
 		return ElementalReaction.getReactionDamage(world, amplifier);
 	}
 

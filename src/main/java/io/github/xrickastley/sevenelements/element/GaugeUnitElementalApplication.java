@@ -16,11 +16,11 @@ import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 import io.github.xrickastley.sevenelements.util.ViewHelper;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.text.Text;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.storage.ValueInput;
 
 public final class GaugeUnitElementalApplication extends ElementalApplication {
 	private double decayRate;
@@ -34,17 +34,17 @@ public final class GaugeUnitElementalApplication extends ElementalApplication {
 		if (this.isAura && element.hasAuraTax()) this.currentGauge *= 0.8;
 	}
 
-	static ElementalApplication fromData(LivingEntity entity, ReadView view, long syncedAt) {
+	static ElementalApplication fromData(LivingEntity entity, ValueInput view, long syncedAt) {
 		final Element element = ViewHelper.get(view, "Element", Element.CODEC);
-		final UUID uuid = ViewHelper.get(view, "UUID", Uuids.CODEC);
+		final UUID uuid = ViewHelper.get(view, "UUID", UUIDUtil.AUTHLIB_CODEC);
 		final double gaugeUnits = ViewHelper.get(view, "GaugeUnits", Codec.doubleRange(0, Double.MAX_VALUE));
 		final double currentGauge = ViewHelper.get(view, "CurrentGauge", Codec.doubleRange(0, Double.MAX_VALUE));
 		final boolean isAura = ViewHelper.get(view, "IsAura", Codec.BOOL);
 
 		final var application = new GaugeUnitElementalApplication(entity, element, uuid, gaugeUnits, isAura);
 
-		final double syncedGaugeDeduction = Math.max(entity.getEntityWorld().getTime() - syncedAt, 0) * application.getDecayRate();
-		application.currentGauge = MathHelper.clamp(currentGauge - syncedGaugeDeduction, 0, application.gaugeUnits);
+		final double syncedGaugeDeduction = Math.max(entity.level().getGameTime() - syncedAt, 0) * application.getDecayRate();
+		application.currentGauge = Mth.clamp(currentGauge - syncedGaugeDeduction, 0, application.gaugeUnits);
 		application.appliedAt = ViewHelper.get(view, "AppliedAt", Codec.LONG);
 
 		return application;
@@ -88,11 +88,11 @@ public final class GaugeUnitElementalApplication extends ElementalApplication {
 	}
 
 	@Override
-	public Text getText(@Nullable DecimalFormat gaugeFormat, @Nullable DecimalFormat durationFormat) {
+	public Component getText(@Nullable DecimalFormat gaugeFormat, @Nullable DecimalFormat durationFormat) {
 		gaugeFormat = JavaScriptUtil.nullishCoalesing(gaugeFormat, GAUGE_UNIT_FORMAT);
 
 		return TextHelper.color(
-			Text.translatable("formats.seven-elements.elemental_application.gauge_unit", gaugeFormat.format(this.currentGauge), this.element.getString()),
+			Component.translatable("formats.seven-elements.elemental_application.gauge_unit", gaugeFormat.format(this.currentGauge), this.element.getString()),
 			this.element.getDamageColor()
 		);
 	}

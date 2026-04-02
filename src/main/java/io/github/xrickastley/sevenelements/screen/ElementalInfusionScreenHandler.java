@@ -15,30 +15,30 @@ import io.github.xrickastley.sevenelements.networking.FinishElementalInfusionS2C
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.CraftingResultInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.slot.Slot;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.random.Random;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-public final class ElementalInfusionScreenHandler extends ScreenHandler {
+public final class ElementalInfusionScreenHandler extends AbstractContainerMenu {
 	private static final List<Element> ELEMENTS = List.of(Element.PYRO, Element.HYDRO, Element.ANEMO, Element.ELECTRO, Element.DENDRO, Element.CRYO, Element.GEO);
 	private static final List<Double> GAUGE_UNITS = List.of(1.0, 1.5, 2.0);
 	private static final int REQUIRED_LEVEL = 10;
 
-	private final ScreenHandlerContext context;
-	private final CraftingResultInventory output = new CraftingResultInventory();
-	private final Random RANDOM = Random.create();
+	private final ContainerLevelAccess context;
+	private final ResultContainer output = new ResultContainer();
+	private final RandomSource RANDOM = RandomSource.create();
 
-	public ElementalInfusionScreenHandler(int syncId, PlayerInventory playerInventory) {
-		this(syncId, playerInventory, ScreenHandlerContext.EMPTY);
+	public ElementalInfusionScreenHandler(int syncId, Inventory playerInventory) {
+		this(syncId, playerInventory, ContainerLevelAccess.NULL);
 	}
 
-	public ElementalInfusionScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
+	public ElementalInfusionScreenHandler(int syncId, Inventory playerInventory, ContainerLevelAccess context) {
 		super(SevenElementsScreenHandlers.ELEMENTAL_INFUSION_SCREEN_HANDLER, syncId);
 
 		this.context = context;
@@ -57,23 +57,23 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 	}
 
 	@Override
-	public ItemStack quickMove(PlayerEntity player, int slotId) {
+	public ItemStack quickMoveStack(Player player, int slotId) {
 		final Slot slot = this.slots.get(slotId);
 
-		if (slot == null || !slot.hasStack()) return ItemStack.EMPTY;
+		if (slot == null || !slot.hasItem()) return ItemStack.EMPTY;
 
-		ItemStack stack = slot.getStack();
+		ItemStack stack = slot.getItem();
 
 		if (slotId == 0) {
-			final ItemStack resultStack = slot.getStack();
+			final ItemStack resultStack = slot.getItem();
 			stack = resultStack.copy();
 
-			if (!this.insertItem(resultStack, 1, 37, false))
+			if (!this.moveItemStackTo(resultStack, 1, 37, false))
 				return ItemStack.EMPTY;
 
-			slot.onQuickTransfer(resultStack, stack);
+			slot.onQuickCraft(resultStack, stack);
 		} else {
-			if (!this.insertItem(stack, 0, 1, false))
+			if (!this.moveItemStackTo(stack, 0, 1, false))
 				return ItemStack.EMPTY;
 		}
 
@@ -81,22 +81,22 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 	}
 
 	@Override
-	public boolean canUse(PlayerEntity player) {
-		return ScreenHandler.canUse(context, player, SevenElementsBlocks.INFUSION_TABLE);
+	public boolean stillValid(Player player) {
+		return AbstractContainerMenu.stillValid(context, player, SevenElementsBlocks.INFUSION_TABLE);
 	}
 
-	public boolean canInfuse(PlayerEntity player) {
-		return (player.experienceLevel >= REQUIRED_LEVEL || player.isInCreativeMode()) && this.getResultSlot().hasStack();
+	public boolean canInfuse(Player player) {
+		return (player.experienceLevel >= REQUIRED_LEVEL || player.hasInfiniteMaterials()) && this.getResultSlot().hasItem();
 	}
 
-	public boolean infuse(PlayerEntity player) {
-		if (!this.canInfuse(player) || !(player instanceof final ServerPlayerEntity serverPlayer)) return false;
+	public boolean infuse(Player player) {
+		if (!this.canInfuse(player) || !(player instanceof final ServerPlayer serverPlayer)) return false;
 
 		final Slot slot = this.slots.get(0);
 
-		if (slot == null || !slot.hasStack()) return false;
+		if (slot == null || !slot.hasItem()) return false;
 
-		final ItemStack stack = slot.getStack();
+		final ItemStack stack = slot.getItem();
 		final Element element = ELEMENTS.get(RANDOM.nextInt(ELEMENTS.size()));
 
 		ElementalInfusionComponent.applyInfusion(
@@ -110,10 +110,10 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 				.setType(InternalCooldownType.DEFAULT)
 		);
 
-		if (!player.isInCreativeMode()) serverPlayer.addExperienceLevels(-REQUIRED_LEVEL);
+		if (!player.hasInfiniteMaterials()) serverPlayer.giveExperienceLevels(-REQUIRED_LEVEL);
 
-		slot.setStack(stack);
-		slot.markDirty();
+		slot.setByPlayer(stack);
+		slot.setChanged();
 
 		ServerPlayNetworking.send(serverPlayer, new FinishElementalInfusionS2CPayload(this));
 		SevenElementsCriteria.ELEMENTAL_INFUSION.trigger(serverPlayer, stack, element);
@@ -127,14 +127,14 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 	}
 
 	@Override
-	public boolean onButtonClick(PlayerEntity player, int id) {
+	public boolean clickMenuButton(Player player, int id) {
 		if (!this.canInfuse(player)) return false;
 
 		return this.infuse(player);
 	}
 
 	@Override
-	public void onClosed(PlayerEntity player) {
-		this.dropInventory(player, this.output);
+	public void removed(Player player) {
+		this.clearContainer(player, this.output);
 	}
 }

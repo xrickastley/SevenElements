@@ -10,9 +10,9 @@ import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 /**
  * An {@code InternalCooldownContext} is a class used for holding the various {@code InternalCooldown}
@@ -131,7 +131,7 @@ public final class InternalCooldownContext {
 	private @Nullable UUID getUuid() {
 		return origin == null && force
 			? FORCE_HANDLER_UUID
-			: ClassInstanceUtil.mapOrNull(origin, Entity::getUuid);
+			: ClassInstanceUtil.mapOrNull(origin, Entity::getUUID);
 	}
 
 	public InternalCooldownContext withOrigin(@Nullable LivingEntity origin) {
@@ -174,7 +174,7 @@ public final class InternalCooldownContext {
 	public static final class Builder {
 		public static final Codec<InternalCooldownContext.Builder> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 			InternalCooldownTag.CODEC.fieldOf("tag").forGetter(i -> i.tag),
-			InternalCooldownType.REGISTRY_CODEC.optionalFieldOf("type", RegistryEntry.of(InternalCooldownType.DEFAULT)).forGetter(i -> RegistryEntry.of(i.type))
+			InternalCooldownType.REGISTRY_CODEC.optionalFieldOf("type", Holder.direct(InternalCooldownType.DEFAULT)).forGetter(i -> Holder.direct(i.type))
 		).apply(instance, InternalCooldownContext.Builder::new));
 
 		private InternalCooldownTag tag;
@@ -182,7 +182,7 @@ public final class InternalCooldownContext {
 
 		private Builder() {}
 
-		private Builder(InternalCooldownTag tag, RegistryEntry<InternalCooldownType> type) {
+		private Builder(InternalCooldownTag tag, Holder<InternalCooldownType> type) {
 			this.tag = tag;
 			this.type = type.value();
 		}

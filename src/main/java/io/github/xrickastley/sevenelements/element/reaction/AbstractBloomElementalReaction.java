@@ -6,10 +6,10 @@ import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
 import io.github.xrickastley.sevenelements.entity.SevenElementsEntityTypes;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EntitySpawnReason;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
 
 public abstract sealed class AbstractBloomElementalReaction
 	extends ElementalReaction
@@ -21,14 +21,14 @@ public abstract sealed class AbstractBloomElementalReaction
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		final World world = entity.getEntityWorld();
+		final Level world = entity.level();
 
-		if (!(world instanceof final ServerWorld serverWorld)) return;
+		if (!(world instanceof final ServerLevel serverWorld)) return;
 
-		final DendroCoreEntity dendroCore = SevenElementsEntityTypes.DENDRO_CORE.create(serverWorld, SpawnReason.TRIGGERED);
+		final DendroCoreEntity dendroCore = SevenElementsEntityTypes.DENDRO_CORE.create(serverWorld, EntitySpawnReason.TRIGGERED);
 		dendroCore.addOwner(origin);
-		dendroCore.setPosition(entity.getEntityPos());
+		dendroCore.setPos(entity.position());
 
-		serverWorld.spawnNewEntityAndPassengers(dendroCore);
+		serverWorld.tryAddFreshEntityWithPassengers(dendroCore);
 	}
 }

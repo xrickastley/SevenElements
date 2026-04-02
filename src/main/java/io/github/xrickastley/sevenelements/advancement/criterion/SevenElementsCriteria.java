@@ -2,9 +2,9 @@ package io.github.xrickastley.sevenelements.advancement.criterion;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 
-import net.minecraft.advancement.criterion.Criterion;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
+import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 public class SevenElementsCriteria {
 	public static final ElementalInfusionCriterion ELEMENTAL_INFUSION = new ElementalInfusionCriterion();
@@ -13,7 +13,7 @@ public class SevenElementsCriteria {
 		register("elemental_infusion", ELEMENTAL_INFUSION);
 	}
 
-	private static void register(String id, Criterion<?> criterion) {
-		Registry.register(Registries.CRITERION, SevenElements.identifier(id), criterion);
+	private static void register(String id, CriterionTrigger<?> criterion) {
+		Registry.register(BuiltInRegistries.TRIGGER_TYPES, SevenElements.identifier(id), criterion);
 	}
 }

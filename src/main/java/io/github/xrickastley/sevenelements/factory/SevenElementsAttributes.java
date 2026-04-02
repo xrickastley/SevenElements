@@ -9,36 +9,36 @@ import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.ClampedEntityAttribute;
-import net.minecraft.entity.attribute.DefaultAttributeContainer;
-import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 
 public class SevenElementsAttributes {
-	private static final List<RegistryEntry<EntityAttribute>> ADDED_ATTRIBUTES = new ArrayList<>();
-	private static final Map<Element, ConcurrentHashMap<ModifierType, RegistryEntry<EntityAttribute>>> LINKS = new ConcurrentHashMap<>();
+	private static final List<Holder<Attribute>> ADDED_ATTRIBUTES = new ArrayList<>();
+	private static final Map<Element, ConcurrentHashMap<ModifierType, Holder<Attribute>>> LINKS = new ConcurrentHashMap<>();
 	private static boolean registered = false;
 
-	public static final RegistryEntry<EntityAttribute> PHYSICAL_DMG_BONUS = register("physical_dmg_bonus", createAttribute("Physical DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> PYRO_DMG_BONUS = register("pyro_dmg_bonus", createAttribute("Pyro DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> HYDRO_DMG_BONUS = register("hydro_dmg_bonus", createAttribute("Hydro DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> ANEMO_DMG_BONUS = register("anemo_dmg_bonus", createAttribute("Anemo DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> ELECTRO_DMG_BONUS = register("electro_dmg_bonus", createAttribute("Electro DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> DENDRO_DMG_BONUS = register("dendro_dmg_bonus", createAttribute("Dendro DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> CRYO_DMG_BONUS = register("cryo_dmg_bonus", createAttribute("Cryo DMG Bonus%", 0, 0, 400));
-	public static final RegistryEntry<EntityAttribute> GEO_DMG_BONUS = register("geo_dmg_bonus", createAttribute("Geo DMG Bonus%", 0, 0, 400));
+	public static final Holder<Attribute> PHYSICAL_DMG_BONUS = register("physical_dmg_bonus", createAttribute("Physical DMG Bonus%", 0, 0, 400));
+	public static final Holder<Attribute> PYRO_DMG_BONUS = register("pyro_dmg_bonus", createAttribute("Pyro DMG Bonus%", 0, 0, 400));
+	public static final Holder<Attribute> HYDRO_DMG_BONUS = register("hydro_dmg_bonus", createAttribute("Hydro DMG Bonus%", 0, 0, 400));
+	public static final Holder<Attribute> ANEMO_DMG_BONUS = register("anemo_dmg_bonus", createAttribute("Anemo DMG Bonus%", 0, 0, 400));
+	public static final Holder<Attribute> ELECTRO_DMG_BONUS = register("electro_dmg_bonus", createAttribute("Electro DMG Bonus%", 0, 0, 400));
+	public static final Holder<Attribute> DENDRO_DMG_BONUS = register("dendro_dmg_bonus", createAttribute("Dendro DMG Bonus%", 0, 0, 400));
+	public static final Holder<Attribute> CRYO_DMG_BONUS = register("cryo_dmg_bonus", createAttribute("Cryo DMG Bonus%", 0, 0, 400));
+	public static final Holder<Attribute> GEO_DMG_BONUS = register("geo_dmg_bonus", createAttribute("Geo DMG Bonus%", 0, 0, 400));
 
-	public static final RegistryEntry<EntityAttribute> PHYSICAL_RES = register("physical_res", createAttribute("Physical RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> PYRO_RES = register("pyro_res", createAttribute("Pyro RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> HYDRO_RES = register("hydro_res", createAttribute("Hydro RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> ANEMO_RES = register("anemo_res", createAttribute("Anemo RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> ELECTRO_RES = register("electro_res", createAttribute("Electro RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> DENDRO_RES = register("dendro_res", createAttribute("Dendro RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> CRYO_RES = register("cryo_res", createAttribute("Cryo RES%", 0, -200, 100));
-	public static final RegistryEntry<EntityAttribute> GEO_RES = register("geo_res", createAttribute("Geo RES%", 0, -200, 100));
+	public static final Holder<Attribute> PHYSICAL_RES = register("physical_res", createAttribute("Physical RES%", 0, -200, 100));
+	public static final Holder<Attribute> PYRO_RES = register("pyro_res", createAttribute("Pyro RES%", 0, -200, 100));
+	public static final Holder<Attribute> HYDRO_RES = register("hydro_res", createAttribute("Hydro RES%", 0, -200, 100));
+	public static final Holder<Attribute> ANEMO_RES = register("anemo_res", createAttribute("Anemo RES%", 0, -200, 100));
+	public static final Holder<Attribute> ELECTRO_RES = register("electro_res", createAttribute("Electro RES%", 0, -200, 100));
+	public static final Holder<Attribute> DENDRO_RES = register("dendro_res", createAttribute("Dendro RES%", 0, -200, 100));
+	public static final Holder<Attribute> CRYO_RES = register("cryo_res", createAttribute("Cryo RES%", 0, -200, 100));
+	public static final Holder<Attribute> GEO_RES = register("geo_res", createAttribute("Geo RES%", 0, -200, 100));
 
 	public static void register() {
 		if (registered) return;
@@ -72,14 +72,14 @@ public class SevenElementsAttributes {
 	 * @return The modified amount of DMG that should be dealt.
 	 */
 	public static float modifyDamage(LivingEntity target, ElementalDamageSource source, float amount) {
-		if (!(source.getAttacker() instanceof final LivingEntity attacker))
+		if (!(source.getEntity() instanceof final LivingEntity attacker))
 			return amount;
 
 		final Element element = source.getElementalApplication().getElement();
-		final ConcurrentHashMap<ModifierType, RegistryEntry<EntityAttribute>> modifierMap = SevenElementsAttributes.LINKS.getOrDefault(element, new ConcurrentHashMap<>());
+		final ConcurrentHashMap<ModifierType, Holder<Attribute>> modifierMap = SevenElementsAttributes.LINKS.getOrDefault(element, new ConcurrentHashMap<>());
 
-		final RegistryEntry<EntityAttribute> dmgBonusAttribute = modifierMap.get(ModifierType.DMG_BONUS);
-		final RegistryEntry<EntityAttribute> resAttribute = modifierMap.get(ModifierType.RES);
+		final Holder<Attribute> dmgBonusAttribute = modifierMap.get(ModifierType.DMG_BONUS);
+		final Holder<Attribute> resAttribute = modifierMap.get(ModifierType.RES);
 
 		final float dmgBonusMultiplier = 1 + (target.getAttributes().hasAttribute(dmgBonusAttribute) && source.applyDMGBonus()
 			? (float) (attacker.getAttributes().getValue(dmgBonusAttribute) / 100)
@@ -92,7 +92,7 @@ public class SevenElementsAttributes {
 		return amount * dmgBonusMultiplier * resMultiplier;
 	}
 
-	public static DefaultAttributeContainer.Builder apply(DefaultAttributeContainer.Builder builder) {
+	public static AttributeSupplier.Builder apply(AttributeSupplier.Builder builder) {
 		// do this since Mod Load (registering) is delayed.
 		SevenElementsAttributes.register();
 		SevenElementsAttributes.ADDED_ATTRIBUTES.forEach(builder::add);
@@ -100,7 +100,7 @@ public class SevenElementsAttributes {
 		return builder;
 	}
 
-	private static double getRESMultiplier(LivingEntity target, RegistryEntry<EntityAttribute> resAttribute) {
+	private static double getRESMultiplier(LivingEntity target, Holder<Attribute> resAttribute) {
 		final double elementalRes = target.getAttributes().getValue(resAttribute) / 100;
 
 		return elementalRes < 0
@@ -110,25 +110,25 @@ public class SevenElementsAttributes {
 				: 1 / ((4 * elementalRes) + 1);
 	}
 
-	private static void link(RegistryEntry<EntityAttribute> attribute, Element element, ModifierType modifierType) {
-		final ConcurrentHashMap<ModifierType, RegistryEntry<EntityAttribute>> modifierMap = SevenElementsAttributes.LINKS.getOrDefault(element, new ConcurrentHashMap<>());
+	private static void link(Holder<Attribute> attribute, Element element, ModifierType modifierType) {
+		final ConcurrentHashMap<ModifierType, Holder<Attribute>> modifierMap = SevenElementsAttributes.LINKS.getOrDefault(element, new ConcurrentHashMap<>());
 
 		modifierMap.put(modifierType, attribute);
 
 		SevenElementsAttributes.LINKS.put(element, modifierMap);
 	}
 
-	private static RegistryEntry<EntityAttribute> register(String name, EntityAttribute attribute) {
-		final RegistryEntry<EntityAttribute> entry = Registry.registerReference(Registries.ATTRIBUTE, SevenElements.identifier(name), attribute);
+	private static Holder<Attribute> register(String name, Attribute attribute) {
+		final Holder<Attribute> entry = Registry.registerForHolder(BuiltInRegistries.ATTRIBUTE, SevenElements.identifier(name), attribute);
 
 		SevenElementsAttributes.ADDED_ATTRIBUTES.add(entry);
 
 		return entry;
 	}
 
-	private static EntityAttribute createAttribute(final String name, double base, double min, double max) {
-		return new ClampedEntityAttribute(name, base, min, max)
-			.setTracked(true);
+	private static Attribute createAttribute(final String name, double base, double min, double max) {
+		return new RangedAttribute(name, base, min, max)
+			.setSyncable(true);
 	}
 
 	private static enum ModifierType {

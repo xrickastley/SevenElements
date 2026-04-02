@@ -4,32 +4,32 @@ import java.util.UUID;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.BossBar;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Uuids;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.BossEvent;
+import net.minecraft.world.entity.LivingEntity;
 
-public record SyncBossBarEntityS2CPayload(UUID uuid, boolean hasEntity, int entityId) implements CustomPayload {
-	public static final CustomPayload.Id<SyncBossBarEntityS2CPayload> ID = new CustomPayload.Id<>(
+public record SyncBossBarEntityS2CPayload(UUID uuid, boolean hasEntity, int entityId) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<SyncBossBarEntityS2CPayload> ID = new CustomPacketPayload.Type<>(
 		SevenElements.identifier("s2c/sync_boss_bar_entity")
 	);
 
-	public static final PacketCodec<RegistryByteBuf, SyncBossBarEntityS2CPayload> CODEC = PacketCodec.tuple(
-		Uuids.PACKET_CODEC, SyncBossBarEntityS2CPayload::uuid,
-		PacketCodecs.BOOLEAN, SyncBossBarEntityS2CPayload::hasEntity,
-		PacketCodecs.INTEGER, SyncBossBarEntityS2CPayload::entityId,
+	public static final StreamCodec<RegistryFriendlyByteBuf, SyncBossBarEntityS2CPayload> CODEC = StreamCodec.composite(
+		UUIDUtil.STREAM_CODEC, SyncBossBarEntityS2CPayload::uuid,
+		ByteBufCodecs.BOOL, SyncBossBarEntityS2CPayload::hasEntity,
+		ByteBufCodecs.INT, SyncBossBarEntityS2CPayload::entityId,
 		SyncBossBarEntityS2CPayload::new
 	);
 
-	public SyncBossBarEntityS2CPayload(BossBar bossBar, LivingEntity entity) {
-		this(bossBar.getUuid(), entity != null, entity == null ? -1 : entity.getId());
+	public SyncBossBarEntityS2CPayload(BossEvent bossBar, LivingEntity entity) {
+		this(bossBar.getId(), entity != null, entity == null ? -1 : entity.getId());
 	}
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 }

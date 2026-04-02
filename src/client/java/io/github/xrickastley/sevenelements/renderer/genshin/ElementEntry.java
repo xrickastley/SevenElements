@@ -1,5 +1,9 @@
 package io.github.xrickastley.sevenelements.renderer.genshin;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import org.joml.Matrix4f;
 
 import io.github.xrickastley.sevenelements.element.Element;
@@ -9,20 +13,17 @@ import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
 import io.github.xrickastley.sevenelements.util.Ease;
 
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.util.BufferAllocator;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Camera;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 public final class ElementEntry {
 	private static final float BLINK_SECONDS = 1.5f;
 	private static final float BLINK_COUNT = 3;
-	private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(RenderLayer.field_64008);
+	private static final ByteBufferBuilder allocator = SevenElementsRenderer.createAllocator(RenderType.BIG_BUFFER_SIZE);
 	private final Element element;
 	private final double secondsLeft;
 	private final long appliedAt;
@@ -44,22 +45,22 @@ public final class ElementEntry {
 	}
 
 	private long getAppliedTicks(final Entity entity) {
-		return entity.getEntityWorld().getTime() - this.appliedAt;
+		return entity.level().getGameTime() - this.appliedAt;
 	}
 
-	public void render(final LivingEntity entity, final MatrixStack matrixStack, final Camera camera, final float offset) {
+	public void render(final LivingEntity entity, final PoseStack matrixStack, final Camera camera, final float offset) {
 		final float blinkInterval = ElementEntry.BLINK_SECONDS / ElementEntry.BLINK_COUNT;
 		final float intervalSplit = blinkInterval / 2f;
 
-		matrixStack.push();
-		matrixStack.translate(0, entity.getBoundingBox().getLengthY() * 1.1, 0);
-		matrixStack.multiplyPositionMatrix(new Matrix4f().rotation(camera.getRotation()));
+		matrixStack.pushPose();
+		matrixStack.translate(0, entity.getBoundingBox().getYsize() * 1.1, 0);
+		matrixStack.mulPose(new Matrix4f().rotation(camera.rotation()));
 		matrixStack.scale(0.50F, 0.50F, 0.50F);
 
 		final float alpha = (float) (this.secondsLeft <= (BLINK_SECONDS + intervalSplit)
 			? this.secondsLeft % blinkInterval <= intervalSplit
-				? MathHelper.lerp((this.secondsLeft % blinkInterval) / intervalSplit, 0, 1)
-				: MathHelper.lerp(((this.secondsLeft % blinkInterval) - 0.25) / intervalSplit, 1, 0)
+				? Mth.lerp((this.secondsLeft % blinkInterval) / intervalSplit, 0, 1)
+				: Mth.lerp(((this.secondsLeft % blinkInterval) - 0.25) / intervalSplit, 1, 0)
 			: 1);
 
 		this.draw(matrixStack, camera, offset, alpha);
@@ -74,10 +75,10 @@ public final class ElementEntry {
 			this.draw(matrixStack, camera, offset, alpha2);
 		}
 
-		matrixStack.pop();
+		matrixStack.popPose();
 	}
 
-	private void draw(final MatrixStack matrixStack, final Camera camera, final float offset, final float alpha) {
+	private void draw(final PoseStack matrixStack, final Camera camera, final float offset, final float alpha) {
 		final Identifier texture = this.element.getTexture();
 
 		if (texture == null) return;
@@ -85,13 +86,13 @@ public final class ElementEntry {
 		final BufferBuilder buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.ELEMENTS);
 
 		final float finalXOffset = -0.5f + offset;
-		final Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
+		final Matrix4f positionMatrix = matrixStack.last().pose();
 
-		buffer.vertex(positionMatrix, 0 + finalXOffset, 0, 0).texture(0f, 1f).color(1f, 1f, 1f, alpha);
-		buffer.vertex(positionMatrix, 1 + finalXOffset, 0, 0).texture(1f, 1f).color(1f, 1f, 1f, alpha);
-		buffer.vertex(positionMatrix, 1 + finalXOffset, 1, 0).texture(1f, 0f).color(1f, 1f, 1f, alpha);
-		buffer.vertex(positionMatrix, 0 + finalXOffset, 1, 0).texture(0f, 0f).color(1f, 1f, 1f, alpha);
+		buffer.addVertex(positionMatrix, 0 + finalXOffset, 0, 0).setUv(0f, 1f).setColor(1f, 1f, 1f, alpha);
+		buffer.addVertex(positionMatrix, 1 + finalXOffset, 0, 0).setUv(1f, 1f).setColor(1f, 1f, 1f, alpha);
+		buffer.addVertex(positionMatrix, 1 + finalXOffset, 1, 0).setUv(1f, 0f).setColor(1f, 1f, 1f, alpha);
+		buffer.addVertex(positionMatrix, 0 + finalXOffset, 1, 0).setUv(0f, 0f).setColor(1f, 1f, 1f, alpha);
 
-		SevenElementsRenderLayer.getElements(texture).draw(buffer.end());
+		SevenElementsRenderLayer.getElements(texture).draw(buffer.buildOrThrow());
 	}
 }

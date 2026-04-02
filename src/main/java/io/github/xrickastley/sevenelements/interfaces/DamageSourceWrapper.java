@@ -4,7 +4,7 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.world.damagesource.DamageSource;
 
 /**
  * An interface for classes that wrap around Minecraft's {@link DamageSource} class.

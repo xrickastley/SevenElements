@@ -4,25 +4,25 @@ import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistries;
 
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.world.phys.Vec3;
 
-public record ShowElementalReactionS2CPayload(Vec3d pos, ElementalReaction reaction) implements CustomPayload {
-	public static final CustomPayload.Id<ShowElementalReactionS2CPayload> ID = new CustomPayload.Id<>(
+public record ShowElementalReactionS2CPayload(Vec3 pos, ElementalReaction reaction) implements CustomPacketPayload {
+	public static final CustomPacketPayload.Type<ShowElementalReactionS2CPayload> ID = new CustomPacketPayload.Type<>(
 		SevenElements.identifier("s2c/show_elemental_reaction")
 	);
 
-	public static final PacketCodec<RegistryByteBuf, ShowElementalReactionS2CPayload> CODEC = PacketCodec.tuple(
-		PacketCodecs.codec(Vec3d.CODEC), ShowElementalReactionS2CPayload::pos,
-		PacketCodecs.codec(SevenElementsRegistries.ELEMENTAL_REACTION.getCodec()), ShowElementalReactionS2CPayload::reaction,
+	public static final StreamCodec<RegistryFriendlyByteBuf, ShowElementalReactionS2CPayload> CODEC = StreamCodec.composite(
+		ByteBufCodecs.fromCodec(Vec3.CODEC), ShowElementalReactionS2CPayload::pos,
+		ByteBufCodecs.fromCodec(SevenElementsRegistries.ELEMENTAL_REACTION.byNameCodec()), ShowElementalReactionS2CPayload::reaction,
 		ShowElementalReactionS2CPayload::new
 	);
 
 	@Override
-	public Id<? extends CustomPayload> getId() {
+	public Type<? extends CustomPacketPayload> type() {
 		return ID;
 	}
 }

@@ -4,9 +4,9 @@ import java.util.Optional;
 
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 
 public interface InfusableProjectile {
 	default void sevenelements$setOriginStack(ItemStack originStack) {}

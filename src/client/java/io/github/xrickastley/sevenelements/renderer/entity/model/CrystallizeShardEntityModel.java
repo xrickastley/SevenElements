@@ -3,84 +3,84 @@ package io.github.xrickastley.sevenelements.renderer.entity.model;
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.renderer.entity.state.CrystallizeShardEntityState;
 
-import net.minecraft.client.model.Dilation;
-import net.minecraft.client.model.ModelData;
-import net.minecraft.client.model.ModelPart;
-import net.minecraft.client.model.ModelPartBuilder;
-import net.minecraft.client.model.ModelPartData;
-import net.minecraft.client.model.ModelTransform;
-import net.minecraft.client.model.TexturedModelData;
-import net.minecraft.client.render.entity.animation.Animation;
-import net.minecraft.client.render.entity.animation.AnimationDefinition;
-import net.minecraft.client.render.entity.animation.AnimationHelper;
-import net.minecraft.client.render.entity.animation.Keyframe;
-import net.minecraft.client.render.entity.animation.Transformation;
-import net.minecraft.client.render.entity.model.EntityModel;
-import net.minecraft.client.render.entity.model.EntityModelLayer;
+import net.minecraft.client.animation.AnimationChannel;
+import net.minecraft.client.animation.AnimationDefinition;
+import net.minecraft.client.animation.Keyframe;
+import net.minecraft.client.animation.KeyframeAnimation;
+import net.minecraft.client.animation.KeyframeAnimations;
+import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
+import net.minecraft.client.model.geom.builders.CubeDeformation;
+import net.minecraft.client.model.geom.builders.CubeListBuilder;
+import net.minecraft.client.model.geom.builders.LayerDefinition;
+import net.minecraft.client.model.geom.builders.MeshDefinition;
+import net.minecraft.client.model.geom.builders.PartDefinition;
 
 public class CrystallizeShardEntityModel extends EntityModel<CrystallizeShardEntityState> {
-	public static final EntityModelLayer MODEL_LAYER = new EntityModelLayer(SevenElements.identifier("crystallize_shard"), "crystal");
+	public static final ModelLayerLocation MODEL_LAYER = new ModelLayerLocation(SevenElements.identifier("crystallize_shard"), "crystal");
 
-	private static final AnimationDefinition IDLE_ANIMATION = AnimationDefinition.Builder.create(3.0F).looping()
-		.addBoneAnimation("crystal", new Transformation(Transformation.Targets.ROTATE,
-			new Keyframe(0.0F, AnimationHelper.createRotationalVector(0.0F, 0.0F, 0.0F), Transformation.Interpolations.LINEAR),
-			new Keyframe(3.0F, AnimationHelper.createRotationalVector(0.0F, 360.0F, 0.0F), Transformation.Interpolations.LINEAR)
+	private static final AnimationDefinition IDLE_ANIMATION = AnimationDefinition.Builder.withLength(3.0F).looping()
+		.addAnimation("crystal", new AnimationChannel(AnimationChannel.Targets.ROTATION,
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(3.0F, KeyframeAnimations.degreeVec(0.0F, 360.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 		))
-		.addBoneAnimation("particle1", new Transformation(Transformation.Targets.ROTATE,
-			new Keyframe(0.0F, AnimationHelper.createRotationalVector(0.0F, 0.0F, 0.0F), Transformation.Interpolations.LINEAR),
-			new Keyframe(3.0F, AnimationHelper.createRotationalVector(0.0F, 720.0F, 0.0F), Transformation.Interpolations.LINEAR)
+		.addAnimation("particle1", new AnimationChannel(AnimationChannel.Targets.ROTATION,
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(3.0F, KeyframeAnimations.degreeVec(0.0F, 720.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 		))
-		.addBoneAnimation("particle2", new Transformation(Transformation.Targets.ROTATE,
-			new Keyframe(0.0F, AnimationHelper.createRotationalVector(0.0F, 0.0F, 0.0F), Transformation.Interpolations.LINEAR),
-			new Keyframe(3.0F, AnimationHelper.createRotationalVector(0.0F, 720.0F, 0.0F), Transformation.Interpolations.LINEAR)
+		.addAnimation("particle2", new AnimationChannel(AnimationChannel.Targets.ROTATION,
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(3.0F, KeyframeAnimations.degreeVec(0.0F, 720.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 		))
-		.addBoneAnimation("particle3", new Transformation(Transformation.Targets.ROTATE,
-			new Keyframe(0.0F, AnimationHelper.createRotationalVector(0.0F, 0.0F, 0.0F), Transformation.Interpolations.LINEAR),
-			new Keyframe(3.0F, AnimationHelper.createRotationalVector(0.0F, 720.0F, 0.0F), Transformation.Interpolations.LINEAR)
+		.addAnimation("particle3", new AnimationChannel(AnimationChannel.Targets.ROTATION,
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(3.0F, KeyframeAnimations.degreeVec(0.0F, 720.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 		))
-		.addBoneAnimation("particle4", new Transformation(Transformation.Targets.ROTATE,
-			new Keyframe(0.0F, AnimationHelper.createRotationalVector(0.0F, 0.0F, 0.0F), Transformation.Interpolations.LINEAR),
-			new Keyframe(3.0F, AnimationHelper.createRotationalVector(0.0F, 720.0F, 0.0F), Transformation.Interpolations.LINEAR)
+		.addAnimation("particle4", new AnimationChannel(AnimationChannel.Targets.ROTATION,
+			new Keyframe(0.0F, KeyframeAnimations.degreeVec(0.0F, 0.0F, 0.0F), AnimationChannel.Interpolations.LINEAR),
+			new Keyframe(3.0F, KeyframeAnimations.degreeVec(0.0F, 720.0F, 0.0F), AnimationChannel.Interpolations.LINEAR)
 		))
 		.build();
 
-	private final Animation idleAnimation;
+	private final KeyframeAnimation idleAnimation;
 
 	public CrystallizeShardEntityModel(ModelPart root) {
 		super(root);
 
-		this.idleAnimation = CrystallizeShardEntityModel.IDLE_ANIMATION.createAnimation(root);
+		this.idleAnimation = CrystallizeShardEntityModel.IDLE_ANIMATION.bake(root);
 	}
 
-	public static TexturedModelData getTexturedModelData() {
-		final ModelData modelData = new ModelData();
-		final ModelPartData modelPartData = modelData.getRoot();
-		final ModelPartData crystal = modelPartData.addChild("crystal", ModelPartBuilder.create(), ModelTransform.origin(0.0F, 15.0F, -0.5F));
+	public static LayerDefinition getTexturedModelData() {
+		final MeshDefinition modelData = new MeshDefinition();
+		final PartDefinition modelPartData = modelData.getRoot();
+		final PartDefinition crystal = modelPartData.addOrReplaceChild("crystal", CubeListBuilder.create(), PartPose.offset(0.0F, 15.0F, -0.5F));
 
-		final ModelPartData shard = crystal.addChild("shard", ModelPartBuilder.create(), ModelTransform.origin(0.0F, 0.0F, 0.0F));
+		final PartDefinition shard = crystal.addOrReplaceChild("shard", CubeListBuilder.create(), PartPose.offset(0.0F, 0.0F, 0.0F));
 
-		shard.addChild("shard_r1", ModelPartBuilder.create().uv(0, 0).cuboid(-1.0F, -1.0F, -3.0F, 4.0F, 4.0F, 4.0F, new Dilation(0.0F)), ModelTransform.of(-1.5F, -1.0F, 1.25F, 0.4656F, 0.422F, -0.6879F));
-		crystal.addChild("particle1", ModelPartBuilder.create().uv(10, 14).cuboid(-1.2313F, -1.0783F, -7.0F, 3.0F, 1.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(0.0F, -0.5F, 0.5F, 0.0F, -1.0908F, 0.5672F));
+		shard.addOrReplaceChild("shard_r1", CubeListBuilder.create().texOffs(0, 0).addBox(-1.0F, -1.0F, -3.0F, 4.0F, 4.0F, 4.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-1.5F, -1.0F, 1.25F, 0.4656F, 0.422F, -0.6879F));
+		crystal.addOrReplaceChild("particle1", CubeListBuilder.create().texOffs(10, 14).addBox(-1.2313F, -1.0783F, -7.0F, 3.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(0.0F, -0.5F, 0.5F, 0.0F, -1.0908F, 0.5672F));
 
-		final ModelPartData particle2 = crystal.addChild("particle2", ModelPartBuilder.create(), ModelTransform.of(0.0F, -0.5F, 0.5F, 0.0F, 0.0F, -0.5672F));
+		final PartDefinition particle2 = crystal.addOrReplaceChild("particle2", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, -0.5F, 0.5F, 0.0F, 0.0F, -0.5672F));
 
-		particle2.addChild("particle2_r1", ModelPartBuilder.create().uv(10, 14).cuboid(-0.5F, -0.5F, -7.0F, 3.0F, 1.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(-0.2686F, -0.5783F, 0.0F, 0.0F, 0.2618F, 0.0F));
+		particle2.addOrReplaceChild("particle2_r1", CubeListBuilder.create().texOffs(10, 14).addBox(-0.5F, -0.5F, -7.0F, 3.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.2686F, -0.5783F, 0.0F, 0.0F, 0.2618F, 0.0F));
 
-		final ModelPartData particle3 = crystal.addChild("particle3", ModelPartBuilder.create(), ModelTransform.of(0.0F, -0.5F, 0.5F, 0.0F, 0.0F, 0.5672F));
+		final PartDefinition particle3 = crystal.addOrReplaceChild("particle3", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, -0.5F, 0.5F, 0.0F, 0.0F, 0.5672F));
 
-		particle3.addChild("particle3_r1", ModelPartBuilder.create().uv(10, 15).cuboid(0.25F, -1.5F, 7.0F, 3.0F, 1.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(-0.4814F, 0.4217F, 0.0F, 0.0F, -0.2618F, 0.0F));
+		particle3.addOrReplaceChild("particle3_r1", CubeListBuilder.create().texOffs(10, 15).addBox(0.25F, -1.5F, 7.0F, 3.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.4814F, 0.4217F, 0.0F, 0.0F, -0.2618F, 0.0F));
 
-		final ModelPartData particle4 = crystal.addChild("particle4", ModelPartBuilder.create(), ModelTransform.of(0.0F, -0.5F, 0.5F, 0.0F, 0.0F, -0.5672F));
+		final PartDefinition particle4 = crystal.addOrReplaceChild("particle4", CubeListBuilder.create(), PartPose.offsetAndRotation(0.0F, -0.5F, 0.5F, 0.0F, 0.0F, -0.5672F));
 
-		particle4.addChild("particle4_r1", ModelPartBuilder.create().uv(10, 15).cuboid(-0.5F, -0.5F, 7.0F, 3.0F, 1.0F, 0.0F, new Dilation(0.0F)), ModelTransform.of(-0.2686F, -0.5783F, 0.0F, 0.0F, 0.3054F, 0.0F));
+		particle4.addOrReplaceChild("particle4_r1", CubeListBuilder.create().texOffs(10, 15).addBox(-0.5F, -0.5F, 7.0F, 3.0F, 1.0F, 0.0F, new CubeDeformation(0.0F)), PartPose.offsetAndRotation(-0.2686F, -0.5783F, 0.0F, 0.0F, 0.3054F, 0.0F));
 
-		return TexturedModelData.of(modelData, 16, 16);
+		return LayerDefinition.create(modelData, 16, 16);
 	}
 
 	@Override
-	public void setAngles(CrystallizeShardEntityState state) {
-		super.setAngles(state);
+	public void setupAnim(CrystallizeShardEntityState state) {
+		super.setupAnim(state);
 
-		this.idleAnimation.apply(state.idleAnimationState, state.age);
+		this.idleAnimation.apply(state.idleAnimationState, state.ageInTicks);
 	}
 }

@@ -5,9 +5,9 @@ import java.util.UUID;
 import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
 import io.github.xrickastley.sevenelements.util.ViewHelper;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.storage.ValueInput;
 
 public class ElementalApplications {
 	/**
@@ -48,7 +48,7 @@ public class ElementalApplications {
 	 * @param view The NBT to create the Elemental Application from.
 	 * @param syncedAt The world time this Elemental Application was last synced at.
 	 */
-	public static ElementalApplication fromData(LivingEntity entity, ReadView view, long syncedAt) {
+	public static ElementalApplication fromData(LivingEntity entity, ValueInput view, long syncedAt) {
 		final Type type = ViewHelper.get(view, "Type", ElementalApplication.Type.CODEC);
 
 		return type == Type.GAUGE_UNIT
@@ -73,7 +73,7 @@ public class ElementalApplications {
 	 * Gets the timer text of a provided {@link ElementalApplication}, or the standard text if
 	 * unapplicable.
 	 */
-	public static Text getTimerText(ElementalApplication application) {
+	public static Component getTimerText(ElementalApplication application) {
 		return application instanceof final DurationElementalApplication durApp
 			? durApp.getTimerText()
 			: application.getText();

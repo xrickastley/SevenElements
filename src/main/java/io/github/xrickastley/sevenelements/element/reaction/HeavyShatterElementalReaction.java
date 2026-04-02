@@ -5,8 +5,9 @@ import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.registry.SevenElementsItemTags;
 import io.github.xrickastley.sevenelements.util.TextHelper;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.registry.Registries;
+
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.LivingEntity;
 
 public final class HeavyShatterElementalReaction extends AbstractShatterElementalReaction {
 	HeavyShatterElementalReaction() {
@@ -25,8 +26,8 @@ public final class HeavyShatterElementalReaction extends AbstractShatterElementa
 			&& entity.sevenelements$getPlannedAttacker() instanceof final LivingEntity attacker
 			&& entity.sevenelements$getPlannedDamageSource() != null
 			&& entity.sevenelements$getPlannedDamageSource().isDirect()
-			&& Registries.ITEM
-				.getEntry(attacker.getActiveOrMainHandStack().getItem())
-				.isIn(SevenElementsItemTags.HEAVY_WEAPON);
+			&& BuiltInRegistries.ITEM
+				.wrapAsHolder(attacker.getActiveItem().getItem())
+				.is(SevenElementsItemTags.HEAVY_WEAPON);
 	}
 }

@@ -1,6 +1,6 @@
 package io.github.xrickastley.sevenelements.util;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.Minecraft;
 
 /**
  * Utility class that rescales components according to the current scaled height and width given the original height and width.
@@ -20,7 +20,7 @@ public class Rescaler {
 	 * @return The rescaled x-coordinate. Width within Minecraft's rendering system and the Window itself is different, with the factor given by {@code MinecraftClient.getInstance().getWindow().getScaleFactor()}. This method returns the rescaled x-coordinate based on Minecraft's own scaled width.
 	 */
 	public int rescaleX(double x) {
-		return (int) ((x / originalX) * MinecraftClient.getInstance().getWindow().getScaledWidth());
+		return (int) ((x / originalX) * Minecraft.getInstance().getWindow().getGuiScaledWidth());
 	}
 
 	/**
@@ -29,7 +29,7 @@ public class Rescaler {
 	 * @return The rescaled x-coordinate. Width within Minecraft's rendering system and the Window itself is different, with the factor given by {@code MinecraftClient.getInstance().getWindow().getScaleFactor()}. This method returns the rescaled x-coordinate based on the Minecraft window.
 	 */
  	public int rescaleXWindow(double x) {
-		return (int) (this.rescaleX(x) * MinecraftClient.getInstance().getWindow().getScaleFactor());
+		return (int) (this.rescaleX(x) * Minecraft.getInstance().getWindow().getGuiScale());
 	}
 
 	/**
@@ -38,7 +38,7 @@ public class Rescaler {
 	 * @return The rescaled y-coordinate. Height within Minecraft's rendering system and the Window itself is different, with the factor given by {@code MinecraftClient.getInstance().getWindow().getScaleFactor()}. This method returns the rescaled y-coordinate based on Minecraft's own scaled Height.
 	 */
 	public int rescaleY(double y) {
-		return (int) ((y / originalY) * MinecraftClient.getInstance().getWindow().getScaledHeight());
+		return (int) ((y / originalY) * Minecraft.getInstance().getWindow().getGuiScaledHeight());
 	}
 
 	/**
@@ -47,7 +47,7 @@ public class Rescaler {
 	 * @return The rescaled y-coordinate. Height within Minecraft's rendering system and the Window itself is different, with the factor given by {@code MinecraftClient.getInstance().getWindow().getScaleFactor()}. This method returns the rescaled y-coordinate based on the Minecraft window.
 	 */
  	public int rescaleYWindow(double y) {
-		return (int) (this.rescaleY(y) * MinecraftClient.getInstance().getWindow().getScaleFactor());
+		return (int) (this.rescaleY(y) * Minecraft.getInstance().getWindow().getGuiScale());
 	}
 
 	/**
@@ -55,8 +55,8 @@ public class Rescaler {
 	 * @return The rescale factor for resizing whole objects.
 	 */
 	public double getRescaleFactorWindow() {
-		final int windowX = (int) (MinecraftClient.getInstance().getWindow().getScaledWidth() * MinecraftClient.getInstance().getWindow().getScaleFactor());
-		final int windowY = (int) (MinecraftClient.getInstance().getWindow().getScaledHeight() * MinecraftClient.getInstance().getWindow().getScaleFactor());
+		final int windowX = (int) (Minecraft.getInstance().getWindow().getGuiScaledWidth() * Minecraft.getInstance().getWindow().getGuiScale());
+		final int windowY = (int) (Minecraft.getInstance().getWindow().getGuiScaledHeight() * Minecraft.getInstance().getWindow().getGuiScale());
 
 		return Math.min(windowX / originalX, windowY / originalY);
 	}
@@ -66,6 +66,6 @@ public class Rescaler {
 	 * @return The rescale factor for resizing whole objects.
 	 */
 	public double getRescaleFactor() {
-		return getRescaleFactorWindow() / MinecraftClient.getInstance().getWindow().getScaleFactor();
+		return getRescaleFactorWindow() / Minecraft.getInstance().getWindow().getGuiScale();
 	}
 }

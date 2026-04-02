@@ -17,23 +17,23 @@ import io.github.xrickastley.sevenelements.util.Color;
 import io.github.xrickastley.sevenelements.util.Colors;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.core.particles.ParticleOptions;
+import net.minecraft.core.particles.ParticleType;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtException;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.particle.ParticleEffect;
-import net.minecraft.particle.ParticleType;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
-import net.minecraft.util.dynamic.Codecs;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.util.RandomSource;
+import net.minecraft.util.Tuple;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public enum Element {
 	// Only here for Attribute Identification. Other than that, this serves no use, since Physical isn't really an Element.
@@ -52,7 +52,7 @@ public enum Element {
 			.setDamageColor(Colors.PYRO)
 			.setPriority(2)
 			.decayInheritance(false)
-			.particleRenderer(new ParticleRenderer(ParticleTypes.FLAME, new Vec3d(0, 0.75, 0), new Vec3d(0.125, 0.250, 0.125), 0.025, 2))
+			.particleRenderer(new ParticleRenderer(ParticleTypes.FLAME, new Vec3(0, 0.75, 0), new Vec3(0.125, 0.250, 0.125), 0.025, 2))
 	),
 	HYDRO(
 		SevenElements.identifier("hydro"),
@@ -61,7 +61,7 @@ public enum Element {
 			.setTexture(SevenElements.identifier("textures/element/hydro.png"))
 			.setDamageColor(Colors.HYDRO)
 			.setPriority(2)
-			.particleRenderer(new ParticleRenderer(ParticleTypes.FALLING_WATER, new Vec3d(0, 0.75, 0), new Vec3d(0.25, 0.25, 0.25), 0.025, 2))
+			.particleRenderer(new ParticleRenderer(ParticleTypes.FALLING_WATER, new Vec3(0, 0.75, 0), new Vec3(0.25, 0.25, 0.25), 0.025, 2))
 	),
 	ANEMO(
 		SevenElements.identifier("anemo"),
@@ -88,7 +88,7 @@ public enum Element {
 			.setDamageColor(Colors.DENDRO)
 			.setPriority(2)
 			.setDecayRate(Decays.DENDRO_DECAY_RATE)
-			.particleRenderer(new ParticleRenderer(ParticleTypes.TINTED_LEAVES, new Vec3d(0, 0.75, 0), new Vec3d(0.125, 0.250, 0.125), 0.01, 2, "{color: [0, 1, 0, 1]}"))
+			.particleRenderer(new ParticleRenderer(ParticleTypes.TINTED_LEAVES, new Vec3(0, 0.75, 0), new Vec3(0.125, 0.250, 0.125), 0.01, 2, "{color: [0, 1, 0, 1]}"))
 	),
 	CRYO(
 		SevenElements.identifier("cryo"),
@@ -97,7 +97,7 @@ public enum Element {
 			.setTexture(SevenElements.identifier("textures/element/cryo.png"))
 			.setDamageColor(Colors.CRYO)
 			.setPriority(2)
-			.particleRenderer(new ParticleRenderer(ParticleTypes.SNOWFLAKE, new Vec3d(0, 0.75, 0), new Vec3d(0.125, 0.250, 0.125), 0.01, 2))
+			.particleRenderer(new ParticleRenderer(ParticleTypes.SNOWFLAKE, new Vec3(0, 0.75, 0), new Vec3(0.125, 0.250, 0.125), 0.01, 2))
 	),
 	GEO(
 		SevenElements.identifier("geo"),
@@ -139,11 +139,11 @@ public enum Element {
 			.linkGaugeDecayIf(application -> ElementComponent.KEY.get(application.getEntity()).hasElementalApplication(Element.BURNING))
 	);
 
-	public static final Codec<Element> CODEC = Codecs.NON_EMPTY_STRING.xmap(Element::valueOf, Element::toString);
+	public static final Codec<Element> CODEC = ExtraCodecs.NON_EMPTY_STRING.xmap(Element::valueOf, Element::toString);
 
 	private final Identifier id;
 	private final ElementSettings settings;
-	private final List<Pair<Element, Predicate<ElementalApplication>>> linkedElements;
+	private final List<Tuple<Element, Predicate<ElementalApplication>>> linkedElements;
 
 	private Element(Identifier id, ElementSettings settings) {
 		this.id = id;
@@ -153,9 +153,9 @@ public enum Element {
 		if (settings.linkedElement == null) return;
 
 		if (settings.reverseLinkedElement) {
-			this.linkedElements.add(new Pair<>(settings.linkedElement, settings.linkDecayOnlyIf));
+			this.linkedElements.add(new Tuple<>(settings.linkedElement, settings.linkDecayOnlyIf));
 		} else {
-			settings.linkedElement.linkedElements.add(new Pair<>(this, settings.linkDecayOnlyIf));
+			settings.linkedElement.linkedElements.add(new Tuple<>(this, settings.linkDecayOnlyIf));
 		}
 	}
 
@@ -203,16 +203,16 @@ public enum Element {
 		return settings.hasAuraTax;
 	}
 
-	public Text getText() {
+	public Component getText() {
 		final String string = this.toString();
 		final String fallback = string.substring(0, 1).toUpperCase() + string.substring(1).toLowerCase();
 
-		return Text.translatableWithFallback("seven-elements.element." + string.toLowerCase(), fallback);
+		return Component.translatableWithFallback("seven-elements.element." + string.toLowerCase(), fallback);
 	}
 
-	public Text getText(boolean withColor) {
+	public Component getText(boolean withColor) {
 		return withColor
-			? ((MutableText) this.getText())
+			? ((MutableComponent) this.getText())
 				.withColor(JavaScriptUtil.nullishCoalesing(this.getDamageColor(), Colors.PHYSICAL).asARGB())
 			: this.getText();
 	}
@@ -232,12 +232,12 @@ public enum Element {
 
 		if (component == null) return;
 
-		for (final Pair<Element, Predicate<ElementalApplication>> pair : application.getElement().linkedElements) {
-			if (!component.hasElementalApplication(pair.getLeft())) continue;
+		for (final Tuple<Element, Predicate<ElementalApplication>> pair : application.getElement().linkedElements) {
+			if (!component.hasElementalApplication(pair.getA())) continue;
 
-			if (isGaugeDecay && !pair.getRight().test(application)) continue;
+			if (isGaugeDecay && !pair.getB().test(application)) continue;
 
-			component.getElementalApplication(pair.getLeft()).currentGauge -= reduction;
+			component.getElementalApplication(pair.getA()).currentGauge -= reduction;
 		}
 
 		ElementComponent.sync(application.getEntity());
@@ -300,7 +300,7 @@ public enum Element {
 		 *
 		 * @param priority The priority of this element.
 		 * @see ElementComponent#getPrioritizedElements() ElementComponent#getPrioritizedElements
-		 * @see ElementComponentImpl#triggerReactions(ElementalApplication, net.minecraft.entity.LivingEntity) ElementComponentImpl#triggerReactions
+		 * @see ElementComponentImpl#triggerReactions(ElementalApplication, net.minecraft.world.entity.LivingEntity) ElementComponentImpl#triggerReactions
 		 * @see ElementComponentImpl#attemptReapply(ElementalApplication) ElementComponentImpl#attemptReapply
 		 */
 		public ElementSettings setPriority(int priority) {
@@ -465,20 +465,20 @@ public enum Element {
 		};
 	}
 
-	private static record ParticleRenderer(ParticleType<? extends ParticleEffect> particle, Vec3d relativePos, Vec3d delta, double speed, int count, NbtCompound compound) {
-		private static final Random random = Random.create();
+	private static record ParticleRenderer(ParticleType<? extends ParticleOptions> particle, Vec3 relativePos, Vec3 delta, double speed, int count, CompoundTag compound) {
+		private static final RandomSource random = RandomSource.create();
 
-		ParticleRenderer(ParticleType<? extends ParticleEffect> particle, Vec3d relativePos, Vec3d delta, double speed, int count, String nbt) {
+		ParticleRenderer(ParticleType<? extends ParticleOptions> particle, Vec3 relativePos, Vec3 delta, double speed, int count, String nbt) {
 			this(particle, relativePos, delta, speed, count, parseCompound(nbt));
 		}
 
-		ParticleRenderer(ParticleType<? extends ParticleEffect> particle, Vec3d relativePos, Vec3d delta, double speed, int count) {
-			this(particle, relativePos, delta, speed, count, new NbtCompound());
+		ParticleRenderer(ParticleType<? extends ParticleOptions> particle, Vec3 relativePos, Vec3 delta, double speed, int count) {
+			this(particle, relativePos, delta, speed, count, new CompoundTag());
 		}
 
-		private static NbtCompound parseCompound(String nbt) {
+		private static CompoundTag parseCompound(String nbt) {
 			try {
-				return StringNbtReader.readCompound(nbt);
+				return TagParser.parseCompoundFully(nbt);
 			} catch (Exception e) {
 				RuntimeException e2 = new NbtException("An invalid NBT string was provided!");
 				e2.addSuppressed(e);
@@ -487,37 +487,37 @@ public enum Element {
 			}
 		}
 
-		private ParticleEffect getParticle(World world) {
+		private ParticleOptions getParticle(Level world) {
 			return particle
-				.getCodec()
 				.codec()
-				.parse(world.getRegistryManager().getOps(NbtOps.INSTANCE), compound)
+				.codec()
+				.parse(world.registryAccess().createSerializationContext(NbtOps.INSTANCE), compound)
 				.getOrThrow();
 		}
 
 		private void render(LivingEntity entity) {
 			// ServerWorld has no impl. for addParticle.
-			if (!entity.getEntityWorld().isClient()) return;
+			if (!entity.level().isClientSide()) return;
 
-			final Box box = entity.getBoundingBox();
-			final Vec3d pos = entity.getEntityPos().add(relativePos.multiply(box.getLengthX(), box.getLengthY(), box.getLengthZ()));
+			final AABB box = entity.getBoundingBox();
+			final Vec3 pos = entity.position().add(relativePos.multiply(box.getXsize(), box.getYsize(), box.getZsize()));
 
 			if (count == 0) this.addSingleParticle(entity, pos);
 			else this.addMultipleParticles(entity, pos);
 		}
 
-		private void addSingleParticle(LivingEntity entity, Vec3d pos) {
-			final World world = entity.getEntityWorld();
+		private void addSingleParticle(LivingEntity entity, Vec3 pos) {
+			final Level world = entity.level();
 
 			double velX = speed * delta.x;
 			double velY = speed * delta.y;
 			double velZ = speed * delta.z;
 
-			world.addParticleClient(this.getParticle(world), pos.x, pos.y, pos.z, velX, velY, velZ);
+			world.addParticle(this.getParticle(world), pos.x, pos.y, pos.z, velX, velY, velZ);
 		}
 
-		private void addMultipleParticles(LivingEntity entity, Vec3d pos) {
-			final World world = entity.getEntityWorld();
+		private void addMultipleParticles(LivingEntity entity, Vec3 pos) {
+			final Level world = entity.level();
 
 			for (int i = 0; i < count; ++i) {
 				double randX = random.nextGaussian() * delta.x;
@@ -527,7 +527,7 @@ public enum Element {
 				double velY = random.nextGaussian() * speed;
 				double velZ = random.nextGaussian() * speed;
 
-				world.addParticleClient(this.getParticle(world), pos.x + randX, pos.y + randY, pos.z + randZ, velX, velY, velZ);
+				world.addParticle(this.getParticle(world), pos.x + randX, pos.y + randY, pos.z + randZ, velX, velY, velZ);
 			}
 		}
 	}

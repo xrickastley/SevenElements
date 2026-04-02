@@ -27,24 +27,24 @@ import io.github.xrickastley.sevenelements.util.ViewHelper;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.codec.PacketCodecs;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundCategory;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.dynamic.Codecs;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 // Should technically extend Entity, but extends LivingEntity instead to NOT deal with more Networking and Spawn Packets.
 public final class DendroCoreEntity extends SevenElementsEntity {
@@ -62,27 +62,27 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	private int curTicksInHitbox = 0;
 	private boolean direct = false;
 
-	public DendroCoreEntity(EntityType<? extends LivingEntity> entityType, World world) {
+	public DendroCoreEntity(EntityType<? extends LivingEntity> entityType, Level world) {
 		this(entityType, world, null);
 	}
 
-	public DendroCoreEntity(EntityType<? extends LivingEntity> entityType, World world, @Nullable LivingEntity owner) {
+	public DendroCoreEntity(EntityType<? extends LivingEntity> entityType, Level world, @Nullable LivingEntity owner) {
 		super(entityType, world);
 
 		this.owners = new ArrayList<>();
-		if (owner != null) this.owners.add(owner.getUuid());
+		if (owner != null) this.owners.add(owner.getUUID());
 	}
 
 	public DendroCoreEntity setOwner(LivingEntity owner) {
 		this.owners = new ArrayList<>();
 
-		if (owner != null) this.owners.add(owner.getUuid());
+		if (owner != null) this.owners.add(owner.getUUID());
 
 		return this;
 	}
 
 	public DendroCoreEntity addOwner(LivingEntity owner) {
-		if (owner != null) this.owners.add(owner.getUuid());
+		if (owner != null) this.owners.add(owner.getUUID());
 
 		return this;
 	}
@@ -91,20 +91,20 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		if (this.type != Type.NORMAL) throw new IllegalStateException("This DendroCoreEntity has already been transformed! Type: " + this.type);
 
 		this.type = Type.HYPERBLOOM;
-		this.hyperbloomAge = this.age;
-		this.noClip = true;
+		this.hyperbloomAge = this.tickCount;
+		this.noPhysics = true;
 		this.setNoGravity(true);
 
 		final @Nullable LivingEntity target = ElementalReaction
 			.getEntitiesInAoE(this, DendroCoreEntity.SPRAWLING_SHOT_RADIUS)
 			.stream()
-			.filter(e -> !(this.owners.contains(e.getUuid()) || e.isDead() || e instanceof SevenElementsEntity || e.getType().isIn(SevenElementsEntityTypeTags.IGNORED_TARGETS) || e.isInCreativeMode()))
-			.min(Comparator.comparing(e -> e.squaredDistanceTo(this)))
+			.filter(e -> !(this.owners.contains(e.getUUID()) || e.isDeadOrDying() || e instanceof SevenElementsEntity || e.getType().is(SevenElementsEntityTypeTags.IGNORED_TARGETS) || e.hasInfiniteMaterials()))
+			.min(Comparator.comparing(e -> e.distanceToSqr(this)))
 			.orElse(null);
 
 		if (target == null) return;
 
-		this.target = target.getUuid();
+		this.target = target.getUUID();
 		this.sendStateUpdate();
 	}
 
@@ -128,81 +128,81 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	}
 
 	@Override
-	public void writeCustomData(WriteView view) {
-		super.writeCustomData(view);
+	public void addAdditionalSaveData(ValueOutput view) {
+		super.addAdditionalSaveData(view);
 
-		view.put("Type", DendroCoreEntity.Type.CODEC, this.type);
+		view.store("Type", DendroCoreEntity.Type.CODEC, this.type);
 		view.putBoolean("Direct", this.direct);
-		view.putNullable("Target", Uuids.CODEC, target);
+		view.storeNullable("Target", UUIDUtil.AUTHLIB_CODEC, target);
 
-		ViewHelper.putList(view, "Owners", Uuids.CODEC, this.owners);
+		ViewHelper.putList(view, "Owners", UUIDUtil.AUTHLIB_CODEC, this.owners);
 	}
 
 	@Override
-	public void readCustomData(ReadView view) {
-		super.readCustomData(view);
+	public void readAdditionalSaveData(ValueInput view) {
+		super.readAdditionalSaveData(view);
 
 		this.type = view.read("Type", DendroCoreEntity.Type.CODEC).orElse(Type.NORMAL);
 		this.direct = view.read("Direct", Codec.BOOL).orElse(this.direct);
-		this.target = view.read("Target", Uuids.CODEC).orElse(null);
+		this.target = view.read("Target", UUIDUtil.AUTHLIB_CODEC).orElse(null);
 
 		this.owners.clear();
-		this.owners.addAll(ViewHelper.getList(view, "Owners", Uuids.CODEC));
+		this.owners.addAll(ViewHelper.getList(view, "Owners", UUIDUtil.AUTHLIB_CODEC));
 	}
 
 	private void doHyperbloom() {
-		if (!(this.getEntityWorld() instanceof final ServerWorld world)) return;
+		if (!(this.level() instanceof final ServerLevel world)) return;
 
-		final int hyperbloomTick = this.age - this.hyperbloomAge;
+		final int hyperbloomTick = this.tickCount - this.hyperbloomAge;
 		final LivingEntity target = ClassInstanceUtil.castOrNull(world.getEntity(this.target), LivingEntity.class);
 
 		if (target != null) {
-			final Vec3d targetPos = target.getEyePos().subtract(this.getEntityPos());
+			final Vec3 targetPos = target.getEyePosition().subtract(this.position());
 			final double distance = Math.sqrt(targetPos.x * targetPos.x + targetPos.z * targetPos.z);
 			final int ticks = Math.max(1, (int) (distance / DendroCoreEntity.SPRAWLING_SHOT_SPEED));
 
 			if (ticks <= 5) this.direct = true;
 
 			// y value is derived from y(t) = y_0 + v_yt + \frac{1}{2}ay \times t^2
-			final Vec3d velocity = new Vec3d(
+			final Vec3 velocity = new Vec3(
 				targetPos.x / ticks,
-				direct 
+				direct
 					? targetPos.y / ticks
 					: (targetPos.y - 0.5 * DendroCoreEntity.SPRAWLING_SHOT_GRAVITY * ticks * ticks) / ticks,
 				targetPos.z / ticks
 			);
 
-			super.setVelocity(velocity);
+			super.setDeltaMovement(velocity);
 
-			final Box boundingBox = target.getBoundingBox();
+			final AABB boundingBox = target.getBoundingBox();
 
-			if (!boundingBox.contains(this.getEntityPos())) return;
+			if (!boundingBox.contains(this.position())) return;
 
 			this.curTicksInHitbox++;
 
 			if (this.curTicksInHitbox < DendroCoreEntity.SPRAWLING_SHOT_DELAY) return;
 
-			for (final Entity target2 : ElementalReaction.getEntitiesInAoE(target, 1.0, e -> !owners.contains(e.getUuid())))
-				target2.damage(world, this.createDamageSource(target), ElementalReaction.getReactionDamage(this, 3.0));
+			for (final Entity target2 : ElementalReaction.getEntitiesInAoE(target, 1.0, e -> !owners.contains(e.getUUID())))
+				target2.hurtServer(world, this.createDamageSource(target), ElementalReaction.getReactionDamage(this, 3.0));
 
 			this.remove(RemovalReason.KILLED);
 
-			this.getEntityWorld()
-				.playSound(null, this.getBlockPos(), SevenElementsSoundEvents.SPRAWLING_SHOT_HIT, SoundCategory.PLAYERS, 0.5f, 1.0f);
+			this.level()
+				.playSound(null, this.blockPosition(), SevenElementsSoundEvents.SPRAWLING_SHOT_HIT, SoundSource.PLAYERS, 0.5f, 1.0f);
 		} else {
-			super.setVelocity(new Vec3d(0, 0.5, 0));
+			super.setDeltaMovement(new Vec3(0, 0.5, 0));
 
 			if (hyperbloomTick >= 40) this.remove(RemovalReason.KILLED);
 		}
 	}
 
 	@Override
-	public void kill(ServerWorld world) {
+	public void kill(ServerLevel world) {
 		this.explode(2.0);
 	}
 
 	@Override
-	public boolean damage(ServerWorld world, DamageSource source, float amount) {
+	public boolean hurtServer(ServerLevel world, DamageSource source, float amount) {
 		source = ElementComponent.applyElementalInfusions(source, this);
 
 		if (!(source instanceof final ElementalDamageSource eds) || !this.isNormal()) return false;
@@ -215,7 +215,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			? ElementalReactions.BURGEON
 			: ElementalReactions.HYPERBLOOM;
 
-		reaction.trigger(this, ClassInstanceUtil.castOrNull(source.getAttacker(), LivingEntity.class));
+		reaction.trigger(this, ClassInstanceUtil.castOrNull(source.getEntity(), LivingEntity.class));
 
 		return true;
 	}
@@ -224,11 +224,11 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	public void tick() {
 		super.tick();
 
-		if (this.age == 1) this.removeOldDendroCores();
+		if (this.tickCount == 1) this.removeOldDendroCores();
 
 		if (this.type == Type.HYPERBLOOM) this.doHyperbloom();
 
-		if (this.age >= 120 && type != Type.HYPERBLOOM) {
+		if (this.tickCount >= 120 && type != Type.HYPERBLOOM) {
 			this.explode(2.0);
 			this.remove(RemovalReason.KILLED);
 		}
@@ -236,14 +236,14 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 	public void syncFromPacket(SyncDendroCoreStateS2CPayload packet) {
 		this.type = packet.type;
-		this.age = packet.age;
+		this.tickCount = packet.age;
 	}
 
 	private void removeOldDendroCores() {
-		if (!(this.getEntityWorld() instanceof final ServerWorld world)) return;
+		if (!(this.level() instanceof final ServerLevel world)) return;
 
-		final Box box = Box.of(this.getLerpedPos(1f), DendroCoreEntity.DENDRO_CORES_IN_RADIUS, DendroCoreEntity.DENDRO_CORES_IN_RADIUS, DendroCoreEntity.DENDRO_CORES_IN_RADIUS);
-		final List<DendroCoreEntity> dendroCores = this.getEntityWorld().getEntitiesByClass(DendroCoreEntity.class, box, dc -> true);
+		final AABB box = AABB.ofSize(this.getPosition(1f), DendroCoreEntity.DENDRO_CORES_IN_RADIUS, DendroCoreEntity.DENDRO_CORES_IN_RADIUS, DendroCoreEntity.DENDRO_CORES_IN_RADIUS);
+		final List<DendroCoreEntity> dendroCores = this.level().getEntitiesOfClass(DendroCoreEntity.class, box, dc -> true);
 
 		if (dendroCores.size() <= 5) return;
 
@@ -255,15 +255,15 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	}
 
 	private boolean explode(final double reactionMultiplier) {
-		if (!(this.getEntityWorld() instanceof final ServerWorld world)) return false;
+		if (!(this.level() instanceof final ServerLevel world)) return false;
 
 		if (this.exploded) return false;
 
 		this.exploded = true;
-		this.age = 117;
+		this.tickCount = 117;
 		this.sendStateUpdate();
 
-		if (!this.getEntityWorld().isClient()) this.sendStateUpdate();
+		if (!this.level().isClientSide()) this.sendStateUpdate();
 
 		final @Nullable LivingEntity recentOwner = this.getRecentOwner();
 
@@ -274,19 +274,19 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 			float damage = ElementalReaction.getReactionDamage(this, reactionMultiplier);
 
-			if (this.owners.contains(target.getUuid())) damage *= 0.02f;
+			if (this.owners.contains(target.getUUID())) damage *= 0.02f;
 
-			target.damage(world, source, damage);
+			target.hurtServer(world, source, damage);
 		}
 
-		this.getEntityWorld()
-			.playSound(null, this.getBlockPos(), SevenElementsSoundEvents.DENDRO_CORE_EXPLOSION, SoundCategory.PLAYERS, 0.5f, 1.0f);
+		this.level()
+			.playSound(null, this.blockPosition(), SevenElementsSoundEvents.DENDRO_CORE_EXPLOSION, SoundSource.PLAYERS, 0.5f, 1.0f);
 
 		return true;
 	}
 
 	private @Nullable LivingEntity getRecentOwner() {
-		return !owners.isEmpty() && this.getEntityWorld() instanceof ServerWorld
+		return !owners.isEmpty() && this.level() instanceof ServerLevel
 			? this.getEntityFromUUID(owners.get(owners.size() - 1))
 			: null;
 	}
@@ -299,20 +299,20 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 	private ElementalDamageSource createDamageSource(final LivingEntity target, final LivingEntity recentOwner) {
 		return new ElementalDamageSource(
-			this.getEntityWorld()
-				.getDamageSources()
-				.create(SevenElementsDamageTypes.DENDRO_CORE, this, recentOwner),
+			this.level()
+				.damageSources()
+				.source(SevenElementsDamageTypes.DENDRO_CORE, this, recentOwner),
 			ElementalApplications.gaugeUnits(target, Element.DENDRO, 0.0),
 			InternalCooldownContext.ofNone(recentOwner)
 		).shouldApplyDMGBonus(false);
 	}
 
 	private void sendStateUpdate() {
-		if (this.getEntityWorld().isClient()) return;
+		if (this.level().isClientSide()) return;
 
 		final SyncDendroCoreStateS2CPayload packet = new SyncDendroCoreStateS2CPayload(this);
 
-		for (final ServerPlayerEntity otherPlayer : PlayerLookup.tracking(this))
+		for (final ServerPlayer otherPlayer : PlayerLookup.tracking(this))
 			ServerPlayNetworking.send(otherPlayer, packet);
 	}
 
@@ -323,18 +323,18 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	private static enum Type {
 		NORMAL, HYPERBLOOM, BURGEON;
 
-		private static final Codec<Type> CODEC = Codecs.NON_EMPTY_STRING.xmap(Type::valueOf, Type::toString);
+		private static final Codec<Type> CODEC = ExtraCodecs.NON_EMPTY_STRING.xmap(Type::valueOf, Type::toString);
 	}
 
-	public static class SyncDendroCoreStateS2CPayload implements CustomPayload {
-		public static final CustomPayload.Id<SyncDendroCoreStateS2CPayload> ID = new CustomPayload.Id<>(
+	public static class SyncDendroCoreStateS2CPayload implements CustomPacketPayload {
+		public static final CustomPacketPayload.Type<SyncDendroCoreStateS2CPayload> ID = new CustomPacketPayload.Type<>(
 			SevenElements.identifier("s2c/sync_dendro_core_state")
 		);
 
-		public static final PacketCodec<RegistryByteBuf, SyncDendroCoreStateS2CPayload> CODEC = PacketCodec.tuple(
-			PacketCodecs.INTEGER, SyncDendroCoreStateS2CPayload::entityId,
-			PacketCodecs.INTEGER, SyncDendroCoreStateS2CPayload::age,
-			PacketCodecs.codec(DendroCoreEntity.Type.CODEC), SyncDendroCoreStateS2CPayload::type,
+		public static final StreamCodec<RegistryFriendlyByteBuf, SyncDendroCoreStateS2CPayload> CODEC = StreamCodec.composite(
+			ByteBufCodecs.INT, SyncDendroCoreStateS2CPayload::entityId,
+			ByteBufCodecs.INT, SyncDendroCoreStateS2CPayload::age,
+			ByteBufCodecs.fromCodec(DendroCoreEntity.Type.CODEC), SyncDendroCoreStateS2CPayload::dendroCoreType,
 			SyncDendroCoreStateS2CPayload::new
 		);
 
@@ -343,7 +343,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		private final DendroCoreEntity.Type type;
 
 		public SyncDendroCoreStateS2CPayload(final DendroCoreEntity dendroCore) {
-			this(dendroCore.getId(), dendroCore.age, dendroCore.type);
+			this(dendroCore.getId(), dendroCore.tickCount, dendroCore.type);
 		}
 
 		private SyncDendroCoreStateS2CPayload(int entityId, int age, DendroCoreEntity.Type type) {
@@ -360,12 +360,12 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			return this.age;
 		}
 
-		public DendroCoreEntity.Type type() {
+		public DendroCoreEntity.Type dendroCoreType() {
 			return type;
 		}
 
 		@Override
-		public Id<? extends CustomPayload> getId() {
+		public CustomPacketPayload.Type<SyncDendroCoreStateS2CPayload> type() {
 			return ID;
 		}
 	}

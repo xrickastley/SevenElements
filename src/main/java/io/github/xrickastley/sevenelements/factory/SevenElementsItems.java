@@ -12,58 +12,58 @@ import io.github.xrickastley.sevenelements.util.Functions;
 import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents.ModifyEntriesAll;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemGroups;
-import net.minecraft.item.Items;
-import net.minecraft.item.TallBlockItem;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.DoubleHighBlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
 
 public class SevenElementsItems {
-	public static final Item INFUSION_TABLE = new TallBlockItem(
+	public static final Item INFUSION_TABLE = new DoubleHighBlockItem(
 		SevenElementsBlocks.INFUSION_TABLE,
-		new Item.Settings()
-		    .useBlockPrefixedTranslationKey()
-		    .registryKey(SevenElements.registryKey(RegistryKeys.ITEM, "infusion_table"))
+		new Item.Properties()
+		    .useBlockDescriptionPrefix()
+		    .setId(SevenElements.registryKey(Registries.ITEM, "infusion_table"))
 	);
 
 	public static void register() {
 		register("infusion_table", SevenElementsItems.INFUSION_TABLE);
 
-		ModifyEntryHandler.addAfter(ItemGroups.FUNCTIONAL, SevenElementsItems.INFUSION_TABLE, Items.CRAFTING_TABLE);
+		ModifyEntryHandler.addAfter(CreativeModeTabs.FUNCTIONAL_BLOCKS, SevenElementsItems.INFUSION_TABLE, Items.CRAFTING_TABLE);
 	}
 
 	public static void register(String id, Item item) {
-		Registry.register(Registries.ITEM, SevenElements.identifier(id), item);
+		Registry.register(BuiltInRegistries.ITEM, SevenElements.identifier(id), item);
 	}
 
 	public static class ModifyEntryHandler implements ModifyEntriesAll {
 		private static final ModifyEntryHandler INSTANCE = new ModifyEntryHandler();
-		private static final Multimap<RegistryKey<ItemGroup>, Entry> ENTRIES = HashMultimap.create();
+		private static final Multimap<ResourceKey<CreativeModeTab>, Entry> ENTRIES = HashMultimap.create();
 
-		public static void prepend(RegistryKey<ItemGroup> group, Item item) {
+		public static void prepend(ResourceKey<CreativeModeTab> group, Item item) {
 			ENTRIES.get(group).add(new Entry(item, EntryType.PREPEND, null));
 		}
 
-		public static void add(RegistryKey<ItemGroup> group, Item item) {
+		public static void add(ResourceKey<CreativeModeTab> group, Item item) {
 			ENTRIES.get(group).add(new Entry(item, EntryType.ADD, null));
 		}
 
-		public static void addBefore(RegistryKey<ItemGroup> group, Item item, Item before) {
+		public static void addBefore(ResourceKey<CreativeModeTab> group, Item item, Item before) {
 			ENTRIES.get(group).add(new Entry(item, EntryType.ADD_BEFORE, before));
 		}
 
-		public static void addAfter(RegistryKey<ItemGroup> group, Item item, Item after) {
+		public static void addAfter(ResourceKey<CreativeModeTab> group, Item item, Item after) {
 			ENTRIES.get(group).add(new Entry(item, EntryType.ADD_AFTER, after));
 		}
 
 		@Override
-		public void modifyEntries(ItemGroup group, FabricItemGroupEntries entries) {
+		public void modifyEntries(CreativeModeTab group, FabricItemGroupEntries entries) {
 			ModifyEntryHandler.ENTRIES
-				.get(Registries.ITEM_GROUP.getKey(group).orElseThrow())
+				.get(BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(group).orElseThrow())
 				.forEach(Functions.withArgument(Entry::add, entries));
 		}
 	}
@@ -94,7 +94,7 @@ public class SevenElementsItems {
 		ADD {
 			@Override
 			void add(Entry entry, FabricItemGroupEntries entries) {
-				entries.add(entry.item);
+				entries.accept(entry.item);
 			}
 		},
 		ADD_AFTER {

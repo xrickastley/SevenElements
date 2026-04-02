@@ -2,6 +2,10 @@ package io.github.xrickastley.sevenelements.renderer.genshin;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,30 +36,26 @@ import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContext;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.Context;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.util.BufferAllocator;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RotationAxis;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.random.Random;
-import net.minecraft.world.World;
+import net.minecraft.client.Camera;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 
 public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroChargeS2CPayload> {
 	private static final int MAX_TICKS = 10;
 	private static final double POISSON_DENSITY = 1.5;
-	private static final Random RANDOM = Random.create();
+	private static final RandomSource RANDOM = RandomSource.create();
 	private static final int CHARGE_ITERATIONS = 4;
-	private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(RenderLayer.field_64008);
+	private static final ByteBufferBuilder allocator = SevenElementsRenderer.createAllocator(RenderType.BIG_BUFFER_SIZE);
 	private final List<Entry> entries = new ArrayList<>();
 	private final Multimap<LivingEntity, ChargeLinePositions> chargePositions = HashMultimap.create();
 
@@ -64,22 +64,22 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 	 * @param entity The entity planned to render effects for.
 	 */
 	public static boolean shouldRender(Entity entity) {
-		final MinecraftClient client = MinecraftClient.getInstance();
+		final Minecraft client = Minecraft.getInstance();
 
 		return entity.isAlive()
-			&& (entity != client.player || client.gameRenderer.getCamera().isThirdPerson());
+			&& (entity != client.player || client.gameRenderer.getMainCamera().isDetached());
 	}
 
 	@Override
-	public CustomPayload.Id<ShowElectroChargeS2CPayload> getPayloadId() {
+	public CustomPacketPayload.Type<ShowElectroChargeS2CPayload> getPayloadId() {
 		return ShowElectroChargeS2CPayload.ID;
 	}
 
 	@Override
 	public void receive(ShowElectroChargeS2CPayload payload, Context context) {
-		final ClientPlayerEntity player = context.player();
-		final World world = player.getEntityWorld();
-		final Entity mainEntity = world.getEntityById(payload.mainEntity());
+		final LocalPlayer player = context.player();
+		final Level world = player.level();
+		final Entity mainEntity = world.getEntity(payload.mainEntity());
 
 		if (mainEntity == null) {
 			SevenElements.sublogger().warn("Received packet for unknown main Electro-Charged entity, ignoring!");
@@ -93,7 +93,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 				payload
 					.otherEntities()
 					.stream()
-					.map(world::getEntityById)
+					.map(world::getEntity)
 					.filter(e -> e != null)
 					.toList()
 			)
@@ -106,11 +106,11 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		this.renderEffects(context);
 	}
 
-	public void tick(ClientWorld world) {
+	public void tick(ClientLevel world) {
 		this.entries.removeIf(Entry::shouldRemove);
 		this.entries.forEach(Entry::tick);
 
-		if (world.getTime() % 10 == 0) this.chargePositions.clear();
+		if (world.getGameTime() % 10 == 0) this.chargePositions.clear();
 
 		this.chargePositions
 			.values()
@@ -123,11 +123,11 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		if (!mapValue.isEmpty()) return mapValue;
 
 		final List<ChargeLinePositions> computedValue = new ArrayList<>();
-		final Box box = BoxUtil.multiplyBox(entity.getBoundingBox(), 0.75);
+		final AABB box = BoxUtil.multiplyBox(entity.getBoundingBox(), 0.75);
 
 		for (int i = 0; i < SpecialEffectsRenderer.CHARGE_ITERATIONS + 2; i++) {
-			final Vec3d initialPos = BoxUtil.randomPos(box);
-			final Vec3d finalPos = BoxUtil.randomPos(box);
+			final Vec3 initialPos = BoxUtil.randomPos(box);
+			final Vec3 finalPos = BoxUtil.randomPos(box);
 
 			computedValue.add(new ChargeLinePositions(initialPos, finalPos, entity));
 		}
@@ -156,7 +156,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 	}
 
 	private void renderEffects(WorldRenderContext context) {
-		for (final Entity entity : context.world().getEntities()) {
+		for (final Entity entity : context.world().entitiesForRendering()) {
 			if (!(entity instanceof final LivingEntity livingEntity) || !shouldRender(livingEntity)) continue;
 
 			final ElementComponent component = ElementComponent.KEY.get(livingEntity);
@@ -167,91 +167,91 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 	}
 
 	private void renderChargeLine(WorldRenderContext context, ChargeLinePositions clp, Entity entity, Color outerColor, Color innerColor) {
-		final Vec3d initialPos = clp.getInitialPos(entity);
+		final Vec3 initialPos = clp.getInitialPos(entity);
 
 		this.renderChargeLine(context, initialPos, clp.generatePositions(this, entity), outerColor, innerColor);
 	}
 
 	@SuppressWarnings("unused")
-	private void renderChargeLine(WorldRenderContext context, Vec3d initialPos, Vec3d finalPos, Color outerColor, Color innerColor) {
-		final List<Vec3d> positions = this.generatePositions(Vec3d.ZERO, initialPos.subtract(finalPos));
+	private void renderChargeLine(WorldRenderContext context, Vec3 initialPos, Vec3 finalPos, Color outerColor, Color innerColor) {
+		final List<Vec3> positions = this.generatePositions(Vec3.ZERO, initialPos.subtract(finalPos));
 
-		Vec3d randomVec = Vec3d.ZERO;
+		Vec3 randomVec = Vec3.ZERO;
 
 		for (int i = 0; i < positions.size(); i++) {
-			randomVec = new Vec3d(RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5);
+			randomVec = new Vec3(RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5);
 
 			positions.set(i, positions.get(i).add(randomVec));
 		}
 
-		positions.add(0, Vec3d.ZERO);
+		positions.add(0, Vec3.ZERO);
 		positions.add(finalPos.subtract(initialPos));
 
 		this.renderChargeLine(context, initialPos, positions, outerColor, innerColor);
 	}
 
-	private void renderChargeLine(WorldRenderContext context, Vec3d origin, List<Vec3d> positions, Color outerColor, Color innerColor) {
+	private void renderChargeLine(WorldRenderContext context, Vec3 origin, List<Vec3> positions, Color outerColor, Color innerColor) {
 		final Camera camera = context.camera();
-		final Vec3d camPos = camera.getCameraPos();
+		final Vec3 camPos = camera.position();
 
-		final MatrixStack matrices = new MatrixStack();
-		matrices.push();
-		matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
-		matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
+		final PoseStack matrices = new PoseStack();
+		matrices.pushPose();
+		matrices.mulPose(Axis.XP.rotationDegrees(camera.xRot()));
+		matrices.mulPose(Axis.YP.rotationDegrees(camera.yRot() + 180.0F));
 		matrices.translate(origin.x - camPos.x, origin.y - camPos.y, origin.z - camPos.z);
 
-		final Matrix4f posMat = matrices.peek().getPositionMatrix();
-		final MatrixStack.Entry entry = matrices.peek();
+		final Matrix4f posMat = matrices.last().pose();
+		final PoseStack.Pose entry = matrices.last();
 
 		BufferBuilder buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.CHARGE_LINE);
 
 		for (int i = 1; i < positions.size(); i++) {
-			final Vec3d start = positions.get(i - 1);
-			final Vec3d end = positions.get(i);
-			Vec3d normal = end.normalize();
+			final Vec3 start = positions.get(i - 1);
+			final Vec3 end = positions.get(i);
+			Vec3 normal = end.normalize();
 
 			buffer
-				.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
-				.color(outerColor.asARGB())
-				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
-				.lineWidth(6.0f);
+				.addVertex(posMat, (float) start.x, (float) start.y, (float) start.z)
+				.setColor(outerColor.asARGB())
+				.setNormal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.setLineWidth(6.0f);
 
 			buffer
-				.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
-				.color(outerColor.asARGB())
-				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
-				.lineWidth(6.0f);
+				.addVertex(posMat, (float) end.x, (float) end.y, (float) end.z)
+				.setColor(outerColor.asARGB())
+				.setNormal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.setLineWidth(6.0f);
 		}
 
-		SevenElementsRenderLayer.getChargeLine().draw(buffer.end());
+		SevenElementsRenderLayer.getChargeLine().draw(buffer.buildOrThrow());
 
 		buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.CHARGE_LINE);
 
 		for (int i = 1; i < positions.size(); i++) {
-			final Vec3d start = positions.get(i - 1);
-			final Vec3d end = positions.get(i);
-			Vec3d normal = end.normalize();
+			final Vec3 start = positions.get(i - 1);
+			final Vec3 end = positions.get(i);
+			Vec3 normal = end.normalize();
 
 			buffer
-				.vertex(posMat, (float) start.x, (float) start.y, (float) start.z)
-				.color(innerColor.asARGB())
-				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
-				.lineWidth(2.0f);
+				.addVertex(posMat, (float) start.x, (float) start.y, (float) start.z)
+				.setColor(innerColor.asARGB())
+				.setNormal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.setLineWidth(2.0f);
 
 			buffer
-				.vertex(posMat, (float) end.x, (float) end.y, (float) end.z)
-				.color(innerColor.asARGB())
-				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
-				.lineWidth(2.0f);
+				.addVertex(posMat, (float) end.x, (float) end.y, (float) end.z)
+				.setColor(innerColor.asARGB())
+				.setNormal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
+				.setLineWidth(2.0f);
 		}
 
-		SevenElementsRenderLayer.getChargeLine().draw(buffer.end());
+		SevenElementsRenderLayer.getChargeLine().draw(buffer.buildOrThrow());
 
-		matrices.pop();
+		matrices.popPose();
 	}
 
-	private List<Vec3d> generatePositions(final Vec3d initialPos, final Vec3d finalPos) {
-		final Vec3d norm = initialPos.subtract(finalPos);
+	private List<Vec3> generatePositions(final Vec3 initialPos, final Vec3 finalPos) {
+		final Vec3 norm = initialPos.subtract(finalPos);
 		final double length = norm.length();
 
 		final int n = Math.max(1, this.poisson(SpecialEffectsRenderer.POISSON_DENSITY * length));
@@ -262,7 +262,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		return doubles
 			.stream()
 			.sorted()
-			.map(t -> initialPos.add(norm.multiply(t)).add(new Vec3d(RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5)))
+			.map(t -> initialPos.add(norm.scale(t)).add(new Vec3(RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5)))
 			.collect(Collectors.toList());
 	}
 
@@ -292,17 +292,17 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		private final Map<Entity, StoredElectroChargedPositions> positionMap = new HashMap<>();
 
 		private ElectroChargedEffect(Entity mainEntity, List<Entity> otherEntities) {
-			this.time = MinecraftClient.getInstance().world.getTime();
+			this.time = Minecraft.getInstance().level.getGameTime();
 			this.mainEntity = mainEntity;
 			this.otherEntities = otherEntities;
 		}
 
 		boolean shouldRemove() {
-			return !mainEntity.isAlive() || otherEntities.isEmpty() || MinecraftClient.getInstance().world.getTime() > this.time + MAX_TICKS;
+			return !mainEntity.isAlive() || otherEntities.isEmpty() || Minecraft.getInstance().level.getGameTime() > this.time + MAX_TICKS;
 		}
 
 		void render(final WorldRenderContext context, final SpecialEffectsRenderer renderer) {
-			final double gradientStep = MathHelper.clamp(MathHelper.getLerpProgress(MinecraftClient.getInstance().world.getTime() - this.time + context.tickCounter().getTickProgress(false), 0, 10), 0, 1);
+			final double gradientStep = Mth.clamp(Mth.inverseLerp(Minecraft.getInstance().level.getGameTime() - this.time + context.tickCounter().getGameTimeDeltaPartialTick(false), 0, 10), 0, 1);
 			final Color outerColor = Color.gradientStep(Colors.ELECTRO, Colors.HYDRO, gradientStep, Ease.IN_QUART);
 			final Color innerColor = Colors.PHYSICAL;
 
@@ -322,17 +322,17 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 			this.positionMap.values().forEach(StoredElectroChargedPositions::tick);
 		}
 
-		private Vec3d entityPos(Entity entity) {
-			return entity.getEntityPos().add(0, entity.getHeight() * 0.5, 0);
+		private Vec3 entityPos(Entity entity) {
+			return entity.position().add(0, entity.getBbHeight() * 0.5, 0);
 		}
 	}
 
 	private static class StoredElectroChargedPositions {
 		private final Entity mainEntity;
 		private final Entity targetEntity;
-		private Vec3d prevMainEntityPos;
-		private Vec3d prevTargetEntityPos;
-		private @Nullable List<Vec3d> positions = null;
+		private Vec3 prevMainEntityPos;
+		private Vec3 prevTargetEntityPos;
+		private @Nullable List<Vec3> positions = null;
 
 		private StoredElectroChargedPositions(Entity mainEntity, Entity targetEntity) {
 			this.mainEntity = mainEntity;
@@ -350,24 +350,24 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 				&& this.entityPos(targetEntity).equals(prevTargetEntityPos);
 		}
 
-		private List<Vec3d> generatePositions(SpecialEffectsRenderer renderer) {
+		private List<Vec3> generatePositions(SpecialEffectsRenderer renderer) {
 			if (this.positions != null && shouldPositionsPersist()) return this.positions;
 
 			// Required unequal due to shouldPositionsPersist(), refresh
-			final Vec3d initialPos = this.prevMainEntityPos = this.entityPos(this.mainEntity);
-			final Vec3d finalPos = this.prevTargetEntityPos = this.entityPos(this.targetEntity);
+			final Vec3 initialPos = this.prevMainEntityPos = this.entityPos(this.mainEntity);
+			final Vec3 finalPos = this.prevTargetEntityPos = this.entityPos(this.targetEntity);
 
-			final List<Vec3d> positions = renderer.generatePositions(Vec3d.ZERO, initialPos.subtract(finalPos));
+			final List<Vec3> positions = renderer.generatePositions(Vec3.ZERO, initialPos.subtract(finalPos));
 
-			Vec3d randomVec = Vec3d.ZERO;
+			Vec3 randomVec = Vec3.ZERO;
 
 			for (int i = 0; i < positions.size(); i++) {
-				randomVec = new Vec3d(RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5);
+				randomVec = new Vec3(RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5);
 
 				positions.set(i, positions.get(i).add(randomVec));
 			}
 
-			positions.add(0, Vec3d.ZERO);
+			positions.add(0, Vec3.ZERO);
 			positions.add(finalPos.subtract(initialPos));
 
 			this.positions = positions;
@@ -375,50 +375,50 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 			return positions;
 		}
 
-		private Vec3d entityPos(Entity entity) {
-			return entity.getEntityPos().add(0, entity.getHeight() * 0.5, 0);
+		private Vec3 entityPos(Entity entity) {
+			return entity.position().add(0, entity.getBbHeight() * 0.5, 0);
 		}
 	}
 
 	private static class ChargeLinePositions {
-		private final Vec3d initialPos;
-		private final Vec3d finalPos;
-		private @Nullable List<Vec3d> positions = null;
+		private final Vec3 initialPos;
+		private final Vec3 finalPos;
+		private @Nullable List<Vec3> positions = null;
 		private @Nullable Color color = null;
 
-		private ChargeLinePositions(Vec3d initialPos, Vec3d finalPos, Entity relativeTo) {
-			final Vec3d entityPos = relativeTo.getEntityPos();
+		private ChargeLinePositions(Vec3 initialPos, Vec3 finalPos, Entity relativeTo) {
+			final Vec3 entityPos = relativeTo.position();
 
 			this.initialPos = initialPos.subtract(entityPos);
 			this.finalPos = finalPos.subtract(entityPos);
 		}
 
-		private Vec3d getInitialPos(Entity relativeTo) {
-			return this.initialPos.add(relativeTo.getEntityPos());
+		private Vec3 getInitialPos(Entity relativeTo) {
+			return this.initialPos.add(relativeTo.position());
 		}
 
-		private List<Vec3d> generatePositions(SpecialEffectsRenderer renderer, Entity relativeTo) {
+		private List<Vec3> generatePositions(SpecialEffectsRenderer renderer, Entity relativeTo) {
 			if (this.positions != null) return this.positions;
 
-			final Vec3d entityPos = relativeTo.getEntityPos();
-			final List<Vec3d> positions = renderer.generatePositions(Vec3d.ZERO, initialPos.subtract(finalPos));
+			final Vec3 entityPos = relativeTo.position();
+			final List<Vec3> positions = renderer.generatePositions(Vec3.ZERO, initialPos.subtract(finalPos));
 
-			Vec3d randomVec = Vec3d.ZERO;
+			Vec3 randomVec = Vec3.ZERO;
 
 			for (int i = 0; i < positions.size(); i++) {
-				randomVec = new Vec3d(RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5);
+				randomVec = new Vec3(RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5, RANDOM.nextDouble() - 0.5);
 
 				positions.set(i, positions.get(i).add(randomVec));
 			}
 
-			positions.add(0, Vec3d.ZERO);
+			positions.add(0, Vec3.ZERO);
 			positions.add(finalPos.subtract(initialPos));
 
 			this.positions = positions;
 
 			return positions
 				.stream()
-				.map(Functions.<Vec3d, Vec3d, Vec3d>withArgument(Vec3d::add, entityPos))
+				.map(Functions.<Vec3, Vec3, Vec3>withArgument(Vec3::add, entityPos))
 				.toList();
 		}
 

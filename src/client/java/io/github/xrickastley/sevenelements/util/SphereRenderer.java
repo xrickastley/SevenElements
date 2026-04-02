@@ -1,5 +1,9 @@
 package io.github.xrickastley.sevenelements.util;
 
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import java.util.function.Function;
 
 import org.joml.Matrix3f;
@@ -9,14 +13,11 @@ import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
 
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.util.BufferAllocator;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 
 public final class SphereRenderer {
-	private static final BufferAllocator allocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer.getSphere().getExpectedBufferSize());
+	private static final ByteBufferBuilder allocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer.getSphere().bufferSize());
 	private SphereRenderer() {}
 
 	/**
@@ -29,7 +30,7 @@ public final class SphereRenderer {
 	 * @param lonSteps Horizontal subdivisions
 	 * @param color An ARGB int {@code 0xAARRGGBB}
 	 */
-	public static void render(MatrixStack matrices, Vec3d origin, float radius, int latSteps, int lonSteps, int color) {
+	public static void render(PoseStack matrices, Vec3 origin, float radius, int latSteps, int lonSteps, int color) {
 		SphereRenderer.render(matrices, origin, radius, latSteps, lonSteps, pos -> color);
 	}
 
@@ -43,17 +44,17 @@ public final class SphereRenderer {
 	 * @param lonSteps Horizontal subdivisions
 	 * @param colorFunc A function taking in a {@code Vec3d} and returns an ARGB int {@code 0xAARRGGBB}
 	 */
-	public static void render(MatrixStack matrices, Vec3d origin, float radius, int latSteps, int lonSteps, Function<Vec3d, Integer> colorFunc) {
+	public static void render(PoseStack matrices, Vec3 origin, float radius, int latSteps, int lonSteps, Function<Vec3, Integer> colorFunc) {
 		if (latSteps < 2) latSteps = 2;
 		if (lonSteps < 3) lonSteps = 3;
 
 		// translate to sphere center
-		matrices.push();
+		matrices.pushPose();
 		matrices.translate(origin.x, origin.y, origin.z);
 
 		// grab matrices used by VertexConsumer
-		Matrix4f modelMat = matrices.peek().getPositionMatrix();
-		Matrix3f normalMat = matrices.peek().getNormalMatrix();
+		Matrix4f modelMat = matrices.last().pose();
+		Matrix3f normalMat = matrices.last().normal();
 
 		final BufferBuilder buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.SPHERE);
 
@@ -65,10 +66,10 @@ public final class SphereRenderer {
 				final double phi1 = 2.0 * Math.PI * lon / (double) lonSteps;
 				final double phi2 = 2.0 * Math.PI * (lon + 1) / (double) lonSteps;
 
-				final Vec3d v00 = spherical(radius, theta1, phi1);
-				final Vec3d v01 = spherical(radius, theta1, phi2);
-				final Vec3d v10 = spherical(radius, theta2, phi1);
-				final Vec3d v11 = spherical(radius, theta2, phi2);
+				final Vec3 v00 = spherical(radius, theta1, phi1);
+				final Vec3 v01 = spherical(radius, theta1, phi2);
+				final Vec3 v10 = spherical(radius, theta2, phi1);
+				final Vec3 v11 = spherical(radius, theta2, phi2);
 
 				vertex(buffer, modelMat, normalMat, v10, colorFunc.apply(SphereRenderer.relativeClamp(v10, radius)));
 				vertex(buffer, modelMat, normalMat, v00, colorFunc.apply(SphereRenderer.relativeClamp(v00, radius)));
@@ -80,31 +81,31 @@ public final class SphereRenderer {
 			}
 		}
 
-		SevenElementsRenderLayer.getSphere().draw(buffer.end());
+		SevenElementsRenderLayer.getSphere().draw(buffer.buildOrThrow());
 
-		matrices.pop();
+		matrices.popPose();
 	}
 
-	private static Vec3d spherical(double r, double theta, double phi) {
+	private static Vec3 spherical(double r, double theta, double phi) {
 		double x = r * Math.sin(theta) * Math.cos(phi);
 		double y = r * Math.cos(theta);
 		double z = r * Math.sin(theta) * Math.sin(phi);
-		return new Vec3d(x, y, z);
+		return new Vec3(x, y, z);
 	}
 
-	private static void vertex(BufferBuilder buffer, Matrix4f projMat, Matrix3f normalMat, Vec3d pos, int color) {
+	private static void vertex(BufferBuilder buffer, Matrix4f projMat, Matrix3f normalMat, Vec3 pos, int color) {
 		buffer
-			.vertex(projMat, (float)pos.x, (float)pos.y, (float)pos.z)
-			.color(color);
+			.addVertex(projMat, (float)pos.x, (float)pos.y, (float)pos.z)
+			.setColor(color);
 	}
 
-	private static Vec3d relativeClamp(Vec3d pos, float radius) {
-		final Vec3d relPos = pos.multiply(1 / radius);
+	private static Vec3 relativeClamp(Vec3 pos, float radius) {
+		final Vec3 relPos = pos.scale(1 / radius);
 
-		return new Vec3d(
-			MathHelper.clamp(relPos.x, -1, 1),
-			MathHelper.clamp(relPos.y, -1, 1),
-			MathHelper.clamp(relPos.z, -1, 1)
+		return new Vec3(
+			Mth.clamp(relPos.x, -1, 1),
+			Mth.clamp(relPos.y, -1, 1),
+			Mth.clamp(relPos.z, -1, 1)
 		);
 	}
 }

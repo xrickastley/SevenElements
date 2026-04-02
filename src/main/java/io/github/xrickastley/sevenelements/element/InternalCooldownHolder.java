@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.LivingEntity;
 
 public final class InternalCooldownHolder {
 	private final LivingEntity owner;

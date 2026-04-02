@@ -11,8 +11,8 @@ import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
 
 /*
  * DEV NOTE: No concept of "Poise" exists within Seven Elements, therefore the implementation of
@@ -34,8 +34,8 @@ public abstract sealed class AbstractShatterElementalReaction
 		if (!isTriggerable(entity)) return false;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
-		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getLeft());
-		final ElementalApplication triggeringElement = component.getElementalApplication(this.triggeringElement.getLeft());
+		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getA());
+		final ElementalApplication triggeringElement = component.getElementalApplication(this.triggeringElement.getA());
 
 		final double reducedGauge = auraElement.reduceGauge(Double.MAX_VALUE);
 
@@ -46,18 +46,18 @@ public abstract sealed class AbstractShatterElementalReaction
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.level() instanceof final ServerLevel world)) return;
 
 		final float damage = ElementalReaction.getReactionDamage(entity, 3.0);
 		final ElementalDamageSource source = new ElementalDamageSource(
 			entity
-				.getDamageSources()
-				.create(SevenElementsDamageTypes.SHATTER, origin),
+				.damageSources()
+				.source(SevenElementsDamageTypes.SHATTER, origin),
 			ElementalApplications.gaugeUnits(entity, Element.PHYSICAL, 0.0, false),
 			InternalCooldownContext.ofNone(entity)
 		).shouldApplyDMGBonus(false).shouldInfuse(false);
 
-		entity.damage(world, source, damage);
-		entity.removeStatusEffect(SevenElementsStatusEffects.FROZEN);
+		entity.hurtServer(world, source, damage);
+		entity.removeEffect(SevenElementsStatusEffects.FROZEN);
 	}
 }

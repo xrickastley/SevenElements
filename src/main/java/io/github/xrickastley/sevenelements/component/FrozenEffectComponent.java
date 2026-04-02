@@ -8,15 +8,15 @@ import org.ladysnake.cca.api.v3.component.tick.ServerTickingComponent;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityPose;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Pose;
 
 public interface FrozenEffectComponent extends AutoSyncedComponent, ClientTickingComponent, ServerTickingComponent {
 	public static final ComponentKey<FrozenEffectComponent> KEY = ComponentRegistry.getOrCreate(SevenElements.identifier("frozen_effect"), FrozenEffectComponent.class);
 
 	public boolean isFrozen();
 
-	public EntityPose getForcePose();
+	public Pose getForcePose();
 
 	public float getForceHeadYaw();
 

@@ -1,121 +1,122 @@
 package io.github.xrickastley.sevenelements.renderer;
 
+import com.mojang.blaze3d.vertex.ByteBufferBuilder;
+
 import java.util.SequencedMap;
 import java.util.function.Function;
 
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.RenderSetup.OutlineMode;
-import net.minecraft.client.render.RenderSetup;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.BufferAllocator;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.rendertype.RenderSetup.OutlineProperty;
+import net.minecraft.client.renderer.rendertype.RenderSetup;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 
 public class SevenElementsRenderLayer {
-	private static final RenderLayer TRIANGLES = RenderLayer.of(
+	private static final RenderType TRIANGLES = RenderType.create(
 		"seven-elements:triangles",
 		RenderSetup
 			.builder(SevenElementsRenderPipelines.TRIANGLES)
-			.outlineMode(OutlineMode.NONE)
-			.build()
+			.setOutline(OutlineProperty.NONE)
+			.createRenderSetup()
 	);
 
-	private static final RenderLayer QUADS = RenderLayer.of(
+	private static final RenderType QUADS = RenderType.create(
 		"seven-elements:quads",
 		RenderSetup
 			.builder(SevenElementsRenderPipelines.QUADS)
-			.outlineMode(OutlineMode.NONE)
-			.build()
+			.setOutline(OutlineProperty.NONE)
+			.createRenderSetup()
 	);
 
-	private static final RenderLayer RULER_LINES = RenderLayer.of(
+	private static final RenderType RULER_LINES = RenderType.create(
 		"seven-elements:ruler_lines",
 		RenderSetup
 			.builder(SevenElementsRenderPipelines.LINES)
-			.outlineMode(OutlineMode.NONE)
-			.build()
+			.setOutline(OutlineProperty.NONE)
+			.createRenderSetup()
 	);
 
-	private static final Function<Identifier, RenderLayer> ELEMENTS = Util.memoize(
+	private static final Function<Identifier, RenderType> ELEMENTS = Util.memoize(
 		texture -> {
-			return RenderLayer.of(
+			return RenderType.create(
 				"seven-elements:elements",
 				RenderSetup
 					.builder(SevenElementsRenderPipelines.ELEMENTS)
-					.outlineMode(OutlineMode.NONE)
-					.texture("Sampler0", texture)
-					.build()
+					.setOutline(OutlineProperty.NONE)
+					.withTexture("Sampler0", texture)
+					.createRenderSetup()
 			);
 		}
 	);
 
-	private static final RenderLayer WORLD_TEXT = RenderLayer.of(
+	private static final RenderType WORLD_TEXT = RenderType.create(
 		"seven-elements:world/text",
 		RenderSetup
 			.builder(SevenElementsRenderPipelines.WORLD_TEXT)
-			.outlineMode(OutlineMode.NONE)
-			.build()
+			.setOutline(OutlineProperty.NONE)
+			.createRenderSetup()
 	);
 
-	private static final RenderLayer CHARGE_LINE = RenderLayer.of(
+	private static final RenderType CHARGE_LINE = RenderType.create(
 		"seven-elements:world/charge_line",
 		RenderSetup
 			.builder(SevenElementsRenderPipelines.CHARGE_LINE)
-			.outlineMode(OutlineMode.NONE)
-			.build()
+			.setOutline(OutlineProperty.NONE)
+			.createRenderSetup()
 	);
 
-	private static final RenderLayer SPHERE = RenderLayer.of(
+	private static final RenderType SPHERE = RenderType.create(
 		"seven-elements:sphere",
 		RenderSetup
 			.builder(SevenElementsRenderPipelines.SPHERE)
-			.outlineMode(OutlineMode.NONE)
-			.build()
+			.setOutline(OutlineProperty.NONE)
+			.createRenderSetup()
 	);
 
-	private static final SequencedMap<RenderLayer, BufferAllocator> WORLD_TEXT_SEQUENCED_MAP = Util.make(
+	private static final SequencedMap<RenderType, ByteBufferBuilder> WORLD_TEXT_SEQUENCED_MAP = Util.make(
 		new Object2ObjectLinkedOpenHashMap<>(), map -> {
 			map.put(SevenElementsRenderLayer.WORLD_TEXT, SevenElementsRenderer.createAllocator(786432));
 		}
 	);
 
-	private static final VertexConsumerProvider.Immediate WORLD_TEXT_IMMEDIATE = VertexConsumerProvider.immediate(WORLD_TEXT_SEQUENCED_MAP, SevenElementsRenderer.createAllocator(1536));
+	private static final MultiBufferSource.BufferSource WORLD_TEXT_IMMEDIATE = MultiBufferSource.immediateWithBuffers(WORLD_TEXT_SEQUENCED_MAP, SevenElementsRenderer.createAllocator(1536));
 
-	public static RenderLayer getTriangles() {
+	public static RenderType getTriangles() {
 		return SevenElementsRenderLayer.TRIANGLES;
 	}
 
-	public static RenderLayer getQuads() {
+	public static RenderType getQuads() {
 		return SevenElementsRenderLayer.QUADS;
 	}
 
-	public static RenderLayer getLines() {
+	public static RenderType getLines() {
 		return SevenElementsRenderLayer.RULER_LINES;
 	}
 
-	public static Function<Identifier, RenderLayer> getElements() {
+	public static Function<Identifier, RenderType> getElements() {
 		return SevenElementsRenderLayer.ELEMENTS;
 	}
 
-	public static RenderLayer getElements(Identifier texture) {
+	public static RenderType getElements(Identifier texture) {
 		return SevenElementsRenderLayer.ELEMENTS.apply(texture);
 	}
 
-	public static RenderLayer getWorldText() {
+	public static RenderType getWorldText() {
 		return SevenElementsRenderLayer.WORLD_TEXT;
 	}
 
-	public static RenderLayer getChargeLine() {
+	public static RenderType getChargeLine() {
 		return SevenElementsRenderLayer.CHARGE_LINE;
 	}
 
-	public static RenderLayer getSphere() {
+	public static RenderType getSphere() {
 		return SevenElementsRenderLayer.SPHERE;
 	}
 
-	public static VertexConsumerProvider.Immediate getWorldTextImmediate() {
+	public static MultiBufferSource.BufferSource getWorldTextImmediate() {
 		return WORLD_TEXT_IMMEDIATE;
 	}
 }

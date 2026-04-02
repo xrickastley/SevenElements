@@ -16,12 +16,12 @@ import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.storage.ReadView;
-import net.minecraft.storage.WriteView;
-import net.minecraft.text.Text;
-import net.minecraft.util.Uuids;
-import net.minecraft.util.dynamic.Codecs;
+import net.minecraft.core.UUIDUtil;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /**
  * A class representing an Elemental Application for an entity.
@@ -49,7 +49,7 @@ public abstract sealed class ElementalApplication permits DurationElementalAppli
 
 		this.gaugeUnits = gaugeUnits;
 		this.currentGauge = gaugeUnits;
-		this.appliedAt = entity.getEntityWorld().getTime();
+		this.appliedAt = entity.level().getGameTime();
 	}
 
 	/**
@@ -90,7 +90,7 @@ public abstract sealed class ElementalApplication permits DurationElementalAppli
 	 * Gets the number of ticks this Elemental Application has been applied for.
 	 */
 	public long getAppliedTicks() {
-		return this.entity.getEntityWorld().getTime() - this.appliedAt;
+		return this.entity.level().getGameTime() - this.appliedAt;
 	}
 
 	/**
@@ -101,29 +101,29 @@ public abstract sealed class ElementalApplication permits DurationElementalAppli
 
 	public abstract int getRemainingTicks();
 
-	public Text getText() {
+	public Component getText() {
 		return this.getText(GAUGE_UNIT_FORMAT, DURATION_FORMAT);
 	}
 
-	public Text getText(@Nullable String gaugeFormat) {
+	public Component getText(@Nullable String gaugeFormat) {
 		return this.getText(
 			ClassInstanceUtil.mapOrNull(gaugeFormat, DecimalFormat::new),
 			DURATION_FORMAT
 		);
 	}
 
-	public Text getText(@Nullable DecimalFormat gaugeFormat) {
+	public Component getText(@Nullable DecimalFormat gaugeFormat) {
 		return this.getText(gaugeFormat, DURATION_FORMAT);
 	}
 
-	public Text getText(@Nullable String gaugeFormat, @Nullable String durationFormat) {
+	public Component getText(@Nullable String gaugeFormat, @Nullable String durationFormat) {
 		return this.getText(
 			ClassInstanceUtil.<String, DecimalFormat>mapOrNull(gaugeFormat, DecimalFormat::new),
 			ClassInstanceUtil.<String, DecimalFormat>mapOrNull(durationFormat, DecimalFormat::new)
 		);
 	}
 
-	public abstract Text getText(@Nullable DecimalFormat gaugeFormat, @Nullable DecimalFormat durationFormat);
+	public abstract Component getText(@Nullable DecimalFormat gaugeFormat, @Nullable DecimalFormat durationFormat);
 
 	/**
 	 * Returns whether this Elemental Application is using Gauge Units.
@@ -196,17 +196,17 @@ public abstract sealed class ElementalApplication permits DurationElementalAppli
 
 	public abstract ElementalApplication asNonAura();
 
-	public void writeData(WriteView view) {
+	public void writeData(ValueOutput view) {
 		view.putString("Type", this.type.toString());
 		view.putString("Element", this.element.toString());
-		view.put("UUID", Uuids.CODEC, uuid);
+		view.store("UUID", UUIDUtil.AUTHLIB_CODEC, uuid);
 		view.putBoolean("IsAura", this.isAura);
 		view.putDouble("GaugeUnits", this.gaugeUnits);
 		view.putDouble("CurrentGauge", this.currentGauge);
 		view.putLong("AppliedAt", this.appliedAt);
 	}
 
-	public void updateFromData(ReadView view, long syncedAt) {
+	public void updateFromData(ValueInput view, long syncedAt) {
 		final ElementalApplication application = ElementalApplications.fromData(entity, view, syncedAt);
 
 		if (!application.uuid.equals(this.uuid)) throw new ElementalApplicationOperationException(Operation.INVALID_UUID_VALUES, this, application);
@@ -226,7 +226,7 @@ public abstract sealed class ElementalApplication permits DurationElementalAppli
 		// Has a specified amount of Gauge Units that are removed after DURATION.
 		DURATION;
 
-		public static final Codec<Type> CODEC = Codecs.NON_EMPTY_STRING.xmap(Type::valueOf, Type::toString);
+		public static final Codec<Type> CODEC = ExtraCodecs.NON_EMPTY_STRING.xmap(Type::valueOf, Type::toString);
 	}
 
 	public static final class Builder {
@@ -248,19 +248,19 @@ public abstract sealed class ElementalApplication permits DurationElementalAppli
 			this.isAura = true;
 		}
 
-		public static Text getText(Builder builder) {
+		public static Component getText(Builder builder) {
 			return getText(builder, GAUGE_UNIT_FORMAT, DURATION_FORMAT);
 		}
 
-		public static Text getText(Builder builder, @Nullable String gaugeFormat) {
+		public static Component getText(Builder builder, @Nullable String gaugeFormat) {
 			return getText(builder, ClassInstanceUtil.mapOrNull(gaugeFormat, DecimalFormat::new), DURATION_FORMAT);
 		}
 
-		public static Text getText(Builder builder, @Nullable DecimalFormat gaugeFormat) {
+		public static Component getText(Builder builder, @Nullable DecimalFormat gaugeFormat) {
 			return getText(builder, gaugeFormat, DURATION_FORMAT);
 		}
 
-		public static Text getText(Builder builder, @Nullable String gaugeFormat, @Nullable String durationFormat) {
+		public static Component getText(Builder builder, @Nullable String gaugeFormat, @Nullable String durationFormat) {
 			return getText(
 				builder,
 				ClassInstanceUtil.<String, DecimalFormat>mapOrNull(gaugeFormat, DecimalFormat::new),
@@ -268,14 +268,14 @@ public abstract sealed class ElementalApplication permits DurationElementalAppli
 			);
 		}
 
-		public static Text getText(Builder builder, @Nullable DecimalFormat gaugeFormat, @Nullable DecimalFormat durationFormat) {
+		public static Component getText(Builder builder, @Nullable DecimalFormat gaugeFormat, @Nullable DecimalFormat durationFormat) {
 			gaugeFormat = JavaScriptUtil.nullishCoalesing(gaugeFormat, GAUGE_UNIT_FORMAT);
 			durationFormat = JavaScriptUtil.nullishCoalesing(durationFormat, DURATION_FORMAT);
 
 			return TextHelper.color(
 				builder.type == Type.GAUGE_UNIT
-					? Text.translatable("formats.seven-elements.elemental_application.gauge_unit", gaugeFormat.format(builder.gaugeUnits), builder.element.getString())
-					: Text.translatable("formats.seven-elements.elemental_application.duration", gaugeFormat.format(builder.gaugeUnits), builder.element.getString(), durationFormat.format(builder.duration / 20.0)),
+					? Component.translatable("formats.seven-elements.elemental_application.gauge_unit", gaugeFormat.format(builder.gaugeUnits), builder.element.getString())
+					: Component.translatable("formats.seven-elements.elemental_application.duration", gaugeFormat.format(builder.gaugeUnits), builder.element.getString(), durationFormat.format(builder.duration / 20.0)),
 				builder.element.getDamageColor()
 			);
 		}

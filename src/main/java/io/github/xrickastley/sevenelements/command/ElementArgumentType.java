@@ -16,15 +16,15 @@ import java.util.function.Function;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.util.Functions;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 public class ElementArgumentType implements ArgumentType<Element> {
 	public static ElementArgumentType element() {
 		return new ElementArgumentType();
 	}
 
-	public static Element getElement(final CommandContext<ServerCommandSource> context, final String name) throws CommandSyntaxException {
+	public static Element getElement(final CommandContext<CommandSourceStack> context, final String name) throws CommandSyntaxException {
 		return context.getArgument(name, Element.class);
 	}
 
@@ -42,7 +42,7 @@ public class ElementArgumentType implements ArgumentType<Element> {
 	}
 
 	public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder) {
-		return CommandSource.suggestMatching(
+		return SharedSuggestionProvider.suggest(
 			ElementArgumentType.map(Element.values(), Functions.compose(Element::toString, String::toLowerCase)),
 			builder
 		);

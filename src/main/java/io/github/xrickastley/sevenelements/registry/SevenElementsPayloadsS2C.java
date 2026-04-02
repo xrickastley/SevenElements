@@ -9,9 +9,9 @@ import io.github.xrickastley.sevenelements.networking.ShowElementalReactionS2CPa
 import io.github.xrickastley.sevenelements.networking.SyncBossBarEntityS2CPayload;
 
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 
 public final class SevenElementsPayloadsS2C {
 	public static void register() {
@@ -24,7 +24,7 @@ public final class SevenElementsPayloadsS2C {
 		register(FinishElementalInfusionS2CPayload.ID, FinishElementalInfusionS2CPayload.CODEC);
 	}
 
-	public static <T extends CustomPayload> void register(CustomPayload.Id<T> id, PacketCodec<RegistryByteBuf, T> codec) {
+	public static <T extends CustomPacketPayload> void register(CustomPacketPayload.Type<T> id, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
 		PayloadTypeRegistry.playS2C().register(id, codec);
 	}
 }

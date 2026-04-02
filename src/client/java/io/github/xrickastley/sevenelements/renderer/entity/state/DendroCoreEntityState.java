@@ -2,7 +2,7 @@ package io.github.xrickastley.sevenelements.renderer.entity.state;
 
 import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
 
-import net.minecraft.client.render.entity.state.LivingEntityRenderState;
+import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 
 public class DendroCoreEntityState extends LivingEntityRenderState {
 	public boolean normal;

@@ -4,64 +4,64 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.command.argument.IdentifierArgumentType;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.boss.CommandBossBar;
-import net.minecraft.server.command.CommandManager;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.bossevents.CustomBossEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
 
 public class BossBarCommand {
-	public static void register(CommandDispatcher<ServerCommandSource> dispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(
-			CommandManager
+			Commands
 				.literal("bossbar")
-				.requires(CommandManager.requirePermissionLevel(CommandManager.GAMEMASTERS_CHECK))
+				.requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
 				.then(
-					CommandManager
+					Commands
 						.literal("set")
 						.then(
-							CommandManager
-								.argument("id", IdentifierArgumentType.identifier())
-								.suggests(net.minecraft.server.command.BossBarCommand.SUGGESTION_PROVIDER)
+							Commands
+								.argument("id", IdentifierArgument.id())
+								.suggests(net.minecraft.server.commands.BossBarCommands.SUGGEST_BOSS_BAR)
 								.then(
-									CommandManager
+									Commands
 										.literal("entity")
 										.then(
-											CommandManager
-												.argument("entity", EntityArgumentType.entity())
-												.executes(c -> BossBarCommand.setEntity(c, net.minecraft.server.command.BossBarCommand.getBossBar(c)))
+											Commands
+												.argument("entity", EntityArgument.entity())
+												.executes(c -> BossBarCommand.setEntity(c, net.minecraft.server.commands.BossBarCommands.getBossBar(c)))
 										)
 								)
 						)
 				)
 				.then(
-					CommandManager
+					Commands
 						.literal("get")
 						.then(
-							CommandManager
-								.argument("id", IdentifierArgumentType.identifier())
-								.suggests(net.minecraft.server.command.BossBarCommand.SUGGESTION_PROVIDER)
+							Commands
+								.argument("id", IdentifierArgument.id())
+								.suggests(net.minecraft.server.commands.BossBarCommands.SUGGEST_BOSS_BAR)
 								.then(
-									CommandManager
+									Commands
 										.literal("entity")
-										.executes(c -> BossBarCommand.getEntity(c, net.minecraft.server.command.BossBarCommand.getBossBar(c)))
+										.executes(c -> BossBarCommand.getEntity(c, net.minecraft.server.commands.BossBarCommands.getBossBar(c)))
 								)
 						)
 				)
 		);
 	}
 
-	private static int setEntity(CommandContext<ServerCommandSource> context, CommandBossBar bossBar) throws CommandSyntaxException {
-		final Entity entity = EntityArgumentType.getEntity(context, "entity");
+	private static int setEntity(CommandContext<CommandSourceStack> context, CustomBossEvent bossBar) throws CommandSyntaxException {
+		final Entity entity = EntityArgument.getEntity(context, "entity");
 
 		if (!(entity instanceof final LivingEntity target)) {
 			context
 				.getSource()
-				.sendError(Text.translatable("commands.element.failed.entity", entity.getDisplayName()).formatted(Formatting.RED));
+				.sendFailure(Component.translatable("commands.element.failed.entity", entity.getDisplayName()).withStyle(ChatFormatting.RED));
 
 			return 0;
 		}
@@ -70,22 +70,22 @@ public class BossBarCommand {
 
 		context
 			.getSource()
-			.sendFeedback(() -> Text.translatable("commands.bossbar.set.entity.success", bossBar.toHoverableText(), target.getDisplayName()), true);
+			.sendSuccess(() -> Component.translatable("commands.bossbar.set.entity.success", bossBar.getDisplayName(), target.getDisplayName()), true);
 
 		return 1;
 	}
 
-	private static int getEntity(CommandContext<ServerCommandSource> context, CommandBossBar bossBar) throws CommandSyntaxException {
+	private static int getEntity(CommandContext<CommandSourceStack> context, CustomBossEvent bossBar) throws CommandSyntaxException {
 		final LivingEntity entity = bossBar.sevenelements$getEntity();
 
-		if (entity != null && entity.isDead()) bossBar.sevenelements$setEntity(null);
+		if (entity != null && entity.isDeadOrDying()) bossBar.sevenelements$setEntity(null);
 
 		context
 			.getSource()
-			.sendFeedback(
+			.sendSuccess(
 				() -> entity != null
-					? Text.translatable("commands.bossbar.get.entity.success", bossBar.toHoverableText(), entity.getDisplayName())
-					: Text.translatable("commands.bossbar.get.entity.none", bossBar.toHoverableText()),
+					? Component.translatable("commands.bossbar.get.entity.success", bossBar.getDisplayName(), entity.getDisplayName())
+					: Component.translatable("commands.bossbar.get.entity.none", bossBar.getDisplayName()),
 				true
 			);
 

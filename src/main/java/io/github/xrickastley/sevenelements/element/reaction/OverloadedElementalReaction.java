@@ -11,20 +11,20 @@ import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
-import io.github.xrickastley.sevenelements.mixin.WorldAccessor;
+import io.github.xrickastley.sevenelements.mixin.LevelAccessor;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 import io.github.xrickastley.sevenelements.util.NonEntityDamagingExplosion;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.network.packet.s2c.play.ExplosionS2CPacket;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.world.explosion.Explosion.DestructionType;
-import net.minecraft.world.explosion.ExplosionBehavior;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.network.protocol.game.ClientboundExplodePacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Explosion.BlockInteraction;
+import net.minecraft.world.level.ExplosionDamageCalculator;
 
 public class OverloadedElementalReaction extends ElementalReaction {
 	OverloadedElementalReaction() {
@@ -39,20 +39,20 @@ public class OverloadedElementalReaction extends ElementalReaction {
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.level() instanceof final ServerLevel world)) return;
 
 		final float power = 3;
 
 		final NonEntityDamagingExplosion explosion = new NonEntityDamagingExplosion(
 			world,
 			null,
-			new ExplosionBehavior(),
-			entity.getEntityPos(),
+			new ExplosionDamageCalculator(),
+			entity.position(),
 			power,
 			true,
-			world.getGameRules().getValue(SevenElementsGameRules.OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS)
-				? DestructionType.DESTROY
-				: DestructionType.KEEP
+			world.getGameRules().get(SevenElementsGameRules.OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS)
+				? BlockInteraction.DESTROY
+				: BlockInteraction.KEEP
 		);
 
 		explosion.explode();
@@ -60,18 +60,18 @@ public class OverloadedElementalReaction extends ElementalReaction {
 			.getAffectedEntities()
 			.forEach(e -> damage(e, origin));
 
-		for (ServerPlayerEntity serverPlayerEntity : world.getPlayers()) {
-			if (serverPlayerEntity.squaredDistanceTo(entity.getEntityPos()) >= 4096.0) continue;
+		for (ServerPlayer serverPlayerEntity : world.players()) {
+			if (serverPlayerEntity.distanceToSqr(entity.position()) >= 4096.0) continue;
 
-			serverPlayerEntity.networkHandler.sendPacket(
-				new ExplosionS2CPacket(
-					entity.getEntityPos(),
-					explosion.getPower(),
+			serverPlayerEntity.connection.send(
+				new ClientboundExplodePacket(
+					entity.position(),
+					explosion.radius(),
 					0,
 					Optional.ofNullable(explosion.getKnockbackByPlayer().get(serverPlayerEntity)),
 					explosion.isSmall() ? ParticleTypes.EXPLOSION : ParticleTypes.EXPLOSION_EMITTER,
-					SoundEvents.ENTITY_GENERIC_EXPLODE,
-					WorldAccessor.getExplosionBlockParticles()
+					SoundEvents.GENERIC_EXPLODE,
+					LevelAccessor.getExplosionBlockParticles()
 				)
 			);
 		}
@@ -80,13 +80,13 @@ public class OverloadedElementalReaction extends ElementalReaction {
 	private void damage(Entity entity, @Nullable Entity origin) {
 		if (!(entity instanceof final LivingEntity living)) return;
 
-		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.level() instanceof final ServerLevel world)) return;
 
 		final ElementalApplication application = ElementalApplications.gaugeUnits(living, Element.PYRO, 0);
 		final ElementalDamageSource source = new ElementalDamageSource(
 			entity
-				.getDamageSources()
-				.create(SevenElementsDamageTypes.OVERLOADED, origin),
+				.damageSources()
+				.source(SevenElementsDamageTypes.OVERLOADED, origin),
 			application,
 			InternalCooldownContext.ofNone(entity)
 		).shouldApplyDMGBonus(false);
@@ -95,6 +95,6 @@ public class OverloadedElementalReaction extends ElementalReaction {
 
 		if (entity == origin) amount = 0;
 
-		entity.damage(world, source, amount);
+		entity.hurtServer(world, source, amount);
 	}
 }

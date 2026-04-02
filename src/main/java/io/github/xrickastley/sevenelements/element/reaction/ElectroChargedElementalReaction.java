@@ -21,9 +21,9 @@ import io.github.xrickastley.sevenelements.util.TextHelper;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.server.world.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 
 public class ElectroChargedElementalReaction extends ElementalReaction {
 	ElectroChargedElementalReaction() {
@@ -41,8 +41,8 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 	public boolean isTriggerable(LivingEntity entity) {
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 
-		final ElementalApplication applicationAE = component.getElementalApplication(auraElement.getLeft());
-		final ElementalApplication applicationTE = component.getElementalApplication(triggeringElement.getLeft());
+		final ElementalApplication applicationAE = component.getElementalApplication(auraElement.getA());
+		final ElementalApplication applicationTE = component.getElementalApplication(triggeringElement.getA());
 
 		// We need both Elements to exist for Electro-Charged.
 		return applicationAE != null && !applicationAE.isEmpty()
@@ -53,11 +53,11 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 
 	@Override
 	public boolean trigger(LivingEntity entity, @Nullable LivingEntity origin) {
-		if (!isTriggerable(entity) || entity.getEntityWorld().isClient()) return false;
+		if (!isTriggerable(entity) || entity.level().isClientSide()) return false;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
-		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getLeft());
-		final ElementalApplication triggeringElement = component.getElementalApplication(this.triggeringElement.getLeft());
+		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getA());
+		final ElementalApplication triggeringElement = component.getElementalApplication(this.triggeringElement.getA());
 
 		final double reducedGauge = auraElement.reduceGauge(0.4);
 		triggeringElement.reduceGauge(reducedGauge);
@@ -69,7 +69,7 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
+		if (!(entity.level() instanceof final ServerLevel world)) return;
 
 		final ElementComponent entityComponent = ElementComponent.KEY.get(entity);
 
@@ -87,13 +87,13 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 			final float damage = ElementalReaction.getReactionDamage(entity, 2.0);
 			final ElementalDamageSource source = new ElementalDamageSource(
 				entity
-					.getDamageSources()
-					.create(SevenElementsDamageTypes.ELECTRO_CHARGED, entity, origin),
+					.damageSources()
+					.source(SevenElementsDamageTypes.ELECTRO_CHARGED, entity, origin),
 				ElementalApplications.gaugeUnits(target, Element.ELECTRO, 0),
 				InternalCooldownContext.ofNone(origin)
 			).shouldApplyDMGBonus(false);
 
-			target.damage(world, source, damage);
+			target.hurtServer(world, source, damage);
 
 			ElementComponent.KEY
 				.get(target)
@@ -108,9 +108,9 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 
 		final ShowElectroChargeS2CPayload packet = new ShowElectroChargeS2CPayload(mainTarget, otherTargets);
 
-		if (mainTarget instanceof final ServerPlayerEntity serverPlayer) ServerPlayNetworking.send(serverPlayer, packet);
+		if (mainTarget instanceof final ServerPlayer serverPlayer) ServerPlayNetworking.send(serverPlayer, packet);
 
-		for (final ServerPlayerEntity otherPlayer : PlayerLookup.tracking(mainTarget)) {
+		for (final ServerPlayer otherPlayer : PlayerLookup.tracking(mainTarget)) {
 			if (otherPlayer.getId() == mainTarget.getId()) continue;
 
 			ServerPlayNetworking.send(otherPlayer, packet);
@@ -123,7 +123,7 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 		at = @At("HEAD")
 	)
 	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity) {
-		if (!ElementalReactions.ELECTRO_CHARGED.isTriggerable(entity) || entity.getEntityWorld().isClient() || entity.isDead()) return;
+		if (!ElementalReactions.ELECTRO_CHARGED.isTriggerable(entity) || entity.level().isClientSide() || entity.isDeadOrDying()) return;
 
 		ElementalReactions.ELECTRO_CHARGED.trigger(entity);
 

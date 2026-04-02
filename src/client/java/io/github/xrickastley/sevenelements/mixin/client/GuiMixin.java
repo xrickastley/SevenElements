@@ -21,46 +21,46 @@ import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines
 import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.Functions;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.InGameHud;
-import net.minecraft.client.render.RenderTickCounter;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profilers;
+import net.minecraft.client.DeltaTracker;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.profiling.Profiler;
+import net.minecraft.world.entity.player.Player;
 
-@Mixin(InGameHud.class)
-public class InGameHudMixin {
+@Mixin(Gui.class)
+public class GuiMixin {
 	@Shadow
 	@Final
-	private MinecraftClient client;
+	private Minecraft minecraft;
 
 	@Shadow
 	@Final
-	private static Identifier POWDER_SNOW_OUTLINE;
+	private static Identifier POWDER_SNOW_OUTLINE_LOCATION;
 
 	@Shadow
-	private void renderOverlay(DrawContext context, Identifier texture, float opacity) {
+	private void renderTextureOverlay(GuiGraphics context, Identifier texture, float opacity) {
 		throw new AssertionError();
 	}
 
 	@Inject(
-		method = "renderStatusBars",
+		method = "renderPlayerHealth",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/gui/hud/InGameHud;renderArmor(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/entity/player/PlayerEntity;IIII)V",
+			target = "Lnet/minecraft/client/gui/Gui;renderArmor(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/entity/player/Player;IIII)V",
 			shift = At.Shift.AFTER
 		)
 	)
-	private void renderAppliedElements(DrawContext context, CallbackInfo ci, @Local PlayerEntity player, @Local(ordinal = 4) int y, @Local(ordinal = 2) int x, @Local(ordinal = 6) int p, @Local(ordinal = 7) int lines) {
-		Profilers.get().swap("seven-elements:elements");
+	private void renderAppliedElements(GuiGraphics context, CallbackInfo ci, @Local Player player, @Local(ordinal = 4) int y, @Local(ordinal = 2) int x, @Local(ordinal = 6) int p, @Local(ordinal = 7) int lines) {
+		Profiler.get().popPush("seven-elements:elements");
 
 		y -= (p - 1) * lines;
 
 		int offset = 1;
 
-		if (player.getArmor() > 0) offset++;
+		if (player.getArmorValue() > 0) offset++;
 
 		y -= (10 * (offset));
 
@@ -73,7 +73,7 @@ public class InGameHudMixin {
 			.map(Functions.compose(ElementalApplication::getElement, Element::getTexture))
 			.filter(existing::add);
 
-		if (component.getCrystallizeShield() != null && component.getCrystallizeShield().getRight() > 0)
+		if (component.getCrystallizeShield() != null && component.getCrystallizeShield().getB() > 0)
 			appliedElements.add(SevenElements.identifier("textures/status_effect/defense.png"));
 
 		for (int i = 0; i < appliedElements.length(); i++) {
@@ -81,16 +81,16 @@ public class InGameHudMixin {
 			final int x1 = x + (i * 10);
 
 			context.sevenelements$drawCircle(SevenElementsRenderPipelines.CIRCLE, x1 + 4.5f, y + 4.5f, 4.5f, 0x7F646464);
-			context.drawTexture(RenderPipelines.GUI_TEXTURED, texture, x1, y, 0, 0, 9, 9, 9, 9);
+			context.blit(RenderPipelines.GUI_TEXTURED, texture, x1, y, 0, 0, 9, 9, 9, 9);
 		}
 	}
 
 	@Inject(
-		method = "renderMiscOverlays",
+		method = "renderCameraOverlays",
 		at = @At("TAIL")
 	)
-	private void renderFrozenOverlay(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-		if (client.player != null && client.player.hasStatusEffect(SevenElementsStatusEffects.FROZEN))
-			this.renderOverlay(context, POWDER_SNOW_OUTLINE, 1.0F);
+	private void renderFrozenOverlay(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+		if (minecraft.player != null && minecraft.player.hasEffect(SevenElementsStatusEffects.FROZEN))
+			this.renderTextureOverlay(context, POWDER_SNOW_OUTLINE_LOCATION, 1.0F);
 	}
 }

@@ -16,38 +16,39 @@ import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
-@Mixin(value = PlayerEntity.class, priority = Integer.MIN_VALUE)
-public abstract class PrioritizedPlayerEntityMixin extends LivingEntity {
-	public PrioritizedPlayerEntityMixin(final World world, final BlockPos pos, final float yaw, final GameProfile gameProfile) {
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+
+@Mixin(value = Player.class, priority = Integer.MIN_VALUE)
+public abstract class PrioritizedPlayerMixin extends LivingEntity {
+	public PrioritizedPlayerMixin(final Level world, final BlockPos pos, final float yaw, final GameProfile gameProfile) {
 		super(EntityType.PLAYER, world);
 
 		throw new AssertionError();
 	}
 
 	@Inject(
-		method = "isBlockBreakingRestricted",
+		method = "blockActionRestricted",
 		at = @At("HEAD"),
 		cancellable = true,
 		order = Integer.MIN_VALUE // Prioritized since Frozen **MUST** disable movements and actions.
 	)
 	private void frozenPreventsBreakingBlocks(CallbackInfoReturnable<Boolean> info) {
-		if (this.hasStatusEffect(SevenElementsStatusEffects.FROZEN)) info.setReturnValue(true);
+		if (this.hasEffect(SevenElementsStatusEffects.FROZEN)) info.setReturnValue(true);
 	}
 
 	@ModifyExpressionValue(
 		method = "attack",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/player/PlayerEntity;getDamageSource(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/entity/damage/DamageSource;"
+			target = "Lnet/minecraft/world/entity/player/Player;createAttackSource(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/damagesource/DamageSource;"
 		)
 	)
 	public DamageSource applyPlayerElementalInfusions(DamageSource source, @Local(argsOnly = true) Entity target) {
@@ -55,12 +56,12 @@ public abstract class PrioritizedPlayerEntityMixin extends LivingEntity {
 			? ElementComponent.applyElementalInfusions(source, livingTarget).shouldInfuse(false)
 			: source;
 	}
-	
+
 	@ModifyExpressionValue(
-		method = "pierce",
+		method = "stabAttack",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/entity/player/PlayerEntity;getDamageSource(Lnet/minecraft/item/ItemStack;)Lnet/minecraft/entity/damage/DamageSource;"
+			target = "Lnet/minecraft/world/entity/player/Player;createAttackSource(Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/damagesource/DamageSource;"
 		)
 	)
 	private DamageSource applyPlayerElementalInfusionsOnPierce(DamageSource source, @Local(argsOnly = true) Entity target, @Local ItemStack itemStack) {

@@ -12,17 +12,17 @@ import io.github.xrickastley.sevenelements.entity.SevenElementsEntityTypes;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.MathHelper2;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 
 public abstract sealed class AbstractCrystallizeElementalReaction
 	extends ElementalReaction
@@ -36,48 +36,48 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		final World world = entity.getEntityWorld();
+		final Level world = entity.level();
 
-		if (!(world instanceof final ServerWorld serverWorld)) return;
+		if (!(world instanceof final ServerLevel serverWorld)) return;
 
-		final Vec3d spawnPos = this.clampToGround(entity.getEntityWorld(), this.toAbsolutePos(entity, new Vec3d(0, 0, 1)));
+		final Vec3 spawnPos = this.clampToGround(entity.level(), this.toAbsolutePos(entity, new Vec3(0, 0, 1)));
 		final CrystallizeShardEntity crystallizeShard = new CrystallizeShardEntity(SevenElementsEntityTypes.CRYSTALLIZE_SHARD, serverWorld, this.getAuraElement(), origin);
 
-		crystallizeShard.setPosition(spawnPos);
-		serverWorld.spawnNewEntityAndPassengers(crystallizeShard);
+		crystallizeShard.setPos(spawnPos);
+		serverWorld.tryAddFreshEntityWithPassengers(crystallizeShard);
 	}
 
 	// Taken from LookingPosArgument#toAbsolutePos
-	private Vec3d toAbsolutePos(final LivingEntity entity, final Vec3d lookingPos) {
-		final Vec2f vec2f = entity.getRotationClient();
-		final Vec3d vec3d = entity.getEntityPos();
+	private Vec3 toAbsolutePos(final LivingEntity entity, final Vec3 lookingPos) {
+		final Vec2 vec2f = entity.getRotationVector();
+		final Vec3 vec3d = entity.position();
 
-		float f = MathHelper.cos((vec2f.y + 90.0F) * 0.017453292F);
-		float g = MathHelper.sin((vec2f.y + 90.0F) * 0.017453292F);
-		float h = MathHelper.cos(-vec2f.x * 0.017453292F);
-		float i = MathHelper.sin(-vec2f.x * 0.017453292F);
-		float j = MathHelper.cos((-vec2f.x + 90.0F) * 0.017453292F);
-		float k = MathHelper.sin((-vec2f.x + 90.0F) * 0.017453292F);
-		Vec3d vec3d2 = new Vec3d(f * h, i, g * h);
-		Vec3d vec3d3 = new Vec3d(f * j, k, g * j);
-		Vec3d vec3d4 = vec3d2.crossProduct(vec3d3).multiply(-1.0);
+		float f = Mth.cos((vec2f.y + 90.0F) * 0.017453292F);
+		float g = Mth.sin((vec2f.y + 90.0F) * 0.017453292F);
+		float h = Mth.cos(-vec2f.x * 0.017453292F);
+		float i = Mth.sin(-vec2f.x * 0.017453292F);
+		float j = Mth.cos((-vec2f.x + 90.0F) * 0.017453292F);
+		float k = Mth.sin((-vec2f.x + 90.0F) * 0.017453292F);
+		Vec3 vec3d2 = new Vec3(f * h, i, g * h);
+		Vec3 vec3d3 = new Vec3(f * j, k, g * j);
+		Vec3 vec3d4 = vec3d2.cross(vec3d3).scale(-1.0);
 		double d = vec3d2.x * lookingPos.z + vec3d3.x * lookingPos.y + vec3d4.x * lookingPos.x;
 		double e = vec3d2.y * lookingPos.z + vec3d3.y * lookingPos.y + vec3d4.y * lookingPos.x;
 		double l = vec3d2.z * lookingPos.z + vec3d3.z * lookingPos.y + vec3d4.z * lookingPos.x;
-		return new Vec3d(vec3d.x + d, vec3d.y + e, vec3d.z + l);
+		return new Vec3(vec3d.x + d, vec3d.y + e, vec3d.z + l);
 	}
 
-	private Vec3d clampToGround(World world, Vec3d pos) {
+	private Vec3 clampToGround(Level world, Vec3 pos) {
 		final BlockPos originPos = MathHelper2.asBlockPos(pos);
 		final BlockState blockState = world.getBlockState(originPos);
 
 		final Optional<BlockPos> blockPos = AIR_BLOCKS.contains(blockState.getBlock())
-			? this.scan(world, originPos, new Vec3i(0, -1, 0), Functions.composePredicate(BlockState::getBlock, AIR_BLOCKS::contains), bp -> bp.getY() >= world.getBottomY()).map(bp -> bp.add(0, 1, 0))
-			: this.scan(world, originPos, new Vec3i(0, +1, 0), Functions.composePredicate(BlockState::getBlock, Predicate.not(AIR_BLOCKS::contains)), bp -> bp.getY() <= world.getTopYInclusive());
+			? this.scan(world, originPos, new Vec3i(0, -1, 0), Functions.composePredicate(BlockState::getBlock, AIR_BLOCKS::contains), bp -> bp.getY() >= world.getMinY()).map(bp -> bp.offset(0, 1, 0))
+			: this.scan(world, originPos, new Vec3i(0, +1, 0), Functions.composePredicate(BlockState::getBlock, Predicate.not(AIR_BLOCKS::contains)), bp -> bp.getY() <= world.getMaxY());
 
 		final BlockPos finalBlockPos = blockPos.orElse(originPos);
 
-		return new Vec3d(pos.x, finalBlockPos.getY(), pos.z);
+		return new Vec3(pos.x, finalBlockPos.getY(), pos.z);
 	}
 
 	/**
@@ -95,13 +95,13 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 	 * @param blockPredicate The condition that must be fulfilled by the block at the specified position.
 	 * @param posPredicate The condition that must be fulfilled for a next iteration to execute.
 	 */
-	private Optional<BlockPos> scan(final World world, final BlockPos originPos, final Vec3i shift, final Predicate<BlockState> blockPredicate, final Predicate<BlockPos> posPredicate) {
+	private Optional<BlockPos> scan(final Level world, final BlockPos originPos, final Vec3i shift, final Predicate<BlockState> blockPredicate, final Predicate<BlockPos> posPredicate) {
 		BlockPos blockPos = originPos;
 		BlockState blockState = world.getBlockState(blockPos);
 
 		while (posPredicate.test(blockPos)) {
 			if (blockPredicate.test(blockState)) {
-				blockPos = blockPos.add(shift);
+				blockPos = blockPos.offset(shift);
 				blockState = world.getBlockState(blockPos);
 
 				continue;
@@ -109,7 +109,7 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 
 			final int diff = originPos.getY() - blockPos.getY();
 
-			return Optional.of(originPos.add(0, -diff, 0));
+			return Optional.of(originPos.offset(0, -diff, 0));
 		}
 
 		return Optional.empty();
