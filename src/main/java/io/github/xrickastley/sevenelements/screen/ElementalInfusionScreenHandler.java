@@ -7,6 +7,7 @@ import io.github.xrickastley.sevenelements.block.SevenElementsBlocks;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
+import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.InternalCooldownTag;
@@ -15,6 +16,7 @@ import io.github.xrickastley.sevenelements.networking.FinishElementalInfusionS2C
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.component.ComponentMap;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingResultInventory;
@@ -97,7 +99,7 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 		if (slot == null || !slot.hasStack()) return false;
 
 		final ItemStack stack = slot.getStack();
-		final Element element = ELEMENTS.get(RANDOM.nextInt(ELEMENTS.size()));
+		final Element element = this.generateElementalInfusion(stack);
 
 		ElementalInfusionComponent.applyInfusion(
 			stack,
@@ -119,6 +121,14 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 		SevenElementsCriteria.ELEMENTAL_INFUSION.trigger(serverPlayer, stack, element);
 
 		return true;
+	}
+
+	private Element generateElementalInfusion(final ItemStack stack) {
+		final ComponentMap components = stack.getComponents();
+
+		return components.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)
+			? components.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT).element()
+			: ELEMENTS.get(RANDOM.nextInt(ELEMENTS.size()));
 	}
 
 	public LockableSlot getResultSlot() {
