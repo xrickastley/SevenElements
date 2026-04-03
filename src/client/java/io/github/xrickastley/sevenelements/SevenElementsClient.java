@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.github.xrickastley.sevenelements.entity.SevenElementsEntityTypes;
-import io.github.xrickastley.sevenelements.events.WorldRenderEnd;
 import io.github.xrickastley.sevenelements.gui.screen.ingame.ElementalInfusionScreen;
 import io.github.xrickastley.sevenelements.networking.SevenElementsPacketsS2C;
 import io.github.xrickastley.sevenelements.networking.SyncBossBarEntityPayloadHandler;
@@ -19,7 +18,8 @@ import io.github.xrickastley.sevenelements.util.ClientConfig;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.entity.EntityRenderers;
 
@@ -41,16 +41,16 @@ public class SevenElementsClient implements ClientModInitializer {
 		SevenElementsPacketsS2C.registerHandler(SevenElementsClient.SPECIAL_EFFECTS_RENDERER);
 		SevenElementsPacketsS2C.registerHandler(SevenElementsClient.SYNC_BOSS_BAR_ENTITY_HANDLER);
 
-		WorldRenderEnd.EVENT.register(SevenElementsClient.SPECIAL_EFFECTS_RENDERER::render);
-		ClientTickEvents.START_WORLD_TICK.register(SevenElementsClient.SPECIAL_EFFECTS_RENDERER::tick);
+		LevelRenderEvents.END_MAIN.register(SevenElementsClient.SPECIAL_EFFECTS_RENDERER::render);
+		ClientTickEvents.START_LEVEL_TICK.register(SevenElementsClient.SPECIAL_EFFECTS_RENDERER::tick);
 
-		WorldRenderEnd.EVENT.register(SevenElementsClient.WORLD_TEXT_RENDERER::render);
-		ClientTickEvents.START_WORLD_TICK.register(SevenElementsClient.WORLD_TEXT_RENDERER::tick);
+		LevelRenderEvents.END_MAIN.register(SevenElementsClient.WORLD_TEXT_RENDERER::render);
+		ClientTickEvents.START_LEVEL_TICK.register(SevenElementsClient.WORLD_TEXT_RENDERER::tick);
 
 		EntityRenderers.register(SevenElementsEntityTypes.DENDRO_CORE, DendroCoreEntityRenderer::new);
 		EntityRenderers.register(SevenElementsEntityTypes.CRYSTALLIZE_SHARD, CrystallizeShardEntityRenderer::new);
-		EntityModelLayerRegistry.registerModelLayer(DendroCoreEntityModel.MODEL_LAYER, DendroCoreEntityModel::getTexturedModelData);
-		EntityModelLayerRegistry.registerModelLayer(CrystallizeShardEntityModel.MODEL_LAYER, CrystallizeShardEntityModel::getTexturedModelData);
+		ModelLayerRegistry.registerModelLayer(DendroCoreEntityModel.MODEL_LAYER, DendroCoreEntityModel::getTexturedModelData);
+		ModelLayerRegistry.registerModelLayer(CrystallizeShardEntityModel.MODEL_LAYER, CrystallizeShardEntityModel::getTexturedModelData);
 
 		SevenElementsPacketsS2C.register();
 

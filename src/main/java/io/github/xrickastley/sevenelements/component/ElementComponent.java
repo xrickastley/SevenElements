@@ -63,7 +63,7 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 		if (!(source.getEntity() instanceof final LivingEntity attacker)) return Optional.empty();
 
 		for (final var entry : ElementComponentImpl.ENTITY_TYPE_ELEMENT_MAP.entrySet()) {
-			if (!attacker.getType().is(entry.getKey())) continue;
+			if (!attacker.is(entry.getKey())) continue;
 
 			return Optional.of(
 				new ElementalDamageSource(

@@ -1,5 +1,6 @@
 package io.github.xrickastley.sevenelements.registry.dynamic;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
@@ -71,11 +72,12 @@ public final class DynamicRegistryLoadEvents {
 		}
 	}
 
-	static class RegistryContextImpl<T> implements RegistryContext<T> {
+	@ApiStatus.Internal
+	public static class RegistryContextImpl<T> implements RegistryContext<T> {
 		private final ResourceKey<? extends Registry<T>> registryKey;
 		private final Registry<T> registry;
 
-		RegistryContextImpl(ResourceKey<? extends Registry<T>> registryKey, Registry<T> registry) {
+		public RegistryContextImpl(ResourceKey<? extends Registry<T>> registryKey, Registry<T> registry) {
 			this.registryKey = registryKey;
 			this.registry = registry;
 		}
@@ -90,12 +92,13 @@ public final class DynamicRegistryLoadEvents {
 		}
 	}
 
-	static class RegistryEntryContextImpl<T> implements RegistryEntryContext<T> {
+	@ApiStatus.Internal
+	public static class RegistryEntryContextImpl<T> implements RegistryEntryContext<T> {
 		private final T entry;
 		private final ResourceKey<? extends Registry<T>> registryKey;
 		private final Registry<T> registry;
 
-		RegistryEntryContextImpl(T entry, ResourceKey<? extends Registry<T>> registryKey, Registry<T> registry) {
+		public RegistryEntryContextImpl(T entry, ResourceKey<? extends Registry<T>> registryKey, Registry<T> registry) {
 			this.entry = entry;
 			this.registryKey = registryKey;
 			this.registry = registry;

@@ -13,7 +13,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
 
 public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEntity, DendroCoreEntityState, DendroCoreEntityModel> {
@@ -69,5 +69,5 @@ public class DendroCoreEntityRenderer extends LivingEntityRenderer<DendroCoreEnt
 	}
 
 	@Override
-	protected void submitNameTag(DendroCoreEntityState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {}
+	protected void submitNameDisplay(DendroCoreEntityState state, PoseStack matrices, SubmitNodeCollector queue, CameraRenderState cameraRenderState) {}
 }

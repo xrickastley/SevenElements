@@ -7,14 +7,14 @@
     "BossHealthOverlayAccessor",
     "BossHealthOverlayMixin",
     "BufferBuilderAccessor",
-    "GuiGraphicsMixin",
     "EntityRendererMixin",
     "EntityRenderStateMixin",
     "GameRendererMixin",
+    "GuiGraphicsExtractorMixin",
     "GuiMixin",
+    "LevelRendererAccessor",
     "LivingEntityMixin",
-    "LivingEntityRendererMixin",
-    "LevelRendererMixin"
+    "LivingEntityRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

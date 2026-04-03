@@ -9,9 +9,9 @@ import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.block.SevenElementsBlocks;
 import io.github.xrickastley.sevenelements.util.Functions;
 
-import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroupEntries;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents.ModifyEntriesAll;
-import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents.ModifyOutputAll;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
+import net.fabricmc.fabric.api.creativetab.v1.FabricCreativeModeTabOutput;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -40,7 +40,7 @@ public class SevenElementsItems {
 		Registry.register(BuiltInRegistries.ITEM, SevenElements.identifier(id), item);
 	}
 
-	public static class ModifyEntryHandler implements ModifyEntriesAll {
+	public static class ModifyEntryHandler implements ModifyOutputAll {
 		private static final ModifyEntryHandler INSTANCE = new ModifyEntryHandler();
 		private static final Multimap<ResourceKey<CreativeModeTab>, Entry> ENTRIES = HashMultimap.create();
 
@@ -61,7 +61,7 @@ public class SevenElementsItems {
 		}
 
 		@Override
-		public void modifyEntries(CreativeModeTab group, FabricItemGroupEntries entries) {
+		public void modifyOutput(CreativeModeTab group, FabricCreativeModeTabOutput entries) {
 			ModifyEntryHandler.ENTRIES
 				.get(BuiltInRegistries.CREATIVE_MODE_TAB.getResourceKey(group).orElseThrow())
 				.forEach(Functions.withArgument(Entry::add, entries));
@@ -79,7 +79,7 @@ public class SevenElementsItems {
 			this.relativeItem = relativeItem;
 		}
 
-		private void add(FabricItemGroupEntries entries) {
+		private void add(FabricCreativeModeTabOutput entries) {
 			this.type.add(this, entries);
 		}
 	}
@@ -87,35 +87,35 @@ public class SevenElementsItems {
 	private static enum EntryType {
 		PREPEND {
 			@Override
-			void add(Entry entry, FabricItemGroupEntries entries) {
+			void add(Entry entry, FabricCreativeModeTabOutput entries) {
 				entries.prepend(entry.item);
 			}
 		},
 		ADD {
 			@Override
-			void add(Entry entry, FabricItemGroupEntries entries) {
+			void add(Entry entry, FabricCreativeModeTabOutput entries) {
 				entries.accept(entry.item);
 			}
 		},
 		ADD_AFTER {
 			@Override
-			void add(Entry entry, FabricItemGroupEntries entries) {
-				entries.addAfter(entry.relativeItem, entry.item);
+			void add(Entry entry, FabricCreativeModeTabOutput entries) {
+				entries.insertAfter(entry.relativeItem, entry.item);
 			}
 		},
 		ADD_BEFORE {
 			@Override
-			void add(Entry entry, FabricItemGroupEntries entries) {
-				entries.addBefore(entry.relativeItem, entry.item);
+			void add(Entry entry, FabricCreativeModeTabOutput entries) {
+				entries.insertBefore(entry.relativeItem, entry.item);
 			}
 		};
 
 		private EntryType() {}
 
-		abstract void add(Entry entry, FabricItemGroupEntries entries);
+		abstract void add(Entry entry, FabricCreativeModeTabOutput entries);
 	}
 
 	static {
-		ItemGroupEvents.MODIFY_ENTRIES_ALL.register(ModifyEntryHandler.INSTANCE);
+		CreativeModeTabEvents.MODIFY_OUTPUT_ALL.register(ModifyEntryHandler.INSTANCE);
 	}
 }

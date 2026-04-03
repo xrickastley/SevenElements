@@ -10,14 +10,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 import io.github.xrickastley.sevenelements.gui.render.state.CircleGuiElementRenderState;
-import io.github.xrickastley.sevenelements.interfaces.ExtendedDrawContext;
+import io.github.xrickastley.sevenelements.interfaces.ExtendedGuiGraphicsExtractor;
 
-import net.minecraft.client.gui.GuiGraphics.ScissorStack;
-import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.render.state.GuiRenderState;
+import net.minecraft.client.gui.GuiGraphicsExtractor.ScissorStack;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.state.gui.GuiRenderState;
 
-@Mixin(GuiGraphics.class)
-public class GuiGraphicsMixin implements ExtendedDrawContext {
+@Mixin(GuiGraphicsExtractor.class)
+public class GuiGraphicsExtractorMixin implements ExtendedGuiGraphicsExtractor {
 	@Shadow
 	@Final
    	public ScissorStack scissorStack;
@@ -33,7 +33,7 @@ public class GuiGraphicsMixin implements ExtendedDrawContext {
 	@Override
 	@Unique
 	public void sevenelements$drawCircle(RenderPipeline pipeline, float x, float y, float radius, int color) {
-		this.guiRenderState.submitGuiElement(
+		this.guiRenderState.addGuiElement(
 			new CircleGuiElementRenderState(pipeline, new Matrix3x2f(this.pose), x, y, radius, color, this.scissorStack.peek())
 		);
 	}

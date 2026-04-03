@@ -25,6 +25,6 @@ public final class SevenElementsPayloadsS2C {
 	}
 
 	public static <T extends CustomPacketPayload> void register(CustomPacketPayload.Type<T> id, StreamCodec<RegistryFriendlyByteBuf, T> codec) {
-		PayloadTypeRegistry.playS2C().register(id, codec);
+		PayloadTypeRegistry.clientboundPlay().register(id, codec);
 	}
 }

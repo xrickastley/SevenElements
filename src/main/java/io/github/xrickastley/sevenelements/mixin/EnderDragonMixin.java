@@ -17,7 +17,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.level.dimension.end.EnderDragonFight;
 
 @Mixin(EnderDragon.class)
 public abstract class EnderDragonMixin
@@ -34,7 +34,7 @@ public abstract class EnderDragonMixin
 		method = "setDragonFight",
 		at = @At("HEAD")
 	)
-	private void addEnderDragonEntityToFight(EndDragonFight fight, CallbackInfo ci) {
+	private void addEnderDragonEntityToFight(EnderDragonFight fight, CallbackInfo ci) {
 		ClassInstanceUtil.ifPresentMapped(
 			fight,
 			IEnderDragonFight.class::cast,
@@ -60,10 +60,10 @@ public abstract class EnderDragonMixin
 		method = "aiStep",
 		at = @At(
 			value = "INVOKE_ASSIGN",
-			target = "Lnet/minecraft/server/level/ServerLevel;getDragonFight()Lnet/minecraft/world/level/dimension/end/EndDragonFight;"
+			target = "Lnet/minecraft/server/level/ServerLevel;getDragonFight()Lnet/minecraft/world/level/dimension/end/EnderDragonFight;"
 		)
 	)
-	private void setDragonOnFightUpdate(CallbackInfo ci, @Local EndDragonFight enderDragonFight) {
+	private void setDragonOnFightUpdate(CallbackInfo ci, @Local EnderDragonFight enderDragonFight) {
 		ClassInstanceUtil.ifPresentMapped(
 			enderDragonFight,
 			IEnderDragonFight.class::cast,

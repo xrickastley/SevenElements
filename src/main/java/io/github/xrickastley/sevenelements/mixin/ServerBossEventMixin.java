@@ -17,7 +17,6 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -31,7 +30,7 @@ public abstract class ServerBossEventMixin extends BossEvent {
 	public abstract Collection<ServerPlayer> getPlayers();
 
 	public ServerBossEventMixin(Component displayName, BossEvent.BossBarColor color, BossEvent.BossBarOverlay style) {
-		super(Mth.createInsecureUUID(), displayName, color, style);
+		super(null, displayName, color, style);
 
 		throw new AssertionError();
 	}

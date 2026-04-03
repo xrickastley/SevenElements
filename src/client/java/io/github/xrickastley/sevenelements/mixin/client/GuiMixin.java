@@ -24,7 +24,7 @@ import io.github.xrickastley.sevenelements.util.Functions;
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.profiling.Profiler;
@@ -41,28 +41,28 @@ public class GuiMixin {
 	private static Identifier POWDER_SNOW_OUTLINE_LOCATION;
 
 	@Shadow
-	private void renderTextureOverlay(GuiGraphics context, Identifier texture, float opacity) {
+	private void extractTextureOverlay(GuiGraphicsExtractor graphics, Identifier texture, float alpha) {
 		throw new AssertionError();
 	}
 
 	@Inject(
-		method = "renderPlayerHealth",
+		method = "extractPlayerHealth",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/gui/Gui;renderArmor(Lnet/minecraft/client/gui/GuiGraphics;Lnet/minecraft/world/entity/player/Player;IIII)V",
+			target = "Lnet/minecraft/client/gui/Gui;extractArmor(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/world/entity/player/Player;IIII)V",
 			shift = At.Shift.AFTER
 		)
 	)
-	private void renderAppliedElements(GuiGraphics context, CallbackInfo ci, @Local Player player, @Local(ordinal = 4) int y, @Local(ordinal = 2) int x, @Local(ordinal = 6) int p, @Local(ordinal = 7) int lines) {
+	private void renderAppliedElements(GuiGraphicsExtractor graphics, CallbackInfo ci, @Local Player player, @Local(name = "yLineBase") int yLineBase, @Local(name = "xLeft") int xLeft, @Local(name = "numHealthRows") int numHealthRows, @Local(name = "healthRowHeight") int healthRowHeight) {
 		Profiler.get().popPush("seven-elements:elements");
 
-		y -= (p - 1) * lines;
+		yLineBase -= (numHealthRows - 1) * healthRowHeight;
 
 		int offset = 1;
 
 		if (player.getArmorValue() > 0) offset++;
 
-		y -= (10 * (offset));
+		yLineBase -= (10 * (offset));
 
 		final ElementComponent component = ElementComponent.KEY.get(player);
 
@@ -78,19 +78,19 @@ public class GuiMixin {
 
 		for (int i = 0; i < appliedElements.length(); i++) {
 			final Identifier texture = appliedElements.get(i);
-			final int x1 = x + (i * 10);
+			final int x1 = xLeft + (i * 10);
 
-			context.sevenelements$drawCircle(SevenElementsRenderPipelines.CIRCLE, x1 + 4.5f, y + 4.5f, 4.5f, 0x7F646464);
-			context.blit(RenderPipelines.GUI_TEXTURED, texture, x1, y, 0, 0, 9, 9, 9, 9);
+			graphics.sevenelements$drawCircle(SevenElementsRenderPipelines.CIRCLE, x1 + 4.5f, yLineBase + 4.5f, 4.5f, 0x7F646464);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, texture, x1, yLineBase, 0, 0, 9, 9, 9, 9);
 		}
 	}
 
 	@Inject(
-		method = "renderCameraOverlays",
+		method = "extractCameraOverlays",
 		at = @At("TAIL")
 	)
-	private void renderFrozenOverlay(GuiGraphics context, DeltaTracker tickCounter, CallbackInfo ci) {
+	private void renderFrozenOverlay(GuiGraphicsExtractor graphics, DeltaTracker deltaTracker, CallbackInfo ci) {
 		if (minecraft.player != null && minecraft.player.hasEffect(SevenElementsStatusEffects.FROZEN))
-			this.renderTextureOverlay(context, POWDER_SNOW_OUTLINE_LOCATION, 1.0F);
+			this.extractTextureOverlay(graphics, POWDER_SNOW_OUTLINE_LOCATION, 1.0F);
 	}
 }

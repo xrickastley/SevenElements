@@ -8,7 +8,7 @@ import org.joml.Matrix3x2f;
 
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.render.TextureSetup;
-import net.minecraft.client.gui.render.state.GuiElementRenderState;
+import net.minecraft.client.renderer.state.gui.GuiElementRenderState;
 
 public record CircleGuiElementRenderState(RenderPipeline pipeline, Matrix3x2f matrix, float x, float y, float radius, int color, @Nullable ScreenRectangle scissorArea, @Nullable ScreenRectangle bounds) implements GuiElementRenderState {
 	public CircleGuiElementRenderState(RenderPipeline pipeline, Matrix3x2f matrix, float x, float y, float radius, int color, @Nullable ScreenRectangle scissorArea) {

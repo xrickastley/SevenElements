@@ -21,6 +21,7 @@ import org.joml.Matrix4f;
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
+import io.github.xrickastley.sevenelements.mixin.client.LevelRendererAccessor;
 import io.github.xrickastley.sevenelements.networking.PayloadHandler;
 import io.github.xrickastley.sevenelements.networking.ShowElectroChargeS2CPayload;
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
@@ -33,9 +34,9 @@ import io.github.xrickastley.sevenelements.util.Colors;
 import io.github.xrickastley.sevenelements.util.Ease;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
-import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContext;
 
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking.Context;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -100,7 +101,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		);
 	}
 
-	public void render(WorldRenderContext context) {
+	public void render(LevelRenderContext context) {
 		entries.forEach(Functions.withArgument(Entry::render, context, this));
 
 		this.renderEffects(context);
@@ -137,7 +138,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		return computedValue;
 	}
 
-	private void renderQuickenAura(WorldRenderContext context, LivingEntity entity) {
+	private void renderQuickenAura(LevelRenderContext context, LivingEntity entity) {
 		if (!ClientConfig.getEffectRenderType().allowsSpecialEffects()) return;
 
 		this.getChargePositions(entity)
@@ -148,15 +149,15 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 			});
 	}
 
-	private void renderElectroAura(WorldRenderContext context, LivingEntity entity) {
+	private void renderElectroAura(LevelRenderContext context, LivingEntity entity) {
 		if (!ClientConfig.getEffectRenderType().allowsNormalEffects()) return;
 
 		this.getChargePositions(entity)
 			.forEach(clp -> this.renderChargeLine(context, clp, entity, Colors.ELECTRO, Colors.PHYSICAL));
 	}
 
-	private void renderEffects(WorldRenderContext context) {
-		for (final Entity entity : context.world().entitiesForRendering()) {
+	private void renderEffects(LevelRenderContext context) {
+		for (final Entity entity : ((LevelRendererAccessor) context.levelRenderer()).sevenelements$getLevel().entitiesForRendering()) {
 			if (!(entity instanceof final LivingEntity livingEntity) || !shouldRender(livingEntity)) continue;
 
 			final ElementComponent component = ElementComponent.KEY.get(livingEntity);
@@ -166,14 +167,14 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		}
 	}
 
-	private void renderChargeLine(WorldRenderContext context, ChargeLinePositions clp, Entity entity, Color outerColor, Color innerColor) {
+	private void renderChargeLine(LevelRenderContext context, ChargeLinePositions clp, Entity entity, Color outerColor, Color innerColor) {
 		final Vec3 initialPos = clp.getInitialPos(entity);
 
 		this.renderChargeLine(context, initialPos, clp.generatePositions(this, entity), outerColor, innerColor);
 	}
 
 	@SuppressWarnings("unused")
-	private void renderChargeLine(WorldRenderContext context, Vec3 initialPos, Vec3 finalPos, Color outerColor, Color innerColor) {
+	private void renderChargeLine(LevelRenderContext context, Vec3 initialPos, Vec3 finalPos, Color outerColor, Color innerColor) {
 		final List<Vec3> positions = this.generatePositions(Vec3.ZERO, initialPos.subtract(finalPos));
 
 		Vec3 randomVec = Vec3.ZERO;
@@ -190,14 +191,12 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 		this.renderChargeLine(context, initialPos, positions, outerColor, innerColor);
 	}
 
-	private void renderChargeLine(WorldRenderContext context, Vec3 origin, List<Vec3> positions, Color outerColor, Color innerColor) {
-		final Camera camera = context.camera();
+	private void renderChargeLine(LevelRenderContext context, Vec3 origin, List<Vec3> positions, Color outerColor, Color innerColor) {
+		final Camera camera = context.gameRenderer().getMainCamera();
 		final Vec3 camPos = camera.position();
 
 		final PoseStack matrices = new PoseStack();
 		matrices.pushPose();
-		matrices.mulPose(Axis.XP.rotationDegrees(camera.xRot()));
-		matrices.mulPose(Axis.YP.rotationDegrees(camera.yRot() + 180.0F));
 		matrices.translate(origin.x - camPos.x, origin.y - camPos.y, origin.z - camPos.z);
 
 		final Matrix4f posMat = matrices.last().pose();
@@ -281,7 +280,7 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 
 	private static abstract class Entry {
 		abstract boolean shouldRemove();
-		abstract void render(final WorldRenderContext context, final SpecialEffectsRenderer renderer);
+		abstract void render(final LevelRenderContext context, final SpecialEffectsRenderer renderer);
 		void tick() {};
 	}
 
@@ -301,8 +300,8 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 			return !mainEntity.isAlive() || otherEntities.isEmpty() || Minecraft.getInstance().level.getGameTime() > this.time + MAX_TICKS;
 		}
 
-		void render(final WorldRenderContext context, final SpecialEffectsRenderer renderer) {
-			final double gradientStep = Mth.clamp(Mth.inverseLerp(Minecraft.getInstance().level.getGameTime() - this.time + context.tickCounter().getGameTimeDeltaPartialTick(false), 0, 10), 0, 1);
+		void render(final LevelRenderContext context, final SpecialEffectsRenderer renderer) {
+			final double gradientStep = Mth.clamp(Mth.inverseLerp(Minecraft.getInstance().level.getGameTime() - this.time + Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false), 0, 10), 0, 1);
 			final Color outerColor = Color.gradientStep(Colors.ELECTRO, Colors.HYDRO, gradientStep, Ease.IN_QUART);
 			final Color innerColor = Colors.PHYSICAL;
 

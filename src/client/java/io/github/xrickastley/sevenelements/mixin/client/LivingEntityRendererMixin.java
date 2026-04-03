@@ -49,8 +49,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.LivingEntity;
@@ -67,21 +66,19 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
 	@Unique
 	private static final ByteBufferBuilder sevenelements$quadAllocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer::getQuads);
-	@Unique
-	private static final ByteBufferBuilder sevenelements$linesAllocator = SevenElementsRenderer.createAllocator(RenderType.BIG_BUFFER_SIZE);
 
 	@Inject(
-		method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V",
+		method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V",
 		at = @At("TAIL")
 	)
-	private void addRenderers(S state, PoseStack matrixStack, SubmitNodeCollector orderedRenderCommandQueue, CameraRenderState cameraRenderState, CallbackInfo ci) {
+	private void addRenderers(S state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, CallbackInfo ci) {
 		if (!(state.sevenelements$getEntity() instanceof final LivingEntity entity)) return;
 
 		final float tickDelta = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false);
 
-		this.sevenelements$renderElementsIfPresent(entity, matrixStack, tickDelta);
-		this.sevenelements$renderElementalGauges(entity, matrixStack, tickDelta);
-		this.sevenelements$renderCrystallizeShield(entity, matrixStack);
+		this.sevenelements$renderElementsIfPresent(entity, poseStack, tickDelta);
+		this.sevenelements$renderElementalGauges(entity, poseStack, tickDelta);
+		this.sevenelements$renderCrystallizeShield(entity, poseStack);
 	}
 
 	@Unique
@@ -329,10 +326,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@Inject(
-		method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/CameraRenderState;)V",
+		method = "submit(Lnet/minecraft/client/renderer/entity/state/LivingEntityRenderState;Lcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/SubmitNodeCollector;Lnet/minecraft/client/renderer/state/level/CameraRenderState;)V",
 		at = @At("HEAD")
 	)
-	private void forceFrozenPose(S state, PoseStack matrixStack, SubmitNodeCollector orderedRenderCommandQueue, CameraRenderState cameraRenderState, CallbackInfo ci) {
+	private void forceFrozenPose(S state, PoseStack poseStack, SubmitNodeCollector submitNodeCollector, CameraRenderState camera, CallbackInfo ci) {
 		if (!(state.sevenelements$getEntity() instanceof final LivingEntity entity)) return;
 
 		final FrozenEffectComponent component = FrozenEffectComponent.KEY.get(entity);

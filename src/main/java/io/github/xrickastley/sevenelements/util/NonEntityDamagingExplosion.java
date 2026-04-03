@@ -127,7 +127,7 @@ public class NonEntityDamagingExplosion implements Explosion {
 						d /= g;
 						e /= g;
 						f /= g;
-						float h = this.power * (0.7F + this.world.random.nextFloat() * 0.6F);
+						float h = this.power * (0.7F + this.world.getRandom().nextFloat() * 0.6F);
 						double m = this.pos.x;
 						double n = this.pos.y;
 						double o = this.pos.z;
@@ -225,7 +225,7 @@ public class NonEntityDamagingExplosion implements Explosion {
 
 	private void destroyBlocks(List<BlockPos> positions) {
 		List<DroppedItem> list = new ArrayList<>();
-		Util.shuffle(positions, this.world.random);
+		Util.shuffle(positions, this.world.getRandom());
 		Iterator<BlockPos> posIterator = positions.iterator();
 
 		while(posIterator.hasNext()) {
@@ -249,7 +249,7 @@ public class NonEntityDamagingExplosion implements Explosion {
 
 		while(var2.hasNext()) {
 			BlockPos blockPos = (BlockPos)var2.next();
-			if (this.world.random.nextInt(3) == 0 && this.world.getBlockState(blockPos).isAir() && this.world.getBlockState(blockPos.below()).isSolidRender()) {
+			if (this.world.getRandom().nextInt(3) == 0 && this.world.getBlockState(blockPos).isAir() && this.world.getBlockState(blockPos.below()).isSolidRender()) {
 				this.world.setBlockAndUpdate(blockPos, BaseFireBlock.getState(this.world, blockPos));
 			}
 		}

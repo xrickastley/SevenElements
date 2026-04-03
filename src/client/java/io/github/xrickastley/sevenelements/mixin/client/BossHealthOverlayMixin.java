@@ -22,7 +22,7 @@ import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import net.minecraft.client.gui.components.LerpingBossEvent;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -37,14 +37,14 @@ public class BossHealthOverlayMixin {
 	private Minecraft minecraft;
 
 	@ModifyConstant(
-		method = "render",
+		method = "extractRenderState",
 		constant = @Constant(intValue = 9, ordinal = 1)
 	)
-	private int addElementsToRender(int value, @Local LerpingBossEvent bossBar) {
-		if (bossBar.sevenelements$getEntity() == null) return value;
+	private int addElementsToRender(int value, @Local LerpingBossEvent event) {
+		if (event.sevenelements$getEntity() == null) return value;
 
 		final int shift = ElementComponent.KEY
-			.get(bossBar.sevenelements$getEntity())
+			.get(event.sevenelements$getEntity())
 			.getAppliedElements()
 			.isEmpty() ? 0 : 8;
 
@@ -52,11 +52,11 @@ public class BossHealthOverlayMixin {
 	}
 
 	@Inject(
-		method = "drawBar(Lnet/minecraft/client/gui/GuiGraphics;IILnet/minecraft/world/BossEvent;I[Lnet/minecraft/resources/Identifier;[Lnet/minecraft/resources/Identifier;)V",
+		method = "extractBar(Lnet/minecraft/client/gui/GuiGraphicsExtractor;IILnet/minecraft/world/BossEvent;I[Lnet/minecraft/resources/Identifier;[Lnet/minecraft/resources/Identifier;)V",
 		at = @At("TAIL")
 	)
-	private void renderAppliedElements(GuiGraphics context, int x, int y, BossEvent bossBar, int width, Identifier[] textures, Identifier[] notchedTextures, CallbackInfo ci) {
-		if (bossBar.sevenelements$getEntity() == null || bossBar.sevenelements$getEntity().isDeadOrDying()) return;
+	private void renderAppliedElements(GuiGraphicsExtractor graphics, int x, int y, BossEvent event, int width, Identifier[] sprites, Identifier[] overlaySprites, CallbackInfo ci) {
+		if (event.sevenelements$getEntity() == null || event.sevenelements$getEntity().isDeadOrDying()) return;
 
 		final int RADIUS = 5;
 		final int BOUND = (int) (RADIUS * 2);
@@ -69,7 +69,7 @@ public class BossHealthOverlayMixin {
 
 		final Set<Identifier> existing = new HashSet<>();
 		final Array<Identifier> appliedElements = ElementComponent.KEY
-			.get(bossBar.sevenelements$getEntity())
+			.get(event.sevenelements$getEntity())
 			.getAppliedElements()
 			.map(Functions.compose(ElementalApplication::getElement, Element::getTexture))
 			.filter(existing::add);
@@ -77,16 +77,9 @@ public class BossHealthOverlayMixin {
 		for (int i = 0; i < appliedElements.length(); i++) {
 			final Identifier texture = appliedElements.get(i);
 			final int x1 = x + (i * (BOUND + 1));
-			/*
-			final CircleRenderer circleRenderer = new CircleRenderer((x1 + RADIUS) * scaleFactor, (y + RADIUS) * scaleFactor, 0);
 
-			circleRenderer
-				.add(RADIUS * scaleFactor, 1, 0x7F646464)
-				.draw(context.getMatrices().peek().getPositionMatrix());
-			*/
-
-			context.sevenelements$drawCircle(SevenElementsRenderPipelines.CIRCLE, x1 + RADIUS, y + RADIUS, RADIUS, 0x7F646464);
-			context.blit(RenderPipelines.GUI_TEXTURED, texture, x1 + SHIFT, y + SHIFT, 0, 0, INNER_BOUND, INNER_BOUND, INNER_BOUND, INNER_BOUND);
+			graphics.sevenelements$drawCircle(SevenElementsRenderPipelines.CIRCLE, x1 + RADIUS, y + RADIUS, RADIUS, 0x7F646464);
+			graphics.blit(RenderPipelines.GUI_TEXTURED, texture, x1 + SHIFT, y + SHIFT, 0, 0, INNER_BOUND, INNER_BOUND, INNER_BOUND, INNER_BOUND);
 		}
 	}
 }

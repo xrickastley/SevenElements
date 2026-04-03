@@ -130,7 +130,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	private void checkCrystallizeShield() {
 		if (this.level().isClientSide()) return;
 
-		final List<LivingEntity> entities = ElementalReaction.getEntitiesInAoE(this, 1.0, e -> !(e instanceof SevenElementsEntity || e.getType().is(SevenElementsEntityTypeTags.IGNORED_TARGETS)));
+		final List<LivingEntity> entities = ElementalReaction.getEntitiesInAoE(this, 1.0, e -> !(e instanceof SevenElementsEntity || e.is(SevenElementsEntityTypeTags.IGNORED_TARGETS)));
 		final @Nullable LivingEntity owner = this.getEntityFromUUID(this.owner);
 
 		@Nullable LivingEntity target = null;

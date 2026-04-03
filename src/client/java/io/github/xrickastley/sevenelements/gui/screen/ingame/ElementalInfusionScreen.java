@@ -8,7 +8,7 @@ import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler
 import io.github.xrickastley.sevenelements.util.ClientConfig;
 import io.github.xrickastley.sevenelements.util.MathHelper2;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -36,42 +36,40 @@ public class ElementalInfusionScreen extends AbstractContainerScreen<ElementalIn
 	private long tooltipDisplayedAt;
 
 	public ElementalInfusionScreen(ElementalInfusionScreenHandler handler, Inventory inventory, Component title) {
-		super(handler, inventory, title);
+		super(handler, inventory, title, 176, 246);
 
-		this.imageHeight = 246;
-		this.imageWidth = 176;
 		this.inventoryLabelX = 8;
 		this.inventoryLabelY = this.imageHeight - 94;
 		this.player = inventory.player;
 	}
 
 	@Override
-	protected void renderBg(GuiGraphics context, float delta, int mouseX, int mouseY) {
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
 		final int x = (width - imageWidth) / 2;
 		final int y = (height - imageHeight) / 2;
 
-		context.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, imageWidth, imageHeight, 256, 256);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, TEXTURE, x, y, 0, 0, imageWidth, imageHeight, 256, 256);
 
-		this.drawElements(context, x, y);
-		this.drawInfuseButton(context, x, y, mouseX, mouseY);
+		this.drawElements(graphics, x, y);
+		this.drawInfuseButton(graphics, x, y, mouseX, mouseY);
 
 		final Slot slot = this.menu.getResultSlot();
 
 		if (this.displayTooltip() && slot.hasItem())
-			context.setComponentTooltipForNextFrame(this.font, this.getTooltipFromContainerItem(slot.getItem()), x + slot.x + 16, y + slot.y + 12);
+			graphics.setComponentTooltipForNextFrame(this.font, this.getTooltipFromContainerItem(slot.getItem()), x + slot.x + 16, y + slot.y + 12);
 	}
 
-	private void drawElements(GuiGraphics context, final int x, final int y) {
-		context.blit(RenderPipelines.GUI_TEXTURED, Element.PYRO.getTexture(), x + 76, y + 18, 0, 0, 24, 24, 24, 24);
-		context.blit(RenderPipelines.GUI_TEXTURED, Element.HYDRO.getTexture(), x + 107, y + 33, 0, 0, 24, 24, 24, 24);
-		context.blit(RenderPipelines.GUI_TEXTURED, Element.ANEMO.getTexture(), x + 115, y + 63, 0, 0, 24, 24, 24, 24);
-		context.blit(RenderPipelines.GUI_TEXTURED, Element.ELECTRO.getTexture(), x + 94, y + 92, 0, 0, 24, 24, 24, 24);
-		context.blit(RenderPipelines.GUI_TEXTURED, Element.DENDRO.getTexture(), x + 59, y + 92, 0, 0, 24, 24, 24, 24);
-		context.blit(RenderPipelines.GUI_TEXTURED, Element.CRYO.getTexture(), x + 37, y + 63, 0, 0, 24, 24, 24, 24);
-		context.blit(RenderPipelines.GUI_TEXTURED, Element.GEO.getTexture(), x + 45, y + 33, 0, 0, 24, 24, 24, 24);
+	private void drawElements(GuiGraphicsExtractor graphics, final int x, final int y) {
+		graphics.blit(RenderPipelines.GUI_TEXTURED, Element.PYRO.getTexture(), x + 76, y + 18, 0, 0, 24, 24, 24, 24);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, Element.HYDRO.getTexture(), x + 107, y + 33, 0, 0, 24, 24, 24, 24);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, Element.ANEMO.getTexture(), x + 115, y + 63, 0, 0, 24, 24, 24, 24);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, Element.ELECTRO.getTexture(), x + 94, y + 92, 0, 0, 24, 24, 24, 24);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, Element.DENDRO.getTexture(), x + 59, y + 92, 0, 0, 24, 24, 24, 24);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, Element.CRYO.getTexture(), x + 37, y + 63, 0, 0, 24, 24, 24, 24);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, Element.GEO.getTexture(), x + 45, y + 33, 0, 0, 24, 24, 24, 24);
 	}
 
-	private void drawInfuseButton(GuiGraphics context, final int x, final int y, final int mouseX, final int mouseY) {
+	private void drawInfuseButton(GuiGraphicsExtractor graphics, final int x, final int y, final int mouseX, final int mouseY) {
 		if (!menu.getResultSlot().hasItem()) return;
 
 		final int x1 = x + 43;
@@ -93,16 +91,15 @@ public class ElementalInfusionScreen extends AbstractContainerScreen<ElementalIn
 			? CommonColors.YELLOW
 			: 0xFF685E4A;
 
-		context.blitSprite(RenderPipelines.GUI_TEXTURED, texture, x1, y1, 90, 19);
-		context.blitSprite(RenderPipelines.GUI_TEXTURED, expTexture, x2 - 24, y2 - 16, 24, 16);
-		context.drawString(this.font, Component.translatable("container.seven-elements.infusion_table.infuse"), x1 + 6, y1 + 6, color, false);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, texture, x1, y1, 90, 19);
+		graphics.blitSprite(RenderPipelines.GUI_TEXTURED, expTexture, x2 - 24, y2 - 16, 24, 16);
+		graphics.text(this.font, Component.translatable("container.seven-elements.infusion_table.infuse"), x1 + 6, y1 + 6, color, false);
 	}
 
 	@Override
-	public void render(GuiGraphics context, int mouseX, int mouseY, float delta) {
-		this.renderBackground(context, mouseX, mouseY, delta);
-		super.render(context, mouseX, mouseY, delta);
-		this.renderTooltip(context, mouseX, mouseY);
+	public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float a) {
+		this.extractBackground(graphics, mouseX, mouseY, a);
+		super.extractRenderState(graphics, mouseX, mouseY, a);
 	}
 
 	@Override

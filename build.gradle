@@ -1,5 +1,5 @@
-plugins {
-	id 'net.fabricmc.fabric-loom-remap' version "${loom_version}"
+	plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
 	id 'maven-publish'
 }
 
@@ -26,6 +26,17 @@ repositories {
 	maven { 
 		url = "https://maven.terraformersmc.com/releases/"
 	}
+	exclusiveContent {
+		forRepository {
+			maven {
+				name = "Modrinth"
+				url = "https://api.modrinth.com/maven"
+			}
+		}
+		filter {
+			includeGroup "maven.modrinth"
+		}
+	}
 }
 
 loom {
@@ -44,24 +55,25 @@ loom {
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
 
-	modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+	implementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
 	// Cloth Config by shedaniel 
-	modImplementation ("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
+	implementation ("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
 
-    include modImplementation ("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cca_version}")
-    include modImplementation ("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
-	include modImplementation ("org.ladysnake.cardinal-components-api:cardinal-components-item:${project.cca_version}")
+    include implementation ("org.ladysnake.cardinal-components-api:cardinal-components-base:${project.cca_version}")
+    include implementation ("org.ladysnake.cardinal-components-api:cardinal-components-entity:${project.cca_version}")
+	include implementation ("org.ladysnake.cardinal-components-api:cardinal-components-item:${project.cca_version}")
 	
-	modCompileOnly 'com.github.Fourmisain:TaxFreeLevels:loom-SNAPSHOT'
+	// compileOnly "com.github.Fourmisain:TaxFreeLevels:${project.tax_free_levels_version}"
+	compileOnly "maven.modrinth:tax-free-levels:${project.tax_free_levels_version}" // Above dependency has a JitPack error
+
 }
 
 processResources {
@@ -73,16 +85,27 @@ processResources {
 }
 
 tasks.withType(JavaCompile).configureEach {
-	it.options.release = 21
+	it.options.release = 25
 }
 
 tasks.withType(Javadoc).configureEach {
     options.encoding = 'UTF-8'
     options.addStringOption('Xdoclint:none', '-quiet') // optional
 
-	options.links("https://maven.fabricmc.net/docs/fabric-api-${project.fabric_version}/")
+	options.links("https://maven.fabricmc.net/docs/fabric-api-${project.fabric_api_version}/")
 	options.links("https://maven.fabricmc.net/docs/fabric-loader-${project.loader_version}/")
 	options.memberLevel = JavadocMemberLevel.PRIVATE;
+}
+
+tasks.withType(JavaExec).configureEach {
+    // Only apply this to Fabric's run tasks
+    if (name.contains("runClient") || name.contains("runServer")) {
+        classpath = classpath.filter { file ->
+            // Filter out files that belong to the compileOnly configuration
+            !configurations.compileOnly.contains(file) && 
+            !configurations.modCompileOnly.contains(file)
+        }
+    }
 }
 
 java {
@@ -91,11 +114,11 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 
 	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
+		languageVersion = JavaLanguageVersion.of(25)
 	}
 }
 
@@ -107,11 +130,11 @@ jar {
 	}
 }
 
-tasks.named('remapJar') {
+tasks.named('jar') {
     archiveFileName.set("${project.archives_base_name}-${project.version}+${project.minecraft_version}.jar")
 }
 
-tasks.named('remapSourcesJar') {
+tasks.named('sourcesJar') {
     archiveFileName.set("${project.archives_base_name}-${project.version}+${project.minecraft_version}-sources.jar")
 }
 

@@ -4,7 +4,7 @@ import com.mojang.blaze3d.pipeline.RenderPipeline;
 
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
 
-public interface ExtendedDrawContext {
+public interface ExtendedGuiGraphicsExtractor {
 	default void sevenelements$drawCircle(float x, float y, float radius) {
 		this.sevenelements$drawCircle(SevenElementsRenderPipelines.CIRCLE, x, y, radius);
 	}

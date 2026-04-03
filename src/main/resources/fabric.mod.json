@@ -40,33 +40,33 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.18.2",
-		"minecraft": "1.21.11",
+		"minecraft": "26.1.1",
 		"java": ">=21",
 		"fabric-api": "*",
 		"cloth-config": "*"	
 	},
 	"custom": {
 		"loom:injected_interfaces": {
-			"net/minecraft/class_1291": [
+			"net/minecraft/world/effect/MobEffect": [
 				"io/github/xrickastley/sevenelements/interfaces/EntityAwareEffect"
 			],
-			"net/minecraft/class_1309": [
+			"net/minecraft/world/entity/LivingEntity": [
 				"io/github/xrickastley/sevenelements/interfaces/ILivingEntity"
 			],
-			"net/minecraft/class_1282": [
+			"net/minecraft/world/damagesource/DamageSource": [
 				"io/github/xrickastley/sevenelements/interfaces/IDamageSource"
 			],
-			"net/minecraft/class_1259": [
+			"net/minecraft/world/BossEvent": [
 				"io/github/xrickastley/sevenelements/interfaces/IBossBar"
 			],
-			"net/minecraft/class_1676": [
+			"net/minecraft/world/entity/projectile/Projectile": [
 				"io/github/xrickastley/sevenelements/interfaces/InfusableProjectile"
 			],
-			"net/minecraft/class_10017": [
+			"net/minecraft/client/renderer/entity/state/EntityRenderState": [
 				"io/github/xrickastley/sevenelements/interfaces/EntityAwareRenderState"
 			],
-			"net/minecraft/class_332": [
-				"io/github/xrickastley/sevenelements/interfaces/ExtendedDrawContext"
+			"net/minecraft/client/gui/GuiGraphicsExtractor": [
+				"io/github/xrickastley/sevenelements/interfaces/ExtendedGuiGraphicsExtractor"
 			]
 		},
 		"cardinal-components": [

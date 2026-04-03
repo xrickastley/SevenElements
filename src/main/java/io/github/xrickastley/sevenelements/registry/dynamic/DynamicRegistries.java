@@ -8,16 +8,17 @@ import java.util.function.BiFunction;
 import net.fabricmc.fabric.impl.registry.sync.DynamicRegistriesImpl;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryValidator;
 import net.minecraft.resources.ResourceKey;
 
 public final class DynamicRegistries {
 	public static <T> void register(Class<T> entryClass, ResourceKey<? extends Registry<T>> key, Codec<T> elementCodec) {
-		DynamicRegistries.register(entryClass, key, elementCodec, false);
+		DynamicRegistries.register(entryClass, key, elementCodec, RegistryValidator.none());
 	}
 
-	public static <T> void register(Class<T> entryClass, ResourceKey<? extends Registry<T>> key, Codec<T> elementCodec, boolean requiredNonEmpty) {
+	public static <T> void register(Class<T> entryClass, ResourceKey<? extends Registry<T>> key, Codec<T> elementCodec, RegistryValidator<T> validator) {
 		SevenElementsRegistryLoader.add(
-			new SevenElementsRegistryLoader.Entry<>(entryClass, key, elementCodec, requiredNonEmpty)
+			new SevenElementsRegistryLoader.RegistryEntry<>(entryClass, key, elementCodec, validator)
 		);
 
 		DynamicRegistriesImpl.register(key, elementCodec);
@@ -26,12 +27,12 @@ public final class DynamicRegistries {
 	}
 
 	public static <T, R> void registerIdentified(Class<T> resultClass, ResourceKey<? extends Registry<T>> key, Codec<R> builderCodec, Codec<T> elementCodec, BiFunction<R, Identifier, T> resultFn) {
-		DynamicRegistries.registerIdentified(resultClass, key, builderCodec, elementCodec, resultFn, false);
+		DynamicRegistries.registerIdentified(resultClass, key, builderCodec, elementCodec, resultFn, RegistryValidator.none());
 	}
 
-	public static <T, R> void registerIdentified(Class<T> resultClass, ResourceKey<? extends Registry<T>> key, Codec<R> builderCodec, Codec<T> elementCodec, BiFunction<R, Identifier, T> resultFn, boolean requiredNonEmpty) {
+	public static <T, R> void registerIdentified(Class<T> resultClass, ResourceKey<? extends Registry<T>> key, Codec<R> builderCodec, Codec<T> elementCodec, BiFunction<R, Identifier, T> resultFn, RegistryValidator<T> validator) {
 		SevenElementsRegistryLoader.add(
-			new SevenElementsRegistryLoader.IdentifiedEntry<>(resultClass, key, builderCodec, resultFn, requiredNonEmpty)
+			new SevenElementsRegistryLoader.IdentifiedRegistryEntry<>(resultClass, key, builderCodec, resultFn, validator)
 		);
 
 		DynamicRegistriesImpl.register(key, elementCodec);

@@ -23,7 +23,7 @@ import net.minecraft.world.level.Level;
 @Mixin(WindChargeItem.class)
 public class WindChargeItemMixin {
 	@ModifyReturnValue(
-		method = "method_61665",
+		method = "lambda$use$0",
 		at = @At("RETURN")
 	)
 	private static WindCharge setElementalInfusion1(WindCharge original, @Local(argsOnly = true) Player user) {

@@ -112,9 +112,8 @@ public final class InfusionTableBlock extends HorizontalDirectionalBlock {
 		if (serverWorld.getGameRules().get(SevenElementsGameRules.INFUSION_TABLE)) {
 			player.openMenu(state.getMenuProvider(world, pos));
 		} else {
-			player.displayClientMessage(
-				Component.translatable("container.seven-elements.infusion_table.fail_by_gamerule").withColor(CommonColors.SOFT_RED),
-				false
+			player.sendOverlayMessage(
+				Component.translatable("container.seven-elements.infusion_table.fail_by_gamerule").withColor(CommonColors.SOFT_RED)
 			);
 		}
 

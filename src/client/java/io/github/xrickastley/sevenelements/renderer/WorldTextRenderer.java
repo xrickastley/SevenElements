@@ -12,8 +12,8 @@ import io.github.xrickastley.sevenelements.util.ClientConfig;
 import io.github.xrickastley.sevenelements.util.Color;
 import io.github.xrickastley.sevenelements.util.Ease;
 import io.github.xrickastley.sevenelements.util.TextHelper;
-import io.github.xrickastley.sevenelements.util.polyfill.rendering.WorldRenderContext;
 
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font.DisplayMode;
@@ -27,19 +27,11 @@ import net.minecraft.util.Mth;
 public final class WorldTextRenderer {
 	private final List<Entry> entries = new ArrayList<>();
 
-	public void render(WorldRenderContext context) {
-		final Camera camera = context.camera();
+	public void render(LevelRenderContext context) {
+		final Camera camera = context.gameRenderer().getMainCamera();
 		final PoseStack matrixStack = new PoseStack();
 
-		matrixStack.pushPose();
-
-		// Implement legacy renderWorld transforms.
-		matrixStack.mulPose(Axis.XP.rotationDegrees(camera.xRot()));
-		matrixStack.mulPose(Axis.YP.rotationDegrees(camera.yRot() + 180.0F));
-
-		entries.forEach(entry -> entry.render(camera, context.tickCounter().getGameTimeDeltaPartialTick(false), matrixStack));
-
-		matrixStack.popPose();
+		entries.forEach(entry -> entry.render(camera, Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(false), matrixStack));
 	}
 
 	public void tick(ClientLevel world) {

@@ -12,9 +12,9 @@ import io.github.xrickastley.sevenelements.interfaces.IEnderDragonFight;
 
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.level.dimension.end.EndDragonFight;
+import net.minecraft.world.level.dimension.end.EnderDragonFight;
 
-@Mixin(EndDragonFight.class)
+@Mixin(EnderDragonFight.class)
 public class EndDragonFightMixin implements IEnderDragonFight {
 	@Shadow
 	@Final
