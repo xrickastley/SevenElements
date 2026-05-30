@@ -22,6 +22,7 @@ import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.InternalCooldownTag;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
+import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistryKeys;
 import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
@@ -39,7 +40,6 @@ import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
 import static net.minecraft.server.command.CommandManager.argument;
@@ -153,6 +153,10 @@ public class ElementCommand {
 										)
 									)
 								)
+							)
+							.then(
+								literal("random")
+								.executes(ElementCommand::infuseRandom)
 							)
 						)
 					)
@@ -333,10 +337,7 @@ public class ElementCommand {
 		ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder);
 
 		final Text elementText = ElementalApplication.Builder.getText(infusionBuilder);
-		final Text icdText = Text.empty()
-			.append(tag.getText(Formatting.WHITE))
-			.append("/")
-			.append(type.getText());
+		final Text icdText = InternalCooldownContext.Builder.getText(icdBuilder);
 
 		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
 	}
@@ -376,10 +377,28 @@ public class ElementCommand {
 		ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder);
 
 		final Text elementText = ElementalApplication.Builder.getText(infusionBuilder);
-		final Text icdText = Text.empty()
-			.append(tag.getText())
-			.append("/")
-			.append(type.getText());
+		final Text icdText = InternalCooldownContext.Builder.getText(icdBuilder);
+
+		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
+	}
+
+	private static int infuseRandom(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		final Entity entity = EntityArgumentType.getEntity(context, "entity");
+
+		if (!(entity instanceof final LivingEntity livingEntity))
+			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
+
+		final ItemStack stack = livingEntity.getMainHandStack();
+
+		if (stack.isEmpty())
+			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.itemless", entity.getDisplayName()));
+
+		ElementalInfusionComponent.generateAndApplyInfusion(stack, entity.getWorld());
+
+		final ElementalInfusionComponent infusion = stack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+
+		final Text elementText = ElementalApplication.Builder.getText(infusion.elementalInfusion());
+		final Text icdText = InternalCooldownContext.Builder.getText(infusion.internalCooldown());
 
 		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
 	}

@@ -6,12 +6,13 @@ import com.mojang.serialization.Codec;
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
 import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes.ModifierType;
+import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
+
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
-import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributeModifier.Operation;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -31,7 +32,7 @@ public record ElementalAttunementComponent(Element element) implements Attribute
 		} else if (slot == AttributeModifierSlot.MAINHAND) {
 			attributeMultimap.put(SevenElementsAttributes.getElementalAttribute(element, ModifierType.DMG_BONUS), this.createAttributeModifier(slot, 50, Operation.ADD_VALUE));
 		}
-		
+
 		return attributeMultimap;
 	}
 
@@ -40,6 +41,6 @@ public record ElementalAttunementComponent(Element element) implements Attribute
 	}
 
 	public EntityAttributeModifier createAttributeModifier(StringIdentifiable suffix, double value, EntityAttributeModifier.Operation operation) {
-    	return new EntityAttributeModifier(this.getModifierId(suffix), value, operation);
+		return new EntityAttributeModifier(this.getModifierId(suffix), value, operation);
 	}
 }
