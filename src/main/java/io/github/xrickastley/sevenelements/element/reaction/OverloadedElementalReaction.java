@@ -52,7 +52,7 @@ public class OverloadedElementalReaction extends ElementalReaction {
 			y,
 			z,
 			power,
-			true,
+			world.getGameRules().getBoolean(SevenElementsGameRules.OVERLOADED_EXPLOSIONS_CREATE_FIRE),
 			world.getGameRules().getBoolean(SevenElementsGameRules.OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS)
 				? DestructionType.DESTROY
 				: DestructionType.KEEP
