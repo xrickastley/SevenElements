@@ -88,6 +88,9 @@
 	"commands.element.infuse.apply.success": "Applied elemental infusion %s (%s) to %s's item",
 	"commands.element.infuse.remove.none": "%s's item already has no elemental infusion!",
 	"commands.element.infuse.remove.success": "Removed elemental infusion from %s's item",
+	"commands.element.attune.apply.success": "Applied %s elemental attunement to %s's item",
+	"commands.element.attune.remove.none": "%s's item already has no elemental attunement!",
+	"commands.element.attune.remove.success": "Removed elemental attunement from %s's item",
 
 	"item.seven-elements.components.infusion.infusion": "Elemental Infusion: ",
 	"item.seven-elements.components.infusion.tag": "ICD Tag: ",

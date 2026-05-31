@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
+import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementHolder;
@@ -165,6 +166,26 @@ public class ElementCommand {
 						.then(
 							argument("entity", EntityArgumentType.entity())
 							.executes(ElementCommand::infuseRemove)
+						)
+					)
+				)
+				.then(
+					literal("attunement")
+					.then(
+						literal("apply")
+						.then(
+							argument("entity", EntityArgumentType.entity())
+							.then(
+								argument("element", ElementArgumentType.element())
+								.executes(ElementCommand::attuneApply)
+							)
+						)
+					)
+					.then(
+						literal("remove")
+						.then(
+							argument("entity", EntityArgumentType.entity())
+							.executes(ElementCommand::attuneRemove)
 						)
 					)
 				)
@@ -417,5 +438,38 @@ public class ElementCommand {
 		return ElementalInfusionComponent.removeInfusion(stack)
 			? CommandUtils.sendFeedback(context, Text.translatable("commands.element.infuse.remove.success", entity.getDisplayName()), true)
 			: CommandUtils.sendError(context, Text.translatable("commands.element.infuse.remove.none", entity.getDisplayName()));
+	}
+
+	private static int attuneApply(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		final Element element = ElementArgumentType.getElement(context, "element");
+		final Entity entity = EntityArgumentType.getEntity(context, "entity");
+
+		if (!(entity instanceof final LivingEntity livingEntity))
+			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
+
+		final ItemStack stack = livingEntity.getMainHandStack();
+
+		if (stack.isEmpty())
+			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.itemless", entity.getDisplayName()));
+
+		ElementalAttunementComponent.applyAttunement(stack, element);
+		
+		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.attune.apply.success", element.getText(true), entity.getDisplayName()), true);
+	}
+
+	private static int attuneRemove(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
+		final Entity entity = EntityArgumentType.getEntity(context, "entity");
+
+		if (!(entity instanceof final LivingEntity livingEntity))
+			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
+
+		final ItemStack stack = livingEntity.getMainHandStack();
+
+		if (stack.isEmpty())
+			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.itemless", entity.getDisplayName()));
+
+		return ElementalAttunementComponent.removeAttunement(stack)
+			? CommandUtils.sendFeedback(context, Text.translatable("commands.element.attune.remove.success", entity.getDisplayName()), true)
+			: CommandUtils.sendError(context, Text.translatable("commands.element.attune.remove.none", entity.getDisplayName()));
 	}
 }
