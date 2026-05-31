@@ -41,6 +41,9 @@ import net.minecraft.util.Formatting;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin implements ComponentHolder {
+	@Shadow
+	private <T extends TooltipAppender> void appendTooltip(ComponentType<T> componentType, Item.TooltipContext context, Consumer<Text> textConsumer, TooltipType type) { throw new AssertionError(); }
+
 	@ModifyReturnValue(
 		method = "getName",
 		at = @At("RETURN")
@@ -61,49 +64,25 @@ public abstract class ItemStackMixin implements ComponentHolder {
 		method = "getTooltip",
 		at = @At(
 			value = "INVOKE",
+			target = "Lnet/minecraft/item/ItemStack;appendTooltip(Lnet/minecraft/component/ComponentType;Lnet/minecraft/item/Item$TooltipContext;Ljava/util/function/Consumer;Lnet/minecraft/item/tooltip/TooltipType;)V",
+			ordinal = 1,
+			shift = At.Shift.AFTER
+		)
+	)
+	private void addAttunementData(Item.TooltipContext context, @Nullable PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir, @Local Consumer<Text> consumer) {
+		this.appendTooltip(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT, context, consumer, type);
+	}
+
+	@Inject(
+		method = "getTooltip",
+		at = @At(
+			value = "INVOKE",
 			target = "Ljava/util/List;add(Ljava/lang/Object;)Z",
 			ordinal = 3
 		)
 	)
-	private void addInfusionData(Item.TooltipContext context, @Nullable PlayerEntity player, TooltipType _type, CallbackInfoReturnable<List<Text>> cir, @Local List<Text> texts) {
-		final @Nullable ElementalInfusionComponent component = this.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
-
-		if (component == null || !component.hasElementalInfusion()) return;
-
-		final Builder builder = component.internalCooldown();
-
-		texts.add(
-			Text.empty()
-				.append(Text.translatable("item.seven-elements.components.infusion.infusion").formatted(Formatting.WHITE))
-				.append(ElementalApplication.Builder.getText(component.elementalInfusion()))
-		);
-
-
-
-		@Nullable InternalCooldownTag tag = ClassInstanceUtil.mapOrNull(builder, Builder::getTag);
-
-		final Text tagText = tag != null
-			? tag.getText(Formatting.DARK_GRAY)
-			: Text.literal("none").formatted(Formatting.RED);
-
-		texts.add(
-			Text.empty()
-				.append(Text.translatable("item.seven-elements.components.infusion.tag").formatted(Formatting.WHITE))
-				.append(tagText)
-		);
-
-
-
-		final InternalCooldownType type = JavaScriptUtil.nullishCoalesing(
-			ClassInstanceUtil.mapOrNull(builder, Builder::getType),
-			InternalCooldownType.DEFAULT
-		);
-
-		texts.add(
-			Text.empty()
-				.append(Text.translatable("item.seven-elements.components.infusion.type").formatted(Formatting.WHITE))
-				.append(type.getText(true).formatted(Formatting.DARK_GRAY))
-		);
+	private void addInfusionData(Item.TooltipContext context, @Nullable PlayerEntity player, TooltipType type, CallbackInfoReturnable<List<Text>> cir, @Local List<Text> list) {
+		this.appendTooltip(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT, context, list::add, type);
 	}
 
 	@Inject(

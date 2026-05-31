@@ -95,6 +95,7 @@
 	"item.seven-elements.components.infusion.infusion": "Elemental Infusion: ",
 	"item.seven-elements.components.infusion.tag": "ICD Tag: ",
 	"item.seven-elements.components.infusion.type": "ICD Type: ",
+	"item.seven-elements.components.attunement.attunement": "Elemental Attunement: ",
 	
 	"formats.seven-elements.icd_type": "%ss/%s hits",
 	"formats.seven-elements.icd_context": "%s/%s",

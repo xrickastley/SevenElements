@@ -6,6 +6,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -16,6 +17,7 @@ import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
+import io.github.xrickastley.sevenelements.element.InternalCooldownContext.Builder;
 import io.github.xrickastley.sevenelements.element.InternalCooldownTag;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
@@ -27,10 +29,15 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Item.TooltipContext;
+import net.minecraft.item.tooltip.TooltipAppender;
+import net.minecraft.item.tooltip.TooltipType;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
 import net.minecraft.world.World;
 
-public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder elementalInfusion, @Nullable InternalCooldownContext.Builder internalCooldown) {
+public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder elementalInfusion, @Nullable InternalCooldownContext.Builder internalCooldown) implements TooltipAppender {
 	private static final List<Element> ELEMENTS = List.of(Element.PYRO, Element.HYDRO, Element.ANEMO, Element.ELECTRO, Element.DENDRO, Element.CRYO, Element.GEO);
 	private static final List<Double> GAUGE_UNITS = List.of(1.0, 1.5, 2.0);
 
@@ -153,5 +160,39 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 
 		return Objects.equals(this.elementalInfusion, component.elementalInfusion)
 			&& Objects.equals(this.internalCooldown, component.internalCooldown);
+	}
+
+	@Override
+	public void appendTooltip(TooltipContext context, Consumer<Text> tooltip, TooltipType type) {
+		final Builder icdContext = this.internalCooldown();
+
+		tooltip.accept(
+			Text.empty()
+				.append(Text.translatable("item.seven-elements.components.infusion.infusion").formatted(Formatting.WHITE))
+				.append(ElementalApplication.Builder.getText(this.elementalInfusion()))
+		);
+
+		@Nullable InternalCooldownTag tag = ClassInstanceUtil.mapOrNull(icdContext, Builder::getTag);
+
+		final Text tagText = tag != null
+			? tag.getText(Formatting.DARK_GRAY)
+			: Text.literal("none").formatted(Formatting.RED);
+
+		tooltip.accept(
+			Text.empty()
+				.append(Text.translatable("item.seven-elements.components.infusion.tag").formatted(Formatting.WHITE))
+				.append(tagText)
+		);
+
+		final InternalCooldownType icdType = JavaScriptUtil.nullishCoalesing(
+			ClassInstanceUtil.mapOrNull(icdContext, Builder::getType),
+			InternalCooldownType.DEFAULT
+		);
+
+		tooltip.accept(
+			Text.empty()
+				.append(Text.translatable("item.seven-elements.components.infusion.type").formatted(Formatting.WHITE))
+				.append(icdType.getText(true).formatted(Formatting.DARK_GRAY))
+		);
 	}
 }
