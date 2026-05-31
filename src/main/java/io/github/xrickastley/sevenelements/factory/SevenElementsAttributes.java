@@ -86,7 +86,7 @@ public class SevenElementsAttributes {
 		final RegistryEntry<EntityAttribute> dmgBonusAttribute = modifierMap.get(ModifierType.DMG_BONUS);
 		final RegistryEntry<EntityAttribute> resAttribute = modifierMap.get(ModifierType.RES);
 
-		final float dmgBonusMultiplier = 1 + (target.getAttributes().hasAttribute(dmgBonusAttribute) && source.applyDMGBonus()
+		final float dmgBonusMultiplier = 1 + (attacker.getAttributes().hasAttribute(dmgBonusAttribute) && source.applyDMGBonus()
 			? (float) (attacker.getAttributes().getValue(dmgBonusAttribute) / 100)
 			: 0);
 
