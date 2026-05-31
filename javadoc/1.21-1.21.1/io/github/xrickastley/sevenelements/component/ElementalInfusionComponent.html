@@ -90,9 +90,14 @@ loadScripts(document, 'script');</script>
 </div>
 </div>
 <section class="class-description" id="class-description">
+<dl class="notes">
+<dt>All Implemented Interfaces:</dt>
+<dd><code><a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/tooltip/TooltipAppender.html" title="class or interface in net.minecraft.item.tooltip" class="external-link">TooltipAppender</a></code></dd>
+</dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">ElementalInfusionComponent</span>(<a href="../element/ElementalApplication.Builder.html" title="class in io.github.xrickastley.sevenelements.element">ElementalApplication.Builder</a>&nbsp;elementalInfusion, <a href="../element/InternalCooldownContext.Builder.html" title="class in io.github.xrickastley.sevenelements.element">InternalCooldownContext.Builder</a>&nbsp;internalCooldown)
-<span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a></span></div>
+<span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a>
+implements <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/tooltip/TooltipAppender.html" title="class or interface in net.minecraft.item.tooltip" class="external-link">TooltipAppender</a></span></div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -113,6 +118,12 @@ loadScripts(document, 'script');</script>
 <div class="col-last odd-row-color">
 <div class="block">The field for the <code>elementalInfusion</code> record component.</div>
 </div>
+<div class="col-first even-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../element/Element.html" title="enum class in io.github.xrickastley.sevenelements.element">Element</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#ELEMENTS" class="member-name-link">ELEMENTS</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
+<div class="col-first odd-row-color"><code>private static final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Double.html" title="class or interface in java.lang" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#GAUGE_UNITS" class="member-name-link">GAUGE_UNITS</a></code></div>
+<div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private final <a href="../element/InternalCooldownContext.Builder.html" title="class in io.github.xrickastley.sevenelements.element">InternalCooldownContext.Builder</a></code></div>
 <div class="col-second even-row-color"><code><a href="#internalCooldown" class="member-name-link">internalCooldown</a></code></div>
 <div class="col-last even-row-color">
@@ -148,29 +159,38 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../element/ElementalDamageSource.html" title="class in io.github.xrickastley.sevenelements.element">ElementalDamageSource</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#apply(net.minecraft.entity.damage.DamageSource,net.minecraft.entity.Entity)" class="member-name-link">apply</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/entity/damage/DamageSource.html" title="class or interface in net.minecraft.entity.damage" class="external-link">DamageSource</a>&nbsp;source,
- <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/entity/Entity.html" title="class or interface in net.minecraft.entity" class="external-link">Entity</a>&nbsp;target)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#appendTooltip(net.minecraft.item.Item.TooltipContext,java.util.function.Consumer,net.minecraft.item.tooltip.TooltipType)" class="member-name-link">appendTooltip</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/Item.TooltipContext.html" title="class or interface in net.minecraft.item" class="external-link">Item.TooltipContext</a>&nbsp;context,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/text/Text.html" title="class or interface in net.minecraft.text" class="external-link">Text</a>&gt;&nbsp;tooltip,
+ <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/tooltip/TooltipType.html" title="class or interface in net.minecraft.item.tooltip" class="external-link">TooltipType</a>&nbsp;type)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#applyInfusion(net.minecraft.item.ItemStack,io.github.xrickastley.sevenelements.element.ElementalApplication.Builder,io.github.xrickastley.sevenelements.element.InternalCooldownContext.Builder)" class="member-name-link">applyInfusion</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/ItemStack.html" title="class or interface in net.minecraft.item" class="external-link">ItemStack</a>&nbsp;stack,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../element/ElementalDamageSource.html" title="class in io.github.xrickastley.sevenelements.element">ElementalDamageSource</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#apply(net.minecraft.entity.damage.DamageSource,net.minecraft.entity.Entity)" class="member-name-link">apply</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/entity/damage/DamageSource.html" title="class or interface in net.minecraft.entity.damage" class="external-link">DamageSource</a>&nbsp;source,
+ <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/entity/Entity.html" title="class or interface in net.minecraft.entity" class="external-link">Entity</a>&nbsp;target)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#applyInfusion(net.minecraft.item.ItemStack,io.github.xrickastley.sevenelements.element.ElementalApplication.Builder,io.github.xrickastley.sevenelements.element.InternalCooldownContext.Builder)" class="member-name-link">applyInfusion</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/ItemStack.html" title="class or interface in net.minecraft.item" class="external-link">ItemStack</a>&nbsp;stack,
  <a href="../element/ElementalApplication.Builder.html" title="class in io.github.xrickastley.sevenelements.element">ElementalApplication.Builder</a>&nbsp;applicationBuilder,
  <a href="../element/InternalCooldownContext.Builder.html" title="class in io.github.xrickastley.sevenelements.element">InternalCooldownContext.Builder</a>&nbsp;icdBuilder)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../element/ElementalDamageSource.html" title="class in io.github.xrickastley.sevenelements.element">ElementalDamageSource</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#applyToDamageSource(net.minecraft.entity.damage.DamageSource,net.minecraft.entity.Entity)" class="member-name-link">applyToDamageSource</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/entity/damage/DamageSource.html" title="class or interface in net.minecraft.entity.damage" class="external-link">DamageSource</a>&nbsp;source,
- <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/entity/Entity.html" title="class or interface in net.minecraft.entity" class="external-link">Entity</a>&nbsp;target)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../element/ElementalApplication.Builder.html" title="class in io.github.xrickastley.sevenelements.element">ElementalApplication.Builder</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elementalInfusion()" class="member-name-link">elementalInfusion</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Optional.html" title="class or interface in java.util" class="external-link">Optional</a><wbr>&lt;<a href="../element/ElementalDamageSource.html" title="class in io.github.xrickastley.sevenelements.element">ElementalDamageSource</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#applyToDamageSource(net.minecraft.entity.damage.DamageSource,net.minecraft.entity.Entity)" class="member-name-link">applyToDamageSource</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/entity/damage/DamageSource.html" title="class or interface in net.minecraft.entity.damage" class="external-link">DamageSource</a>&nbsp;source,
+ <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/entity/Entity.html" title="class or interface in net.minecraft.entity" class="external-link">Entity</a>&nbsp;target)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../element/ElementalApplication.Builder.html" title="class in io.github.xrickastley.sevenelements.element">ElementalApplication.Builder</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#elementalInfusion()" class="member-name-link">elementalInfusion</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>elementalInfusion</code> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/util/Pair.html" title="class or interface in net.minecraft.util" class="external-link">Pair</a><wbr>&lt;<a href="../element/Element.html" title="enum class in io.github.xrickastley.sevenelements.element">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Double.html" title="class or interface in java.lang" class="external-link">Double</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#generateAndApplyInfusion(net.minecraft.item.ItemStack,net.minecraft.world.World)" class="member-name-link">generateAndApplyInfusion</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/ItemStack.html" title="class or interface in net.minecraft.item" class="external-link">ItemStack</a>&nbsp;stack,
+ <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/world/World.html" title="class or interface in net.minecraft.world" class="external-link">World</a>&nbsp;world)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@Nullable <a href="../element/Element.html" title="enum class in io.github.xrickastley.sevenelements.element">Element</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getElement()" class="member-name-link">getElement</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
@@ -241,6 +261,18 @@ loadScripts(document, 'script');</script>
 </section>
 </li>
 <li>
+<section class="detail" id="ELEMENTS">
+<h3>ELEMENTS</h3>
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="../element/Element.html" title="enum class in io.github.xrickastley.sevenelements.element">Element</a>&gt;</span>&nbsp;<span class="element-name">ELEMENTS</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="GAUGE_UNITS">
+<h3>GAUGE_UNITS</h3>
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a>&lt;<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Double.html" title="class or interface in java.lang" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">GAUGE_UNITS</span></div>
+</section>
+</li>
+<li>
 <section class="detail" id="CODEC">
 <h3>CODEC</h3>
 <div class="member-signature"><span class="modifiers">public static final</span>&nbsp;<span class="return-type">com.mojang.serialization.Codec&lt;<a href="ElementalInfusionComponent.html" title="class in io.github.xrickastley.sevenelements.component">ElementalInfusionComponent</a>&gt;</span>&nbsp;<span class="element-name">CODEC</span></div>
@@ -277,6 +309,14 @@ loadScripts(document, 'script');</script>
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="generateAndApplyInfusion(net.minecraft.item.ItemStack,net.minecraft.world.World)">
+<h3>generateAndApplyInfusion</h3>
+<div class="member-signature"><span class="annotations">@Internal
+</span><span class="modifiers">public static</span>&nbsp;<span class="return-type"><a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/util/Pair.html" title="class or interface in net.minecraft.util" class="external-link">Pair</a>&lt;<a href="../element/Element.html" title="enum class in io.github.xrickastley.sevenelements.element">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Double.html" title="class or interface in java.lang" class="external-link">Double</a>&gt;</span>&nbsp;<span class="element-name">generateAndApplyInfusion</span><wbr><span class="parameters">(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/ItemStack.html" title="class or interface in net.minecraft.item" class="external-link">ItemStack</a>&nbsp;stack,
+ <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/world/World.html" title="class or interface in net.minecraft.world" class="external-link">World</a>&nbsp;world)</span></div>
+</section>
+</li>
 <li>
 <section class="detail" id="applyToDamageSource(net.minecraft.entity.damage.DamageSource,net.minecraft.entity.Entity)">
 <h3>applyToDamageSource</h3>
@@ -355,6 +395,18 @@ loadScripts(document, 'script');</script>
 <dd><code>obj</code> - the object with which to compare</dd>
 <dt>Returns:</dt>
 <dd><code>true</code> if this object is the same as the <code>obj</code> argument; <code>false</code> otherwise.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="appendTooltip(net.minecraft.item.Item.TooltipContext,java.util.function.Consumer,net.minecraft.item.tooltip.TooltipType)">
+<h3>appendTooltip</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">appendTooltip</span><wbr><span class="parameters">(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/Item.TooltipContext.html" title="class or interface in net.minecraft.item" class="external-link">Item.TooltipContext</a>&nbsp;context,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/text/Text.html" title="class or interface in net.minecraft.text" class="external-link">Text</a>&gt;&nbsp;tooltip,
+ <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/tooltip/TooltipType.html" title="class or interface in net.minecraft.item.tooltip" class="external-link">TooltipType</a>&nbsp;type)</span></div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/tooltip/TooltipAppender.html#appendTooltip(net.minecraft.item.Item.TooltipContext,java.util.function.Consumer,net.minecraft.item.tooltip.TooltipType)" title="class or interface in net.minecraft.item.tooltip" class="external-link">appendTooltip</a></code>&nbsp;in interface&nbsp;<code><a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/item/tooltip/TooltipAppender.html" title="class or interface in net.minecraft.item.tooltip" class="external-link">TooltipAppender</a></code></dd>
 </dl>
 </section>
 </li>
