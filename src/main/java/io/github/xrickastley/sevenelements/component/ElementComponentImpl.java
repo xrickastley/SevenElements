@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -43,6 +44,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.damage.DamageType;
 import net.minecraft.entity.decoration.ArmorStandEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -58,6 +60,7 @@ public final class ElementComponentImpl implements ElementComponent {
 	static final Set<Class<LivingEntity>> DENIED_ENTITIES = new HashSet<>();
 	static final Map<TagKey<EntityType<?>>, Element> ENTITY_TYPE_ELEMENT_MAP = new HashMap<>();
 	static final Map<TagKey<DamageType>, Element> DAMAGE_TYPE_ELEMENT_MAP = new HashMap<>();
+	static final Map<Integer, InfusionFunction> INFUSION_FUNCTIONS = new HashMap<>();
 
 	private final LivingEntity owner;
 	private final Map<Element, ElementHolder> elementHolders = new ConcurrentHashMap<>();
@@ -642,6 +645,29 @@ public final class ElementComponentImpl implements ElementComponent {
 		}
 	}
 
+	static class InfusionFunction implements BiFunction<DamageSource, LivingEntity, Optional<ElementalDamageSource>> {
+		private final BiFunction<DamageSource, LivingEntity, Optional<ElementalDamageSource>> infusionFn;
+		private final int priority;
+
+		InfusionFunction(BiFunction<DamageSource, LivingEntity, Optional<ElementalDamageSource>> infusionFn, int priority) {
+			this.infusionFn = infusionFn;
+			this.priority = priority;
+		}
+
+		@Override
+		public Optional<ElementalDamageSource> apply(DamageSource t, LivingEntity u) {
+			return this.infusionFn.apply(t, u);
+		}
+
+		public Optional<ElementalDamageSource> get(DamageSource t, LivingEntity u) {
+			return this.infusionFn.apply(t, u);
+		}
+
+		public int getPriority() {
+			return this.priority;
+		}
+	}
+
 	static {
 		ElementComponent.denyElementsFor(ArmorStandEntity.class);
 
@@ -660,5 +686,54 @@ public final class ElementComponentImpl implements ElementComponent {
 		ElementComponentImpl.DAMAGE_TYPE_ELEMENT_MAP.put(SevenElementsDamageTypeTags.HAS_DENDRO_INFUSION, Element.DENDRO);
 		ElementComponentImpl.DAMAGE_TYPE_ELEMENT_MAP.put(SevenElementsDamageTypeTags.HAS_CRYO_INFUSION, Element.CRYO);
 		ElementComponentImpl.DAMAGE_TYPE_ELEMENT_MAP.put(SevenElementsDamageTypeTags.HAS_GEO_INFUSION, Element.GEO);
+
+		ElementComponent.addElementalInfusionMethod(ElementalInfusionComponent::applyToDamageSource, 1000);
+		ElementComponent.addElementalInfusionMethod(ElementComponentImpl::attemptDamageTypeInfusions, 750);
+		ElementComponent.addElementalInfusionMethod(ElementComponentImpl::attemptEntityDamageInfusions, 500);
+		ElementComponent.addElementalInfusionMethod(ElementComponentImpl::attemptProjectileInfusions, 250);
 	}
+
+	private static Optional<ElementalDamageSource> attemptDamageTypeInfusions(DamageSource source, LivingEntity target) {
+		for (final var entry : ElementComponentImpl.DAMAGE_TYPE_ELEMENT_MAP.entrySet()) {
+			if (!source.isIn(entry.getKey())) continue;
+
+			return Optional.of(
+				new ElementalDamageSource(
+					source,
+					ElementalApplications.gaugeUnits(target, entry.getValue(), 1.0),
+					InternalCooldownContext.ofDefault(target, "seven-elements:damage_infusion")
+				)
+			);
+		}
+
+		return Optional.empty();
+	}
+
+	private static Optional<ElementalDamageSource> attemptEntityDamageInfusions(DamageSource source, LivingEntity target) {
+		if (!(source.getAttacker() instanceof final LivingEntity attacker)) return Optional.empty();
+
+		for (final var entry : ElementComponentImpl.ENTITY_TYPE_ELEMENT_MAP.entrySet()) {
+			if (!attacker.getType().isIn(entry.getKey())) continue;
+
+			return Optional.of(
+				new ElementalDamageSource(
+					source,
+					ElementalApplications.gaugeUnits(target, entry.getValue(), 1.0),
+					InternalCooldownContext.ofDefault(attacker, "seven-elements:mob_attack")
+				)
+			);
+		}
+
+		return Optional.empty();
+	}
+
+	private static Optional<ElementalDamageSource> attemptProjectileInfusions(DamageSource source, LivingEntity target) {
+		// Projectiles are indirect DMG sources.
+		if (source.isDirect()) return Optional.empty();
+
+		return source.getSource() instanceof final ProjectileEntity projectile
+			? projectile.sevenelements$attemptInfusion(source, target)
+			: Optional.empty();
+	}
+
 }

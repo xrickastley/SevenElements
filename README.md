@@ -40,6 +40,7 @@ If you wanna contribute to the wiki, the branch for it is [wiki](https://github.
 <p align="center">
 	<b>Copyright © 2025 xrickastley (_xRickAstley). All Rights Reserved.</b>
 </p>
-<p align="center">
-  <b>Special thanks to YaBoiYin (yin_n_yang) on Discord for the entity models!</b>
-</p>
+
+### Special thanks to:
+- YaBoiYin (yin_n_yang @ Discord) - Entity Models
+- [LW-Arqiu1shz](https://github.com/LW-Arqiu1shz) - ZH-CN localization

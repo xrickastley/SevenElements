@@ -13,7 +13,6 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 
 import net.minecraft.entity.LivingEntity;
 
-
 public class SevenElementsCCAComponents implements EntityComponentInitializer, ItemComponentInitializer {
 	@Override
 	public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
