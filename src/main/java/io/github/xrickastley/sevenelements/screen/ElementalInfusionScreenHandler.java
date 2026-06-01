@@ -1,16 +1,9 @@
 package io.github.xrickastley.sevenelements.screen;
 
-import java.util.List;
-
 import io.github.xrickastley.sevenelements.advancement.criterion.SevenElementsCriteria;
 import io.github.xrickastley.sevenelements.block.SevenElementsBlocks;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
-import io.github.xrickastley.sevenelements.element.ElementalApplications;
-import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
-import io.github.xrickastley.sevenelements.element.InternalCooldownTag;
-import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.networking.FinishElementalInfusionS2CPayload;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
@@ -23,16 +16,12 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerContext;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.util.math.random.Random;
 
 public final class ElementalInfusionScreenHandler extends ScreenHandler {
-	private static final List<Element> ELEMENTS = List.of(Element.PYRO, Element.HYDRO, Element.ANEMO, Element.ELECTRO, Element.DENDRO, Element.CRYO, Element.GEO);
-	private static final List<Double> GAUGE_UNITS = List.of(1.0, 1.5, 2.0);
 	private static final int REQUIRED_LEVEL = 10;
 
 	private final ScreenHandlerContext context;
 	private final CraftingResultInventory output = new CraftingResultInventory();
-	private final Random RANDOM = Random.create();
 
 	public ElementalInfusionScreenHandler(int syncId, PlayerInventory playerInventory) {
 		this(syncId, playerInventory, ScreenHandlerContext.EMPTY);
@@ -97,18 +86,7 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 		if (slot == null || !slot.hasStack()) return false;
 
 		final ItemStack stack = slot.getStack();
-		final Element element = ELEMENTS.get(RANDOM.nextInt(ELEMENTS.size()));
-
-		ElementalInfusionComponent.applyInfusion(
-			stack,
-			ElementalApplications.builder()
-				.setType(Type.GAUGE_UNIT)
-				.setElement(element)
-				.setGaugeUnits(GAUGE_UNITS.get(RANDOM.nextInt(GAUGE_UNITS.size()))),
-			InternalCooldownContext.builder()
-				.setTag(InternalCooldownTag.of("seven-elements:elemental_infusion"))
-				.setType(InternalCooldownType.DEFAULT)
-		);
+		final Element infusedElement = ElementalInfusionComponent.generateAndApplyInfusion(stack, player.getWorld()).getLeft();
 
 		if (!player.isInCreativeMode()) serverPlayer.addExperienceLevels(-REQUIRED_LEVEL);
 
@@ -116,7 +94,7 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 		slot.markDirty();
 
 		ServerPlayNetworking.send(serverPlayer, new FinishElementalInfusionS2CPayload(this));
-		SevenElementsCriteria.ELEMENTAL_INFUSION.trigger(serverPlayer, stack, element);
+		SevenElementsCriteria.ELEMENTAL_INFUSION.trigger(serverPlayer, stack, infusedElement);
 
 		return true;
 	}
