@@ -1,25 +1,25 @@
 package io.github.xrickastley.sevenelements.component;
 
-import java.util.function.Consumer;
-
 import com.google.common.collect.HashMultimap;
 import com.mojang.serialization.Codec;
+
+import java.util.function.Consumer;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes.ModifierType;
-import io.github.xrickastley.sevenelements.util.TextHelper;
-import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
+import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
+import io.github.xrickastley.sevenelements.util.TextHelper;
 
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier.Operation;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.item.ArmorItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Item.TooltipContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipAppender;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.entry.RegistryEntry;

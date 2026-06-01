@@ -1,9 +1,9 @@
 package io.github.xrickastley.sevenelements.component.interfaces;
 
+import com.google.common.collect.HashMultimap;
+
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
-
-import com.google.common.collect.HashMultimap;
 
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.LivingEntity;

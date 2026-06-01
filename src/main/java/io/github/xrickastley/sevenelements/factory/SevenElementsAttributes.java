@@ -155,7 +155,7 @@ public class SevenElementsAttributes {
 		DMG_BONUS, RES
 	}
 
-	
+
 	static {
 		SevenElementsAttributes.addMultiplicativeLikeAttributes(List.of(
 			PHYSICAL_DMG_BONUS,

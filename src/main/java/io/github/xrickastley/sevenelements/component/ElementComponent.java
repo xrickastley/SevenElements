@@ -61,7 +61,7 @@ public interface ElementComponent extends AutoSyncedComponent, CommonTickingComp
 			.findFirst()
 			.orElse(ElementalDamageSource.of(source, target));
 	}
-	
+
 	public LivingEntity getOwner();
 
 	public ElementHolder getElementHolder(Element element);

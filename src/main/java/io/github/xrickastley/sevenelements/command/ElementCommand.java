@@ -453,7 +453,7 @@ public class ElementCommand {
 			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.itemless", entity.getDisplayName()));
 
 		ElementalAttunementComponent.applyAttunement(stack, element);
-		
+
 		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.attune.apply.success", element.getText(true), entity.getDisplayName()), true);
 	}
 
