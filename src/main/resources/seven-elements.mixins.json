@@ -4,6 +4,7 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AbstractBlockStateMixin",
+    "AttributeModifiersComponent$Display$DefaultMixin",
     "BlockItemMixin",
     "BossBarMixin",
     "CrossbowItemMixin",
@@ -18,6 +19,7 @@
     "LivingEntityMixin",
     "PersistentProjectileEntityMixin",
     "PlayerEntityMixin",
+    "PrioritizedItemStackMixin",
     "PrioritizedLivingEntityMixin",
     "PrioritizedPlayerEntityMixin",
     "ProjectileEntityMixin",

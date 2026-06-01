@@ -1,12 +1,13 @@
 package io.github.xrickastley.sevenelements.mixin.compat.taxfreelevels;
 
-import io.github.fourmisain.taxfreelevels.TaxFreeLevels;
-import net.minecraft.server.network.ServerPlayerEntity;
 import org.spongepowered.asm.mixin.Mixin;
-
-import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+
+import io.github.fourmisain.taxfreelevels.TaxFreeLevels;
+import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler;
+
+import net.minecraft.server.network.ServerPlayerEntity;
 
 @Mixin(ElementalInfusionScreenHandler.class)
 public class ElementalInfusionScreenHandlerMixin {

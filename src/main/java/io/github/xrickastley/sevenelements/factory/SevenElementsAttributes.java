@@ -1,9 +1,13 @@
 package io.github.xrickastley.sevenelements.factory;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+
+import org.jetbrains.annotations.ApiStatus;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.element.Element;
@@ -20,6 +24,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 public class SevenElementsAttributes {
 	private static final List<RegistryEntry<EntityAttribute>> ADDED_ATTRIBUTES = new ArrayList<>();
 	private static final Map<Element, ConcurrentHashMap<ModifierType, RegistryEntry<EntityAttribute>>> LINKS = new ConcurrentHashMap<>();
+	private static final Set<RegistryEntry<EntityAttribute>> MULTIPLICATIVE_LIKE_ATTRIBUTES = new HashSet<>();
 	private static boolean registered = false;
 
 	public static final RegistryEntry<EntityAttribute> PHYSICAL_DMG_BONUS = register("physical_dmg_bonus", createAttribute("Physical DMG Bonus%", 0, 0, 400));
@@ -81,7 +86,7 @@ public class SevenElementsAttributes {
 		final RegistryEntry<EntityAttribute> dmgBonusAttribute = modifierMap.get(ModifierType.DMG_BONUS);
 		final RegistryEntry<EntityAttribute> resAttribute = modifierMap.get(ModifierType.RES);
 
-		final float dmgBonusMultiplier = 1 + (target.getAttributes().hasAttribute(dmgBonusAttribute) && source.applyDMGBonus()
+		final float dmgBonusMultiplier = 1 + (attacker.getAttributes().hasAttribute(dmgBonusAttribute) && source.applyDMGBonus()
 			? (float) (attacker.getAttributes().getValue(dmgBonusAttribute) / 100)
 			: 0);
 
@@ -98,6 +103,21 @@ public class SevenElementsAttributes {
 		SevenElementsAttributes.ADDED_ATTRIBUTES.forEach(builder::add);
 
 		return builder;
+	}
+
+	public static RegistryEntry<EntityAttribute> getElementalAttribute(final Element element, final ModifierType modifierType) {
+		return SevenElementsAttributes.LINKS
+			.getOrDefault(element, new ConcurrentHashMap<>())
+			.get(modifierType);
+	}
+
+	public static void addMultiplicativeLikeAttributes(List<RegistryEntry<EntityAttribute>> attributes) {
+		SevenElementsAttributes.MULTIPLICATIVE_LIKE_ATTRIBUTES.addAll(attributes);
+	}
+
+	@ApiStatus.Internal
+	public static boolean isMultiplicativeLikeAttribute(RegistryEntry<EntityAttribute> attribute) {
+		return SevenElementsAttributes.MULTIPLICATIVE_LIKE_ATTRIBUTES.contains(attribute);
 	}
 
 	private static double getRESMultiplier(LivingEntity target, RegistryEntry<EntityAttribute> resAttribute) {
@@ -131,7 +151,29 @@ public class SevenElementsAttributes {
 			.setTracked(true);
 	}
 
-	private static enum ModifierType {
+	public static enum ModifierType {
 		DMG_BONUS, RES
+	}
+
+
+	static {
+		SevenElementsAttributes.addMultiplicativeLikeAttributes(List.of(
+			PHYSICAL_DMG_BONUS,
+			PYRO_DMG_BONUS,
+			HYDRO_DMG_BONUS,
+			ANEMO_DMG_BONUS,
+			ELECTRO_DMG_BONUS,
+			DENDRO_DMG_BONUS,
+			CRYO_DMG_BONUS,
+			GEO_DMG_BONUS,
+			PHYSICAL_RES,
+			PYRO_RES,
+			HYDRO_RES,
+			ANEMO_RES,
+			ELECTRO_RES,
+			DENDRO_RES,
+			CRYO_RES,
+			GEO_RES
+		));
 	}
 }
