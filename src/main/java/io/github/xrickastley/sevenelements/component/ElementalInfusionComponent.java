@@ -3,14 +3,18 @@ package io.github.xrickastley.sevenelements.component;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.element.Element;
+import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
+import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext.Builder;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
@@ -20,28 +24,57 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
+import net.minecraft.component.ComponentMap;
 import net.minecraft.component.ComponentsAccess;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.item.Item.TooltipContext;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipAppender;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Pair;
+import net.minecraft.world.World;
 
 public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder elementalInfusion, @Nullable InternalCooldownContext.Builder internalCooldown) implements TooltipAppender {
+	private static final List<Element> ELEMENTS = List.of(Element.PYRO, Element.HYDRO, Element.ANEMO, Element.ELECTRO, Element.DENDRO, Element.CRYO, Element.GEO);
+	private static final List<Double> GAUGE_UNITS = List.of(1.0, 1.5, 2.0);
+
 	public static final Codec<ElementalInfusionComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ElementalApplication.Builder.CODEC.fieldOf("elemental_infusion").forGetter(ElementalInfusionComponent::elementalInfusion),
 		InternalCooldownContext.Builder.CODEC.optionalFieldOf("internal_cooldown", InternalCooldownContext.Builder.ofNone()).forGetter(ElementalInfusionComponent::internalCooldown)
 	).apply(instance, ElementalInfusionComponent::new));
 
+	@ApiStatus.Internal
+	public static Pair<Element, Double> generateAndApplyInfusion(ItemStack stack, World world) {
+		final ComponentMap components = stack.getComponents();
+
+		final Element element = components.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)
+			? components.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT).element()
+			: ELEMENTS.get(world.getRandom().nextInt(ELEMENTS.size()));
+		final double gaugeUnits = GAUGE_UNITS.get(world.getRandom().nextInt(GAUGE_UNITS.size()));
+
+		ElementalInfusionComponent.applyInfusion(
+			stack,
+			ElementalApplications.builder()
+				.setType(Type.GAUGE_UNIT)
+				.setElement(element)
+				.setGaugeUnits(gaugeUnits),
+			InternalCooldownContext.builder()
+				.setTag(InternalCooldownTag.of("seven-elements:elemental_infusion"))
+				.setType(InternalCooldownType.DEFAULT)
+		);
+
+		return new Pair<>(element, gaugeUnits);
+	}
+
 	public static Optional<ElementalDamageSource> applyToDamageSource(DamageSource source, Entity target) {
 		try {
 			if (!source.isDirect() || !(target instanceof final LivingEntity livingTarget) || !(source.getAttacker() instanceof final LivingEntity attacker)) return Optional.empty();
 
-			final @Nullable ElementalInfusionComponent component = attacker.getActiveOrMainHandStack().get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+			final @Nullable ElementalInfusionComponent component = attacker.getWeaponStack().get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 
 			if (component == null || !component.hasElementalInfusion()) return Optional.empty();
 
@@ -131,24 +164,16 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 	}
 
 	@Override
-	public void appendTooltip(TooltipContext context, Consumer<Text> textConsumer, TooltipType tooltipType, ComponentsAccess components) {
-		if (!tooltipType.isAdvanced()) return;
-
-		final @Nullable ElementalInfusionComponent component = components.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
-
-		if (component == null || !component.hasElementalInfusion()) return;
-
-		final Builder builder = component.internalCooldown();
+	public void appendTooltip(Item.TooltipContext context, Consumer<Text> textConsumer, TooltipType type, ComponentsAccess components) {
+		final Builder icdContext = this.internalCooldown();
 
 		textConsumer.accept(
 			Text.empty()
 				.append(Text.translatable("item.seven-elements.components.infusion.infusion").formatted(Formatting.WHITE))
-				.append(ElementalApplication.Builder.getText(component.elementalInfusion()))
+				.append(ElementalApplication.Builder.getText(this.elementalInfusion()))
 		);
 
-
-
-		@Nullable InternalCooldownTag tag = ClassInstanceUtil.mapOrNull(builder, Builder::getTag);
+		@Nullable InternalCooldownTag tag = ClassInstanceUtil.mapOrNull(icdContext, Builder::getTag);
 
 		final Text tagText = tag != null
 			? tag.getText(Formatting.DARK_GRAY)
@@ -160,17 +185,15 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 				.append(tagText)
 		);
 
-
-
-		final InternalCooldownType type = JavaScriptUtil.nullishCoalesing(
-			ClassInstanceUtil.mapOrNull(builder, Builder::getType),
+		final InternalCooldownType icdType = JavaScriptUtil.nullishCoalesing(
+			ClassInstanceUtil.mapOrNull(icdContext, Builder::getType),
 			InternalCooldownType.DEFAULT
 		);
 
 		textConsumer.accept(
 			Text.empty()
 				.append(Text.translatable("item.seven-elements.components.infusion.type").formatted(Formatting.WHITE))
-				.append(type.getText(true).formatted(Formatting.DARK_GRAY))
+				.append(icdType.getText(true).formatted(Formatting.DARK_GRAY))
 		);
 	}
 }

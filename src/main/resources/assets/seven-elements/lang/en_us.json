@@ -88,12 +88,17 @@
 	"commands.element.infuse.apply.success": "Applied elemental infusion %s (%s) to %s's item",
 	"commands.element.infuse.remove.none": "%s's item already has no elemental infusion!",
 	"commands.element.infuse.remove.success": "Removed elemental infusion from %s's item",
+	"commands.element.attune.apply.success": "Applied %s elemental attunement to %s's item",
+	"commands.element.attune.remove.none": "%s's item already has no elemental attunement!",
+	"commands.element.attune.remove.success": "Removed elemental attunement from %s's item",
 
 	"item.seven-elements.components.infusion.infusion": "Elemental Infusion: ",
 	"item.seven-elements.components.infusion.tag": "ICD Tag: ",
 	"item.seven-elements.components.infusion.type": "ICD Type: ",
+	"item.seven-elements.components.attunement.attunement": "Elemental Attunement: ",
 	
 	"formats.seven-elements.icd_type": "%ss/%s hits",
+	"formats.seven-elements.icd_context": "%s/%s",
 	"formats.seven-elements.elemental_application.gauge_unit": "%sU %s",
 	"formats.seven-elements.elemental_application.duration": "%sU %s/%ss",
 	"formats.seven-elements.elemental_application.duration.timer": "%sU %s (%ss left)",

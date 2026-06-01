@@ -13,6 +13,7 @@ import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.text.Text;
 
 /**
  * An {@code InternalCooldownContext} is a class used for holding the various {@code InternalCooldown}
@@ -199,6 +200,10 @@ public final class InternalCooldownContext {
 
 		public static InternalCooldownType getType(Builder builder) {
 			return builder.type;
+		}
+
+		public static Text getText(Builder builder) {
+			return Text.translatable("formats.seven-elements.icd_context", builder.tag.getText(), builder.type.getText());
 		}
 
 		public InternalCooldownContext.Builder setTag(InternalCooldownTag tag) {

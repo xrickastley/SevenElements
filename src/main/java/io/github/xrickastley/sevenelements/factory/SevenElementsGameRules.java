@@ -26,6 +26,12 @@ public class SevenElementsGameRules {
 			.category(ELEMENTS_CATEGORY)
 			.buildAndRegister(SevenElements.identifier("overloaded_block_destruction"));
 
+	public static final GameRule<Boolean> OVERLOADED_EXPLOSIONS_CREATE_FIRE
+		 = GameRuleBuilder
+			.forBoolean(true)
+			.category(ELEMENTS_CATEGORY)
+			.buildAndRegister(SevenElements.identifier("overloaded_creates_fire"));
+
 	public static final GameRule<Boolean> PYRO_FROM_FIRE
 		 = GameRuleBuilder
 			.forBoolean(true)
