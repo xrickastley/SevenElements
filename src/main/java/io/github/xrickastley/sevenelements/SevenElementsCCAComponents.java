@@ -2,6 +2,7 @@ package io.github.xrickastley.sevenelements;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
+import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.component.FrozenEffectComponent;
 import io.github.xrickastley.sevenelements.component.FrozenEffectComponentImpl;
@@ -13,7 +14,6 @@ import dev.onyxstudios.cca.api.v3.entity.EntityComponentInitializer;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentFactoryRegistry;
 import dev.onyxstudios.cca.api.v3.item.ItemComponentInitializer;
 
-
 public class SevenElementsCCAComponents implements EntityComponentInitializer, ItemComponentInitializer {
 	@Override
 	public void registerEntityComponentFactories(EntityComponentFactoryRegistry registry) {
@@ -23,6 +23,7 @@ public class SevenElementsCCAComponents implements EntityComponentInitializer, I
 
 	@Override
 	public void registerItemComponentFactories(ItemComponentFactoryRegistry registry) {
+		registry.register(i -> true, ElementalAttunementComponent.KEY, ElementalAttunementComponent::new);
 		registry.register(i -> true, ElementalInfusionComponent.KEY, ElementalInfusionComponent::new);
 	}
 }

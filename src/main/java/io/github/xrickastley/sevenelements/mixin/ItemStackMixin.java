@@ -1,48 +1,41 @@
 package io.github.xrickastley.sevenelements.mixin;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+
+import java.util.List;
+import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
-import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
+import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
+import io.github.xrickastley.sevenelements.component.interfaces.TooltipProvider;
 import io.github.xrickastley.sevenelements.element.Element;
+import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.util.TextHelper;
+import io.github.xrickastley.sevenelements.util.Util;
 
+import net.minecraft.client.item.TooltipContext;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.attribute.EntityAttribute;
+import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.text.Text;
-import net.minecraft.util.Hand;
-import net.minecraft.util.TypedActionResult;
-import net.minecraft.world.World;
 
 // Prioritized since Frozen **MUST** disable using items.
-@Mixin(value = ItemStack.class, priority = Integer.MIN_VALUE)
+@Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
-	@Shadow
-	public abstract Item getItem();
-
-	@WrapOperation(
-		method = "use",
-		at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/item/Item;use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/TypedActionResult;"
-		)
-	)
-	private TypedActionResult<ItemStack> frozenPreventsItemUse(Item instance, World world, PlayerEntity user, Hand hand, Operation<TypedActionResult<ItemStack>> original) {
-		ItemStack handStack = user.getStackInHand(hand);
-
-		return user.hasStatusEffect(SevenElementsStatusEffects.FROZEN)
-			? TypedActionResult.fail(handStack)
-			: original.call(instance, world, user, hand);
-	}
-
 	@ModifyReturnValue(
 		method = "getName",
 		at = @At("RETURN")
@@ -50,12 +43,64 @@ public abstract class ItemStackMixin {
 	private Text modifyName(Text original) {
 		final @Nullable ElementalInfusionComponent component = ElementalInfusionComponent.get((ItemStack)(Object) this);
 
-		if (component == null || !component.hasElementalInfusion()) return original;
+		if (component == null || !component.hasElementalInfusion() || Util.isCalledBy("net.minecraft.client.gui.screen.ingame.AnvilScreen", "onSlotUpdate", 1) || Util.isCalledBy(AnvilScreenHandler.class, "updateResult", 2)) return original;
 
 		final Element element = component.getElement();
 
 		return Text.empty()
 			.append(original)
 			.append(TextHelper.noModifiers(TextHelper.color(" [" + element.getString() + "]", element.getDamageColor())));
+	}
+
+	@Inject(
+		method = "getTooltip",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/item/ItemStack;isSectionVisible(ILnet/minecraft/item/ItemStack$TooltipSection;)Z",
+			ordinal = 2,
+			shift = At.Shift.BEFORE
+		)
+	)
+	private void addAttunementData(@Nullable PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> cir, @Local List<Text> list) {
+		TooltipProvider.appendTooltip(ElementalAttunementComponent.KEY, (ItemStack)(Object) this, player, context, list::add);
+	}
+
+	@Inject(
+		method = "getTooltip",
+		at = @At(
+			value = "INVOKE",
+			target = "Ljava/util/List;add(Ljava/lang/Object;)Z",
+			ordinal = 18,
+			shift = At.Shift.AFTER
+		)
+	)
+	private void addInfusionData(@Nullable PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> cir, @Local List<Text> list) {
+		TooltipProvider.appendTooltip(ElementalInfusionComponent.KEY, (ItemStack)(Object) this, player, context, list::add);
+	}
+
+	@ModifyReturnValue(
+		method = "getAttributeModifiers",
+		at = @At("RETURN")
+	)
+	private Multimap<EntityAttribute, EntityAttributeModifier> applyAttributeModifyingComponents(Multimap<EntityAttribute, EntityAttributeModifier> original, @Local EquipmentSlot slot) {
+		final Multimap<EntityAttribute, EntityAttributeModifier> attributes = LinkedHashMultimap.create();
+
+		attributes.putAll(original);
+		attributes.putAll(AttributeModifyingComponent.getModifiers(slot, (ItemStack)(Object) this));
+
+		return attributes;
+	}
+
+	@ModifyExpressionValue(
+		method = "getTooltip",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/entity/attribute/EntityAttributeModifier$Operation;getId()I"
+		)
+	)
+	private int modifyIdForMultiplicativeLikeAttributes(int original, @Local Map.Entry<EntityAttribute, EntityAttributeModifier> entry) {
+		return SevenElementsAttributes.isMultiplicativeLikeAttribute(entry.getKey())
+			? 1
+			: original;
 	}
 }
