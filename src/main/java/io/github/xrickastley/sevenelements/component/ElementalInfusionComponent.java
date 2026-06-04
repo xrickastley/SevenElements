@@ -3,14 +3,18 @@ package io.github.xrickastley.sevenelements.component;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.element.Element;
+import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
+import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext.Builder;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
@@ -22,7 +26,9 @@ import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponentGetter;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -30,12 +36,39 @@ import net.minecraft.world.item.Item.TooltipContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipProvider;
+import net.minecraft.world.level.Level;
 
 public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder elementalInfusion, @Nullable InternalCooldownContext.Builder internalCooldown) implements TooltipProvider {
+	private static final List<Element> ELEMENTS = List.of(Element.PYRO, Element.HYDRO, Element.ANEMO, Element.ELECTRO, Element.DENDRO, Element.CRYO, Element.GEO);
+	private static final List<Double> GAUGE_UNITS = List.of(1.0, 1.5, 2.0);
+
 	public static final Codec<ElementalInfusionComponent> CODEC = RecordCodecBuilder.create(instance -> instance.group(
 		ElementalApplication.Builder.CODEC.fieldOf("elemental_infusion").forGetter(ElementalInfusionComponent::elementalInfusion),
 		InternalCooldownContext.Builder.CODEC.optionalFieldOf("internal_cooldown", InternalCooldownContext.Builder.ofNone()).forGetter(ElementalInfusionComponent::internalCooldown)
 	).apply(instance, ElementalInfusionComponent::new));
+
+	@ApiStatus.Internal
+	public static Tuple<Element, Double> generateAndApplyInfusion(ItemStack stack, Level level) {
+		final DataComponentMap components = stack.getComponents();
+
+		final Element element = components.has(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)
+			? components.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT).element()
+			: ELEMENTS.get(level.getRandom().nextInt(ELEMENTS.size()));
+		final double gaugeUnits = GAUGE_UNITS.get(level.getRandom().nextInt(GAUGE_UNITS.size()));
+
+		ElementalInfusionComponent.applyInfusion(
+			stack,
+			ElementalApplications.builder()
+				.setType(Type.GAUGE_UNIT)
+				.setElement(element)
+				.setGaugeUnits(gaugeUnits),
+			InternalCooldownContext.builder()
+				.setTag(InternalCooldownTag.of("seven-elements:elemental_infusion"))
+				.setType(InternalCooldownType.DEFAULT)
+		);
+
+		return new Tuple<>(element, gaugeUnits);
+	}
 
 	public static Optional<ElementalDamageSource> applyToDamageSource(DamageSource source, Entity target) {
 		try {
@@ -132,23 +165,15 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 
 	@Override
 	public void addToTooltip(TooltipContext context, Consumer<Component> textConsumer, TooltipFlag tooltipType, DataComponentGetter components) {
-		if (!tooltipType.isAdvanced()) return;
-
-		final @Nullable ElementalInfusionComponent component = components.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
-
-		if (component == null || !component.hasElementalInfusion()) return;
-
-		final Builder builder = component.internalCooldown();
+		final Builder icdContext = this.internalCooldown();
 
 		textConsumer.accept(
 			Component.empty()
 				.append(Component.translatable("item.seven-elements.components.infusion.infusion").withStyle(ChatFormatting.WHITE))
-				.append(ElementalApplication.Builder.getText(component.elementalInfusion()))
+				.append(ElementalApplication.Builder.getText(this.elementalInfusion()))
 		);
 
-
-
-		@Nullable InternalCooldownTag tag = ClassInstanceUtil.mapOrNull(builder, Builder::getTag);
+		@Nullable InternalCooldownTag tag = ClassInstanceUtil.mapOrNull(icdContext, Builder::getTag);
 
 		final Component tagText = tag != null
 			? tag.getText(ChatFormatting.DARK_GRAY)
@@ -160,17 +185,15 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 				.append(tagText)
 		);
 
-
-
-		final InternalCooldownType type = JavaScriptUtil.nullishCoalesing(
-			ClassInstanceUtil.mapOrNull(builder, Builder::getType),
+		final InternalCooldownType icdType = JavaScriptUtil.nullishCoalesing(
+			ClassInstanceUtil.mapOrNull(icdContext, Builder::getType),
 			InternalCooldownType.DEFAULT
 		);
 
 		textConsumer.accept(
 			Component.empty()
 				.append(Component.translatable("item.seven-elements.components.infusion.type").withStyle(ChatFormatting.WHITE))
-				.append(type.getText(true).withStyle(ChatFormatting.DARK_GRAY))
+				.append(icdType.getText(true).withStyle(ChatFormatting.DARK_GRAY))
 		);
 	}
 }

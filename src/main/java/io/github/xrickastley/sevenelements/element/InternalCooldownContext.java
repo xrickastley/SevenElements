@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
 import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
@@ -199,6 +200,10 @@ public final class InternalCooldownContext {
 
 		public static InternalCooldownType getType(Builder builder) {
 			return builder.type;
+		}
+
+		public static Component getText(Builder builder) {
+			return Component.translatable("formats.seven-elements.icd_context", builder.tag.getText(), builder.type.getText());
 		}
 
 		public InternalCooldownContext.Builder setTag(InternalCooldownTag tag) {

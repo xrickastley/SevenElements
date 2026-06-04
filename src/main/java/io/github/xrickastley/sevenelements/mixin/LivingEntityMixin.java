@@ -7,6 +7,7 @@ import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 
 import java.util.Collection;
+import java.util.Map;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -15,6 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
+import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
@@ -39,9 +41,12 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
@@ -221,6 +226,28 @@ public abstract class LivingEntityMixin
 		return source.is(SevenElementsDamageTypeTags.PREVENTS_COOLDOWN_TRIGGER)
 			? 10
 			: original;
+	}
+
+	@Inject(
+		method = "collectEquipmentChanges",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/world/entity/LivingEntity;stopLocationBasedEffects(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/EquipmentSlot;Lnet/minecraft/world/entity/ai/attributes/AttributeMap;)V"
+		)
+	)
+	private void applyAttributeModifyingComponents$1(CallbackInfoReturnable<Map<EquipmentSlot, ItemStack>> cir, @Local(ordinal = 0) ItemStack itemStack, @Local(ordinal = 0) EquipmentSlot slot) {
+		AttributeModifyingComponent.removeModifiers((LivingEntity)(Entity) this, EquipmentSlotGroup.bySlot(slot), itemStack);
+	}
+
+	@Inject(
+		method = "collectEquipmentChanges",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/world/item/ItemStack;forEachModifier(Lnet/minecraft/world/entity/EquipmentSlot;Ljava/util/function/BiConsumer;)V"
+		)
+	)
+	private void applyAttributeModifyingComponents$2(CallbackInfoReturnable<Map<EquipmentSlot, ItemStack>> cir, @Local(ordinal = 0) ItemStack itemStack, @Local(ordinal = 0) EquipmentSlot slot) {
+		AttributeModifyingComponent.applyModifiers((LivingEntity)(Entity) this, EquipmentSlotGroup.bySlot(slot), itemStack);
 	}
 
 	@Unique

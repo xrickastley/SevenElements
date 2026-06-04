@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
+import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementHolder;
@@ -22,13 +23,13 @@ import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.InternalCooldownTag;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
+import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistryKeys;
 import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -154,6 +155,10 @@ public class ElementCommand {
 									)
 								)
 							)
+							.then(
+								literal("random")
+								.executes(ElementCommand::infuseRandom)
+							)
 						)
 					)
 					.then(
@@ -161,6 +166,26 @@ public class ElementCommand {
 						.then(
 							argument("entity", EntityArgument.entity())
 							.executes(ElementCommand::infuseRemove)
+						)
+					)
+				)
+				.then(
+					literal("attunement")
+					.then(
+						literal("apply")
+						.then(
+							argument("entity", EntityArgument.entity())
+							.then(
+								argument("element", ElementArgumentType.element())
+								.executes(ElementCommand::attuneApply)
+							)
+						)
+					)
+					.then(
+						literal("remove")
+						.then(
+							argument("entity", EntityArgument.entity())
+							.executes(ElementCommand::attuneRemove)
 						)
 					)
 				)
@@ -333,10 +358,7 @@ public class ElementCommand {
 		ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder);
 
 		final Component elementText = ElementalApplication.Builder.getText(infusionBuilder);
-		final Component icdText = Component.empty()
-			.append(tag.getText(ChatFormatting.WHITE))
-			.append("/")
-			.append(type.getText());
+		final Component icdText = InternalCooldownContext.Builder.getText(icdBuilder);
 
 		return CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
 	}
@@ -376,10 +398,7 @@ public class ElementCommand {
 		ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder);
 
 		final Component elementText = ElementalApplication.Builder.getText(infusionBuilder);
-		final Component icdText = Component.empty()
-			.append(tag.getText())
-			.append("/")
-			.append(type.getText());
+		final Component icdText = InternalCooldownContext.Builder.getText(icdBuilder);
 
 		return CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
 	}
@@ -398,5 +417,59 @@ public class ElementCommand {
 		return ElementalInfusionComponent.removeInfusion(stack)
 			? CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.remove.success", entity.getDisplayName()), true)
 			: CommandUtils.sendError(context, Component.translatable("commands.element.infuse.remove.none", entity.getDisplayName()));
+	}
+
+	private static int infuseRandom(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		final Entity entity = EntityArgument.getEntity(context, "entity");
+
+		if (!(entity instanceof final LivingEntity livingEntity))
+			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
+
+		final ItemStack stack = livingEntity.getMainHandItem();
+
+		if (stack.isEmpty())
+			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.itemless", entity.getDisplayName()));
+
+		ElementalInfusionComponent.generateAndApplyInfusion(stack, entity.level());
+
+		final ElementalInfusionComponent infusion = stack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+
+		final Component elementText = ElementalApplication.Builder.getText(infusion.elementalInfusion());
+		final Component icdText = InternalCooldownContext.Builder.getText(infusion.internalCooldown());
+
+		return CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
+	}
+
+	private static int attuneApply(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		final Element element = ElementArgumentType.getElement(context, "element");
+		final Entity entity = EntityArgument.getEntity(context, "entity");
+
+		if (!(entity instanceof final LivingEntity livingEntity))
+			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
+
+		final ItemStack stack = livingEntity.getMainHandItem();
+
+		if (stack.isEmpty())
+			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.itemless", entity.getDisplayName()));
+
+		ElementalAttunementComponent.applyAttunement(stack, element);
+
+		return CommandUtils.sendFeedback(context, Component.translatable("commands.element.attune.apply.success", element.getText(true), entity.getDisplayName()), true);
+	}
+
+	private static int attuneRemove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		final Entity entity = EntityArgument.getEntity(context, "entity");
+
+		if (!(entity instanceof final LivingEntity livingEntity))
+			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
+
+		final ItemStack stack = livingEntity.getMainHandItem();
+
+		if (stack.isEmpty())
+			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.itemless", entity.getDisplayName()));
+
+		return ElementalAttunementComponent.removeAttunement(stack)
+			? CommandUtils.sendFeedback(context, Component.translatable("commands.element.attune.remove.success", entity.getDisplayName()), true)
+			: CommandUtils.sendError(context, Component.translatable("commands.element.attune.remove.none", entity.getDisplayName()));
 	}
 }

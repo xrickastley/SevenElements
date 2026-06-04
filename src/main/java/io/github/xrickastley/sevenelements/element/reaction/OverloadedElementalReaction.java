@@ -49,7 +49,7 @@ public class OverloadedElementalReaction extends ElementalReaction {
 			new ExplosionDamageCalculator(),
 			entity.position(),
 			power,
-			true,
+			world.getGameRules().get(SevenElementsGameRules.OVERLOADED_EXPLOSIONS_CREATE_FIRE),
 			world.getGameRules().get(SevenElementsGameRules.OVERLOADED_EXPLOSIONS_DAMAGE_BLOCKS)
 				? BlockInteraction.DESTROY
 				: BlockInteraction.KEEP

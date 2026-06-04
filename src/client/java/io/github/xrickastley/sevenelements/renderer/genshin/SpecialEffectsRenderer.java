@@ -5,7 +5,6 @@ import com.google.common.collect.Multimap;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 
 import java.util.ArrayList;
 import java.util.Collection;

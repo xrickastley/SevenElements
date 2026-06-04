@@ -12,6 +12,7 @@ import io.github.xrickastley.sevenelements.command.ElementArgumentType;
 import io.github.xrickastley.sevenelements.command.ElementCommand;
 import io.github.xrickastley.sevenelements.command.InternalCooldownTagType;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
+import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.factory.SevenElementsFactories;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.registry.SevenElementsPayloadsS2C;
@@ -23,11 +24,13 @@ import io.github.xrickastley.sevenelements.registry.dynamic.DynamicRegistryLoadE
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.ArgumentTypeRegistry;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.item.v1.ItemComponentTooltipProviderRegistry;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -72,6 +75,7 @@ public class SevenElements implements ModInitializer {
 			SingletonArgumentInfo.contextFree(InternalCooldownTagType::new)
 		);
 
+		ItemComponentTooltipProviderRegistry.addAfter(DataComponents.TRIM, SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT);
 	}
 
 	public static Identifier identifier(String path) {

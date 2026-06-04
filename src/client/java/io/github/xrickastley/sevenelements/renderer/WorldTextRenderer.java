@@ -1,7 +1,6 @@
 package io.github.xrickastley.sevenelements.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 
 import java.util.ArrayList;
 import java.util.List;

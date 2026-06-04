@@ -1,6 +1,7 @@
 package io.github.xrickastley.sevenelements.element;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -139,11 +140,19 @@ public enum Element {
 			.linkGaugeDecayIf(application -> ElementComponent.KEY.get(application.getEntity()).hasElementalApplication(Element.BURNING))
 	);
 
-	public static final Codec<Element> CODEC = ExtraCodecs.NON_EMPTY_STRING.xmap(Element::valueOf, Element::toString);
+	public static final Codec<Element> CODEC = ExtraCodecs.NON_EMPTY_STRING.comapFlatMap(Element::validate, Element::toString);
 
 	private final Identifier id;
 	private final ElementSettings settings;
 	private final List<Tuple<Element, Predicate<ElementalApplication>>> linkedElements;
+
+	private static DataResult<Element> validate(String element) {
+		try {
+			return DataResult.success(Element.valueOf(element.toUpperCase()));
+		} catch (IllegalArgumentException e) {
+			return DataResult.error(() -> "Not a valid Element: " + element + " " + e.getMessage());
+		}
+	}
 
 	private Element(Identifier id, ElementSettings settings) {
 		this.id = id;
@@ -426,7 +435,7 @@ public enum Element {
 		/**
 		 * Sets whether the gauge decay is linked to the gauge of this element, or the gauge of the
 		 * corresponding element, if {@code reverse} was {@code true} for
-		 * {@link ElementSettings#linkElement(Element, boolean) ElementSettings#linkedElement}.
+		 * {@link ElementSettings#linkElement(Element) ElementSettings#linkedElement}.
 		 *
 		 * @param link Whether the gauge decay is also linked.
 		 */

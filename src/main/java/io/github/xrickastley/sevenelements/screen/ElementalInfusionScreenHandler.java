@@ -1,22 +1,14 @@
 package io.github.xrickastley.sevenelements.screen;
 
-import java.util.List;
-
 import io.github.xrickastley.sevenelements.advancement.criterion.SevenElementsCriteria;
 import io.github.xrickastley.sevenelements.block.SevenElementsBlocks;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
-import io.github.xrickastley.sevenelements.element.ElementalApplications;
-import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
-import io.github.xrickastley.sevenelements.element.InternalCooldownTag;
-import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.networking.FinishElementalInfusionS2CPayload;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -26,13 +18,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public final class ElementalInfusionScreenHandler extends AbstractContainerMenu {
-	private static final List<Element> ELEMENTS = List.of(Element.PYRO, Element.HYDRO, Element.ANEMO, Element.ELECTRO, Element.DENDRO, Element.CRYO, Element.GEO);
-	private static final List<Double> GAUGE_UNITS = List.of(1.0, 1.5, 2.0);
 	private static final int REQUIRED_LEVEL = 10;
 
 	private final ContainerLevelAccess context;
 	private final ResultContainer output = new ResultContainer();
-	private final RandomSource RANDOM = RandomSource.create();
 
 	public ElementalInfusionScreenHandler(int syncId, Inventory playerInventory) {
 		this(syncId, playerInventory, ContainerLevelAccess.NULL);
@@ -97,18 +86,7 @@ public final class ElementalInfusionScreenHandler extends AbstractContainerMenu 
 		if (slot == null || !slot.hasItem()) return false;
 
 		final ItemStack stack = slot.getItem();
-		final Element element = ELEMENTS.get(RANDOM.nextInt(ELEMENTS.size()));
-
-		ElementalInfusionComponent.applyInfusion(
-			stack,
-			ElementalApplications.builder()
-				.setType(Type.GAUGE_UNIT)
-				.setElement(element)
-				.setGaugeUnits(GAUGE_UNITS.get(RANDOM.nextInt(GAUGE_UNITS.size()))),
-			InternalCooldownContext.builder()
-				.setTag(InternalCooldownTag.of("seven-elements:elemental_infusion"))
-				.setType(InternalCooldownType.DEFAULT)
-		);
+		final Element infusedElement = ElementalInfusionComponent.generateAndApplyInfusion(stack, player.level()).getA();
 
 		if (!player.hasInfiniteMaterials()) serverPlayer.giveExperienceLevels(-REQUIRED_LEVEL);
 
@@ -116,7 +94,7 @@ public final class ElementalInfusionScreenHandler extends AbstractContainerMenu 
 		slot.setChanged();
 
 		ServerPlayNetworking.send(serverPlayer, new FinishElementalInfusionS2CPayload(this));
-		SevenElementsCriteria.ELEMENTAL_INFUSION.trigger(serverPlayer, stack, element);
+		SevenElementsCriteria.ELEMENTAL_INFUSION.trigger(serverPlayer, stack, infusedElement);
 
 		return true;
 	}
