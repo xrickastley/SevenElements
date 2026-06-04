@@ -6,6 +6,7 @@ io.github.xrickastley.sevenelements.block
 io.github.xrickastley.sevenelements.command
 io.github.xrickastley.sevenelements.compat
 io.github.xrickastley.sevenelements.component
+io.github.xrickastley.sevenelements.component.interfaces
 io.github.xrickastley.sevenelements.effect
 io.github.xrickastley.sevenelements.element
 io.github.xrickastley.sevenelements.element.reaction
