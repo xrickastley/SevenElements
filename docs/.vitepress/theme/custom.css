@@ -123,3 +123,12 @@ h1, h2, h3, h4, h5, h6 {
 mjx-container[jax="SVG"][display="true"] {
 	overflow: visible !important;
 }
+
+.jump:not(:hover) {
+	text-decoration: none;
+}
+
+div.center-table table {
+	width: 100% !important;
+	table-layout: auto;
+}

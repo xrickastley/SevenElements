@@ -47,7 +47,10 @@ Contains entity types that innately deal **1U** <span class="anemo">**Anemo**</s
 <div class="treeview">
 	<ul>
 		<li>
-			<span title="NBT List / JSON Array" class="nbt-sprite sprite" style="background-position:-32px -32px;background-size:64px auto;height:16px;width:16px"></span> <b>#seven-elements:deals_anemo_damage</b> <i>(no values)</i>
+			<span title="NBT List / JSON Array" class="nbt-sprite sprite" style="background-position:-32px -32px;background-size:64px auto;height:16px;width:16px"></span> <b>#seven-elements:deals_anemo_damage</b> <i>(1 value)</i>
+			<ul>
+				<li><code>minecraft:breeze</code></li>
+			</ul>
 		</li>
 	</ul>
 </div>

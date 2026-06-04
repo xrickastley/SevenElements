@@ -103,6 +103,17 @@ Queries the specified element of the specified target.
 <br>
 
 ```mcfunction
+element infusion apply <target> random
+```
+
+Applies a random permanent elemental infusion to the target's held item, like using an [Infusion Table](../../workstations/infusion_table.md)
+
+- `<target>` being a target selector, username, or UUID; can only select one at a time.
+    - (e.g: `@a[limit = 1]`, `@p`, `_xRickAstley`, `b1b981b6-4081-4abe-afd8-e79269c6a339`)
+
+<br>
+
+```mcfunction
 element infusion apply <target> <element> <gaugeUnits>
 ```
 ```mcfunction
@@ -151,3 +162,28 @@ Removes the elemental infusion from the target's held item.
 
 - `<target>` being a target selector, username, or UUID; can only select one at a time.
     - (e.g: `@a[limit = 1]`, `@p`, `_xRickAstley`, `b1b981b6-4081-4abe-afd8-e79269c6a339`)
+
+<br>
+
+```mcfunction
+element attunement apply <target> <element>
+```
+
+Applies an elemental attunement to the target's held item.
+
+- `<target>` being a target selector, username, or UUID; can only select one at a time.
+    - (e.g: `@a[limit = 1]`, `@p`, `_xRickAstley`, `b1b981b6-4081-4abe-afd8-e79269c6a339`)
+- `<element>` being the name of an element.
+    - (e.g: `pyro`, `HYDRO`, `eLeCtRo`)
+
+<br>
+
+```mcfunction
+element infusion remove <target>
+```
+
+Removes the elemental attunement from the target's held item.
+
+- `<target>` being a target selector, username, or UUID; can only select one at a time.
+    - (e.g: `@a[limit = 1]`, `@p`, `_xRickAstley`, `b1b981b6-4081-4abe-afd8-e79269c6a339`)
+
