@@ -193,10 +193,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 			: elementColor.multiply(1, 1, 1, 0.5).asARGB();
 
 		buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_COLOR);
-		buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color).next();
-		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 0 - yOffset, 0.0001f).color(color).next();
-		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 1 - yOffset, 0.0001f).color(color).next();
-		buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, xOffset, 0 - yOffset, -0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 0 - yOffset, -0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 1 - yOffset, -0.0001f).color(color).next();
+		buffer.vertex(positionMatrix, xOffset, 1 - yOffset, -0.0001f).color(color).next();
 
 		tessellator.draw();
 
