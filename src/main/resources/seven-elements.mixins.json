@@ -20,6 +20,7 @@
     "ItemStackMixin",
     "LivingEntityMixin",
     "PlayerEntityMixin",
+    "PrioritizedItemStackMixin",
     "PrioritizedLivingEntityMixin",
     "PrioritizedPlayerEntityMixin",
     "ProjectileEntityMixin",

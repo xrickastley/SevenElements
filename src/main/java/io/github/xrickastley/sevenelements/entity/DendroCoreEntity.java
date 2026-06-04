@@ -188,7 +188,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			// y value is derived from y(t) = y_0 + v_yt + \frac{1}{2}ay \times t^2
 			final Vec3d velocity = new Vec3d(
 				targetPos.x / ticks,
-				direct 
+				direct
 					? targetPos.y / ticks
 					: (targetPos.y - 0.5 * DendroCoreEntity.SPRAWLING_SHOT_GRAVITY * ticks * ticks) / ticks,
 				targetPos.z / ticks

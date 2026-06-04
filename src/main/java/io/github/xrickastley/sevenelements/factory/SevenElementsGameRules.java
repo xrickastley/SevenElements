@@ -24,6 +24,12 @@ public class SevenElementsGameRules {
 		GameRuleFactory.createBooleanRule(false)
 	);
 
+	public static final GameRules.Key<GameRules.BooleanRule> OVERLOADED_EXPLOSIONS_CREATE_FIRE = GameRuleRegistry.register(
+		"overloadedCreatesFire",
+		GameRules.Category.MISC,
+		GameRuleFactory.createBooleanRule(true)
+	);
+
 	public static final GameRules.Key<GameRules.BooleanRule> PYRO_FROM_FIRE = GameRuleRegistry.register(
 		"pyroFromFire",
 		GameRules.Category.MISC,

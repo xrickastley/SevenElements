@@ -67,6 +67,7 @@
 		},
 		"cardinal-components": [
 			"seven-elements:elements",
+			"seven-elements:elemental_attunement",
 			"seven-elements:elemental_infusion",
 			"seven-elements:frozen_effect"
 		]
