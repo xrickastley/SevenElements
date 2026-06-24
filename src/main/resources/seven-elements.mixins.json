@@ -27,6 +27,7 @@
     "RegistryLoaderAccessor",
     "RegistryLoaderMixin",
     "ServerBossBarMixin",
+    "SmithingTemplateItemAccessor",
     "StatusEffectMixin",
     "WindChargeItemMixin",
     "WitherEntityMixin"

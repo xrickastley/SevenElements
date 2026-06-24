@@ -7,6 +7,7 @@ import java.util.function.Consumer;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
+import io.github.xrickastley.sevenelements.component.interfaces.ElementModifyingComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes.ModifierType;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
@@ -28,7 +29,7 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 
-public record ElementalAttunementComponent(Element element) implements AttributeModifyingComponent, TooltipAppender {
+public record ElementalAttunementComponent(Element element) implements AttributeModifyingComponent, ElementModifyingComponent, TooltipAppender {
 	public static final Codec<ElementalAttunementComponent> CODEC = Element.CODEC.xmap(ElementalAttunementComponent::new, ElementalAttunementComponent::element);
 
 	public static void applyAttunement(ItemStack stack, Element element) {
@@ -70,6 +71,11 @@ public record ElementalAttunementComponent(Element element) implements Attribute
 
 	public EntityAttributeModifier createAttributeModifier(StringIdentifiable suffix, double value, EntityAttributeModifier.Operation operation) {
 		return new EntityAttributeModifier(this.getModifierId(suffix), value, operation);
+	}
+
+	@Override
+	public Text getSymbol() {
+		return Text.translatable("symbols.seven-elements.elemental_infusion.elemental_attunment");
 	}
 
 	@Override

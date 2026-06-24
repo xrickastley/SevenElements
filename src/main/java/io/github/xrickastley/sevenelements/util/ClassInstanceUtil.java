@@ -61,4 +61,20 @@ public final class ClassInstanceUtil {
 
 		ifNonNull.accept(value);
 	}
+
+	/**
+	 * If {@code obj} isn't null and {@code obj} is an instance of {@code clazz}, calls the 
+	 * {@code ifClassInstance} consumer with {@code obj} as an instance of {@code clazz}.
+	 *
+	 * @param <T> The type of the expected class.
+	 * @param obj The object to check as an instance of {@code clazz} if it isn't null.
+	 * @param clazz The expected class {@code obj} is an instance of.
+	 * @param ifClassInstance The consumer to call if {@code obj} is an instance of {@code clazz}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> void ifInstanceOf(@Nullable Object obj, Class<T> clazz, Consumer<T> ifClassInstance) {
+		if (obj == null || !clazz.isInstance(obj)) return;
+
+		ifClassInstance.accept((T) obj);
+	}
 }

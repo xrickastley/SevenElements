@@ -1,0 +1,24 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "misc",
+	"key": {
+		"B": { "item": "minecraft:smooth_stone" },
+		"P": { "item": "minecraft:fire_charge" },
+		"H": { "item": "minecraft:water_bucket" },
+		"A": { "item": "minecraft:wind_charge" },
+		"E": { "item": "minecraft:lightning_rod" },
+		"D": { "tag": "minecraft:leaves" },
+		"C": { "item": "minecraft:blue_ice" },
+		"G": { "tag": "minecraft:stone_crafting_materials" }
+	},
+	"pattern": [
+		"GPH",
+		"CBA",
+		"D E"
+	],
+	"result": {
+		"count": 2,
+		"id": "seven-elements:elemental_rune"
+	},
+	"show_notification": false
+}

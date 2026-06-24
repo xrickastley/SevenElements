@@ -98,6 +98,8 @@
 	"formats.seven-elements.elemental_application.duration": "%sU %s/%ss",
 	"formats.seven-elements.elemental_application.duration.timer": "%sU %s (剩余%ss)",
 
+	"symbols.seven-elements.elemental_infusion.elemental_attunment": "✨",
+
 	"seven-elements.element.physical": "物理",
 	"seven-elements.element.pyro": "火元素",
 	"seven-elements.element.hydro": "水元素",
@@ -134,8 +136,31 @@
 	"block.seven-elements.infusion_table": "元素灌注台",
 	
 	"item.seven-elements.infusion_table": "元素灌注台",
+	"item.seven-elements.elemental_rune": "Elemental Rune",
+	"item.seven-elements.elemental_attunement_smithing_template": "Elemental Attunement Smithing Template",
+	"item.seven-elements.pyro_attunement_smithing_template": "Smithing Template",
+	"item.seven-elements.hydro_attunement_smithing_template": "Smithing Template",
+	"item.seven-elements.anemo_attunement_smithing_template": "Smithing Template",
+	"item.seven-elements.electro_attunement_smithing_template": "Smithing Template",
+	"item.seven-elements.dendro_attunement_smithing_template": "Smithing Template",
+	"item.seven-elements.cryo_attunement_smithing_template": "Smithing Template",
+	"item.seven-elements.geo_attunement_smithing_template": "Smithing Template",
+	
+	"item.seven-elements.smithing_template.elemental_attunement.additions_slot_description": "Add Elemental Rune",
+	"item.seven-elements.smithing_template.elemental_attunement.applies_to": "Equipment",
+	"item.seven-elements.smithing_template.elemental_attunement.base_slot_description": "Add a piece of armor, a weapon or a tool",
+	"item.seven-elements.smithing_template.elemental_attunement.ingredients": "Elemental Rune",
 
-	"tag.item.seven-elements.heavy_weapon": "重武器",
+	"elemental_attunement.seven-elements.pyro": "Pyro Elemental Attunement",
+	"elemental_attunement.seven-elements.hydro": "Hydro Elemental Attunement",
+	"elemental_attunement.seven-elements.anemo": "Anemo Elemental Attunement",
+	"elemental_attunement.seven-elements.electro": "Electro Elemental Attunement",
+	"elemental_attunement.seven-elements.dendro": "Dendro Elemental Attunement",
+	"elemental_attunement.seven-elements.cryo": "Cryo Elemental Attunement",
+	"elemental_attunement.seven-elements.geo": "Geo Elemental Attunement",
+
+	"tag.item.seven-elements.heavy_weapon": "Heavy Weapon",
+	"tag.item.seven-elements.attunable_items": "Attunable Items",
 
 	"gamerule.category.seven-elements.elements": "元素有七·元素",
 	"gamerule.seven-elements.do_elements": "启用元素",

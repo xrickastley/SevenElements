@@ -7,6 +7,7 @@ import com.llamalad7.mixinextras.sugar.Local;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,9 +19,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
+import io.github.xrickastley.sevenelements.component.interfaces.ElementModifyingComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
+import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 import io.github.xrickastley.sevenelements.util.Util;
 
@@ -54,9 +57,17 @@ public abstract class ItemStackMixin implements ComponentHolder {
 
 		final Element element = component.getElement();
 
+		final String symbols = this.getComponents()
+			.stream()
+			.<ElementModifyingComponent>mapMulti((component2, mapper) ->
+				ClassInstanceUtil.ifInstanceOf(component2.value(), ElementModifyingComponent.class, mapper::accept)
+			)
+			.map(emc -> " " + emc.getSymbol().getString())
+			.collect(Collectors.joining());
+
 		return Text.empty()
 			.append(original)
-			.append(TextHelper.noModifiers(TextHelper.color(" [" + element.getString() + "]", element.getDamageColor())));
+			.append(TextHelper.noModifiers(TextHelper.color(" [" + element.getString() + symbols + "]", element.getDamageColor())));
 	}
 
 	@Inject(
