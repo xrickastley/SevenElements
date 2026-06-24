@@ -181,8 +181,10 @@
 	"gamerule.infusionTable": "(Seven Elements) Enable Infusion Table",
 	"gamerule.infusionTable.description": "Whether the Infusion Table is enabled.",
 
-	"advancements.seven-elements.root.elemental_awakening": "Elemental Awakening",
-	"advancements.seven-elements.root.elemental_awakening.description": "Craft or place an Infusion Table",
-	"advancements.seven-elements.root.power_of_the_elements": "Power of the Elements!",
-	"advancements.seven-elements.root.power_of_the_elements.description": "Infuse an item with an element."
+	"advancements.seven-elements.root.title": "Path of the Traveler",
+	"advancements.seven-elements.root.description": "Travel the world, become a master over the Seven Elements and vanquish your foes in combat!",
+	"advancements.seven-elements.elemental_awakening.title": "Elemental Awakening",
+	"advancements.seven-elements.elemental_awakening.description": "Place an Infusion Table",
+	"advancements.seven-elements.power_of_the_elements.title": "Power of the Elements!",
+	"advancements.seven-elements.power_of_the_elements.description": "Infuse an item with an element"
 } 
