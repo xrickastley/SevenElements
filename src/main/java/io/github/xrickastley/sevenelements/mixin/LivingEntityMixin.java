@@ -33,7 +33,6 @@ import io.github.xrickastley.sevenelements.util.BoxUtil;
 
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.Blocks;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -99,16 +98,6 @@ public abstract class LivingEntityMixin
 
 			component.addElementalApplication(
 				Element.HYDRO,
-				InternalCooldownContext
-					.ofType(null, "seven-elements:natural_environment", InternalCooldownType.INTERVAL_ONLY)
-					.forced(),
-				1.0
-			);
-		} else if (this.getBlockStateAtPos().getBlock() == Blocks.FIRE && this.getWorld().getGameRules().getBoolean(SevenElementsGameRules.PYRO_FROM_FIRE)) {
-			final ElementComponent component = ElementComponent.KEY.get(this);
-
-			component.addElementalApplication(
-				Element.PYRO,
 				InternalCooldownContext
 					.ofType(null, "seven-elements:natural_environment", InternalCooldownType.INTERVAL_ONLY)
 					.forced(),
