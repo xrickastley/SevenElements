@@ -141,7 +141,7 @@ public abstract class LivingEntityMixin
 		if (finalAmount < amount)
 			this.getWorld().playSound(null, this.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_HIT, SoundCategory.PLAYERS, 1.0f, 1.0f);
 
-		if (finalAmount <= 0) this.sevenelements$blockedByCrystallizeShield = true;
+		if (finalAmount <= 0 && finalAmount != amount) this.sevenelements$blockedByCrystallizeShield = true;
 
 		return finalAmount;
 	}
