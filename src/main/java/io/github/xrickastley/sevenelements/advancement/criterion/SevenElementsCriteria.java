@@ -8,9 +8,11 @@ import net.minecraft.registry.Registry;
 
 public class SevenElementsCriteria {
 	public static final ElementalInfusionCriterion ELEMENTAL_INFUSION = new ElementalInfusionCriterion();
+	public static final ReactionTriggeredCriterion REACTION_TRIGGERED = new ReactionTriggeredCriterion();
 
 	public static void register() {
 		register("elemental_infusion", ELEMENTAL_INFUSION);
+		register("reaction_triggered", REACTION_TRIGGERED);
 	}
 
 	private static void register(String id, Criterion<?> criterion) {

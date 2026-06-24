@@ -10,6 +10,7 @@ import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.minecraft.advancement.criterion.AbstractCriterion;
 import net.minecraft.item.ItemStack;
+import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.predicate.entity.LootContextPredicate;
 import net.minecraft.predicate.item.ItemPredicate;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -25,7 +26,7 @@ public class ElementalInfusionCriterion extends AbstractCriterion<ElementalInfus
 
 	public record Conditions(Optional<LootContextPredicate> player, Optional<ItemPredicate> item, Optional<Element> element) implements AbstractCriterion.Conditions {
 		public static final Codec<ElementalInfusionCriterion.Conditions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			LootContextPredicate.CODEC.optionalFieldOf("player").forGetter(Conditions::player),
+			EntityPredicate.LOOT_CONTEXT_PREDICATE_CODEC.optionalFieldOf("player").forGetter(Conditions::player),
 			ItemPredicate.CODEC.optionalFieldOf("item").forGetter(Conditions::item),
 			Element.CODEC.optionalFieldOf("element").forGetter(Conditions::element)
 		).apply(instance, Conditions::new));

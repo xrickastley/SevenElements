@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.SevenElements;
+import io.github.xrickastley.sevenelements.advancement.criterion.SevenElementsCriteria;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
@@ -22,6 +23,9 @@ import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.text.Text;
@@ -32,6 +36,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public abstract class ElementalReaction {
+	private final RegistryEntry.Reference<ElementalReaction> registryEntry = SevenElementsRegistries.ELEMENTAL_REACTION.createEntry(this);
+
 	protected final String name;
 	protected final Identifier id;
 	protected final @Nullable Text text;
@@ -66,8 +72,6 @@ public abstract class ElementalReaction {
 		this.reactionDisplayOrder = reactionDisplayOrder
 			.filter(Objects::nonNull)
 			.collect(Collectors.toList());
-
-		SevenElementsRegistries.ELEMENTAL_REACTION.createEntry(this);
 	}
 
 	public static float getReactionDamage(Entity entity, double reactionMultiplier) {
@@ -226,7 +230,7 @@ public abstract class ElementalReaction {
 	}
 
 	public boolean trigger(LivingEntity entity, @Nullable LivingEntity origin) {
-		if (!isTriggerable(entity)) return false;
+		if (!this.isTriggerable(entity)) return false;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 		ElementalApplication applicationAE = component.getElementalApplication(auraElement.getLeft());
@@ -250,6 +254,9 @@ public abstract class ElementalReaction {
 		this.onReaction(entity, auraElement, triggeringElement, reducedGauge, origin);
 		this.displayReaction(entity);
 
+		if (origin instanceof final ServerPlayerEntity player)
+			SevenElementsCriteria.REACTION_TRIGGERED.trigger(player, this, triggeringElement.getElement());
+
 		ReactionTriggered.EVENT
 			.invoker()
 			.onReactionTriggered(this, reducedGauge, entity, origin);
@@ -261,6 +268,17 @@ public abstract class ElementalReaction {
 
 	public boolean idEquals(ElementalReaction reaction) {
 		return this.getId().equals(reaction.getId());
+	}
+
+	/**
+	 * {@return whether this elemental reaction is in {@code tag}}
+	 */
+	public final boolean isIn(TagKey<ElementalReaction> tag) {
+		return this.registryEntry.isIn(tag);
+	}
+
+	public final boolean isIn(RegistryEntryList<ElementalReaction> registryEntryList) {
+		return registryEntryList.contains(this.registryEntry);
 	}
 
 	protected void displayReaction(LivingEntity target) {
