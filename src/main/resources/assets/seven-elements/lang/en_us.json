@@ -151,6 +151,8 @@
 	"item.seven-elements.cryo_attunement_smithing_template": "Smithing Template",
 	"item.seven-elements.geo_attunement_smithing_template": "Smithing Template",
 	
+	"item.seven-elements.elemental_attunement_smithing_template.tip": "A blank smithing template capable of holding elemental power.\n\nPerhaps keeping it in your inventory and attuning yourself to the elements might yield something...",
+
 	"item.seven-elements.smithing_template.elemental_attunement.additions_slot_description": "Add Elemental Rune",
 	"item.seven-elements.smithing_template.elemental_attunement.applies_to": "Equipment",
 	"item.seven-elements.smithing_template.elemental_attunement.base_slot_description": "Add a piece of armor, a weapon or a tool",
@@ -164,8 +166,8 @@
 	"elemental_attunement.seven-elements.cryo": "Cryo Elemental Attunement",
 	"elemental_attunement.seven-elements.geo": "Geo Elemental Attunement",
 
-	"tag.item.seven-elements.heavy_weapon": "Heavy Weapon",
 	"tag.item.seven-elements.attunable_items": "Attunable Items",
+	"tag.item.seven-elements.heavy_weapon": "Heavy Weapon",
 
 	"gamerule.doElements": "(Seven Elements) Do elements",
 	"gamerule.levelMultiplier": "(Seven Elements) Level Multiplier",

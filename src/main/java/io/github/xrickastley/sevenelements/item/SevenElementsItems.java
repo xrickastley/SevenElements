@@ -29,7 +29,7 @@ public class SevenElementsItems {
 	public static final Item INFUSION_TABLE = new TallBlockItem(SevenElementsBlocks.INFUSION_TABLE, new Item.Settings());
 
 	public static final Item ELEMENTAL_RUNE = new Item(new Item.Settings());
-	public static final Item ELEMENTAL_ATTUNEMENT_SMITHING_TEMPLATE = new Item(new Item.Settings());
+	public static final Item ELEMENTAL_ATTUNEMENT_SMITHING_TEMPLATE = new ElementalAttunementSmithingTemplateItem();
 	public static final Item PYRO_ATTUNEMENT_SMITHING_TEMPLATE = SevenElementsSmithingTemplateItem.of(Element.PYRO);
 	public static final Item HYDRO_ATTUNEMENT_SMITHING_TEMPLATE = SevenElementsSmithingTemplateItem.of(Element.HYDRO);
 	public static final Item ANEMO_ATTUNEMENT_SMITHING_TEMPLATE = SevenElementsSmithingTemplateItem.of(Element.ANEMO);
@@ -50,6 +50,8 @@ public class SevenElementsItems {
 		register("cryo_attunement_smithing_template", SevenElementsItems.CRYO_ATTUNEMENT_SMITHING_TEMPLATE);
 		register("geo_attunement_smithing_template", SevenElementsItems.GEO_ATTUNEMENT_SMITHING_TEMPLATE);
 
+		registerLootTableModifications();
+
 		ModifyEntryHandler.addAfter(ItemGroups.FUNCTIONAL, Items.CRAFTING_TABLE, SevenElementsItems.INFUSION_TABLE);
 		ModifyEntryHandler.addAllAfter(ItemGroups.INGREDIENTS, Items.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE,
 			SevenElementsItems.ELEMENTAL_ATTUNEMENT_SMITHING_TEMPLATE,
@@ -66,6 +68,10 @@ public class SevenElementsItems {
 
 	public static void register(String id, Item item) {
 		Registry.register(Registries.ITEM, SevenElements.identifier(id), item);
+	}
+
+	private static void registerLootTableModifications() {
+		ElementalAttunementSmithingTemplateItem.registerLootTableModifications();
 	}
 
 	public static class ModifyEntryHandler implements ModifyEntriesAll {

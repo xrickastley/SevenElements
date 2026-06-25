@@ -15,6 +15,7 @@ import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.element.Element;
@@ -63,6 +64,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	private final LivingEntity owner;
 	private final Map<Element, ElementHolder> elementHolders = new ConcurrentHashMap<>();
+	private final Map<Identifier, Integer> mechanicPityHolder = new ConcurrentHashMap<>();
 	private final FreezeDecayHandler freezeDecayHandler;
 	private Pair<ElementalReaction, Long> lastReaction = new Pair<>(null, -1L);
 	private long electroChargedCooldown = -1;
@@ -72,7 +74,7 @@ public final class ElementComponentImpl implements ElementComponent {
 	private CrystallizeShield crystallizeShield = null;
 	private int crystallizeShieldReducedAt = -1;
 
-	// TO BE USED ONLY INTERNALLY.
+	@ApiStatus.Internal
 	public static <T extends LivingEntity> boolean canApplyElement(Class<T> entityClass) {
 		return !ElementComponentImpl.DENIED_ENTITIES.contains(entityClass);
 	}
@@ -183,7 +185,7 @@ public final class ElementComponentImpl implements ElementComponent {
 		return ImmutablePair.of(this.lastReaction);
 	}
 
-	// TO BE USED ONLY INTERNALLY.
+	@ApiStatus.Internal
 	public void setLastReaction(Pair<ElementalReaction, Long> lastReaction) {
 		this.lastReaction = lastReaction;
 	}
@@ -265,6 +267,15 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		if (this.crystallizeShield != null && !this.crystallizeShield.isEmpty())
 			crystallizeShield.writeToNbt(tag);
+
+		if (!this.mechanicPityHolder.isEmpty()) {
+			final NbtCompound mechanicPityHolders = new NbtCompound();
+
+			for (final Map.Entry<Identifier, Integer> holder : this.mechanicPityHolder.entrySet())
+				mechanicPityHolders.putInt(holder.getKey().toString(), holder.getValue());
+
+			tag.put("PityHolders", mechanicPityHolders);
+		}
 	}
 
 	@Override
@@ -305,6 +316,15 @@ public final class ElementComponentImpl implements ElementComponent {
 			tag.getCompound("FreezeDecay"),
 			this.owner.getWorld().getTime() - syncedAt
 		);
+
+		if (tag.contains("PityHolders")) {
+			final NbtCompound mechanicPityHolders = tag.getCompound("PityHolders");
+
+			this.mechanicPityHolder.clear();
+
+			for (final String holderKey : mechanicPityHolders.getKeys())
+				this.mechanicPityHolder.put(Identifier.of(holderKey), mechanicPityHolders.getInt(holderKey));
+		}
  	}
 
 	@Override
@@ -523,6 +543,32 @@ public final class ElementComponentImpl implements ElementComponent {
 		return triggeredReactions;
 	}
 
+
+
+	@ApiStatus.Internal
+	public void resetPityCounter(Identifier id) {
+		this.mechanicPityHolder.remove(id);
+	}
+
+	@ApiStatus.Internal
+	public void incrementPityCounter(Identifier id) {
+		this.incrementPityCounter(id, 1);
+	}
+
+	@ApiStatus.Internal
+	public void incrementPityCounter(Identifier id, int increment) {
+		this.mechanicPityHolder.merge(id, increment, Integer::sum);
+	}
+
+	@ApiStatus.Internal
+	public double getChanceFromPityCounter(Identifier id, double baseChance, int pityStart, double chancePerPity) {
+		final int pity = this.mechanicPityHolder.getOrDefault(id, 0);
+
+		return baseChance + Math.max(pity - pityStart, 0) * chancePerPity;
+	}
+	
+
+
 	private static class CrystallizeShield {
 		private final Element element;
 		private final long appliedAt;
@@ -733,5 +779,4 @@ public final class ElementComponentImpl implements ElementComponent {
 			? projectile.sevenelements$attemptInfusion(source, target)
 			: Optional.empty();
 	}
-
 }

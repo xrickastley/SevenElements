@@ -49,6 +49,9 @@
 			"net/minecraft/class_1291": [
 				"io/github/xrickastley/sevenelements/interfaces/EntityAwareEffect"
 			],
+			"net/minecraft/class_1297": [
+				"io/github/xrickastley/sevenelements/interfaces/IEntity"
+			],
 			"net/minecraft/class_1309": [
 				"io/github/xrickastley/sevenelements/interfaces/ILivingEntity"
 			],
