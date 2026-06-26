@@ -10,8 +10,10 @@ import java.util.function.Supplier;
 import org.jetbrains.annotations.ApiStatus;
 
 import io.github.xrickastley.sevenelements.SevenElements;
+import io.github.xrickastley.sevenelements.advancement.criterion.SevenElementsCriteria;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
+import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.registry.SevenElementsBlockTags;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.TextHelper;
@@ -45,6 +47,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 	private static final Map<RegistryKey<LootTable>, LootPool.Builder> MODIFIED_LOOT_POOLS = new HashMap<>();
 	
 	public static final AttunementPityCounterReference PYRO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
+		Element.PYRO,
 		SevenElements.identifier("pyro_attunement"),
 		0.025,
 		1_800,
@@ -53,6 +56,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 	);
 	
 	public static final AttunementPityCounterReference HYDRO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
+		Element.HYDRO,
 		SevenElements.identifier("hydro_attunement"),
 		0.025,
 		900,
@@ -61,6 +65,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 	);
 	
 	public static final AttunementPityCounterReference ANEMO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
+		Element.ANEMO,
 		SevenElements.identifier("anemo_attunement"),
 		0.025,
 		1_800,
@@ -69,6 +74,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 	);
 	
 	public static final AttunementPityCounterReference ELECTRO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
+		Element.ELECTRO,
 		SevenElements.identifier("electro_attunement"),
 		0,
 		6,
@@ -77,6 +83,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 	);
 	
 	public static final AttunementPityCounterReference DENDRO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
+		Element.DENDRO,
 		SevenElements.identifier("dendro_attunement"),
 		0.001,
 		2000,
@@ -85,6 +92,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 	);
 
 	public static final AttunementPityCounterReference CRYO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
+		Element.CRYO,
 		SevenElements.identifier("cryo_attunement"),
 		0.025,
 		900,
@@ -93,6 +101,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 	);
 
 	public static final AttunementPityCounterReference GEO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
+		Element.GEO,
 		SevenElements.identifier("geo_attunement"),
 		0.025,
 		900,
@@ -260,7 +269,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 	}
 
 	@ApiStatus.Internal
-	public static record AttunementPityCounterReference(Identifier counter, double baseChance, int pityStart, double chancePerPity, Supplier<ItemStack> reward) {
+	public static record AttunementPityCounterReference(Element attunement, Identifier counter, double baseChance, int pityStart, double chancePerPity, Supplier<ItemStack> reward) {
 		public boolean roll(PlayerEntity player) {
 			if (!(player instanceof final ServerPlayerEntity serverPlayer)) 
 				return false;
@@ -287,14 +296,15 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 		}
 
 		private void giveReward(ServerPlayerEntity serverPlayer) {
-			serverPlayer.getInventory().remove(Functions.withArgument(ItemStack::isOf, SevenElementsItems.ELEMENTAL_ATTUNEMENT_SMITHING_TEMPLATE), 1, serverPlayer.playerScreenHandler.getCraftingInput());
-			serverPlayer.currentScreenHandler.sendContentUpdates();
-			serverPlayer.playerScreenHandler.onContentChanged(serverPlayer.getInventory());
+			SevenElementsCriteria.PERFORM_ATTUNEMENT.trigger(serverPlayer, attunement);
 
+			serverPlayer.getInventory().remove(Functions.withArgument(ItemStack::isOf, SevenElementsItems.ELEMENTAL_ATTUNEMENT_SMITHING_TEMPLATE), 1, serverPlayer.playerScreenHandler.getCraftingInput());
+			
 			final ItemStack reward = this.reward.get();
 
 			if (serverPlayer.getInventory().insertStack(reward)) {
 				serverPlayer.currentScreenHandler.sendContentUpdates();
+				serverPlayer.playerScreenHandler.onContentChanged(serverPlayer.getInventory());
 				return;
 			}
 

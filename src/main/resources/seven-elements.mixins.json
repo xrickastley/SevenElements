@@ -16,6 +16,7 @@
     "GrindstoneScreenHandler$23Mixin",
     "GrindstoneScreenHandler$4Mixin",
     "GrindstoneScreenHandlerMixin",
+    "ItemMixin",
     "ItemStackMixin",
     "LivingEntityMixin",
     "PersistentProjectileEntityMixin",

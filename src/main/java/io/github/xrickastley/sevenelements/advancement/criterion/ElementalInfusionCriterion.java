@@ -32,8 +32,8 @@ public class ElementalInfusionCriterion extends AbstractCriterion<ElementalInfus
 		).apply(instance, Conditions::new));
 
 		public boolean requirementsMet(ItemStack stack, Element infused) {
-			return (element.isEmpty() || element.get() == infused)
-				&& (item.isEmpty() || item.get().test(stack));
+			return SevenElementsCriteria.emptyOrEqual(element, infused)
+				&& SevenElementsCriteria.emptyOrPasses(item, ItemPredicate::test, stack);
 		}
 	}
 }

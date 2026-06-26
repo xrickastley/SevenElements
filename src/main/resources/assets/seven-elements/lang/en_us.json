@@ -151,7 +151,7 @@
 	"item.seven-elements.cryo_attunement_smithing_template": "Smithing Template",
 	"item.seven-elements.geo_attunement_smithing_template": "Smithing Template",
 	
-	"item.seven-elements.elemental_attunement_smithing_template.tip": "A blank smithing template capable of holding elemental power.\n\nPerhaps keeping it in your inventory and attuning yourself to the elements might yield something...",
+	"item.seven-elements.elemental_attunement_smithing_template.tip": "A blank smithing template capable of holding immense elemental power.\n\nPerhaps keeping it in your inventory and attuning yourself to the elements might yield something...",
 
 	"item.seven-elements.smithing_template.elemental_attunement.additions_slot_description": "Add Elemental Rune",
 	"item.seven-elements.smithing_template.elemental_attunement.applies_to": "Equipment",
@@ -188,5 +188,21 @@
 	"advancements.seven-elements.elemental_awakening.title": "Elemental Awakening",
 	"advancements.seven-elements.elemental_awakening.description": "Place an Infusion Table",
 	"advancements.seven-elements.power_of_the_elements.title": "Power of the Elements!",
-	"advancements.seven-elements.power_of_the_elements.description": "Infuse an item with an element"
+	"advancements.seven-elements.power_of_the_elements.description": "Infuse an item with an element",
+	"advancements.seven-elements.elements_reborn.title": "Elements Reborn",
+	"advancements.seven-elements.elements_reborn.description": "Obtain a blank Elemental Attunement Smithing Template.\n\nPerhaps there's a way to reactivate the residual elemental power within...",
+	"advancements.seven-elements.this_is_fine.title": "This is fine.",
+	"advancements.seven-elements.this_is_fine.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Pyro by staying in lava while in the Nether.",
+	"advancements.seven-elements.shipwreck_sailor_experience.title": "Shipwreck Sailor Experience",
+	"advancements.seven-elements.shipwreck_sailor_experience.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Hydro by drowning.",
+	"advancements.seven-elements.fly_like_a_feather.title": "Fly like a Feather",
+	"advancements.seven-elements.fly_like_a_feather.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Anemo by being in the air for a long... time.",
+	"advancements.seven-elements.stormy_execution.title": "Those who brave the Lightning's Glow...",
+	"advancements.seven-elements.stormy_execution.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Electro by being struck by lightning.",
+	"advancements.seven-elements.let_it_grow.title": "Let it Grow!",
+	"advancements.seven-elements.let_it_grow.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Dendro by interacting with nature.",
+	"advancements.seven-elements.freeze.title": "Freeze!",
+	"advancements.seven-elements.freeze.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Cryo by freezing.",
+	"advancements.seven-elements.the_wrath_of_the_rock.title": "The Wrath of the Rock",
+	"advancements.seven-elements.the_wrath_of_the_rock.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Pyro by staying in lava while in the Nether."
 } 

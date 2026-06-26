@@ -34,8 +34,8 @@ public class ReactionTriggeredCriterion extends AbstractCriterion<ReactionTrigge
 		).apply(instance, Conditions::new));
 
 		public boolean requirementsMet(ElementalReaction reaction, Element element) {
-			return (triggeringElement.isEmpty() || triggeringElement.get() == element)
-				&& (elementalReactions.isEmpty() || reaction.isIn(elementalReactions.get()));
+			return SevenElementsCriteria.emptyOrEqual(triggeringElement, element)
+				&& SevenElementsCriteria.emptyOrPasses(elementalReactions, reaction::isIn);
 		}
 	}
 }
