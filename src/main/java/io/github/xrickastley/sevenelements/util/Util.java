@@ -1,6 +1,10 @@
 package io.github.xrickastley.sevenelements.util;
 
+import java.util.function.Function;
+
 import org.jetbrains.annotations.Nullable;
+
+import io.github.xrickastley.sevenelements.util.functions.MemoizedFunction;
 
 public final class Util {
 	public static boolean isCalledBy(Class<?> clazz) {
@@ -30,5 +34,9 @@ public final class Util {
 		final StackTraceElement caller = stackTrace[offset];
 
 		return caller.getClassName().equals(className) && (method == null || caller.getMethodName().equals(method));
+	}
+
+	public static <T, R> MemoizedFunction<T, R> memoize(final Function<T, R> function) {
+		return new MemoizedFunction<>(function);
 	}
 }
