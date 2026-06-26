@@ -51,14 +51,14 @@ public class SmithingAttunementRecipe implements SmithingRecipe {
 
 		final ItemStack result = itemStack.copy();
 
-		result.set(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT, new ElementalAttunementComponent(template.getElementalAttunement()));
+		ElementalAttunementComponent.applyAttunement(result, template.getElementalAttunement());
 
 		return result;
 	}
 
 	@Override
 	public ItemStack getResult(RegistryWrapper.WrapperLookup registriesLookup) {
-		final ItemStack itemStack = new ItemStack(Items.DIAMOND_SWORD);
+		final ItemStack itemStack = new ItemStack(Items.IRON_SWORD);
 		
 		itemStack.set(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT, new ElementalAttunementComponent(Element.PYRO));
 
