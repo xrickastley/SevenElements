@@ -105,6 +105,10 @@ public class SevenElementsAttributes {
 		return builder;
 	}
 
+	public static boolean hasElementalAttribute(final Element element) {
+		return SevenElementsAttributes.LINKS.containsKey(element);
+	}
+
 	public static RegistryEntry<EntityAttribute> getElementalAttribute(final Element element, final ModifierType modifierType) {
 		return SevenElementsAttributes.LINKS
 			.getOrDefault(element, new ConcurrentHashMap<>())

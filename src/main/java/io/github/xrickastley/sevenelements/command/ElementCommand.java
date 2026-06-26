@@ -23,6 +23,7 @@ import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.InternalCooldownTag;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
+import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistryKeys;
 import io.github.xrickastley.sevenelements.util.Array;
@@ -446,6 +447,9 @@ public class ElementCommand {
 
 		if (!(entity instanceof final LivingEntity livingEntity))
 			return CommandUtils.sendError(context, Text.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
+
+		if (!SevenElementsAttributes.hasElementalAttribute(element))
+			return CommandUtils.sendError(context, Text.translatable("commands.element.attune.failed.element", element));
 
 		final ItemStack stack = livingEntity.getMainHandStack();
 

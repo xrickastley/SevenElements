@@ -2,6 +2,7 @@ package io.github.xrickastley.sevenelements.component;
 
 import com.google.common.collect.HashMultimap;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 
 import java.util.function.Consumer;
 
@@ -12,6 +13,7 @@ import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes.ModifierType;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
+import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 
 import net.minecraft.component.type.AttributeModifierSlot;
@@ -30,7 +32,14 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 
 public record ElementalAttunementComponent(Element element) implements AttributeModifyingComponent, ElementModifyingComponent, TooltipAppender {
-	public static final Codec<ElementalAttunementComponent> CODEC = Element.CODEC.xmap(ElementalAttunementComponent::new, ElementalAttunementComponent::element);
+	public static final Codec<ElementalAttunementComponent> CODEC = Element.CODEC.comapFlatMap(ElementalAttunementComponent::validate, ElementalAttunementComponent::element);
+
+	private static DataResult<ElementalAttunementComponent> validate(Element element) {
+		if (SevenElementsAttributes.hasElementalAttribute(element))
+			return DataResult.success(new ElementalAttunementComponent(element));
+		else
+			return DataResult.error(() -> "Not a valid Element for attunement: " + element);
+	}
 
 	public static void applyAttunement(ItemStack stack, Element element) {
 		stack.set(
