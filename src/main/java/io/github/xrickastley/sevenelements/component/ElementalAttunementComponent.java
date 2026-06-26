@@ -37,6 +37,9 @@ public record ElementalAttunementComponent(Element element) implements Attribute
 			SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT,
 			new ElementalAttunementComponent(element)
 		);
+
+		if (ClassInstanceUtil.mapOrNull(stack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT), ElementalInfusionComponent::getElement) != element) 
+			stack.remove(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 	}
 
 	public static boolean removeAttunement(ItemStack stack) {
