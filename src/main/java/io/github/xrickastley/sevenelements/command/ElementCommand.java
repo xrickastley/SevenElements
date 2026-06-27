@@ -356,12 +356,9 @@ public class ElementCommand {
 			.setTag(tag)
 			.setType(type);
 
-		ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder);
-
-		final Text elementText = ElementalApplication.Builder.getText(infusionBuilder);
-		final Text icdText = InternalCooldownContext.Builder.getText(icdBuilder);
-
-		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
+		return ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder)
+			? CommandUtils.sendFeedback(context, Text.translatable("commands.element.infuse.apply.success", ElementalApplication.Builder.getText(infusionBuilder), InternalCooldownContext.Builder.getText(icdBuilder), entity.getDisplayName()), true)
+			: CommandUtils.sendError(context, Text.translatable("commands.element.infuse.failed.incompatible", entity.getDisplayName()));
 	}
 
 	private static int infuseDuration(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -396,12 +393,9 @@ public class ElementCommand {
 			.setTag(tag)
 			.setType(type);
 
-		ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder);
-
-		final Text elementText = ElementalApplication.Builder.getText(infusionBuilder);
-		final Text icdText = InternalCooldownContext.Builder.getText(icdBuilder);
-
-		return CommandUtils.sendFeedback(context, Text.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
+		return ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder)
+			? CommandUtils.sendFeedback(context, Text.translatable("commands.element.infuse.apply.success", ElementalApplication.Builder.getText(infusionBuilder), InternalCooldownContext.Builder.getText(icdBuilder), entity.getDisplayName()), true)
+			: CommandUtils.sendError(context, Text.translatable("commands.element.infuse.failed.incompatible", entity.getDisplayName()));
 	}
 
 	private static int infuseRandom(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {

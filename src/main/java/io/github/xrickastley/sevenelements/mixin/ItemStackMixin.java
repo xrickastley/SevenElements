@@ -24,6 +24,7 @@ import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
+import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 import io.github.xrickastley.sevenelements.util.Util;
 
@@ -62,6 +63,7 @@ public abstract class ItemStackMixin implements ComponentHolder {
 			.<ElementModifyingComponent>mapMulti((component2, mapper) ->
 				ClassInstanceUtil.ifInstanceOf(component2.value(), ElementModifyingComponent.class, mapper::accept)
 			)
+			.filter(Functions.withArgument(ElementModifyingComponent::shouldModify, component))
 			.map(emc -> " " + emc.getSymbol().getString())
 			.collect(Collectors.joining());
 

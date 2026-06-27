@@ -89,11 +89,16 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 		}
 	}
 
-	public static void applyInfusion(ItemStack stack, ElementalApplication.Builder applicationBuilder, InternalCooldownContext.Builder icdBuilder) {
+	public static boolean applyInfusion(ItemStack stack, ElementalApplication.Builder applicationBuilder, InternalCooldownContext.Builder icdBuilder) {
+		if (ClassInstanceUtil.mapOrNull(stack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT), ElementalAttunementComponent::element) != applicationBuilder.getElement())
+			return false;
+
 		stack.set(
 			SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT,
 			new ElementalInfusionComponent(applicationBuilder, icdBuilder)
 		);
+
+		return true;
 	}
 
 	public static boolean removeInfusion(ItemStack stack) {

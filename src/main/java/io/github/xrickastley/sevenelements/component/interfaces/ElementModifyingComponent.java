@@ -11,5 +11,18 @@ import net.minecraft.text.Text;
  * to modified infusions when the item's name is needed. 
  */
 public interface ElementModifyingComponent {
+	/**
+	 * {@return the symbol appended to the elemental infusion text}
+	 */
 	public Text getSymbol();
+
+	/**
+	 * {@return whether this {@code ElementModifyingComponent} should modify the provided
+	 * {@link ElementalInfusionComponent}}
+	 * 
+	 * @param infusion The elemental infusion component to be modified.
+	 */
+	default boolean shouldModify(ElementalInfusionComponent infusion) {
+		return true;
+	}
 }

@@ -91,6 +91,11 @@ public record ElementalAttunementComponent(Element element) implements Attribute
 	}
 
 	@Override
+	public boolean shouldModify(ElementalInfusionComponent infusion) {
+		return infusion.getElement() == this.element;
+	}
+
+	@Override
 	public void appendTooltip(TooltipContext context, Consumer<Text> tooltip, TooltipType type) {
 		tooltip.accept(
 			Text.empty()

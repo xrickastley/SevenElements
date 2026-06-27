@@ -84,7 +84,7 @@
 	"commands.element.query.multiple.success": "Applied element(s) on %s: %s",
 	"commands.element.query.single.none": "%s has no applied %s element",
 	"commands.element.query.single.success": "%s has %s",
-	"commands.element.infuse.failed.incompatible": "%s's item cannot be infused with an element",
+	"commands.element.infuse.failed.incompatible": "%s's item cannot be infused with the %s element",
 	"commands.element.infuse.apply.success": "Applied elemental infusion %s (%s) to %s's item",
 	"commands.element.infuse.remove.none": "%s's item already has no elemental infusion!",
 	"commands.element.infuse.remove.success": "Removed elemental infusion from %s's item",
