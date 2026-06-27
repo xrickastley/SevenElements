@@ -128,20 +128,28 @@ loadScripts(document, 'script');</script>
 <div class="block">Casts the provided <code>instance</code> into an instance of <code>T</code> if it's an instance of
  <code>T</code>.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static &lt;T,<wbr>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static &lt;T&gt;&nbsp;void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#ifInstanceOf(java.lang.Object,java.lang.Class,java.util.function.Consumer)" class="member-name-link">ifInstanceOf</a><wbr>(@Nullable <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;T&gt;&nbsp;clazz,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;T&gt;&nbsp;ifClassInstance)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">If <code>obj</code> isn't null and <code>obj</code> is an instance of <code>clazz</code>, calls the 
+ <code>ifClassInstance</code> consumer with <code>obj</code> as an instance of <code>clazz</code>.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static &lt;T,<wbr>
 R&gt;&nbsp;void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#ifPresentMapped(T,java.util.function.Function,java.util.function.Consumer)" class="member-name-link">ifPresentMapped</a><wbr>(T&nbsp;instance,
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#ifPresentMapped(T,java.util.function.Function,java.util.function.Consumer)" class="member-name-link">ifPresentMapped</a><wbr>(T&nbsp;instance,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Function.html" title="class or interface in java.util.function" class="external-link">Function</a>&lt;T,<wbr>R&gt;&nbsp;mapper,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;R&gt;&nbsp;ifNonNull)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">If <code>instance</code> isn't null and <code>mapper.apply(instance)</code> isn't <code>null</code>, calls the
  <code>ifNonNull</code> consumer with the mapped value obtained from <code>mapper.apply(instance)</code>.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static &lt;T,<wbr>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static &lt;T,<wbr>
 R&gt;&nbsp;R</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#mapOrNull(T,java.util.function.Function)" class="member-name-link">mapOrNull</a><wbr>(T&nbsp;instance,
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#mapOrNull(T,java.util.function.Function)" class="member-name-link">mapOrNull</a><wbr>(T&nbsp;instance,
  <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Function.html" title="class or interface in java.util.function" class="external-link">Function</a>&lt;T,<wbr>R&gt;&nbsp;mapper)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Maps the provided instance into <code>R</code> if it isn't <code>null</code>.</div>
 </div>
 </div>
@@ -239,6 +247,25 @@ R&gt;</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="elemen
 <dd><code>instance</code> - The instance of <code>T</code> to map if it isn't null.</dd>
 <dd><code>mapper</code> - The mapper to apply if <code>instance</code> isn't null</dd>
 <dd><code>ifNonNull</code> - The consumer to call if the result of mapping the instance with <code>mapper</code> isn't <code>null</code>.</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="ifInstanceOf(java.lang.Object,java.lang.Class,java.util.function.Consumer)">
+<h3>ifInstanceOf</h3>
+<div class="member-signature"><span class="modifiers">public static</span>&nbsp;<span class="type-parameters">&lt;T&gt;</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">ifInstanceOf</span><wbr><span class="parameters">(@Nullable
+ @Nullable <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;obj,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Class.html" title="class or interface in java.lang" class="external-link">Class</a>&lt;T&gt;&nbsp;clazz,
+ <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/function/Consumer.html" title="class or interface in java.util.function" class="external-link">Consumer</a>&lt;T&gt;&nbsp;ifClassInstance)</span></div>
+<div class="block">If <code>obj</code> isn't null and <code>obj</code> is an instance of <code>clazz</code>, calls the 
+ <code>ifClassInstance</code> consumer with <code>obj</code> as an instance of <code>clazz</code>.</div>
+<dl class="notes">
+<dt>Type Parameters:</dt>
+<dd><code>T</code> - The type of the expected class.</dd>
+<dt>Parameters:</dt>
+<dd><code>obj</code> - The object to check as an instance of <code>clazz</code> if it isn't null.</dd>
+<dd><code>clazz</code> - The expected class <code>obj</code> is an instance of.</dd>
+<dd><code>ifClassInstance</code> - The consumer to call if <code>obj</code> is an instance of <code>clazz</code>.</dd>
 </dl>
 </section>
 </li>

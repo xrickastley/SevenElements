@@ -14,10 +14,12 @@ io.github.xrickastley.sevenelements.events
 io.github.xrickastley.sevenelements.exception
 io.github.xrickastley.sevenelements.factory
 io.github.xrickastley.sevenelements.interfaces
+io.github.xrickastley.sevenelements.item
 io.github.xrickastley.sevenelements.mixin
 io.github.xrickastley.sevenelements.mixin.compat.taxfreelevels
 io.github.xrickastley.sevenelements.mixin.plugin
 io.github.xrickastley.sevenelements.networking
+io.github.xrickastley.sevenelements.recipe
 io.github.xrickastley.sevenelements.registry
 io.github.xrickastley.sevenelements.registry.dynamic
 io.github.xrickastley.sevenelements.screen

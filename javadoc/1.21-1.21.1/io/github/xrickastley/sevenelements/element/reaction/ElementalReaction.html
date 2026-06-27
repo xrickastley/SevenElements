@@ -149,15 +149,18 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color"><code>protected final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/List.html" title="class or interface in java.util" class="external-link">List</a><wbr>&lt;<a href="../Element.html" title="enum class in io.github.xrickastley.sevenelements.element">Element</a>&gt;</code></div>
 <div class="col-second even-row-color"><code><a href="#reactionDisplayOrder" class="member-name-link">reactionDisplayOrder</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>protected final boolean</code></div>
-<div class="col-second odd-row-color"><code><a href="#reversable" class="member-name-link">reversable</a></code></div>
+<div class="col-first odd-row-color"><code>private final <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/registry/entry/RegistryEntry.Reference.html" title="class or interface in net.minecraft.registry.entry" class="external-link">RegistryEntry.Reference</a><wbr>&lt;<a href="ElementalReaction.html" title="class in io.github.xrickastley.sevenelements.element.reaction">ElementalReaction</a>&gt;</code></div>
+<div class="col-second odd-row-color"><code><a href="#registryEntry" class="member-name-link">registryEntry</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>protected final @Nullable <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/text/Text.html" title="class or interface in net.minecraft.text" class="external-link">Text</a></code></div>
-<div class="col-second even-row-color"><code><a href="#text" class="member-name-link">text</a></code></div>
+<div class="col-first even-row-color"><code>protected final boolean</code></div>
+<div class="col-second even-row-color"><code><a href="#reversable" class="member-name-link">reversable</a></code></div>
 <div class="col-last even-row-color">&nbsp;</div>
-<div class="col-first odd-row-color"><code>protected final <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/util/Pair.html" title="class or interface in net.minecraft.util" class="external-link">Pair</a><wbr>&lt;<a href="../Element.html" title="enum class in io.github.xrickastley.sevenelements.element">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#triggeringElement" class="member-name-link">triggeringElement</a></code></div>
+<div class="col-first odd-row-color"><code>protected final @Nullable <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/text/Text.html" title="class or interface in net.minecraft.text" class="external-link">Text</a></code></div>
+<div class="col-second odd-row-color"><code><a href="#text" class="member-name-link">text</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>protected final <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/util/Pair.html" title="class or interface in net.minecraft.util" class="external-link">Pair</a><wbr>&lt;<a href="../Element.html" title="enum class in io.github.xrickastley.sevenelements.element">Element</a>,<wbr><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Integer.html" title="class or interface in java.lang" class="external-link">Integer</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#triggeringElement" class="member-name-link">triggeringElement</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -264,6 +267,14 @@ loadScripts(document, 'script');</script>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#idEquals(io.github.xrickastley.sevenelements.element.reaction.ElementalReaction)" class="member-name-link">idEquals</a><wbr>(<a href="ElementalReaction.html" title="class in io.github.xrickastley.sevenelements.element.reaction">ElementalReaction</a>&nbsp;reaction)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isIn(net.minecraft.registry.entry.RegistryEntryList)" class="member-name-link">isIn</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/registry/entry/RegistryEntryList.html" title="class or interface in net.minecraft.registry.entry" class="external-link">RegistryEntryList</a>&lt;<a href="ElementalReaction.html" title="class in io.github.xrickastley.sevenelements.element.reaction">ElementalReaction</a>&gt;&nbsp;registryEntryList)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isIn(net.minecraft.registry.tag.TagKey)" class="member-name-link">isIn</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/registry/tag/TagKey.html" title="class or interface in net.minecraft.registry.tag" class="external-link">TagKey</a>&lt;<a href="ElementalReaction.html" title="class in io.github.xrickastley.sevenelements.element.reaction">ElementalReaction</a>&gt;&nbsp;tag)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns whether this elemental reaction is in <code>tag</code>.</div>
+</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isTriggerable(net.minecraft.entity.Entity)" class="member-name-link">isTriggerable</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/entity/Entity.html" title="class or interface in net.minecraft.entity" class="external-link">Entity</a>&nbsp;entity)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
@@ -325,6 +336,12 @@ loadScripts(document, 'script');</script>
 <section class="field-details" id="field-detail">
 <h2>Field Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="registryEntry">
+<h3>registryEntry</h3>
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/registry/entry/RegistryEntry.Reference.html" title="class or interface in net.minecraft.registry.entry" class="external-link">RegistryEntry.Reference</a>&lt;<a href="ElementalReaction.html" title="class in io.github.xrickastley.sevenelements.element.reaction">ElementalReaction</a>&gt;</span>&nbsp;<span class="element-name">registryEntry</span></div>
+</section>
+</li>
 <li>
 <section class="detail" id="name">
 <h3>name</h3>
@@ -653,6 +670,23 @@ loadScripts(document, 'script');</script>
 <section class="detail" id="idEquals(io.github.xrickastley.sevenelements.element.reaction.ElementalReaction)">
 <h3>idEquals</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">idEquals</span><wbr><span class="parameters">(<a href="ElementalReaction.html" title="class in io.github.xrickastley.sevenelements.element.reaction">ElementalReaction</a>&nbsp;reaction)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="isIn(net.minecraft.registry.tag.TagKey)">
+<h3>isIn</h3>
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isIn</span><wbr><span class="parameters">(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/registry/tag/TagKey.html" title="class or interface in net.minecraft.registry.tag" class="external-link">TagKey</a>&lt;<a href="ElementalReaction.html" title="class in io.github.xrickastley.sevenelements.element.reaction">ElementalReaction</a>&gt;&nbsp;tag)</span></div>
+<div class="block">Returns whether this elemental reaction is in <code>tag</code>.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>whether this elemental reaction is in <code>tag</code></dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="isIn(net.minecraft.registry.entry.RegistryEntryList)">
+<h3>isIn</h3>
+<div class="member-signature"><span class="modifiers">public final</span>&nbsp;<span class="return-type">boolean</span>&nbsp;<span class="element-name">isIn</span><wbr><span class="parameters">(<a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/registry/entry/RegistryEntryList.html" title="class or interface in net.minecraft.registry.entry" class="external-link">RegistryEntryList</a>&lt;<a href="ElementalReaction.html" title="class in io.github.xrickastley.sevenelements.element.reaction">ElementalReaction</a>&gt;&nbsp;registryEntryList)</span></div>
 </section>
 </li>
 <li>

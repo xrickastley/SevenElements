@@ -91,6 +91,16 @@ loadScripts(document, 'script');</script>
 </dl>
 <hr>
 <div class="type-signature"><span class="modifiers">public interface </span><span class="element-name type-name-label">AttributeModifyingComponent</span></div>
+<div class="block">An interface for data components that modify attributes on their own. <br> <br>
+
+ This allows other data components than the <a href="https://maven.fabricmc.net/docs/yarn-1.21+build.9/net/minecraft/component/type/AttributeModifiersComponent.html" title="class or interface in net.minecraft.component.type" class="external-link"><code>AttributeModifiersComponent</code></a> to easily apply
+ attribute modifiers to entities holding an item stack with their data component. <br> <br>
+ 
+ Note that modifiers may <b>not</b>, under any circumstances, be <i>too</i> dynamic or 
+ conditional, i.e. give the entity an attribute modifier <b>if</b> they're flying; attribute 
+ modifiers are calculated <b>only</b> when the stack in the attribute modifier slot changes. To
+ avoid unintentional errors when making conditional modifiers, the returned modifier <b>must 
+ always</b> be the same for the stack until it changes.</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
