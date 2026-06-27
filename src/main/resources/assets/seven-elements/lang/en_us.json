@@ -170,6 +170,14 @@
 	"tag.item.seven-elements.attunable_items": "Attunable Items",
 	"tag.item.seven-elements.heavy_weapon": "Heavy Weapon",
 
+	"subtitles.seven-elements.elemental_reaction": "Elemental Reaction is triggered",
+	"subtitles.seven-elements.entity.dendro_core.explode": "Dendro Core explodes",
+	"subtitles.seven-elements.entity.dendro_core.hit": "Sprawling Shot hits",
+	"subtitles.seven-elements.entity.crystallize_shield.absorb": "Crystallize Shard is absorbed",
+	"subtitles.seven-elements.entity.crystallize_shield.hit": "Crystallize Shield hit",
+	"subtitles.seven-elements.entity.crystallize_shield.break": "Crystallize Shield breaks",
+	"subtitles.seven-elements.block.infusion_table.use": "Infusion Table used",
+
 	"gamerule.doElements": "(Seven Elements) Do elements",
 	"gamerule.levelMultiplier": "(Seven Elements) Level Multiplier",
 	"gamerule.levelMultiplier.description": "How strong the effects of Elemental Reactions are",
