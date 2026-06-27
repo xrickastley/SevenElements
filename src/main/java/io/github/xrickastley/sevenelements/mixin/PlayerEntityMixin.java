@@ -17,6 +17,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.interfaces.DamageSourceWrapper;
 import io.github.xrickastley.sevenelements.interfaces.IPlayerEntity;
 
@@ -70,6 +71,28 @@ public abstract class PlayerEntityMixin
 	)
 	private boolean preventKnockbackIfCrystallize(boolean original, @Local(argsOnly = true) Entity entity) {
 		return this.sevenelements$modifyKnockback(original, entity);
+	}
+
+	@Definition(id = "bl3", local = @Local(type = boolean.class, ordinal = 2))
+	@Expression("bl3")
+	@ModifyVariable(
+		method = "attack",
+		at = @At("MIXINEXTRAS:EXPRESSION"),
+		ordinal = 2
+	)
+	private boolean applyCriticalRateAttribute(boolean bl3) {
+		return bl3 || this.getRandom().nextDouble() < (this.getAttributeValue(SevenElementsAttributes.CRITICAL_RATE) / 100);
+	}
+
+	@ModifyExpressionValue(
+		method = "attack",
+		at = @At(
+			value = "CONSTANT",
+			args = "floatValue=1.5"
+		)
+	)
+	private float applyCriticalDamageAttribute(float original) {
+		return original + (float) (this.getAttributeValue(SevenElementsAttributes.CRITICAL_DAMAGE) / 100);
 	}
 
 	@ModifyArg(

@@ -10,6 +10,7 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.interfaces.ILivingEntity;
 import net.minecraft.sound.SoundCategory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -30,9 +31,11 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.World;
 
 @Mixin(LivingEntity.class)
@@ -44,6 +47,9 @@ public abstract class LivingEntityMixin
 		super(entityType, world);
 		throw new AssertionError();
 	}
+
+	@Shadow
+	public abstract double getAttributeValue(RegistryEntry<EntityAttribute> attribute);
 
 	@Unique
 	private boolean sevenelements$blockedByCrystallizeShield = true; // true ONLY if ALL received DMG is blocked.

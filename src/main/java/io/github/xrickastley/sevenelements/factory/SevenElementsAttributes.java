@@ -46,6 +46,8 @@ public class SevenElementsAttributes {
 	public static final RegistryEntry<EntityAttribute> GEO_RES = register("geo_res", createAttribute("Geo RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
 
 	public static final RegistryEntry<EntityAttribute> ELEMENTAL_MASTERY = register("elemental_mastery", createAttribute("Elemental Mastery", 0, 0, Double.POSITIVE_INFINITY));
+	public static final RegistryEntry<EntityAttribute> CRITICAL_RATE = register("critical_rate", createAttribute("CRIT Rate%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final RegistryEntry<EntityAttribute> CRITICAL_DAMAGE = register("critical_damage", createAttribute("CRIT DMG%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
 
 	public static void register() {
 		if (registered) return;
@@ -162,6 +164,7 @@ public class SevenElementsAttributes {
 	}
 
 
+
 	static {
 		SevenElementsAttributes.addMultiplicativeLikeAttributes(List.of(
 			PHYSICAL_DMG_BONUS,
@@ -179,7 +182,9 @@ public class SevenElementsAttributes {
 			ELECTRO_RES,
 			DENDRO_RES,
 			CRYO_RES,
-			GEO_RES
+			GEO_RES,
+			CRITICAL_RATE,
+			CRITICAL_DAMAGE
 		));
 	}
 }
