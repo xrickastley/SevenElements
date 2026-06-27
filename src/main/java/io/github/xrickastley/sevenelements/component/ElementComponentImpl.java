@@ -329,8 +329,8 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	@Override
 	public void tick() {
-		ElectroChargedElementalReaction.mixin$tick(this.owner);
-		AbstractBurningElementalReaction.mixin$tick(this.owner);
+		ElectroChargedElementalReaction.mixin$tick(this.owner, this);
+		AbstractBurningElementalReaction.mixin$tick(this.owner, this);
 
 		final Array<ElementalApplication> appliedElements = this.getAppliedElements();
 

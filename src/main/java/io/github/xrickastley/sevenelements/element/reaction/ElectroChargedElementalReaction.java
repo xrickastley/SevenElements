@@ -120,10 +120,10 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 		method = "Lio/github/xrickastley/sevenelements/component/ElementComponentImpl;tick()V",
 		at = @At("HEAD")
 	)
-	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity) {
+	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity, @Local(self = true) ElementComponent component) {
 		if (!ElementalReactions.ELECTRO_CHARGED.isTriggerable(entity) || entity.getWorld().isClient || entity.isDead()) return;
 
-		ElementalReactions.ELECTRO_CHARGED.trigger(entity);
+		ElementalReactions.ELECTRO_CHARGED.trigger(entity, component.getElectroChargedOrigin());
 
 		ElementComponent.sync(entity);
 	}

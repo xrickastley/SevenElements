@@ -140,9 +140,7 @@ public abstract sealed class AbstractBurningElementalReaction
 		method = "Lio/github/xrickastley/sevenelements/component/ElementComponentImpl;tick()V",
 		at = @At("HEAD")
 	)
-	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity) {
-		final ElementComponent component = ElementComponent.KEY.get(entity);
-
+	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity, @Local(self = true) ElementComponent component) {
 		if (!component.hasElementalApplication(Element.BURNING) || component.isBurningOnCD() || entity.getWorld().isClient) return;
 
 		if (!component.hasElementalApplication(Element.DENDRO) && !component.hasElementalApplication(Element.QUICKEN)) {
