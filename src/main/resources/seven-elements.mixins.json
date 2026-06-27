@@ -18,6 +18,7 @@
     "GrindstoneScreenHandlerMixin",
     "ItemMixin",
     "ItemStackMixin",
+    "LivingEntityAndPlayerEntityMixin",
     "LivingEntityMixin",
     "PersistentProjectileEntityMixin",
     "PlayerEntityMixin",
