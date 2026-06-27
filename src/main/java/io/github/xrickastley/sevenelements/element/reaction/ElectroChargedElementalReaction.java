@@ -29,6 +29,7 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 		super(
 			new Settings("Electro-Charged", SevenElements.identifier("electro-charged"), TextHelper.reaction("reaction.seven-elements.electro-charged", "#d691fc"))
 				.setReactionCoefficient(0)
+				.setReactionMultiplier(2.0)
 				.setAuraElement(Element.ELECTRO, 5)
 				.setTriggeringElement(Element.HYDRO, 6)
 				.applyResultAsAura(true)
@@ -81,7 +82,7 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 		final List<LivingEntity> targets = ElementalReaction.getEntitiesInAoE(entity, 2.5, predicate);
 
 		for (final LivingEntity target : targets) {
-			final float damage = ElementalReaction.getReactionDamage(entity, 2.0);
+			final float damage = this.getReactionStrength(origin, entity.getWorld());
 			final ElementalDamageSource source = new ElementalDamageSource(
 				entity
 					.getDamageSources()

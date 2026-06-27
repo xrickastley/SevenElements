@@ -45,6 +45,8 @@ public class SevenElementsAttributes {
 	public static final RegistryEntry<EntityAttribute> CRYO_RES = register("cryo_res", createAttribute("Cryo RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
 	public static final RegistryEntry<EntityAttribute> GEO_RES = register("geo_res", createAttribute("Geo RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
 
+	public static final RegistryEntry<EntityAttribute> ELEMENTAL_MASTERY = register("elemental_mastery", createAttribute("Elemental Mastery", 0, 0, Double.POSITIVE_INFINITY));
+
 	public static void register() {
 		if (registered) return;
 
@@ -87,7 +89,7 @@ public class SevenElementsAttributes {
 		final RegistryEntry<EntityAttribute> resAttribute = modifierMap.get(ModifierType.RES);
 
 		final float dmgBonusMultiplier = 1 + (attacker.getAttributes().hasAttribute(dmgBonusAttribute) && source.applyDMGBonus()
-			? (float) (attacker.getAttributes().getValue(dmgBonusAttribute) / 100)
+			? (float) (attacker.getAttributeValue(dmgBonusAttribute) / 100)
 			: 0);
 
 		final float resMultiplier = target.getAttributes().hasAttribute(resAttribute) && source.applyRES()
@@ -125,7 +127,7 @@ public class SevenElementsAttributes {
 	}
 
 	private static double getRESMultiplier(LivingEntity target, RegistryEntry<EntityAttribute> resAttribute) {
-		final double elementalRes = target.getAttributes().getValue(resAttribute) / 100;
+		final double elementalRes = target.getAttributeValue(resAttribute) / 100;
 
 		return elementalRes < 0
 			? 1 - (elementalRes / 2)

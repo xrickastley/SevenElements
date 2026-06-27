@@ -18,13 +18,16 @@ public abstract sealed class AbstractSuperconductElementalReaction
 	permits SuperconductElementalReaction, FrozenSuperconductElementalReaction
 {
 	AbstractSuperconductElementalReaction(Settings settings) {
-		super(settings);
+		super(
+			settings
+				.setReactionMultiplier(1.5)
+		);
 	}
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
 		for (final LivingEntity target : ElementalReaction.getEntitiesInAoE(entity, 3, t -> t != origin)) {
-			final float damage = ElementalReaction.getReactionDamage(entity, 1.5);
+			final float damage = this.getReactionStrength(entity.getWorld());
 			final ElementalDamageSource source = new ElementalDamageSource(
 				entity
 					.getDamageSources()

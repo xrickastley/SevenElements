@@ -29,10 +29,10 @@ import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
-import io.github.xrickastley.sevenelements.element.reaction.AdditiveElementalReaction;
-import io.github.xrickastley.sevenelements.element.reaction.AmplifyingElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReactions;
+import io.github.xrickastley.sevenelements.element.reaction.base.DamageModifyingReaction;
+import io.github.xrickastley.sevenelements.element.reaction.base.DamageModifyingReaction.Phase;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.interfaces.ILivingEntity;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
@@ -208,7 +208,7 @@ public abstract class PrioritizedLivingEntityMixin
 		order = Integer.MIN_VALUE // Infusions need to be considered before other DMG effects.
 	)
 	private DamageSource applyElementalInfusions(DamageSource source) {
-		return ElementComponent.applyElementalInfusions(source, (LivingEntity)(Entity) this);
+		return ElementComponent.applyElementalInfusions(source, ClassInstanceUtil.cast(this));
 	}
 
 	@ModifyVariable(
@@ -218,22 +218,25 @@ public abstract class PrioritizedLivingEntityMixin
 		order = Integer.MIN_VALUE // Additive DMG Bonus is a Base DMG multiplier, should be applied ASAP.
 	)
 	private float applyDMGModifiers(float amount, @Local(argsOnly = true) DamageSource source) {
-		final boolean fireResistance = source.isIn(DamageTypeTags.IS_FIRE) && this.hasStatusEffect(StatusEffects.FIRE_RESISTANCE);
-		final boolean damageCooldown = this.timeUntilRegen > 10.0F && !source.isIn(DamageTypeTags.BYPASSES_COOLDOWN) && amount <= this.lastDamageTaken;
-
 		// do **not** apply an element **if** DMG cannot be applied.
-		if (this.isInvulnerableTo(source) || this.getWorld().isClient || this.isDead() || fireResistance || damageCooldown) return amount;
+		if (
+			this.isInvulnerableTo(source) 
+			|| this.getWorld().isClient 
+			|| this.isDead() 
+			|| (source.isIn(DamageTypeTags.IS_FIRE) && this.hasStatusEffect(StatusEffects.FIRE_RESISTANCE))
+			|| this.timeUntilRegen > 10.0F && !source.isIn(DamageTypeTags.BYPASSES_COOLDOWN) && amount <= this.lastDamageTaken
+		) return amount;
 
 		final ElementalDamageSource eds = source instanceof final ElementalDamageSource eds2
 			? eds2
-			: new ElementalDamageSource(source, ElementalApplications.gaugeUnits((LivingEntity)(Entity) this, Element.PHYSICAL, 0.00), InternalCooldownContext.ofNone(source.getAttacker()));
+			: new ElementalDamageSource(source, ElementalApplications.gaugeUnits(ClassInstanceUtil.cast(this), Element.PHYSICAL, 0.00), InternalCooldownContext.ofNone(source.getAttacker()));
 
-		final ElementComponent component = ElementComponent.KEY.get(this);
+		final ElementComponentImpl component = (ElementComponentImpl) ElementComponent.KEY.get(this);
 		this.sevenelements$reactions = new ArrayList<>(component.applyFromDamageSource(eds));
 
 		final @Nullable ElementalReaction lastReaction = this.sevenelements$reactions.isEmpty()
 			? null
-			: this.sevenelements$reactions.get(this.sevenelements$reactions.size() - 1);
+			: this.sevenelements$reactions.getLast();
 
 		final boolean doShatter = !this.sevenelements$reactions.contains(ElementalReactions.GEO_SHATTER)
 			&& !this.sevenelements$reactions.contains(ElementalReactions.SHATTER)
@@ -242,23 +245,20 @@ public abstract class PrioritizedLivingEntityMixin
 
 		if (doShatter) {
 			this.sevenelements$reactions.add(ElementalReactions.SHATTER);
-			((ElementComponentImpl) component).setLastReaction(new Pair<>(ElementalReactions.SHATTER, this.getWorld().getTime()));
-
-			ElementalReactions.SHATTER.trigger((LivingEntity)(Entity) this, ClassInstanceUtil.castOrNull(source.getAttacker(), LivingEntity.class));
+			
+			component.setLastReaction(new Pair<>(ElementalReactions.SHATTER, this.getWorld().getTime()));
+			
+			ElementalReactions.SHATTER.trigger(ClassInstanceUtil.cast(this), ClassInstanceUtil.castOrNull(source.getAttacker(), LivingEntity.class));
 		}
 
-		float additive = this.sevenelements$reactions != null && !this.sevenelements$reactions.isEmpty()
-			? Math.max(
-				this.sevenelements$reactions
-					.stream()
-					.filter(reaction -> reaction instanceof AdditiveElementalReaction)
-					.map(reaction -> ((AdditiveElementalReaction) reaction))
-					.reduce(0.0f, (acc, reaction) -> acc + (float) reaction.getDamageBonus(this.getWorld()), Float::sum),
-				0.0f
+		amount = this.sevenelements$reactions
+			.stream()
+			.<DamageModifyingReaction>mapMulti((reaction, mapper) -> 
+				ClassInstanceUtil.ifInstanceOfAnd(reaction, DamageModifyingReaction.class, Functions.composePredicate(DamageModifyingReaction::getPhase, Phase.BASE::equals), mapper)
 			)
-			: 0.0f;
+			.reduce(amount, (acc, reaction) -> reaction.modifyDamage(source.getAttacker(), this.getWorld(), acc), Float::sum);
 
-		return SevenElementsAttributes.modifyDamage((LivingEntity)(Entity) this, eds, amount + additive);
+		return SevenElementsAttributes.modifyDamage(ClassInstanceUtil.cast(this), eds, amount);
 	}
 
 	@ModifyVariable(
@@ -271,17 +271,12 @@ public abstract class PrioritizedLivingEntityMixin
 		order = Integer.MAX_VALUE // Amplifying DMG Bonus is a Total DMG multiplier, should be applied as late as possible.
 	)
 	private float applyReactionAmplifiers(float amount, @Local(argsOnly = true) DamageSource source) {
-		double amplifier = this.sevenelements$reactions != null && !this.sevenelements$reactions.isEmpty()
-			? Math.max(
-				this.sevenelements$reactions
-					.stream()
-					.filter(reaction -> reaction instanceof AmplifyingElementalReaction)
-					.map(reaction -> ((AmplifyingElementalReaction) reaction))
-					.reduce(0.0, (acc, reaction) -> acc + reaction.getAmplifier(), Double::sum),
-				1.0
+		return this.sevenelements$reactions
+			.stream()
+			.<DamageModifyingReaction>mapMulti((reaction, mapper) -> 
+				// Yes this does make multiple amplifying reactions multiplicative instead of additive with each other, but that's unknown information at this point (and unused) so it won't really matter implementation wise.
+				ClassInstanceUtil.ifInstanceOfAnd(reaction, DamageModifyingReaction.class, Functions.composePredicate(DamageModifyingReaction::getPhase, Phase.TOTAL::equals), mapper)
 			)
-			: 1.0;
-
-		return amount * (float) amplifier;
+			.reduce(amount, (acc, reaction) -> reaction.modifyDamage(source.getAttacker(), this.getWorld(), acc), Float::sum);
 	}
 }

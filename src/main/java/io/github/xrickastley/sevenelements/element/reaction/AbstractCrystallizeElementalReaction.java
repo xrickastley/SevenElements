@@ -31,7 +31,10 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 	private static final Set<Block> AIR_BLOCKS = Set.of(Blocks.AIR, Blocks.CAVE_AIR, Blocks.VOID_AIR);
 
 	AbstractCrystallizeElementalReaction(Settings settings) {
-		super(settings);
+		super(
+			settings
+				.setReactionMultiplier(1.0)
+		);
 	}
 
 	@Override
@@ -41,7 +44,7 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 		if (!(world instanceof final ServerWorld serverWorld)) return;
 
 		final Vec3d spawnPos = this.clampToGround(entity.getWorld(), this.toAbsolutePos(entity, new Vec3d(0, 0, 1)));
-		final CrystallizeShardEntity crystallizeShard = new CrystallizeShardEntity(SevenElementsEntityTypes.CRYSTALLIZE_SHARD, serverWorld, this.getAuraElement(), origin);
+		final CrystallizeShardEntity crystallizeShard = new CrystallizeShardEntity(SevenElementsEntityTypes.CRYSTALLIZE_SHARD, serverWorld, this.getAuraElement(), this.getReactionStrength(origin), origin);
 
 		crystallizeShard.setPosition(spawnPos);
 		serverWorld.spawnNewEntityAndPassengers(crystallizeShard);

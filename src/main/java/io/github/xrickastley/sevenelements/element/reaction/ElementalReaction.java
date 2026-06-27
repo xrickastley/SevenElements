@@ -5,15 +5,19 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.advancement.criterion.SevenElementsCriteria;
+import io.github.xrickastley.sevenelements.annotation.Sealed;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.element.ElementalApplication.Type;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
+import io.github.xrickastley.sevenelements.element.reaction.base.AdditiveElementalReaction;
+import io.github.xrickastley.sevenelements.element.reaction.base.AmplifyingElementalReaction;
 import io.github.xrickastley.sevenelements.events.ReactionTriggered;
+import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
+import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.networking.ShowElementalReactionS2CPayload;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistries;
@@ -41,7 +45,9 @@ public abstract class ElementalReaction {
 	protected final String name;
 	protected final Identifier id;
 	protected final @Nullable Text text;
+	protected final Type type;
 	protected final double reactionCoefficient;
+	protected final double reactionMultiplier;
 	protected final Pair<Element, Integer> auraElement;
 	protected final Pair<Element, Integer> triggeringElement;
 	protected final boolean reversable;
@@ -56,7 +62,9 @@ public abstract class ElementalReaction {
 		this.id = settings.id;
 		this.text = settings.text;
 
+		this.type = settings.type;
 		this.reactionCoefficient = settings.reactionCoefficient;
+		this.reactionMultiplier = settings.reactionMultiplier;
 		this.auraElement = settings.auraElement;
 		this.triggeringElement = settings.triggeringElement;
 		this.reversable = settings.reversable;
@@ -74,20 +82,51 @@ public abstract class ElementalReaction {
 			.collect(Collectors.toList());
 	}
 
+	public static float getLevelMultiplier(Entity entity) {
+		return ElementalReaction.getLevelMultiplier(entity.getWorld());
+	}
+
+	public static float getLevelMultiplier(World world) {
+		return (float) world
+			.getGameRules()
+			.get(SevenElementsGameRules.LEVEL_MULTIPLIER)
+			.get();
+	}
+
+	/**
+	 * @deprecated Reaction DMG now varies across elemental reaction instances. Get an instance of
+	 * {@code ElementalReaction} and use {@link ElementalReaction#getReactionStrength} instead.
+	 */
+	@Deprecated
 	public static float getReactionDamage(Entity entity, double reactionMultiplier) {
 		return ElementalReaction.getReactionDamage(entity, (float) reactionMultiplier);
 	}
 
+	/**
+	 * @deprecated Reaction DMG now varies across elemental reaction instances. Get an instance of
+	 * {@code ElementalReaction} and use {@link ElementalReaction#getReactionStrength} instead.
+	 */
+	@Deprecated
 	public static float getReactionDamage(Entity entity, float reactionMultiplier) {
-		return SevenElements.getLevelMultiplier(entity) * reactionMultiplier;
+		return ElementalReaction.getLevelMultiplier(entity) * reactionMultiplier;
 	}
 
+	/**
+	 * @deprecated Reaction DMG now varies across elemental reaction instances. Get an instance of
+	 * {@code ElementalReaction} and use {@link ElementalReaction#getReactionStrength} instead.
+	 */
+	@Deprecated
 	public static float getReactionDamage(World world, double reactionMultiplier) {
 		return ElementalReaction.getReactionDamage(world, (float) reactionMultiplier);
 	}
 
+	/**
+	 * @deprecated Reaction DMG now varies across elemental reaction instances. Get an instance of
+	 * {@code ElementalReaction} and use {@link ElementalReaction#getReactionStrength} instead.
+	 */
+	@Deprecated
 	public static float getReactionDamage(World world, float reactionMultiplier) {
-		return SevenElements.getLevelMultiplier(world) * reactionMultiplier;
+		return ElementalReaction.getLevelMultiplier(world) * reactionMultiplier;
 	}
 
 	public static List<LivingEntity> getEntitiesInAoE(LivingEntity target, double radius) {
@@ -116,11 +155,11 @@ public abstract class ElementalReaction {
 		return elements.anyMatch(this::hasElement);
 	}
 
-	public Element getAuraElement() {
+	public final Element getAuraElement() {
 		return auraElement.getLeft();
 	}
 
-	public Element getTriggeringElement() {
+	public final Element getTriggeringElement() {
 		return triggeringElement.getLeft();
 	}
 
@@ -140,12 +179,26 @@ public abstract class ElementalReaction {
 		return text;
 	}
 
-	public Pair<Element, Integer> getElementPair(Element element) {
-		return element == auraElement.getLeft()
-			? auraElement
-			: element == triggeringElement.getLeft()
-				? triggeringElement
-				: null;
+	public final double getReactionMultiplier() {
+		return this.reactionMultiplier;
+	}
+
+	public final double getBonusReactionMultiplier(@Nullable Entity origin) {
+		return 1 + this.type.getElementalMasteryBonus(origin);
+	}
+
+	public final float getReactionStrength(@NotNull Entity origin) {
+		return this.getReactionStrength(origin, origin.getWorld());
+	}
+
+	public final float getReactionStrength(World world) {
+		return this.getReactionStrength(null, world);
+	}
+	
+	@Sealed({ AdditiveElementalReaction.class, AmplifyingElementalReaction.class })
+	public float getReactionStrength(@Nullable Entity origin, World world) {
+		return (float) (this.getReactionMultiplier() * ElementalReaction.getLevelMultiplier(world)
+			* this.getBonusReactionMultiplier(origin));
 	}
 
 	public List<Element> getReactionDisplayOrder() {
@@ -281,7 +334,7 @@ public abstract class ElementalReaction {
 		return registryEntryList.contains(this.registryEntry);
 	}
 
-	protected void displayReaction(LivingEntity target) {
+	protected final void displayReaction(LivingEntity target) {
 		if (target.getWorld().isClient) return;
 
 		final Box boundingBox = target.getBoundingBox();
@@ -307,7 +360,9 @@ public abstract class ElementalReaction {
 		private final String name;
 		private final Identifier id;
 		private final @Nullable Text text;
+		private Type type = Type.TRANSFORMATIVE;
 		private double reactionCoefficient = 1.0;
+		private double reactionMultiplier = 1.0;
 		private Pair<Element, Integer> auraElement;
 		private Pair<Element, Integer> triggeringElement;
 		private boolean reversable = false;
@@ -324,12 +379,42 @@ public abstract class ElementalReaction {
 		}
 
 		/**
-		 * Sets the reaction coefficient of the Elemental Reaction. This is a multiplier that dictates how many gauge units are
-		 * consumed from the aura element.
+		 * Sets the type of the Elemental Reaction. <br> <br>
+		 * 
+		 * This is an enum that dictates how the Elemental Mastery attribute will affect the 
+		 * reaction.
+		 * 
+		 * @param type The type of the Elemental Reaction.
+		 */
+		public Settings setType(ElementalReaction.Type type) {
+			this.type = type;
+
+			return this;
+		}
+
+		/**
+		 * Sets the reaction coefficient of the Elemental Reaction. <br> <br>
+		 * 
+		 * This is a multiplier that dictates how many gauge units are consumed from both the aura
+		 * and triggering elements.
+		 * 
 		 * @param reactionCoefficient The reaction coefficient of the Elemental Reaction.
 		 */
 		public Settings setReactionCoefficient(double reactionCoefficient) {
 			this.reactionCoefficient = reactionCoefficient;
+
+			return this;
+		}
+
+		/**
+		 * Sets the reaction multiplier of the Elemental Reaction. <br> <br>
+		 * 
+		 * This is a multiplier that dictates how <i>strong</i> the effects of a reaction are.
+		 * 
+		 * @param reactionMultiplier The reaction multiplier of the Elemental Reaction.
+		 */
+		public Settings setReactionMultiplier(double reactionMultiplier) {
+			this.reactionMultiplier = reactionMultiplier;
 
 			return this;
 		}
@@ -500,6 +585,35 @@ public abstract class ElementalReaction {
 
 		public Element getTriggeringElement() {
 			return triggeringElement.getLeft();
+		}
+	}
+
+	protected static enum Type {
+		TRANSFORMATIVE(16, 2000),
+		AMPLIFYING(2.78, 1400),
+		ADDITIVE(5, 1200),
+		SHIELD(4.44, 1400);
+
+		private final double scale;
+		private final double halfMax;
+
+		private Type(double scale, double halfMax) {
+			this.scale = scale;
+			this.halfMax = halfMax;
+		}
+
+		public double getElementalMasteryBonus(@Nullable Entity entity) {
+			return entity instanceof final LivingEntity livingEntity
+				? this.getElementalMasteryBonus(livingEntity.getAttributeValue(SevenElementsAttributes.ELEMENTAL_MASTERY))
+				: 0;
+		}
+
+		public double getElementalMasteryBonus(double elementalMastery) {
+			return this.getElementalMasteryBonus((int) Math.floor(elementalMastery));
+		}
+
+		public double getElementalMasteryBonus(int elementalMastery) {
+			return scale * (elementalMastery / (elementalMastery + this.halfMax));
 		}
 	}
 }

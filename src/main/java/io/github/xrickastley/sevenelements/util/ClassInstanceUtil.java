@@ -2,6 +2,7 @@ package io.github.xrickastley.sevenelements.util;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -76,5 +77,23 @@ public final class ClassInstanceUtil {
 		if (obj == null || !clazz.isInstance(obj)) return;
 
 		ifClassInstance.accept((T) obj);
+	}
+
+	/**
+	 * If {@code obj} isn't null, is an instance of {@code clazz} and {@code predicate.test(obj)}
+	 * is {@code true}, calls the {@code ifInstanceAnd} consumer with {@code obj} as an instance of
+	 * {@code clazz}.
+	 *
+	 * @param <T> The type of the expected class.
+	 * @param obj The object to check as an instance of {@code clazz} if it isn't null.
+	 * @param clazz The expected class {@code obj} is an instance of.
+	 * @param predicate The test to perform on {@code obj} if it is an instance of {@code T}.
+	 * @param ifInstanceAnd The consumer to call if {@code obj} is an instance of {@code clazz} and {@code predicate.test(obj)} is {@code true}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> void ifInstanceOfAnd(@Nullable Object obj, Class<T> clazz, Predicate<T> predicate, Consumer<T> ifInstanceAnd) {
+		if (obj == null || !clazz.isInstance(obj) || !predicate.test((T) obj)) return;
+		
+		ifInstanceAnd.accept((T) obj);
 	}
 }
