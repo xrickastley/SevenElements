@@ -53,11 +53,20 @@
 		],
 		"subtitle": "subtitles.seven-elements.entity.crystallize_shield.break"
 	},
-	"item_infusion": {
+	"item_infusion.apply": {
 		"category": "player",
 		"sounds": [
 			{
-				"name": "seven-elements:item_infusion"
+				"name": "seven-elements:item_infusion_apply"
+			}
+		],
+		"subtitle": "subtitles.seven-elements.block.infusion_table.use"
+	},
+	"item_infusion.remove": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "seven-elements:item_infusion_remove"
 			}
 		],
 		"subtitle": "subtitles.seven-elements.block.infusion_table.use"

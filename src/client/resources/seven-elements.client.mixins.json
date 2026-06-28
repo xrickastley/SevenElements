@@ -10,6 +10,7 @@
     "BossBarHudMixin",
     "BufferBuilderStorageMixin",
     "BuiltinModelItemRendererMixin",
+    "EnchantmentScreenAccessor",
     "InGameHudMixin",
     "ItemRendererMixin",
     "LivingEntityMixin",

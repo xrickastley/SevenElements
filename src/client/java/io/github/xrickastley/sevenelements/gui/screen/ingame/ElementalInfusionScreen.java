@@ -4,7 +4,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.element.Element;
+import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
+import io.github.xrickastley.sevenelements.mixin.client.EnchantmentScreenAccessor;
 import io.github.xrickastley.sevenelements.networking.FinishElementalInfusionS2CPayload;
 import io.github.xrickastley.sevenelements.screen.ElementalInfusionScreenHandler;
 import io.github.xrickastley.sevenelements.util.ClientConfig;
@@ -15,6 +17,7 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
@@ -22,13 +25,17 @@ import net.minecraft.util.Identifier;
 
 public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScreenHandler> {
 	private static final Identifier TEXTURE = SevenElements.identifier("textures/gui/container/infusion_table.png");
+	private static final Identifier UNINFUSE_TEXTURE = SevenElements.identifier("textures/gui/container/infusion_table_uninfuse.png");
 
-	private static final Identifier SLOT_DISABLED_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot_disabled");
-	private static final Identifier SLOT_HIGHLIGHTED_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot_highlighted");
-	private static final Identifier SLOT_TEXTURE = Identifier.ofVanilla("container/enchanting_table/enchantment_slot");
+	private static final Identifier SLOT_DISABLED_TEXTURE = EnchantmentScreenAccessor.getEnchantmentSlotDisabledTexture();
+	private static final Identifier SLOT_HIGHLIGHTED_TEXTURE = EnchantmentScreenAccessor.getEnchantmentSlotHighlightedTexture();
+	private static final Identifier SLOT_TEXTURE = EnchantmentScreenAccessor.getEnchantmentSlotTexture();
 
-	private static final Identifier LEVEL_DISABLED_TEXTURE = SevenElements.identifier("container/infusion_table/level_disabled");
-	private static final Identifier LEVEL_ENABLED_TEXTURE = SevenElements.identifier("container/infusion_table/level_enabled");
+	private static final Identifier INFUSE_LEVEL_ENABLED_TEXTURE = SevenElements.identifier("container/infusion_table/level_enabled");
+	private static final Identifier INFUSE_LEVEL_DISABLED_TEXTURE = SevenElements.identifier("container/infusion_table/level_disabled");
+
+	private static final Identifier UNINFUSE_LEVEL_ENABLED_TEXTURE = EnchantmentScreenAccessor.getLevelTextures()[1];
+	private static final Identifier UNINFUSE_LEVEL_DISABLED_TEXTURE = EnchantmentScreenAccessor.getLevelDisabledTextures()[1];
 
 	private static final int LOCK_TICKS = 10;
 	private final PlayerEntity player;
@@ -48,17 +55,21 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 
 	@Override
 	protected void drawBackground(DrawContext context, float delta, int mouseX, int mouseY) {
+		final Identifier texture = handler.canPerformUninfuse()
+			? UNINFUSE_TEXTURE
+			: TEXTURE;
+
 		RenderSystem.setShader(GameRenderer::getPositionTexProgram);
 		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.setShaderTexture(0, TEXTURE);
+		RenderSystem.setShaderTexture(0, texture);
 
 		final int x = (width - backgroundWidth) / 2;
 		final int y = (height - backgroundHeight) / 2;
 
-		context.drawTexture(TEXTURE, x, y, 0, 0, backgroundWidth, backgroundHeight);
+		context.drawTexture(texture, x, y, 0, 0, backgroundWidth, backgroundHeight);
 
 		this.drawElements(context, x, y);
-		this.drawInfuseButton(context, x, y, mouseX, mouseY);
+		this.drawButtons(context, x, y, mouseX, mouseY);
 
 		final Slot slot = this.handler.getResultSlot();
 
@@ -71,44 +82,111 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableCull();
 
-		context.drawTexture(Element.PYRO.getTexture(), x + 76, y + 18, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.HYDRO.getTexture(), x + 107, y + 33, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.ANEMO.getTexture(), x + 115, y + 63, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.ELECTRO.getTexture(), x + 94, y + 92, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.DENDRO.getTexture(), x + 59, y + 92, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.CRYO.getTexture(), x + 37, y + 63, 24, 24, 0, 0, 24, 24, 24, 24);
-		context.drawTexture(Element.GEO.getTexture(), x + 45, y + 33, 24, 24, 0, 0, 24, 24, 24, 24);
+		this.drawElement(Element.PYRO, context, x + 76, y + 18);
+		this.drawElement(Element.HYDRO, context, x + 107, y + 33);
+		this.drawElement(Element.ANEMO, context, x + 115, y + 63);
+		this.drawElement(Element.ELECTRO, context, x + 94, y + 92);
+		this.drawElement(Element.DENDRO, context, x + 59, y + 92);
+		this.drawElement(Element.CRYO, context, x + 37, y + 63);
+		this.drawElement(Element.GEO, context, x + 45, y + 33);
 
 		RenderSystem.disableBlend();
 		RenderSystem.disableCull();
 	}
 
+	private void drawElement(final Element element, final DrawContext context, final int x, final int y) {
+		final ItemStack targetItem = handler.getResultSlot().getStack();
+		final boolean cantInfuseElement = targetItem.isEmpty()
+			|| (targetItem.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)
+			&& targetItem.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT).element() != element);
+
+		if (cantInfuseElement)
+			RenderSystem.setShaderColor(0.5f, 0.5f, 0.5f, 0.5f);
+
+		context.drawTexture(element.getTexture(), x, y, 24, 24, 0, 0, 24, 24, 24, 24);
+		
+		if (cantInfuseElement)
+			RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+	}
+
+	private void drawButtons(DrawContext context, final int x, final int y, final int mouseX, final int mouseY) {
+		if (!handler.getResultSlot().hasStack()) return;
+
+		this.drawInfuseButton(context, x, y, mouseX, mouseY);
+		this.drawUninfuseButton(context, x, y, mouseX, mouseY);
+	}
+
 	private void drawInfuseButton(DrawContext context, final int x, final int y, final int mouseX, final int mouseY) {
 		if (!handler.getResultSlot().hasStack()) return;
 
-		final int x1 = x + 43;
-		final int y1 = y + 128;
-		final int x2 = x1 + 90;
-		final int y2 = y1 + 19;
+		final int xStart = handler.canPerformUninfuse() ? 16 : 43;
+		final int yStart = 128;
+		final int width = handler.canPerformUninfuse() ? 67 : 90;
+		final int height = 19;
 
-		final Identifier texture = !this.isEnabled()
+		final int x1 = x + xStart;
+		final int y1 = y + yStart;
+		final int x2 = x1 + width;
+		final int y2 = y1 + height;
+
+		final boolean canInfuse = this.canPerformInfuse();
+		final boolean isButtonHovered = this.isInRectangle(mouseX, mouseY, xStart, yStart, width, height);
+
+		final Identifier texture = !canInfuse
 			? SLOT_DISABLED_TEXTURE
-			: MathHelper2.inRange(mouseX, x1, x2) && MathHelper2.inRange(mouseY, y1, y2)
+			: isButtonHovered
 				? SLOT_HIGHLIGHTED_TEXTURE
 				: SLOT_TEXTURE;
 
-		final Identifier expTexture = this.isEnabled()
-			? LEVEL_ENABLED_TEXTURE
-			: LEVEL_DISABLED_TEXTURE;
+		final Identifier expTexture = canInfuse
+			? INFUSE_LEVEL_ENABLED_TEXTURE
+			: INFUSE_LEVEL_DISABLED_TEXTURE;
 
-		final int color = MathHelper2.inRange(mouseX, x1, x2) && MathHelper2.inRange(mouseY, y1, y2) && this.isEnabled()
+		final int color = isButtonHovered && canInfuse
 			? Colors.YELLOW
 			: 0x685E4A;
 
 		RenderSystem.enableBlend();
-		context.drawGuiTexture(texture, x1, y1, 90, 19);
+		context.drawGuiTexture(texture, x1, y1, width, height);
 		context.drawGuiTexture(expTexture, x2 - 24, y2 - 16, 24, 16);
 		context.drawText(this.textRenderer, Text.translatable("container.seven-elements.infusion_table.infuse"), x1 + 6, y1 + 6, color, false);
+		RenderSystem.disableBlend();
+	}
+
+	private void drawUninfuseButton(DrawContext context, final int x, final int y, final int mouseX, final int mouseY) {
+		if (!handler.canPerformUninfuse()) return;
+
+		final int xStart = 94;
+		final int yStart = 128;
+		final int width = 67;
+		final int height = 19;
+
+		final int x1 = x + xStart;
+		final int y1 = y + yStart;
+		final int x2 = x1 + width;
+		final int y2 = y1 + height;
+
+		final boolean canUninfuse = this.canPerformUninfuse();
+		final boolean isButtonHovered = this.isInRectangle(mouseX, mouseY, xStart, yStart, width, height);
+
+		final Identifier texture = !canUninfuse
+			? SLOT_DISABLED_TEXTURE
+			: isButtonHovered
+				? SLOT_HIGHLIGHTED_TEXTURE
+				: SLOT_TEXTURE;
+
+		final Identifier expTexture = canUninfuse
+			? UNINFUSE_LEVEL_ENABLED_TEXTURE
+			: UNINFUSE_LEVEL_DISABLED_TEXTURE;
+
+		final int color = isButtonHovered && canUninfuse
+			? Colors.RED
+			: 0x685E4A;
+
+		RenderSystem.enableBlend();
+		context.drawGuiTexture(texture, x1, y1, width, height);
+		context.drawGuiTexture(expTexture, x2 - 18, y2 - 16, 16, 16);
+		context.drawText(this.textRenderer, Text.translatable("container.seven-elements.infusion_table.uninfuse"), x1 + 6, y1 + 6, color, false);
 		RenderSystem.disableBlend();
 	}
 
@@ -133,21 +211,51 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 	}
 
 	private boolean checkMouseClick(double mouseX, double mouseY, int button) {
-		final int x = (width - backgroundWidth) / 2;
-		final int y = (height - backgroundHeight) / 2;
+		if (handler.canPerformUninfuse())
+			return this.checkMouseClickInfused(mouseX, mouseY, button);
+		else
+			return this.checkMouseClickUninfused(mouseX, mouseY, button);
+	}
+	
+	private boolean checkMouseClickUninfused(double mouseX, double mouseY, int button) {
+		if (!this.isInRectangle(mouseX, mouseY, 43, 128, 90, 19)) 
+			return false;
 
-		final int x1 = x + 43;
-		final int y1 = y + 128;
-		final int x2 = x1 + 90;
-		final int y2 = y1 + 19;
+		return this.performInfusion();
+	}
 
-		if (!MathHelper2.inRange(mouseX, x1, x2) || !MathHelper2.inRange(mouseY, y1, y2)) return false;
+	private boolean checkMouseClickInfused(double mouseX, double mouseY, int button) {
+		if (this.isInRectangle(mouseX, mouseY, 16, 128, 67, 19))
+			return this.performInfusion();
+		else if (this.isInRectangle(mouseX, mouseY, 94, 128, 67, 19))
+			return this.performUninfusion();
+		else
+			return false;
+	}
 
-		if (!this.isEnabled()) return false;
+	private boolean isInRectangle(double mouseX, double mouseY, double x, double y, double dx, double dy) {
+		final double absX = (int) ((width - backgroundWidth) / 2) + x;
+		final double absY = (int) ((height - backgroundHeight) / 2) + y;
+
+		return MathHelper2.inRange(mouseX, absX, absX + dx) && MathHelper2.inRange(mouseY, absY, absY + dy);
+	}
+
+	private boolean performInfusion() {
+		if (!this.canPerformInfuse()) return false;
 
 		this.lock();
 		this.client.interactionManager.clickButton(handler.syncId, 0);
-		this.client.player.playSound(SevenElementsSoundEvents.ITEM_INFUSION, 1f, 1f);
+		this.client.player.playSound(SevenElementsSoundEvents.ITEM_INFUSION_APPLY, 1f, 1f);
+
+		return true;
+	}
+
+	private boolean performUninfusion() {
+		if (!this.canPerformUninfuse()) return false;
+
+		this.lock();
+		this.client.interactionManager.clickButton(handler.syncId, 1);
+		this.client.player.playSound(SevenElementsSoundEvents.ITEM_INFUSION_REMOVE, 1f, 1f);
 
 		return true;
 	}
@@ -168,8 +276,12 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 		this.tooltipDisplayedAt = player.getWorld().getTime();
 	}
 
-	private boolean isEnabled() {
-		return handler.canInfuse(this.player) && !this.isLocked();
+	private boolean canPerformInfuse() {
+		return !this.isLocked() && handler.canInfuse(this.player);
+	}
+
+	private boolean canPerformUninfuse() {
+		return !this.isLocked() && handler.canUninfuse(this.player);
 	}
 
 	private boolean isLocked() {

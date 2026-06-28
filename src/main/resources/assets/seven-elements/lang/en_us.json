@@ -137,6 +137,7 @@
 
 	"container.seven-elements.infusion_table": "Infusion Table",
 	"container.seven-elements.infusion_table.infuse": "Infuse",
+	"container.seven-elements.infusion_table.uninfuse": "Uninfuse",
 	"container.seven-elements.infusion_table.fail_by_gamerule": "A mysterious force is preventing you from interacting with the Infusion Table!",
 
 	"block.seven-elements.infusion_table": "Infusion Table",
