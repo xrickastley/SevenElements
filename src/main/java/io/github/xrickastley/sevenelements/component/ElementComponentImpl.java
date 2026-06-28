@@ -82,7 +82,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	public ElementComponentImpl(LivingEntity owner) {
 		this.owner = owner;
-		this.freezeDecayHandler = new FreezeDecayHandler(this);
+		this.freezeDecayHandler = new FreezeDecayHandler();
 
 		for (final Element element : Element.values()) elementHolders.put(element, ElementHolder.of(owner, element));
 	}
@@ -341,7 +341,8 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		if (tickedElements > 0) this.removeConsumedElements();
 
-		if (this.crystallizeShield != null) crystallizeShield.tick(this);
+		if (this.crystallizeShield != null) 
+			crystallizeShield.tick();
 
 		this.freezeDecayHandler.tick(appliedElements.anyMatch(a -> a.getElement() == Element.FREEZE));
 	}
@@ -615,7 +616,9 @@ public final class ElementComponentImpl implements ElementComponent {
 			return this.amount <= 0 || this.element == null;
 		}
 
-		private void tick(ElementComponentImpl impl) {
+		private void tick() {
+			final ElementComponentImpl impl = ElementComponentImpl.this;
+
 			if ((this.appliedAt + 300 >= impl.owner.getWorld().getTime() && !this.isEmpty()) || impl.crystallizeShield == null) return;
 
 			impl.crystallizeShield = null;
@@ -627,16 +630,11 @@ public final class ElementComponentImpl implements ElementComponent {
 		}
 	}
 
-	private static class FreezeDecayHandler {
-		private final ElementComponentImpl impl;
+	private class FreezeDecayHandler {
 		private boolean isFreezeReapplied = false;
 		private long freezeReappliedAt;
 		private int freezeTicks;
 		private int unfreezeTicks;
-
-		private FreezeDecayHandler(ElementComponentImpl impl) {
-			this.impl = impl;
-		}
 
 		private double getDecayTimeModifier() {
 			return Math.max(0, freezeTicks - (2 * unfreezeTicks)) / 20.0;
@@ -659,7 +657,7 @@ public final class ElementComponentImpl implements ElementComponent {
 			this.freezeTicks = 0;
 			this.unfreezeTicks = 0;
 
-			ElementComponent.sync(impl.owner);
+			ElementComponent.sync(ElementComponentImpl.this.owner);
 		}
 
 		public void writeToNbt(NbtCompound tag) {
@@ -674,7 +672,7 @@ public final class ElementComponentImpl implements ElementComponent {
 			this.freezeReappliedAt = tag.getLong("FreezeReappliedAt");
 			this.freezeTicks = tag.getInt("FreezeTicks");
 
-			final @Nullable ElementalApplication freezeApp = impl.getElementalApplication(Element.FREEZE);
+			final @Nullable ElementalApplication freezeApp = ElementComponentImpl.this.getElementalApplication(Element.FREEZE);
 			final int syncUnfrozenTicks = JavaScriptUtil.nullishCoalesing(ClassInstanceUtil.mapOrNull(freezeApp, ElementalApplication::getRemainingTicks), 0);
 
 			this.unfreezeTicks = tag.getInt("UnfreezeTicks") + (int) Math.max(0, syncDiff - syncUnfrozenTicks);
