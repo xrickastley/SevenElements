@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -23,6 +24,7 @@ import io.github.xrickastley.sevenelements.component.interfaces.ElementModifying
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
+import io.github.xrickastley.sevenelements.interfaces.IItemStack;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.TextHelper;
@@ -39,13 +41,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipAppender;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.text.Text;
 
 @Mixin(ItemStack.class)
-public abstract class ItemStackMixin implements ComponentHolder {
+public abstract class ItemStackMixin implements ComponentHolder, IItemStack {
 	@Shadow
 	private <T extends TooltipAppender> void appendTooltip(ComponentType<T> componentType, Item.TooltipContext context, Consumer<Text> textConsumer, TooltipType type) { throw new AssertionError(); }
+
+	@Shadow
+	public abstract Text getName();
 
 	@ModifyReturnValue(
 		method = "getName",
@@ -54,7 +58,11 @@ public abstract class ItemStackMixin implements ComponentHolder {
 	private Text modifyName(Text original) {
 		final @Nullable ElementalInfusionComponent component = this.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 
-		if (component == null || !component.hasElementalInfusion() || Util.isCalledBy("net.minecraft.client.gui.screen.ingame.AnvilScreen", "onSlotUpdate", 1) || Util.isCalledBy(AnvilScreenHandler.class, "updateResult", 2)) return original;
+		if (
+			component == null 
+			|| !component.hasElementalInfusion() 
+			|| Util.isCalledBy(ItemStack.class, "sevenelements$getTrueName", 1)
+		) return original;
 
 		final Element element = component.getElement();
 
@@ -119,5 +127,12 @@ public abstract class ItemStackMixin implements ComponentHolder {
 		return SevenElementsAttributes.isMultiplicativeLikeAttribute(attribute)
 			? 1
 			: original;
+	}
+
+	@Unique
+	@Override
+	public Text sevenelements$getTrueName() {
+		// Do this so that any other injects to ItemStack#getName work properly with Seven Elements.
+		return this.getName();
 	}
 }

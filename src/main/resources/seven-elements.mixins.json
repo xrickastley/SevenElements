@@ -5,6 +5,7 @@
   "mixins": [
     "AbstractBlockStateMixin",
     "AbstractFireBlockMixin",
+    "AnvilScreenHandlerMixin",
     "BlockItemMixin",
     "BossBarMixin",
     "CrossbowItemMixin",
