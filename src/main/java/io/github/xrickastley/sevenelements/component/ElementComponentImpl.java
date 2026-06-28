@@ -30,6 +30,7 @@ import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.FrozenElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.QuickenElementalReaction;
 import io.github.xrickastley.sevenelements.events.ElementEvents;
+import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypeTags;
@@ -293,7 +294,7 @@ public final class ElementComponentImpl implements ElementComponent {
 		}
 
 		this.crystallizeShield = tag.contains("CrystallizeShield")
-			? CrystallizeShield.ofNbt(tag.getCompound("CrystallizeShield"))
+			? new CrystallizeShield(tag.getCompound("CrystallizeShield"))
 			: null;
 
 		final NbtList list = tag.getList("AppliedElements", NbtElement.COMPOUND_TYPE);
@@ -569,10 +570,14 @@ public final class ElementComponentImpl implements ElementComponent {
 	
 
 
-	private static class CrystallizeShield {
+	private class CrystallizeShield {
 		private final Element element;
 		private final long appliedAt;
 		private double amount;
+
+		private CrystallizeShield(final NbtCompound tag) {
+			this(Element.valueOf(tag.getString("Element")), tag.getDouble("Amount"), tag.getLong("AppliedAt"));
+		}
 
 		private CrystallizeShield(final Element element, final double amount, final long appliedAt) {
 			this.element = element;
@@ -580,20 +585,18 @@ public final class ElementComponentImpl implements ElementComponent {
 			this.amount = amount;
 		}
 
-		private static CrystallizeShield ofNbt(final NbtCompound tag) {
-			return new CrystallizeShield(Element.valueOf(tag.getString("Element")), tag.getDouble("Amount"), tag.getLong("AppliedAt"));
-		}
-
 		private float reduce(ElementalDamageSource source, float amount) {
+			final double shieldStrength = 1 + (ElementComponentImpl.this.owner.getAttributeValue(SevenElementsAttributes.SHIELD_STRENGTH) / 100);
+			// final double shieldStrength = 1 + 
 			final double elementBonus = this.element == Element.GEO
 				? 1.5 // 150% "effectiveness"
 				: source.getElementalApplication().getElement() == this.element
 					? 2.5 // 250% "effectiveness"
 					: 1; // No "effectiveness"
 
-			final double dmgTakenByShield = Math.min(this.amount * elementBonus, amount);
+			final double dmgTakenByShield = Math.min(this.amount * elementBonus * shieldStrength, amount);
 			// Use Math.max to guarantee >= 0 in case of FP errors.
-			this.amount = Math.max(this.amount - (dmgTakenByShield / elementBonus), 0);
+			this.amount = Math.max(this.amount - (dmgTakenByShield / (elementBonus * shieldStrength)), 0);
 
 			return (float) dmgTakenByShield;
 		}

@@ -95,6 +95,15 @@ public abstract class PlayerEntityMixin
 		return original + (float) (this.getAttributeValue(SevenElementsAttributes.CRITICAL_DAMAGE) / 100);
 	}
 
+	@ModifyVariable(
+		method = "damageShield",
+		at = @At("HEAD"),
+		argsOnly = true
+	)
+	private float applyShieldStrengthAttributeToNormalShield(float amount) {
+		return (float) (amount / (1 + (this.getAttributeValue(SevenElementsAttributes.SHIELD_STRENGTH) / 100)));
+	}
+
 	@ModifyArg(
 		method = "attack",
 		at = @At(
