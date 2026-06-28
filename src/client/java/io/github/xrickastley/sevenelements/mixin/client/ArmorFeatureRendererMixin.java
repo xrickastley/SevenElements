@@ -48,6 +48,6 @@ public abstract class ArmorFeatureRendererMixin<T extends LivingEntity, M extend
 		final ElementalAttunementComponent elementalAttunement = itemStack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT);
 		final Identifier glintPath = SevenElements.identifier("textures/misc/" + elementalAttunement.element().getId().getPath() + "_enchanted_glint_entity.png");
 
-		model.render(matrices, vertexConsumers.getBuffer(SevenElementsRenderLayer.getElementArmorEntityGlint(glintPath)), light, OverlayTexture.DEFAULT_UV);
+		model.render(matrices, vertexConsumers.getBuffer(SevenElementsRenderLayer.getArmorEntityElementGlint(glintPath)), light, OverlayTexture.DEFAULT_UV);
 	}
 }

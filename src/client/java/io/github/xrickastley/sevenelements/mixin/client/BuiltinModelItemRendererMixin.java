@@ -4,6 +4,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
+import java.util.function.Function;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -33,8 +35,10 @@ public class BuiltinModelItemRendererMixin {
 		if (!itemStack.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)) return original.call(provider, layer, solid, glint);
 
 		final ElementalAttunementComponent elementalAttunement = itemStack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT);
-		final Identifier glintPath = SevenElements.identifier("textures/misc/" + elementalAttunement.element().getId().getPath() + "_enchanted_glint_item.png");
+		final String pathSuffix = solid ? "_enchanted_glint_item.png" : "_enchanted_glint_entity.png";
+		final Function<Identifier, RenderLayer> glintLayer = solid ? SevenElementsRenderLayer.getElementGlint() : SevenElementsRenderLayer.getDirectEntityElementGlint();
+		final Identifier glintPath = SevenElements.identifier("textures/misc/" + elementalAttunement.element().getId().getPath() + pathSuffix);
 
-		return VertexConsumers.union(provider.getBuffer(SevenElementsRenderLayer.getElementGlint(glintPath)), original.call(provider, layer, solid, glint));
+		return VertexConsumers.union(provider.getBuffer(glintLayer.apply(glintPath)), original.call(provider, layer, solid, glint));
 	}
 }

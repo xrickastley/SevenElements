@@ -32,13 +32,18 @@ public class BufferBuilderStorageMixin {
 		at = @At("TAIL")
 	)
 	private static void addCustomGlintLayers(Object2ObjectLinkedOpenHashMap<RenderLayer, BufferAllocator> builderStorage, RenderLayer layer, CallbackInfo ci) {
+		// could technically make this an event, but I don't really need it right now
 		if (layer == RenderLayer.getGlint()) {
 			sevenelements$getAllElementGlintPaths("_enchanted_glint_item.png")
-				.map(SevenElementsRenderLayer::getElementGlint)
+				.map(SevenElementsRenderLayer.getElementGlint())
 				.forEach(layer2 -> assignBufferBuilder(builderStorage, layer2));
 		} else if (layer == RenderLayer.getArmorEntityGlint()) {
 			sevenelements$getAllElementGlintPaths("_enchanted_glint_entity.png")
-				.map(SevenElementsRenderLayer::getElementArmorEntityGlint)
+				.map(SevenElementsRenderLayer.getArmorEntityElementGlint())
+				.forEach(layer2 -> assignBufferBuilder(builderStorage, layer2));
+		} else if (layer == RenderLayer.getDirectEntityGlint()) {
+			sevenelements$getAllElementGlintPaths("_enchanted_glint_entity.png")
+				.map(SevenElementsRenderLayer.getDirectEntityElementGlint())
 				.forEach(layer2 -> assignBufferBuilder(builderStorage, layer2));
 		}
 	}
