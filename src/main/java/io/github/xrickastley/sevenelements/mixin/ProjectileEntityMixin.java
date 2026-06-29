@@ -11,12 +11,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
+import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
+import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.interfaces.InfusableProjectile;
-
+import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Ownable;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.projectile.ProjectileEntity;
@@ -24,20 +25,19 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.world.World;
 
 @Mixin(ProjectileEntity.class)
 public abstract class ProjectileEntityMixin
-	extends Entity
+	extends EntityMixin
 	implements Ownable, InfusableProjectile
 {
 	@Unique
 	private ElementalInfusionComponent sevenelements$infusionComponent;
 
-	public ProjectileEntityMixin(EntityType<? extends ProjectileEntity> entityType, World world) {
-		super(entityType, world);
-
-		throw new AssertionError();
+	@Override
+	protected boolean sevenelements$modifyOnFire(boolean original) {
+		return original
+			|| (ClassInstanceUtil.mapOrNull(this.sevenelements$infusionComponent, ElementalInfusionComponent::getElement) == Element.PYRO && this.getWorld().getGameRules().getBoolean(SevenElementsGameRules.PYRO_DOES_FIRE_EFFECTS));
 	}
 
 	@Unique
