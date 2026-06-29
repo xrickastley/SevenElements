@@ -25,5 +25,6 @@ public class RangedWeaponItemMixin {
 	)
 	private void applyInfusionToProjectile(World world, LivingEntity shooter, ItemStack weaponStack, ItemStack projectileStack, boolean critical, CallbackInfoReturnable<ProjectileEntity> cir, @Local PersistentProjectileEntity projectile) {
 		projectile.sevenelements$setOriginStack(weaponStack);
+		projectile.sevenelements$setProjectileStack(projectileStack);
 	}
 }

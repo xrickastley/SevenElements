@@ -1,6 +1,7 @@
 package io.github.xrickastley.sevenelements.mixin;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -17,6 +18,9 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.interfaces.InfusableProjectile;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
+import io.github.xrickastley.sevenelements.util.Functions;
+import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.Ownable;
 import net.minecraft.entity.damage.DamageSource;
@@ -25,6 +29,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.registry.RegistryOps;
 
 @Mixin(ProjectileEntity.class)
 public abstract class ProjectileEntityMixin
@@ -32,55 +37,110 @@ public abstract class ProjectileEntityMixin
 	implements Ownable, InfusableProjectile
 {
 	@Unique
-	private ElementalInfusionComponent sevenelements$infusionComponent;
-
-	@Override
-	protected boolean sevenelements$modifyOnFire(boolean original) {
-		return original
-			|| (ClassInstanceUtil.mapOrNull(this.sevenelements$infusionComponent, ElementalInfusionComponent::getElement) == Element.PYRO && this.getWorld().getGameRules().getBoolean(SevenElementsGameRules.PYRO_DOES_FIRE_EFFECTS));
-	}
-
+	private @Nullable ItemStack sevenelements$originStack;
 	@Unique
-	@Override
-	public void sevenelements$setOriginStack(@Nullable ItemStack originStack) {
-		if (originStack == null) return;
-
-		this.sevenelements$infusionComponent = originStack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
-	}
-
-	@Unique
-	@Override
-	public Optional<ElementalDamageSource> sevenelements$attemptInfusion(DamageSource source, Entity target) {
-		return this.sevenelements$infusionComponent == null
-			? Optional.empty()
-			: this.sevenelements$infusionComponent.apply(source, target);
-	}
+	private @Nullable ItemStack sevenelements$projectileStack;
 
 	@Inject(
 		method = "writeCustomDataToNbt",
 		at = @At("TAIL")
 	)
-	public void writeInfusionToNbt(NbtCompound nbt, CallbackInfo ci) {
-		if (this.sevenelements$infusionComponent == null) return;
+	public void writeStacksToNbt(NbtCompound nbt, CallbackInfo ci) {
+		final RegistryOps<NbtElement> registryOps = this.getWorld().getRegistryManager().getOps(NbtOps.INSTANCE);
 
-		final NbtElement componentNbt = ElementalInfusionComponent.CODEC
-			.encodeStart(NbtOps.INSTANCE, this.sevenelements$infusionComponent)
-			.resultOrPartial(SevenElements.sublogger()::error)
-			.orElseThrow();
+		if (this.sevenelements$originStack != null) {
+			final NbtElement componentNbt = ItemStack.CODEC
+				.encodeStart(registryOps, this.sevenelements$originStack)
+				.resultOrPartial(SevenElements.sublogger()::error)
+				.orElseThrow();
 
-		nbt.put("seven-elements:elemental_infusion", componentNbt);
+			nbt.put("seven-elements:origin_stack", componentNbt);
+		}
+
+		if (this.sevenelements$projectileStack != null) {
+			final NbtElement componentNbt = ItemStack.CODEC
+				.encodeStart(registryOps, this.sevenelements$projectileStack)
+				.resultOrPartial(SevenElements.sublogger()::error)
+				.orElseThrow();
+
+			nbt.put("seven-elements:projectile_stack", componentNbt);
+		}
 	}
 
 	@Inject(
 		method = "readCustomDataFromNbt",
 		at = @At("TAIL")
 	)
-	public void readInfusionFromNbt(NbtCompound nbt, CallbackInfo ci) {
-		if (!nbt.contains("seven-elements:elemental_infusion")) return;
+	public void readStacksFromNbt(NbtCompound nbt, CallbackInfo ci) {
+		final RegistryOps<NbtElement> registryOps = this.getWorld().getRegistryManager().getOps(NbtOps.INSTANCE);
 
-		this.sevenelements$infusionComponent = ElementalInfusionComponent.CODEC
-			.parse(NbtOps.INSTANCE, nbt.get("seven-elements:elemental_infusion"))
-			.resultOrPartial(SevenElements.sublogger()::error)
-			.orElseThrow();
+		if (nbt.contains("seven-elements:origin_stack")) {
+			this.sevenelements$originStack = ItemStack.CODEC
+				.parse(registryOps, nbt.get("seven-elements:origin_stack"))
+				.resultOrPartial(SevenElements.sublogger()::error)
+				.orElseThrow();
+		}
+
+		if (nbt.contains("seven-elements:projectile_stack")) {
+			this.sevenelements$projectileStack = ItemStack.CODEC
+				.parse(registryOps, nbt.get("seven-elements:projectile_stack"))
+				.resultOrPartial(SevenElements.sublogger()::error)
+				.orElseThrow();
+		}
+	}
+
+	@Override
+	protected boolean sevenelements$modifyOnFire(boolean original) {
+		return original
+			|| (this.sevenelements$getElement() == Element.PYRO 
+				&& this.getWorld().getGameRules().getBoolean(SevenElementsGameRules.PYRO_DOES_FIRE_EFFECTS)
+			);
+	}
+
+	@Unique
+	@Override
+	public void sevenelements$setOriginStack(@Nullable ItemStack originStack) {
+		this.sevenelements$originStack = ClassInstanceUtil.mapOrNull(originStack, ItemStack::copy);
+	}
+
+	@Unique
+	@Override
+	public void sevenelements$setProjectileStack(@Nullable ItemStack projectileStack) {
+		this.sevenelements$projectileStack = ClassInstanceUtil.mapOrNull(projectileStack, ItemStack::copy);
+	}
+
+	@Unique
+	@Override
+	public Optional<ElementalDamageSource> sevenelements$attemptInfusion(DamageSource source, Entity target) {
+		return Optional.ofNullable(
+			JavaScriptUtil.nullishCoalesingFn(
+				Functions.supplier(this.sevenelements$getInfusion(this.sevenelements$originStack), source, target),
+				Functions.supplier(this.sevenelements$getInfusion(this.sevenelements$projectileStack), source, target)
+			)
+		);
+	}
+
+	@Unique
+	private BiFunction<DamageSource, Entity, @Nullable ElementalDamageSource> sevenelements$getInfusion(ItemStack stack) {
+		return (source, target) -> Optional.ofNullable(stack)
+			.map(stack2 -> stack2.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT))
+			.flatMap(Functions.withArgument(ElementalInfusionComponent::apply, source, target))
+			.orElse(null);
+	}
+
+	@Unique
+	private @Nullable Element sevenelements$getElement() {
+		return JavaScriptUtil.nullishCoalesing(
+			this.sevenelements$getElement(this.sevenelements$originStack),
+			this.sevenelements$getElement(this.sevenelements$projectileStack)
+		);
+	}
+
+	@Unique
+	private @Nullable Element sevenelements$getElement(ItemStack stack) {
+		return Optional.ofNullable(stack)
+			.map(stack2 -> stack2.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT))
+			.map(ElementalInfusionComponent::getElement)
+			.orElse(null);
 	}
 }

@@ -19,8 +19,8 @@ public final class JavaScriptUtil {
 	 * @param <T> The type of the array.
 	 * @param values The values to perform the logical OR operation on.
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T logicalOR(@Nullable T... values) {
+	@SafeVarargs
+	public static <T> T logicalOr(@Nullable T... values) {
 		for (final T value : values) if (isTruthy(value)) return value;
 
 		return values[values.length - 1];
@@ -33,7 +33,7 @@ public final class JavaScriptUtil {
 	 * @param <T> The type of the array.
 	 * @param values The values to perform the nullish coalesing operation on.
 	 */
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T> @Nullable T nullishCoalesing(@Nullable T... values) {
 		for (final T value : values) if (value != null) return value;
 
@@ -51,7 +51,7 @@ public final class JavaScriptUtil {
 	 * @param <T> The type of the array.
 	 * @param suppliers The {@code Suppliers} to perform the nullish coalesing operation on.
 	 */
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T> @Nullable T nullishCoalesingFn(Supplier<? extends T>... suppliers) {
 		for (final Supplier<? extends T> supplier : suppliers) {
 			final T value = supplier.get();
