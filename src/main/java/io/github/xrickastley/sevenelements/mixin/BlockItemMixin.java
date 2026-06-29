@@ -12,13 +12,13 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.util.ActionResult;
 
-// Prioritized since Frozen **MUST** disable actions.
 @Mixin(value = BlockItem.class, priority = Integer.MIN_VALUE)
 public class BlockItemMixin {
 	@Inject(
 		method = "place(Lnet/minecraft/item/ItemPlacementContext;)Lnet/minecraft/util/ActionResult;",
 		at = @At("HEAD"),
-		cancellable = true
+		cancellable = true,
+		order = Integer.MIN_VALUE // Frozen **must** disable actions.
 	)
 	private void frozenPreventsItemUse(ItemPlacementContext context, CallbackInfoReturnable<ActionResult> cir) {
 		final PlayerEntity player = context.getPlayer();

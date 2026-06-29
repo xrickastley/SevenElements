@@ -46,7 +46,7 @@ public abstract class LivingEntityAndPlayerEntityMixin
 		method = "applyDamage",
 		at = @At("TAIL")
 	)
-	private void sevenelements$triggerDendroCoreReactions(final DamageSource source, float amount, CallbackInfo ci) {
+	private void triggerDendroCoreReactions(final DamageSource source, float amount, CallbackInfo ci) {
 		if (!(source instanceof final ElementalDamageSource eds)) return;
 
 		final Element element = eds.getElementalApplication().getElement();

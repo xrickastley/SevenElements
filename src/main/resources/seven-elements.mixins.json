@@ -23,19 +23,21 @@
     "LivingEntityMixin",
     "PersistentProjectileEntityMixin",
     "PlayerEntityMixin",
-    "PrioritizedEntityMixin",
-    "PrioritizedItemStackMixin",
-    "PrioritizedLivingEntityMixin",
-    "PrioritizedPlayerEntityMixin",
     "ProjectileEntityMixin",
     "RangedWeaponItemMixin",
     "RegistryLoaderAccessor",
     "RegistryLoaderMixin",
     "ServerBossBarMixin",
+    "ServerPlayNetworkHandlerMixin",
     "SmithingTemplateItemAccessor",
     "StatusEffectMixin",
     "WindChargeItemMixin",
-    "WitherEntityMixin"
+    "WitherEntityMixin",
+    "priority.EntityMixin",
+    "priority.ItemStackMixin",
+    "priority.JumpingEntityMixin",
+    "priority.LivingEntityMixin",
+    "priority.PlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

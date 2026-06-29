@@ -1,4 +1,4 @@
-package io.github.xrickastley.sevenelements.mixin;
+package io.github.xrickastley.sevenelements.mixin.priority;
 
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
@@ -16,9 +16,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
-// Prioritized since Frozen **MUST** disable using items.
 @Mixin(value = ItemStack.class, priority = Integer.MIN_VALUE)
-public abstract class PrioritizedItemStackMixin implements ComponentHolder {
+public abstract class ItemStackMixin implements ComponentHolder {
+	// Frozen **must** disable using items.
 	@WrapOperation(
 		method = "use",
 		at = @At(

@@ -1,5 +1,7 @@
 package io.github.xrickastley.sevenelements.util;
 
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
@@ -94,5 +96,29 @@ public final class JavaScriptUtil {
 	 */
 	public static boolean isTruthy(@Nullable Object any) {
 		return !JavaScriptUtil.isFalsy(any);
+	}
+
+	public static <A, R> @Nullable R optionalChain(@Nullable A obj, Function<A, R> a) {
+		return Optional.ofNullable(obj)
+			.map(a)
+			.orElse(null);
+	}
+
+	public static <A, B, R> @Nullable R optionalChain(@Nullable A obj, Function<A, B> a, Function<B, R> b) {
+		return Optional.ofNullable(obj)
+			.map(a).map(b)
+			.orElse(null);
+	}
+
+	public static <A, B, C, R> @Nullable R optionalChain(@Nullable A obj, Function<A, B> a, Function<B, C> b, Function<C, R> c) {
+		return Optional.ofNullable(obj)
+			.map(a).map(b).map(c)
+			.orElse(null);
+	}
+
+	public static <A, B, C, D, R> @Nullable R optionalChain(@Nullable A obj, Function<A, B> a, Function<B, C> b, Function<C, D> c, Function<D, R> d) {
+		return Optional.ofNullable(obj)
+			.map(a).map(b).map(c).map(d)
+			.orElse(null);
 	}
 }

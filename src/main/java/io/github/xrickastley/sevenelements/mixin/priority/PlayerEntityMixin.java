@@ -1,4 +1,4 @@
-package io.github.xrickastley.sevenelements.mixin;
+package io.github.xrickastley.sevenelements.mixin.priority;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -21,8 +21,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 @Mixin(value = PlayerEntity.class, priority = Integer.MIN_VALUE)
-public abstract class PrioritizedPlayerEntityMixin extends LivingEntity {
-	public PrioritizedPlayerEntityMixin(final World world, final BlockPos pos, final float yaw, final GameProfile gameProfile) {
+public abstract class PlayerEntityMixin extends LivingEntity {
+	public PlayerEntityMixin(final World world, final BlockPos pos, final float yaw, final GameProfile gameProfile) {
 		super(EntityType.PLAYER, world);
 
 		throw new AssertionError();
@@ -32,12 +32,13 @@ public abstract class PrioritizedPlayerEntityMixin extends LivingEntity {
 		method = "isBlockBreakingRestricted",
 		at = @At("HEAD"),
 		cancellable = true,
-		order = Integer.MIN_VALUE // Prioritized since Frozen **MUST** disable movements and actions.
+		order = Integer.MIN_VALUE // Frozen **must** disable movements and actions.
 	)
 	private void frozenPreventsBreakingBlocks(CallbackInfoReturnable<Boolean> info) {
 		if (this.hasStatusEffect(SevenElementsStatusEffects.FROZEN)) info.setReturnValue(true);
 	}
 
+	// Infusions should be considered ASAP.
 	@ModifyExpressionValue(
 		method = "attack",
 		at = @At(

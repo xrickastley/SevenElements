@@ -5,9 +5,14 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import java.util.Map;
+import java.util.function.Predicate;
 
+import io.github.xrickastley.sevenelements.effect.ElementalStatusEffect;
+import io.github.xrickastley.sevenelements.element.*;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.interfaces.ILivingEntity;
+import io.github.xrickastley.sevenelements.util.Functions;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.sound.SoundCategory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -18,9 +23,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
-import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
-import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypeTags;
@@ -51,6 +53,12 @@ public abstract class LivingEntityMixin
 	@Shadow
 	public abstract double getAttributeValue(RegistryEntry<EntityAttribute> attribute);
 
+	@Shadow
+	public abstract boolean hasStatusEffect(RegistryEntry<StatusEffect> effect);
+
+	@Shadow
+	public abstract boolean removeStatusEffect(RegistryEntry<StatusEffect> effect);
+
 	@Unique
 	private boolean sevenelements$blockedByCrystallizeShield = true; // true ONLY if ALL received DMG is blocked.
 
@@ -60,6 +68,44 @@ public abstract class LivingEntityMixin
 	)
 	private static DefaultAttributeContainer.Builder addToLivingAttributes(DefaultAttributeContainer.Builder builder) {
 		return SevenElementsAttributes.apply(builder);
+	}
+
+	@Inject(
+		method = "onDeath",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/entity/LivingEntity;setPose(Lnet/minecraft/entity/EntityPose;)V"
+		)
+	)
+	private void applyOnDeathEffects(DamageSource damageSource, CallbackInfo ci) {
+		ElementalStatusEffect
+			.getElementEffects()
+			.forEach(this::removeStatusEffect);
+
+		final ElementComponent component = ElementComponent.KEY.get(this);
+
+		component
+			.getAppliedElements()
+			.stream()
+			.map(Functions.compose(ElementalApplication::getElement, component::getElementHolder))
+			.forEach(ElementHolder::reset);
+	}
+
+	@Inject(
+		method = "tick",
+		at = @At("HEAD")
+	)
+	private void removeExpiredElementEffects(CallbackInfo ci) {
+		final ElementComponent component = ElementComponent.KEY.get(this);
+
+		ElementalStatusEffect
+			.getElementEffects()
+			.stream()
+			.filter(this::hasStatusEffect)
+			.filter(Predicate.not(
+				Functions.composePredicate(RegistryEntry::value, ElementalStatusEffect.class::cast, ElementalStatusEffect::getElement, component::hasElementalApplication)
+			))
+			.forEach(this::removeStatusEffect);
 	}
 
 	@Inject(

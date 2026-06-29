@@ -1,4 +1,4 @@
-package io.github.xrickastley.sevenelements.mixin;
+package io.github.xrickastley.sevenelements.mixin.priority;
 
 import com.llamalad7.mixinextras.sugar.Local;
 
@@ -6,8 +6,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -24,8 +25,6 @@ import io.github.xrickastley.sevenelements.component.ElementComponentImpl;
 import io.github.xrickastley.sevenelements.effect.ElementalStatusEffect;
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.element.ElementHolder;
-import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
@@ -51,8 +50,8 @@ import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.util.Pair;
 import net.minecraft.world.World;
 
-@Mixin(value = LivingEntity.class, priority = Integer.MAX_VALUE - 1000)
-public abstract class PrioritizedLivingEntityMixin
+@Mixin(value = LivingEntity.class, priority = Integer.MIN_VALUE)
+public abstract class LivingEntityMixin
 	extends Entity
 	implements ILivingEntity
 {
@@ -70,9 +69,6 @@ public abstract class PrioritizedLivingEntityMixin
 	@Shadow
 	public abstract boolean hasStatusEffect(RegistryEntry<StatusEffect> effect);
 
-	@Shadow
-	public abstract boolean removeStatusEffect(RegistryEntry<StatusEffect> effect);
-
 	@Unique
 	private List<ElementalReaction> sevenelements$reactions = new ArrayList<>();
 	@Unique
@@ -80,7 +76,7 @@ public abstract class PrioritizedLivingEntityMixin
 	@Unique
 	private @Nullable DamageSource sevenelements$plannedDamageSource;
 
-	public PrioritizedLivingEntityMixin(final EntityType<? extends LivingEntity> entityType, final World world) {
+	public LivingEntityMixin(final EntityType<? extends LivingEntity> entityType, final World world) {
 		super(entityType, world);
 
 		throw new AssertionError();
@@ -96,6 +92,17 @@ public abstract class PrioritizedLivingEntityMixin
 	@Override
 	public @Nullable DamageSource sevenelements$getPlannedDamageSource() {
 		return this.sevenelements$plannedDamageSource;
+	}
+
+	@Inject(
+		method = "travelControlled",
+		at = @At("HEAD"),
+		cancellable = true,
+		order = Integer.MIN_VALUE // Frozen **must** disable movements and actions.
+	)
+	private void frozenPreventsEntityControl(PlayerEntity controllingPlayer, Vec3d movementInput, CallbackInfo ci) {
+		if (this.hasStatusEffect(SevenElementsStatusEffects.FROZEN))
+			ci.cancel();
 	}
 
 	@Inject(
@@ -121,44 +128,6 @@ public abstract class PrioritizedLivingEntityMixin
 		final ElementComponent component = ElementComponent.KEY.get(this);
 
 		if (component.hasElementalApplication(elementEffect.getElement())) cir.setReturnValue(null);
-	}
-
-	@Inject(
-		method = "onDeath",
-		at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/entity/LivingEntity;setPose(Lnet/minecraft/entity/EntityPose;)V"
-		)
-	)
-	private void applyOnDeathEffects(DamageSource damageSource, CallbackInfo ci) {
-		ElementalStatusEffect
-			.getElementEffects()
-			.forEach(this::removeStatusEffect);
-
-		final ElementComponent component = ElementComponent.KEY.get(this);
-
-		component
-			.getAppliedElements()
-			.stream()
-			.map(Functions.compose(ElementalApplication::getElement, component::getElementHolder))
-			.forEach(ElementHolder::reset);
-	}
-
-	@Inject(
-		method = "tick",
-		at = @At("HEAD")
-	)
-	private void removeExpiredElementEffects(CallbackInfo ci) {
-		final ElementComponent component = ElementComponent.KEY.get(this);
-
-		ElementalStatusEffect
-			.getElementEffects()
-			.stream()
-			.filter(this::hasStatusEffect)
-			.filter(Predicate.not(
-				Functions.composePredicate(RegistryEntry::value, ElementalStatusEffect.class::cast, ElementalStatusEffect::getElement, component::hasElementalApplication)
-			))
-			.forEach(this::removeStatusEffect);
 	}
 
 	@ModifyVariable(
@@ -194,7 +163,7 @@ public abstract class PrioritizedLivingEntityMixin
 		method = "damage",
 		at = @At("HEAD"),
 		cancellable = true,
-		order = Integer.MIN_VALUE
+		order = Integer.MIN_VALUE // Frozen **must** prevent the entity from acting.
 	)
 	private void preventDamageWhenFrozen(DamageSource source, float amount, CallbackInfoReturnable<Boolean> cir) {
 		if (source.getAttacker() instanceof final LivingEntity entity && entity.hasStatusEffect(SevenElementsStatusEffects.FROZEN))
@@ -268,7 +237,7 @@ public abstract class PrioritizedLivingEntityMixin
 			shift = At.Shift.BEFORE
 		),
 		argsOnly = true,
-		order = Integer.MAX_VALUE // Amplifying DMG Bonus is a Total DMG multiplier, should be applied as late as possible.
+		order = Integer.MAX_VALUE // Amplifying DMG Bonus is a Total DMG multiplier, should be applied as late as possible. Here due to keeping sevenelements$reactions private.
 	)
 	private float applyReactionAmplifiers(float amount, @Local(argsOnly = true) DamageSource source) {
 		return this.sevenelements$reactions
