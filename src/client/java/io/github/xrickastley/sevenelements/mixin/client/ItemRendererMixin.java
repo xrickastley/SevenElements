@@ -4,26 +4,17 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
-import java.util.function.Function;
-
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-import io.github.xrickastley.sevenelements.SevenElements;
-import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
-import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
-import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
+import io.github.xrickastley.sevenelements.renderer.ElementGlintRenderer;
 
-import net.minecraft.client.render.OverlayVertexConsumer;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexConsumers;
 import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 
 @Mixin(ItemRenderer.class)
 public class ItemRendererMixin {
@@ -35,16 +26,7 @@ public class ItemRendererMixin {
 		)
 	)
 	private VertexConsumer renderAttunementGlint$1(VertexConsumerProvider provider, RenderLayer layer, MatrixStack.Entry entry, Operation<VertexConsumer> original, @Local(argsOnly = true) ItemStack itemStack) {
-		if (!itemStack.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)) return original.call(provider, layer, entry);
-
-		return VertexConsumers.union(
-			new OverlayVertexConsumer(
-				provider.getBuffer(SevenElementsRenderLayer.getElementGlint(this.sevenelements$getElementGlintPath(itemStack))),
-				entry,
-				0.0078125F
-			),
-			provider.getBuffer(layer)
-		);
+		return ElementGlintRenderer.getDynamicDisplayGlintConsumer(original.call(provider, layer, entry), provider, layer, entry, itemStack);
 	}
 
 	@WrapOperation(
@@ -55,14 +37,7 @@ public class ItemRendererMixin {
 		)
 	)
 	private VertexConsumer renderAttunementGlint$2(VertexConsumerProvider provider, RenderLayer layer, boolean solid, boolean glint, Operation<VertexConsumer> original, @Local(argsOnly = true) ItemStack itemStack) {
-		if (!itemStack.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)) return original.call(provider, layer, solid, glint);
-
-		final ElementalAttunementComponent elementalAttunement = itemStack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT);
-		final String pathSuffix = solid ? "_enchanted_glint_item.png" : "_enchanted_glint_entity.png";
-		final Function<Identifier, RenderLayer> glintLayer = solid ? SevenElementsRenderLayer.getElementGlint() : SevenElementsRenderLayer.getDirectEntityElementGlint();
-		final Identifier glintPath = SevenElements.identifier("textures/misc/" + elementalAttunement.element().getId().getPath() + pathSuffix);
-
-		return VertexConsumers.union(provider.getBuffer(glintLayer.apply(glintPath)), original.call(provider, layer, solid, glint));
+		return ElementGlintRenderer.getDirectItemGlintConsumer(original.call(provider, layer, solid, glint), provider, layer, solid, glint, itemStack);
 	}
 
 	@WrapOperation(
@@ -73,20 +48,6 @@ public class ItemRendererMixin {
 		)
 	)
 	private VertexConsumer renderAttunementGlint$3(VertexConsumerProvider vertexConsumers, RenderLayer layer, boolean solid, boolean glint, Operation<VertexConsumer> original, @Local(argsOnly = true) ItemStack itemStack) {
-		if (!itemStack.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)) return original.call(vertexConsumers, layer, solid, glint);
-
-		return VertexConsumers.union(
-			vertexConsumers.getBuffer(SevenElementsRenderLayer.getElementGlint(this.sevenelements$getElementGlintPath(itemStack))),
-			vertexConsumers.getBuffer(layer)
-		);
-	}
-
-	@Unique
-	private Identifier sevenelements$getElementGlintPath(ItemStack stack) {
-		if (!stack.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT))
-			throw new IllegalArgumentException();
-
-		final ElementalAttunementComponent elementalAttunement = stack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT);
-		return SevenElements.identifier("textures/misc/" + elementalAttunement.element().getId().getPath() + "_enchanted_glint_item.png");
+		return ElementGlintRenderer.getItemGlintConsumer(original.call(vertexConsumers, layer, solid, glint), vertexConsumers, layer, solid, glint, itemStack);
 	}
 }

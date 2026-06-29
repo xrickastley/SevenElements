@@ -1,5 +1,8 @@
 package io.github.xrickastley.sevenelements.mixin.client;
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,17 +36,30 @@ public class BufferBuilderStorageMixin {
 	)
 	private static void addCustomGlintLayers(Object2ObjectLinkedOpenHashMap<RenderLayer, BufferAllocator> builderStorage, RenderLayer layer, CallbackInfo ci) {
 		// could technically make this an event, but I don't really need it right now
-		if (layer == RenderLayer.getGlint()) {
-			sevenelements$getAllElementGlintPaths("_enchanted_glint_item.png")
-				.map(SevenElementsRenderLayer.getElementGlint())
-				.forEach(layer2 -> assignBufferBuilder(builderStorage, layer2));
-		} else if (layer == RenderLayer.getArmorEntityGlint()) {
+		if (layer == RenderLayer.getArmorEntityGlint()) {
 			sevenelements$getAllElementGlintPaths("_enchanted_glint_entity.png")
 				.map(SevenElementsRenderLayer.getArmorEntityElementGlint())
 				.forEach(layer2 -> assignBufferBuilder(builderStorage, layer2));
+		} else if (layer == RenderLayer.getGlint()) {
+			sevenelements$getAllElementGlintPaths("_enchanted_glint_item.png")
+				.mapMulti(sevenelements$mapMultipleRenderLayers(
+					SevenElementsRenderLayer.getStaticElementGlint(),
+					SevenElementsRenderLayer.getElementGlint()
+				))
+				.forEach(layer2 -> assignBufferBuilder(builderStorage, layer2));
+		} else if (layer == RenderLayer.getEntityGlint()) {
+			sevenelements$getAllElementGlintPaths("_enchanted_glint_entity.png")
+				.mapMulti(sevenelements$mapMultipleRenderLayers(
+					SevenElementsRenderLayer.getStaticEntityElementGlint(),
+					SevenElementsRenderLayer.getEntityElementGlint()
+				))
+				.forEach(layer2 -> assignBufferBuilder(builderStorage, layer2));
 		} else if (layer == RenderLayer.getDirectEntityGlint()) {
 			sevenelements$getAllElementGlintPaths("_enchanted_glint_entity.png")
-				.map(SevenElementsRenderLayer.getDirectEntityElementGlint())
+				.mapMulti(sevenelements$mapMultipleRenderLayers(
+					SevenElementsRenderLayer.getStaticDirectEntityElementGlint(),
+					SevenElementsRenderLayer.getDirectEntityElementGlint()
+				))
 				.forEach(layer2 -> assignBufferBuilder(builderStorage, layer2));
 		}
 	}
@@ -52,5 +68,14 @@ public class BufferBuilderStorageMixin {
 	private static Stream<Identifier> sevenelements$getAllElementGlintPaths(final String prefix) {
 		return Stream.of(Element.values())
 			.map(element -> SevenElements.identifier("textures/misc/" + element.getId().getPath() + prefix));
+	}
+
+	@Unique
+	@SafeVarargs
+	private static BiConsumer<Identifier, Consumer<RenderLayer>> sevenelements$mapMultipleRenderLayers(final Function<Identifier, RenderLayer>... renderLayerFunctions) {
+		return (id, consumer) -> {
+			for (final Function<Identifier, RenderLayer> fn : renderLayerFunctions) 
+				consumer.accept(fn.apply(id));
+		};
 	}
 }

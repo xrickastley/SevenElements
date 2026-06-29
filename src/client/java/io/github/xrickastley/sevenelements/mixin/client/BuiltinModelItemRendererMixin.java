@@ -4,23 +4,16 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
-import java.util.function.Function;
-
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
-import io.github.xrickastley.sevenelements.SevenElements;
-import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
-import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
-import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
+import io.github.xrickastley.sevenelements.renderer.ElementGlintRenderer;
 
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.VertexConsumers;
 import net.minecraft.client.render.item.BuiltinModelItemRenderer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.Identifier;
 
 @Mixin(BuiltinModelItemRenderer.class)
 public class BuiltinModelItemRendererMixin {
@@ -32,13 +25,6 @@ public class BuiltinModelItemRendererMixin {
 		)
 	)
 	private VertexConsumer renderAttunementGlint(VertexConsumerProvider provider, RenderLayer layer, boolean solid, boolean glint, Operation<VertexConsumer> original, @Local(argsOnly = true) ItemStack itemStack) {
-		if (!itemStack.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)) return original.call(provider, layer, solid, glint);
-
-		final ElementalAttunementComponent elementalAttunement = itemStack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT);
-		final String pathSuffix = solid ? "_enchanted_glint_item.png" : "_enchanted_glint_entity.png";
-		final Function<Identifier, RenderLayer> glintLayer = solid ? SevenElementsRenderLayer.getElementGlint() : SevenElementsRenderLayer.getDirectEntityElementGlint();
-		final Identifier glintPath = SevenElements.identifier("textures/misc/" + elementalAttunement.element().getId().getPath() + pathSuffix);
-
-		return VertexConsumers.union(provider.getBuffer(glintLayer.apply(glintPath)), original.call(provider, layer, solid, glint));
+		return ElementGlintRenderer.getDirectItemGlintConsumer(original.call(provider, layer, solid, glint), provider, layer, solid, glint, itemStack);
 	}
 }

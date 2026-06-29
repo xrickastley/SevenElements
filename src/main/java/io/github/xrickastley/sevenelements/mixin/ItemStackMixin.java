@@ -18,6 +18,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
 import io.github.xrickastley.sevenelements.component.interfaces.ElementModifyingComponent;
@@ -27,15 +28,18 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.interfaces.IItemStack;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Functions;
+import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 import io.github.xrickastley.sevenelements.util.Util;
 
 import net.minecraft.component.ComponentHolder;
 import net.minecraft.component.ComponentType;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipAppender;
@@ -49,7 +53,13 @@ public abstract class ItemStackMixin implements ComponentHolder, IItemStack {
 	private <T extends TooltipAppender> void appendTooltip(ComponentType<T> componentType, Item.TooltipContext context, Consumer<Text> textConsumer, TooltipType type) { throw new AssertionError(); }
 
 	@Shadow
+	public abstract Item getItem();
+
+	@Shadow
 	public abstract Text getName();
+
+	@Shadow
+	public abstract boolean hasGlint();
 
 	@ModifyReturnValue(
 		method = "getName",
@@ -131,8 +141,28 @@ public abstract class ItemStackMixin implements ComponentHolder, IItemStack {
 
 	@Unique
 	@Override
-	public Text sevenelements$getTrueName() {
+	public final Text sevenelements$getTrueName() {
 		// Do this so that any other injects to ItemStack#getName work properly with Seven Elements.
 		return this.getName();
+	}
+
+	@Unique
+	@Override
+	public final boolean sevenelements$hasElementalGlint() {
+		return JavaScriptUtil.nullishCoalesing(this.get(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE), Boolean.TRUE)
+			&& (this.contains(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT) || this.sevenelements$hasAttunementGlint());
+	}
+
+	@Unique
+	@Override
+	public final boolean sevenelements$hasAttunementGlint() {
+		return JavaScriptUtil.nullishCoalesing(this.get(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE), Boolean.TRUE)
+			&& this.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)
+			&& (this.getItem() instanceof ArmorItem
+				|| ClassInstanceUtil.nonNullEquals(
+					ClassInstanceUtil.mapOrNull(this.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT), ElementalInfusionComponent::getElement),
+					ClassInstanceUtil.mapOrNull(this.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT), ElementalAttunementComponent::element)
+				)
+			);
 	}
 }

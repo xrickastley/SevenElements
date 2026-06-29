@@ -2,7 +2,6 @@ package io.github.xrickastley.sevenelements.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import io.github.xrickastley.sevenelements.annotation.mixin.Local;
-import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 
@@ -15,7 +14,8 @@ public class ItemMixin {
 		method = "hasGlint",
 		at = @At("RETURN")
 	)
-	private boolean applyGlintForAttunements(boolean original, @Local(argsOnly = true) ItemStack stack) {
-		return original || stack.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT);
+	private boolean includeElementalGlint(boolean original, @Local(argsOnly = true) ItemStack stack) {
+		return original
+			|| stack.sevenelements$hasAttunementGlint();
 	}
 }
