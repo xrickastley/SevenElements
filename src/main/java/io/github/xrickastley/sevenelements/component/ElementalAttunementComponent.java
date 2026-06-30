@@ -35,7 +35,7 @@ public record ElementalAttunementComponent(Element element) implements Attribute
 	public static final Codec<ElementalAttunementComponent> CODEC = Element.CODEC.comapFlatMap(ElementalAttunementComponent::validate, ElementalAttunementComponent::element);
 
 	private static DataResult<ElementalAttunementComponent> validate(Element element) {
-		if (element != Element.PHYSICAL && SevenElementsAttributes.hasElementalAttribute(element))
+		if (ElementalAttunementComponent.isValidForAttunement(element))
 			return DataResult.success(new ElementalAttunementComponent(element));
 		else
 			return DataResult.error(() -> "Not a valid Element for attunement: " + element);
@@ -61,6 +61,11 @@ public record ElementalAttunementComponent(Element element) implements Attribute
 
 	public static boolean hasAttunement(ItemStack stack) {
 		return stack.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT);
+	}
+
+	public static boolean isValidForAttunement(Element element) {
+		return element != Element.PHYSICAL
+			&& SevenElementsAttributes.hasElementalAttribute(element);
 	}
 
 	@Override
