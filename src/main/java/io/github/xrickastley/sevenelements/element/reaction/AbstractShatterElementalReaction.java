@@ -10,7 +10,7 @@ import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
-
+import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import net.minecraft.entity.LivingEntity;
 
 /*
@@ -37,7 +37,7 @@ public abstract sealed class AbstractShatterElementalReaction
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getLeft());
-		final ElementalApplication triggeringElement = component.getElementalApplication(this.triggeringElement.getLeft());
+		final ElementalApplication triggeringElement = JavaScriptUtil.nullishCoalesing(component.getElementalApplication(this.triggeringElement.getLeft()), ElementalApplications.gaugeUnits(entity, Element.PHYSICAL, 0.0));
 
 		final double reducedGauge = auraElement.reduceGauge(Double.MAX_VALUE);
 

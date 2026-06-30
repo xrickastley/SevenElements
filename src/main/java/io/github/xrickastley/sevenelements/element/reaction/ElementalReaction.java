@@ -307,7 +307,7 @@ public abstract class ElementalReaction {
 		this.onReaction(entity, auraElement, triggeringElement, reducedGauge, origin);
 		this.displayReaction(entity);
 
-		if (triggeringElement != null && origin instanceof final ServerPlayerEntity player)
+		if (origin instanceof final ServerPlayerEntity player)
 			SevenElementsCriteria.REACTION_TRIGGERED.trigger(player, this, triggeringElement.getElement());
 
 		ReactionTriggered.EVENT
