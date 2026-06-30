@@ -30,8 +30,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 @Mixin({ LivingEntity.class, PlayerEntity.class })
-public abstract class LivingEntityAndPlayerEntityMixin 
-	extends Entity 
+public abstract class LivingEntityAndPlayerEntityMixin
+	extends Entity
 	implements ILivingEntity
 {
 	public LivingEntityAndPlayerEntityMixin(EntityType<?> type, World world) {

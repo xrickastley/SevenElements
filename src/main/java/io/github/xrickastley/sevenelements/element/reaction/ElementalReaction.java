@@ -194,7 +194,7 @@ public abstract class ElementalReaction {
 	public final float getReactionStrength(World world) {
 		return this.getReactionStrength(null, world);
 	}
-	
+
 	@Sealed({ AdditiveElementalReaction.class, AmplifyingElementalReaction.class })
 	public float getReactionStrength(@Nullable Entity origin, World world) {
 		return (float) (this.getReactionMultiplier() * ElementalReaction.getLevelMultiplier(world)
@@ -380,10 +380,10 @@ public abstract class ElementalReaction {
 
 		/**
 		 * Sets the type of the Elemental Reaction. <br> <br>
-		 * 
-		 * This is an enum that dictates how the Elemental Mastery attribute will affect the 
+		 *
+		 * This is an enum that dictates how the Elemental Mastery attribute will affect the
 		 * reaction.
-		 * 
+		 *
 		 * @param type The type of the Elemental Reaction.
 		 */
 		public Settings setType(ElementalReaction.Type type) {
@@ -394,10 +394,10 @@ public abstract class ElementalReaction {
 
 		/**
 		 * Sets the reaction coefficient of the Elemental Reaction. <br> <br>
-		 * 
+		 *
 		 * This is a multiplier that dictates how many gauge units are consumed from both the aura
 		 * and triggering elements.
-		 * 
+		 *
 		 * @param reactionCoefficient The reaction coefficient of the Elemental Reaction.
 		 */
 		public Settings setReactionCoefficient(double reactionCoefficient) {
@@ -408,9 +408,9 @@ public abstract class ElementalReaction {
 
 		/**
 		 * Sets the reaction multiplier of the Elemental Reaction. <br> <br>
-		 * 
+		 *
 		 * This is a multiplier that dictates how <i>strong</i> the effects of a reaction are.
-		 * 
+		 *
 		 * @param reactionMultiplier The reaction multiplier of the Elemental Reaction.
 		 */
 		public Settings setReactionMultiplier(double reactionMultiplier) {

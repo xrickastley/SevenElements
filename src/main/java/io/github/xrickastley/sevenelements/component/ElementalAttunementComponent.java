@@ -47,7 +47,7 @@ public record ElementalAttunementComponent(Element element) implements Attribute
 			new ElementalAttunementComponent(element)
 		);
 
-		if (ClassInstanceUtil.mapOrNull(stack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT), ElementalInfusionComponent::getElement) != element) 
+		if (ClassInstanceUtil.mapOrNull(stack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT), ElementalInfusionComponent::getElement) != element)
 			stack.remove(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 	}
 

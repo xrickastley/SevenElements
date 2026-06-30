@@ -92,7 +92,7 @@ public abstract class ProjectileEntityMixin
 	@Override
 	protected boolean sevenelements$modifyOnFire(boolean original) {
 		return original
-			|| (this.sevenelements$getElement() == Element.PYRO 
+			|| (this.sevenelements$getElement() == Element.PYRO
 				&& this.getWorld().getGameRules().getBoolean(SevenElementsGameRules.PYRO_DOES_FIRE_EFFECTS)
 			);
 	}

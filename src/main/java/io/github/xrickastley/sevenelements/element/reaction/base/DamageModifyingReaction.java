@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 
-public sealed interface DamageModifyingReaction 
+public sealed interface DamageModifyingReaction
 	permits AdditiveElementalReaction, AmplifyingElementalReaction
 {
 	default float modifyDamage(@NotNull Entity origin, float damage) {

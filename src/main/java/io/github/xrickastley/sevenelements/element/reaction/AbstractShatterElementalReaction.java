@@ -11,6 +11,7 @@ import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
+
 import net.minecraft.entity.LivingEntity;
 
 /*

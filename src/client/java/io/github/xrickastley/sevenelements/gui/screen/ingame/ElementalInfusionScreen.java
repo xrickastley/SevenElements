@@ -104,7 +104,7 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 			RenderSystem.setShaderColor(0.5f, 0.5f, 0.5f, 0.5f);
 
 		context.drawTexture(element.getTexture(), x, y, 24, 24, 0, 0, 24, 24, 24, 24);
-		
+
 		if (cantInfuseElement)
 			RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
 	}
@@ -216,9 +216,9 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 		else
 			return this.checkMouseClickUninfused(mouseX, mouseY, button);
 	}
-	
+
 	private boolean checkMouseClickUninfused(double mouseX, double mouseY, int button) {
-		if (!this.isInRectangle(mouseX, mouseY, 43, 128, 90, 19)) 
+		if (!this.isInRectangle(mouseX, mouseY, 43, 128, 90, 19))
 			return false;
 
 		return this.performInfusion();

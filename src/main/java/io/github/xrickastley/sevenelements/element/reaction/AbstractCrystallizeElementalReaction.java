@@ -30,7 +30,7 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 	permits PyroCrystallizeElementalReaction, HydroCrystallizeElementalReaction, ElectroCrystallizeElementalReaction, CryoCrystallizeElementalReaction, FrozenCrystallizeElementalReaction
 {
 	private static final Set<Block> AIR_BLOCKS = Set.of(Blocks.AIR, Blocks.CAVE_AIR, Blocks.VOID_AIR);
-	
+
 	private final Element shieldElement;
 
 	AbstractCrystallizeElementalReaction(Settings settings) {

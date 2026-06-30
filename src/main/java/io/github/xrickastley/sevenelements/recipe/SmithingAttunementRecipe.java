@@ -1,9 +1,9 @@
 package io.github.xrickastley.sevenelements.recipe;
 
-import java.util.stream.Stream;
-
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+
+import java.util.stream.Stream;
 
 import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
@@ -41,10 +41,10 @@ public class SmithingAttunementRecipe implements SmithingRecipe {
 
 		if (!this.base.test(itemStack)) return ItemStack.EMPTY;
 
-		if (!(smithingRecipeInput.template().getItem() instanceof final SevenElementsSmithingTemplateItem template)) 
+		if (!(smithingRecipeInput.template().getItem() instanceof final SevenElementsSmithingTemplateItem template))
 			return ItemStack.EMPTY;
 
-		final ElementalAttunementComponent elementalAttunement = itemStack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT); 
+		final ElementalAttunementComponent elementalAttunement = itemStack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT);
 
 		if (elementalAttunement != null && elementalAttunement.element() == template.getElementalAttunement())
 			return ItemStack.EMPTY;
@@ -59,7 +59,7 @@ public class SmithingAttunementRecipe implements SmithingRecipe {
 	@Override
 	public ItemStack getResult(RegistryWrapper.WrapperLookup registriesLookup) {
 		final ItemStack itemStack = new ItemStack(Items.IRON_SWORD);
-		
+
 		itemStack.set(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT, new ElementalAttunementComponent(Element.PYRO));
 
 		return itemStack;

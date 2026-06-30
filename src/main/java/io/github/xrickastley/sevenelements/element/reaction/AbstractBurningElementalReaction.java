@@ -54,7 +54,7 @@ public abstract sealed class AbstractBurningElementalReaction
 
 	@Override
 	public boolean isTriggerable(LivingEntity entity) {
-		return super.isTriggerable(entity) 
+		return super.isTriggerable(entity)
 			&& !ElementComponent.KEY.get(entity).hasElementalApplication(Element.BURNING);
 	}
 

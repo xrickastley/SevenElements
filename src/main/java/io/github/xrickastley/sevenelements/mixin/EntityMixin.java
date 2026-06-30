@@ -2,9 +2,6 @@ package io.github.xrickastley.sevenelements.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 
-import net.minecraft.entity.LightningEntity;
-import net.minecraft.server.world.ServerWorld;
-
 import java.util.stream.Stream;
 
 import org.spongepowered.asm.mixin.Final;
@@ -28,12 +25,14 @@ import io.github.xrickastley.sevenelements.item.ElementalAttunementSmithingTempl
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LightningEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.registry.tag.TagKey;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -72,9 +71,9 @@ public abstract class EntityMixin implements IEntity {
 	private DamageSource applyElectroOnLightning(DamageSource source) {
 		return (Entity)(Object) this instanceof final LivingEntity entity
 			? new ElementalDamageSource(
-				source, 
+				source,
 				ElementalApplications
-					.gaugeUnits(entity, Element.ELECTRO, this.getWorld().getGameRules().getBoolean(SevenElementsGameRules.ELECTRO_FROM_LIGHTNING) ? 2.0 : 0), 
+					.gaugeUnits(entity, Element.ELECTRO, this.getWorld().getGameRules().getBoolean(SevenElementsGameRules.ELECTRO_FROM_LIGHTNING) ? 2.0 : 0),
 				InternalCooldownContext.ofType(null, "seven-elements:natural_environment", InternalCooldownType.INTERVAL_ONLY).forced()
 			)
 			: source;

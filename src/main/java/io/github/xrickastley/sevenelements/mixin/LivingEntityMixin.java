@@ -7,13 +7,6 @@ import com.llamalad7.mixinextras.sugar.Local;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import io.github.xrickastley.sevenelements.effect.ElementalStatusEffect;
-import io.github.xrickastley.sevenelements.element.*;
-import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
-import io.github.xrickastley.sevenelements.interfaces.ILivingEntity;
-import io.github.xrickastley.sevenelements.util.Functions;
-import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.sound.SoundCategory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -23,9 +16,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
+import io.github.xrickastley.sevenelements.effect.ElementalStatusEffect;
+import io.github.xrickastley.sevenelements.element.*;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
+import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
+import io.github.xrickastley.sevenelements.interfaces.ILivingEntity;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypeTags;
+import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.Entity;
@@ -35,9 +33,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.world.World;
 
 @Mixin(LivingEntity.class)

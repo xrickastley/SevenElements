@@ -9,10 +9,10 @@ import java.lang.annotation.Target;
 /**
  * Applied to declare that the annotated element must be considered {@code sealed}.
  *
- * <p>This indicates that the annotated element <b>must not be extended, implemented or 
+ * <p>This indicates that the annotated element <b>must not be extended, implemented or
  * overridden</b> by other subtypes except by those indicated inside {@code value}, which are
  * permitted to do so.
- * 
+ *
  * <p>Like {@code sealed}, every permitted subtype must explicitly choose how it handles further
  * inheritance by either
  * <ul>

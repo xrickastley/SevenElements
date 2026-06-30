@@ -77,12 +77,12 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 	}
 
 	public boolean canInfuse(PlayerEntity player) {
-		return (player.experienceLevel >= INFUSE_REQUIRED_LEVEL || player.isInCreativeMode()) 
+		return (player.experienceLevel >= INFUSE_REQUIRED_LEVEL || player.isInCreativeMode())
 			&& this.getResultSlot().hasStack();
 	}
 
 	public boolean canUninfuse(PlayerEntity player) {
-		return (player.experienceLevel >= UNINFUSE_REQUIRED_LEVEL || player.isInCreativeMode()) 
+		return (player.experienceLevel >= UNINFUSE_REQUIRED_LEVEL || player.isInCreativeMode())
 			&& this.getResultSlot().getStack().contains(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 	}
 

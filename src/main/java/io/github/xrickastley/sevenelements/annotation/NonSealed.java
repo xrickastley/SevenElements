@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 /**
  * Applied to declare that the annotated element must be considered {@code non-sealed}.
  *
- * <p>This indicates that the annotated element may be freely extended, implemented or 
+ * <p>This indicates that the annotated element may be freely extended, implemented or
  * overridden by other subtypes.
  */
 @Documented

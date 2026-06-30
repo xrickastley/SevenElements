@@ -32,7 +32,7 @@ public final class ElementGlintRenderer {
 
 	public static VertexConsumer getArmorGlintConsumer(VertexConsumerProvider provider, RenderLayer layer, ItemStack stack, boolean glint) {
 		return stack.sevenelements$hasAttunementGlint()
-			? VertexConsumers.union(provider.getBuffer(ElementGlintRenderer.ARMOR_ENTITY_GLINT.getLayer(stack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT).element())), provider.getBuffer(layer)) 
+			? VertexConsumers.union(provider.getBuffer(ElementGlintRenderer.ARMOR_ENTITY_GLINT.getLayer(stack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT).element())), provider.getBuffer(layer))
 			: ItemRenderer.getArmorGlintConsumer(provider, layer, glint);
 	}
 
@@ -43,9 +43,9 @@ public final class ElementGlintRenderer {
 	public static VertexConsumer getDynamicDisplayGlintConsumer(VertexConsumer original, VertexConsumerProvider provider, RenderLayer layer, MatrixStack.Entry entry, ItemStack stack) {
 		return stack.sevenelements$hasElementalGlint()
 			? ElementGlintRenderer.getCombinedGlintConsumer(
-				stack, 
-				provider, 
-				layer, 
+				stack,
+				provider,
+				layer,
 				original,
 				new OverlayVertexConsumer(provider.getBuffer(ElementGlintRenderer.getGlintLayer(stack, ElementGlintRenderer.STATIC_GLINT, ElementGlintRenderer.GLINT)), entry, 0.0078125F)
 			)
@@ -59,11 +59,11 @@ public final class ElementGlintRenderer {
 	public static VertexConsumer getItemGlintConsumer(VertexConsumer original, VertexConsumerProvider vertexConsumers, RenderLayer layer, boolean solid, boolean glint, ItemStack stack) {
 		return stack.sevenelements$hasElementalGlint()
 			? ElementGlintRenderer.getCombinedGlintConsumer(
-				stack, 
-				vertexConsumers, 
-				layer, 
+				stack,
+				vertexConsumers,
+				layer,
 				original,
-				solid ? ElementGlintRenderer.STATIC_GLINT : ElementGlintRenderer.STATIC_ENTITY_GLINT, 
+				solid ? ElementGlintRenderer.STATIC_GLINT : ElementGlintRenderer.STATIC_ENTITY_GLINT,
 				solid ? ElementGlintRenderer.GLINT : ElementGlintRenderer.ENTITY_GLINT
 			)
 			: original;
@@ -76,11 +76,11 @@ public final class ElementGlintRenderer {
 	public static VertexConsumer getDirectItemGlintConsumer(VertexConsumer original, VertexConsumerProvider provider, RenderLayer layer, boolean solid, boolean glint, ItemStack stack) {
 		return stack.sevenelements$hasElementalGlint()
 			? ElementGlintRenderer.getCombinedGlintConsumer(
-				stack, 
-				provider, 
-				layer, 
+				stack,
+				provider,
+				layer,
 				original,
-				solid ? ElementGlintRenderer.STATIC_GLINT : ElementGlintRenderer.STATIC_DIRECT_ENTITY_GLINT, 
+				solid ? ElementGlintRenderer.STATIC_GLINT : ElementGlintRenderer.STATIC_DIRECT_ENTITY_GLINT,
 				solid ? ElementGlintRenderer.GLINT : ElementGlintRenderer.DIRECT_ENTITY_GLINT
 			)
 			: original;
@@ -91,9 +91,9 @@ public final class ElementGlintRenderer {
 	@ApiStatus.Internal
 	public static VertexConsumer getCombinedGlintConsumer(ItemStack stack, VertexConsumerProvider provider, RenderLayer layer, VertexConsumer glintConsumer, final GlintRenderLayer infusionLayer, final GlintRenderLayer attunementLayer) {
 		return ElementGlintRenderer.getCombinedGlintConsumer(
-			stack, 
-			provider, 
-			layer, 
+			stack,
+			provider,
+			layer,
 			glintConsumer,
 			provider.getBuffer(ElementGlintRenderer.getGlintLayer(stack, infusionLayer, attunementLayer))
 		);

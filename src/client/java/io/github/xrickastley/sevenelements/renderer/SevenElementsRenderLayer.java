@@ -1,10 +1,10 @@
 package io.github.xrickastley.sevenelements.renderer;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+
 import java.util.function.Function;
 
 import org.joml.Matrix4f;
-
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.render.RenderLayer.MultiPhaseParameters;
 import net.minecraft.client.render.RenderLayer;
@@ -81,9 +81,9 @@ public class SevenElementsRenderLayer {
 	private static final Function<Identifier, RenderLayer> ENTITY_ELEMENT_GLINT = Util.memoize(
 		texture -> RenderLayer.of(
 			"seven-elements:entity_element_glint_direct",
-			VertexFormats.POSITION_TEXTURE, 
-			VertexFormat.DrawMode.QUADS, 
-			1536, 
+			VertexFormats.POSITION_TEXTURE,
+			VertexFormat.DrawMode.QUADS,
+			1536,
 			RenderLayer.MultiPhaseParameters.builder()
 				.program(RenderPhase.ENTITY_GLINT_PROGRAM)
 				.texture(new RenderPhase.Texture(texture, true, false))
@@ -100,9 +100,9 @@ public class SevenElementsRenderLayer {
 	private static final Function<Identifier, RenderLayer> STATIC_ENTITY_ELEMENT_GLINT = Util.memoize(
 		texture -> RenderLayer.of(
 			"seven-elements:entity_element_glint_direct",
-			VertexFormats.POSITION_TEXTURE, 
-			VertexFormat.DrawMode.QUADS, 
-			1536, 
+			VertexFormats.POSITION_TEXTURE,
+			VertexFormat.DrawMode.QUADS,
+			1536,
 			RenderLayer.MultiPhaseParameters.builder()
 				.program(RenderPhase.ENTITY_GLINT_PROGRAM)
 				.texture(new RenderPhase.Texture(texture, true, false))
@@ -119,9 +119,9 @@ public class SevenElementsRenderLayer {
 	private static final Function<Identifier, RenderLayer> DIRECT_ENTITY_ELEMENT_GLINT = Util.memoize(
 		texture -> RenderLayer.of(
 			"seven-elements:entity_element_glint_direct",
-			VertexFormats.POSITION_TEXTURE, 
-			VertexFormat.DrawMode.QUADS, 
-			1536, 
+			VertexFormats.POSITION_TEXTURE,
+			VertexFormat.DrawMode.QUADS,
+			1536,
 			RenderLayer.MultiPhaseParameters.builder()
 				.program(RenderPhase.DIRECT_ENTITY_GLINT_PROGRAM)
 				.texture(new RenderPhase.Texture(texture, true, false))
@@ -137,9 +137,9 @@ public class SevenElementsRenderLayer {
 	private static final Function<Identifier, RenderLayer> STATIC_DIRECT_ENTITY_ELEMENT_GLINT = Util.memoize(
 		texture -> RenderLayer.of(
 			"seven-elements:entity_element_glint_direct",
-			VertexFormats.POSITION_TEXTURE, 
-			VertexFormat.DrawMode.QUADS, 
-			1536, 
+			VertexFormats.POSITION_TEXTURE,
+			VertexFormat.DrawMode.QUADS,
+			1536,
 			RenderLayer.MultiPhaseParameters.builder()
 				.program(RenderPhase.DIRECT_ENTITY_GLINT_PROGRAM)
 				.texture(new RenderPhase.Texture(texture, true, false))

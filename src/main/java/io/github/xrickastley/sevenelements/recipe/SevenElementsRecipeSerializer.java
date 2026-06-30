@@ -1,6 +1,7 @@
 package io.github.xrickastley.sevenelements.recipe;
 
 import io.github.xrickastley.sevenelements.SevenElements;
+
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeSerializer;
 import net.minecraft.registry.Registries;

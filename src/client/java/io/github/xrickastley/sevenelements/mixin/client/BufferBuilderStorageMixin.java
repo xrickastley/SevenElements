@@ -74,7 +74,7 @@ public class BufferBuilderStorageMixin {
 	@SafeVarargs
 	private static BiConsumer<Identifier, Consumer<RenderLayer>> sevenelements$mapMultipleRenderLayers(final Function<Identifier, RenderLayer>... renderLayerFunctions) {
 		return (id, consumer) -> {
-			for (final Function<Identifier, RenderLayer> fn : renderLayerFunctions) 
+			for (final Function<Identifier, RenderLayer> fn : renderLayerFunctions)
 				consumer.accept(fn.apply(id));
 		};
 	}

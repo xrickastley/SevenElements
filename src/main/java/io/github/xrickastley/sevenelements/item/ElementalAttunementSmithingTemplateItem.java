@@ -17,6 +17,7 @@ import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.registry.SevenElementsBlockTags;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.TextHelper;
+
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.loot.v3.LootTableEvents;
 import net.minecraft.entity.Entity;
@@ -45,7 +46,7 @@ import net.minecraft.world.dimension.DimensionTypes;
 
 public class ElementalAttunementSmithingTemplateItem extends Item {
 	private static final Map<RegistryKey<LootTable>, LootPool.Builder> MODIFIED_LOOT_POOLS = new HashMap<>();
-	
+
 	public static final AttunementPityCounterReference PYRO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
 		Element.PYRO,
 		SevenElements.identifier("pyro_attunement"),
@@ -54,7 +55,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 		0.25,
 		() -> new ItemStack(SevenElementsItems.PYRO_ATTUNEMENT_SMITHING_TEMPLATE)
 	);
-	
+
 	public static final AttunementPityCounterReference HYDRO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
 		Element.HYDRO,
 		SevenElements.identifier("hydro_attunement"),
@@ -63,7 +64,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 		0.25,
 		() -> new ItemStack(SevenElementsItems.HYDRO_ATTUNEMENT_SMITHING_TEMPLATE)
 	);
-	
+
 	public static final AttunementPityCounterReference ANEMO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
 		Element.ANEMO,
 		SevenElements.identifier("anemo_attunement"),
@@ -72,7 +73,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 		0.25,
 		() -> new ItemStack(SevenElementsItems.ANEMO_ATTUNEMENT_SMITHING_TEMPLATE)
 	);
-	
+
 	public static final AttunementPityCounterReference ELECTRO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
 		Element.ELECTRO,
 		SevenElements.identifier("electro_attunement"),
@@ -81,7 +82,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 		50,
 		() -> new ItemStack(SevenElementsItems.ELECTRO_ATTUNEMENT_SMITHING_TEMPLATE)
 	);
-	
+
 	public static final AttunementPityCounterReference DENDRO_ATTUNEMENT_PITY = new AttunementPityCounterReference(
 		Element.DENDRO,
 		SevenElements.identifier("dendro_attunement"),
@@ -271,7 +272,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 	@ApiStatus.Internal
 	public static record AttunementPityCounterReference(Element attunement, Identifier counter, double baseChance, int pityStart, double chancePerPity, Supplier<ItemStack> reward) {
 		public boolean roll(PlayerEntity player) {
-			if (!(player instanceof final ServerPlayerEntity serverPlayer)) 
+			if (!(player instanceof final ServerPlayerEntity serverPlayer))
 				return false;
 
 			if (!serverPlayer.getInventory().containsAny(Set.of(SevenElementsItems.ELEMENTAL_ATTUNEMENT_SMITHING_TEMPLATE)))
@@ -284,7 +285,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 			if (component.getOwner().getWorld().getRandom().nextDouble() < component.getChanceFromPityCounter(counter, baseChance / 100, pityStart, chancePerPity / 100)) {
 				component.resetPityCounter(counter);
 				this.giveReward(serverPlayer);
-				
+
 				return true;
 			} else return false;
 		}
@@ -299,7 +300,7 @@ public class ElementalAttunementSmithingTemplateItem extends Item {
 			SevenElementsCriteria.PERFORM_ATTUNEMENT.trigger(serverPlayer, attunement);
 
 			serverPlayer.getInventory().remove(Functions.withArgument(ItemStack::isOf, SevenElementsItems.ELEMENTAL_ATTUNEMENT_SMITHING_TEMPLATE), 1, serverPlayer.playerScreenHandler.getCraftingInput());
-			
+
 			final ItemStack reward = this.reward.get();
 
 			if (serverPlayer.getInventory().insertStack(reward)) {

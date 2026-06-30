@@ -1,12 +1,14 @@
 package io.github.xrickastley.sevenelements.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import io.github.xrickastley.sevenelements.annotation.mixin.Local;
-import net.minecraft.item.ItemStack;
+
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+
+import io.github.xrickastley.sevenelements.annotation.mixin.Local;
 
 import net.minecraft.item.Item;
-import org.spongepowered.asm.mixin.injection.At;
+import net.minecraft.item.ItemStack;
 
 @Mixin(Item.class)
 public class ItemMixin {

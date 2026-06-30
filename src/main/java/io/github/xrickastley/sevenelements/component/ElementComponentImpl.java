@@ -341,7 +341,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		if (tickedElements > 0) this.removeConsumedElements();
 
-		if (this.crystallizeShield != null) 
+		if (this.crystallizeShield != null)
 			crystallizeShield.tick();
 
 		this.freezeDecayHandler.tick(appliedElements.anyMatch(a -> a.getElement() == Element.FREEZE));
@@ -568,7 +568,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		return baseChance + Math.max(pity - pityStart, 0) * chancePerPity;
 	}
-	
+
 
 
 	private class CrystallizeShield {
@@ -588,7 +588,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		private float reduce(ElementalDamageSource source, float amount) {
 			final double shieldStrength = 1 + (ElementComponentImpl.this.owner.getAttributeValue(SevenElementsAttributes.SHIELD_STRENGTH) / 100);
-			// final double shieldStrength = 1 + 
+			// final double shieldStrength = 1 +
 			final double elementBonus = this.element == Element.GEO
 				? 1.5 // 150% "effectiveness"
 				: source.getElementalApplication().getElement() == this.element

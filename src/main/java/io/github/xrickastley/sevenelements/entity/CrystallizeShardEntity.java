@@ -16,6 +16,7 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
+
 import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;

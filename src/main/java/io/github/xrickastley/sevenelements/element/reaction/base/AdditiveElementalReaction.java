@@ -3,13 +3,14 @@ package io.github.xrickastley.sevenelements.element.reaction.base;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
-import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction.Settings;
+import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
-public non-sealed abstract class AdditiveElementalReaction 
+public non-sealed abstract class AdditiveElementalReaction
 	extends ElementalReaction
 	implements DamageModifyingReaction
 {

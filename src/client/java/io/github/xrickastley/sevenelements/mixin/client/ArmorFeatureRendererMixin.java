@@ -40,13 +40,13 @@ public abstract class ArmorFeatureRendererMixin<T extends LivingEntity, M extend
 			original.call(instance, matrices, vertexConsumers, light, model);
 		} else {
 			model.render(
-				matrices, 
+				matrices,
 				vertexConsumers.getBuffer(
 					ElementGlintRenderer.ARMOR_ENTITY_GLINT.getLayer(
 						itemStack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT).element()
 					)
 				),
-				light, 
+				light,
 				OverlayTexture.DEFAULT_UV
 			);
 		}

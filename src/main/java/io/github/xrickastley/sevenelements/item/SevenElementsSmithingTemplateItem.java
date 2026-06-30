@@ -5,6 +5,7 @@ import java.util.List;
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.mixin.SmithingTemplateItemAccessor;
+
 import net.minecraft.item.SmithingTemplateItem;
 import net.minecraft.resource.featuretoggle.FeatureFlag;
 import net.minecraft.text.Text;

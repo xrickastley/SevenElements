@@ -37,7 +37,7 @@ public final class Util {
 
 		final StackTraceElement caller = stackTrace[offset];
 
-		return caller.getClassName().equals(className) 
+		return caller.getClassName().equals(className)
 			&& (method == null || caller.getMethodName().equals(method));
 	}
 

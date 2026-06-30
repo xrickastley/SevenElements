@@ -7,8 +7,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -30,8 +28,8 @@ import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReactions;
-import io.github.xrickastley.sevenelements.element.reaction.base.DamageModifyingReaction;
 import io.github.xrickastley.sevenelements.element.reaction.base.DamageModifyingReaction.Phase;
+import io.github.xrickastley.sevenelements.element.reaction.base.DamageModifyingReaction;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.interfaces.ILivingEntity;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
@@ -45,9 +43,11 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.DamageTypeTags;
 import net.minecraft.util.Pair;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 @Mixin(value = LivingEntity.class, priority = Integer.MIN_VALUE)
@@ -189,9 +189,9 @@ public abstract class LivingEntityMixin
 	private float applyDMGModifiers(float amount, @Local(argsOnly = true) DamageSource source) {
 		// do **not** apply an element **if** DMG cannot be applied.
 		if (
-			this.isInvulnerableTo(source) 
-			|| this.getWorld().isClient 
-			|| this.isDead() 
+			this.isInvulnerableTo(source)
+			|| this.getWorld().isClient
+			|| this.isDead()
 			|| (source.isIn(DamageTypeTags.IS_FIRE) && this.hasStatusEffect(StatusEffects.FIRE_RESISTANCE))
 			|| this.timeUntilRegen > 10.0F && !source.isIn(DamageTypeTags.BYPASSES_COOLDOWN) && amount <= this.lastDamageTaken
 		) return amount;
@@ -214,15 +214,15 @@ public abstract class LivingEntityMixin
 
 		if (doShatter) {
 			this.sevenelements$reactions.add(ElementalReactions.SHATTER);
-			
+
 			component.setLastReaction(new Pair<>(ElementalReactions.SHATTER, this.getWorld().getTime()));
-			
+
 			ElementalReactions.SHATTER.trigger(ClassInstanceUtil.cast(this), ClassInstanceUtil.castOrNull(source.getAttacker(), LivingEntity.class));
 		}
 
 		amount = this.sevenelements$reactions
 			.stream()
-			.<DamageModifyingReaction>mapMulti((reaction, mapper) -> 
+			.<DamageModifyingReaction>mapMulti((reaction, mapper) ->
 				ClassInstanceUtil.ifInstanceOfAnd(reaction, DamageModifyingReaction.class, Functions.composePredicate(DamageModifyingReaction::getPhase, Phase.BASE::equals), mapper)
 			)
 			.reduce(amount, (acc, reaction) -> reaction.modifyDamage(source.getAttacker(), this.getWorld(), acc), Float::sum);
@@ -242,7 +242,7 @@ public abstract class LivingEntityMixin
 	private float applyReactionAmplifiers(float amount, @Local(argsOnly = true) DamageSource source) {
 		return this.sevenelements$reactions
 			.stream()
-			.<DamageModifyingReaction>mapMulti((reaction, mapper) -> 
+			.<DamageModifyingReaction>mapMulti((reaction, mapper) ->
 				// Yes this does make multiple amplifying reactions multiplicative instead of additive with each other, but that's unknown information at this point (and unused) so it won't really matter implementation wise.
 				ClassInstanceUtil.ifInstanceOfAnd(reaction, DamageModifyingReaction.class, Functions.composePredicate(DamageModifyingReaction::getPhase, Phase.TOTAL::equals), mapper)
 			)

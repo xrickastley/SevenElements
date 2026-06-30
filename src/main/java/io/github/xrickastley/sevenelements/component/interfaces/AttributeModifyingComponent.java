@@ -2,10 +2,10 @@ package io.github.xrickastley.sevenelements.component.interfaces;
 
 import com.google.common.collect.HashMultimap;
 
-import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
-
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
+
+import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.component.type.AttributeModifiersComponent;
@@ -20,12 +20,12 @@ import net.minecraft.registry.entry.RegistryEntry;
  *
  * This allows other data components than the {@link AttributeModifiersComponent} to easily apply
  * attribute modifiers to entities holding an item stack with their data component. <br> <br>
- * 
- * Note that modifiers may <b>not</b>, under any circumstances, be <i>too</i> dynamic or 
- * conditional, i.e. give the entity an attribute modifier <b>if</b> they're flying; attribute 
+ *
+ * Note that modifiers may <b>not</b>, under any circumstances, be <i>too</i> dynamic or
+ * conditional, i.e. give the entity an attribute modifier <b>if</b> they're flying; attribute
  * modifiers are calculated <b>only</b> when the stack in the attribute modifier slot changes. To
- * avoid unintentional errors when making conditional modifiers, the returned modifier <b>must 
- * always</b> be the same for the stack until it changes. 
+ * avoid unintentional errors when making conditional modifiers, the returned modifier <b>must
+ * always</b> be the same for the stack until it changes.
  */
 public interface AttributeModifyingComponent {
 	public HashMultimap<RegistryEntry<EntityAttribute>, EntityAttributeModifier> getModifiers(ItemStack stack, AttributeModifierSlot slot);
@@ -52,7 +52,7 @@ public interface AttributeModifyingComponent {
 		return stack
 			.getComponents()
 			.stream()
-			.<AttributeModifyingComponent>mapMulti((component, mapper) -> 
+			.<AttributeModifyingComponent>mapMulti((component, mapper) ->
 				ClassInstanceUtil.ifInstanceOf(component.value(), AttributeModifyingComponent.class, mapper::accept)
 			)
 			.map(amc -> amc.getModifiers(stack, slot));

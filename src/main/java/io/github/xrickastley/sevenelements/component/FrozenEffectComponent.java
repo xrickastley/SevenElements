@@ -11,8 +11,8 @@ import io.github.xrickastley.sevenelements.SevenElements;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPose;
 
-public sealed interface FrozenEffectComponent 
-	extends AutoSyncedComponent, ClientTickingComponent, ServerTickingComponent 
+public sealed interface FrozenEffectComponent
+	extends AutoSyncedComponent, ClientTickingComponent, ServerTickingComponent
 	permits FrozenEffectComponentImpl
 {
 	public static final ComponentKey<FrozenEffectComponent> KEY = ComponentRegistry.getOrCreate(SevenElements.identifier("frozen_effect"), FrozenEffectComponent.class);

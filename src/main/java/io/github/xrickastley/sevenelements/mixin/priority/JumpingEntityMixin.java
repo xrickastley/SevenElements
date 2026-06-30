@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;

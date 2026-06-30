@@ -69,8 +69,8 @@ public abstract class ItemStackMixin implements ComponentHolder, IItemStack {
 		final @Nullable ElementalInfusionComponent component = this.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 
 		if (
-			component == null 
-			|| !component.hasElementalInfusion() 
+			component == null
+			|| !component.hasElementalInfusion()
 			|| Util.isCalledBy(ItemStack.class, "sevenelements$getTrueName", 1)
 		) return original;
 

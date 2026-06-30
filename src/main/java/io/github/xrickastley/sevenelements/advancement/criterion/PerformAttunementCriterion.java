@@ -1,12 +1,13 @@
 package io.github.xrickastley.sevenelements.advancement.criterion;
 
-import java.util.Optional;
-
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import java.util.Optional;
+
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.util.Functions;
+
 import net.minecraft.advancement.criterion.AbstractCriterion;
 import net.minecraft.predicate.entity.EntityPredicate;
 import net.minecraft.predicate.entity.LootContextPredicate;

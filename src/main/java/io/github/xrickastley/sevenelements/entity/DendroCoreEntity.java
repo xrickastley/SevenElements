@@ -291,7 +291,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			if (target instanceof DendroCoreEntity) continue;
 
 			final ElementalDamageSource source = this.createDamageSource(target, recentOwner);
-			final float damageMultiplier = this.owners.contains(target.getUuid()) ? 0.02f : 1f;	
+			final float damageMultiplier = this.owners.contains(target.getUuid()) ? 0.02f : 1f;
 
 			target.damage(source, damage * damageMultiplier);
 		}

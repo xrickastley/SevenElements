@@ -1,6 +1,7 @@
 package io.github.xrickastley.sevenelements.component.interfaces;
 
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
+
 import net.minecraft.text.Text;
 
 /**
@@ -8,7 +9,7 @@ import net.minecraft.text.Text;
  * {@link ElementalInfusionComponent} <br> <br>
  *
  * This component interface actually doesn't do much, only handling appending the special icons
- * to modified infusions when the item's name is needed. 
+ * to modified infusions when the item's name is needed.
  */
 public interface ElementModifyingComponent {
 	/**
@@ -19,7 +20,7 @@ public interface ElementModifyingComponent {
 	/**
 	 * {@return whether this {@code ElementModifyingComponent} should modify the provided
 	 * {@link ElementalInfusionComponent}}
-	 * 
+	 *
 	 * @param infusion The elemental infusion component to be modified.
 	 */
 	default boolean shouldModify(ElementalInfusionComponent infusion) {

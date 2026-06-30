@@ -1,13 +1,6 @@
 package io.github.xrickastley.sevenelements.mixin;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-
-import net.minecraft.block.AbstractFireBlock;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -17,6 +10,13 @@ import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
+
+import net.minecraft.block.AbstractFireBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 @Mixin(AbstractFireBlock.class)
 public class AbstractFireBlockMixin {
