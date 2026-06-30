@@ -157,7 +157,7 @@
 
 	"item.seven-elements.smithing_template.elemental_attunement.additions_slot_description": "Add Elemental Rune",
 	"item.seven-elements.smithing_template.elemental_attunement.applies_to": "Equipment",
-	"item.seven-elements.smithing_template.elemental_attunement.base_slot_description": "Add a piece of armor, a weapon or a tool",
+	"item.seven-elements.smithing_template.elemental_attunement.base_slot_description": "Add a piece of armor or a weapon",
 	"item.seven-elements.smithing_template.elemental_attunement.ingredients": "Elemental Rune",
 
 	"elemental_attunement.seven-elements.pyro": "Pyro Elemental Attunement",
@@ -215,4 +215,4 @@
 	"advancements.seven-elements.freeze.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Cryo by freezing.",
 	"advancements.seven-elements.the_wrath_of_the_rock.title": "The Wrath of the Rock",
 	"advancements.seven-elements.the_wrath_of_the_rock.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Pyro by staying in lava while in the Nether."
-} 
+}
