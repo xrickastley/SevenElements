@@ -12,8 +12,6 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 
 public class SevenElementsSmithingTemplateItem extends SmithingTemplateItem {
-	private static final Identifier EMPTY_SLOT_RUNE_TEXTURE = SevenElements.identifier("item/empty_slot_rune");
-
 	private static final Text ELEMENTAL_ATTUNEMENT_APPLIES_TO_TEXT = Text.translatable(
 			Util.createTranslationKey("item", SevenElements.identifier("smithing_template.elemental_attunement.applies_to"))
 		)
@@ -28,6 +26,15 @@ public class SevenElementsSmithingTemplateItem extends SmithingTemplateItem {
 	private static final Text ELEMENTAL_ATTUNEMENT_ADDITIONS_SLOT_DESCRIPTION_TEXT = Text.translatable(
 		Util.createTranslationKey("item", SevenElements.identifier("smithing_template.elemental_attunement.additions_slot_description"))
 	);
+	private static final Identifier EMPTY_ARMOR_SLOT_HELMET_TEXTURE = SmithingTemplateItemAccessor.getEmptyArmorSlotHelmetTexture();
+	private static final Identifier EMPTY_ARMOR_SLOT_CHESTPLATE_TEXTURE = SmithingTemplateItemAccessor.getEmptyArmorSlotChestplateTexture();
+	private static final Identifier EMPTY_ARMOR_SLOT_LEGGINGS_TEXTURE = SmithingTemplateItemAccessor.getEmptyArmorSlotLeggingsTexture();
+	private static final Identifier EMPTY_ARMOR_SLOT_BOOTS_TEXTURE = SmithingTemplateItemAccessor.getEmptyArmorSlotBootsTexture();
+	private static final Identifier EMPTY_SLOT_AXE_TEXTURE = SmithingTemplateItemAccessor.getEmptySlotAxeTexture();
+	private static final Identifier EMPTY_SLOT_SWORD_TEXTURE = SmithingTemplateItemAccessor.getEmptySlotSwordTexture();
+	private static final Identifier EMPTY_SLOT_TRIDENT_TEXTURE = SevenElements.identifier("item/empty_slot_trident");
+	private static final Identifier EMPTY_SLOT_MACE_TEXTURE = SevenElements.identifier("item/empty_slot_mace");
+	private static final Identifier EMPTY_SLOT_RUNE_TEXTURE = SevenElements.identifier("item/empty_slot_rune");
 
 	private final Element attunement;
 
@@ -46,8 +53,8 @@ public class SevenElementsSmithingTemplateItem extends SmithingTemplateItem {
 			titleText,
 			baseSlotDescriptionText,
 			additionsSlotDescriptionText,
-			SmithingTemplateItemAccessor.sevenelements$invokeGetNetheriteUpgradeEmptyBaseSlotTextures(),
-			List.of(EMPTY_SLOT_RUNE_TEXTURE),
+			SevenElementsSmithingTemplateItem.getElementalAttunementEmptyBaseSlotTextures(),
+			SevenElementsSmithingTemplateItem.getElementalAttunementEmptyAdditionsSlotTextures(),
 			requiredFeatures
 		);
 
@@ -68,5 +75,24 @@ public class SevenElementsSmithingTemplateItem extends SmithingTemplateItem {
 
 	public Element getElementalAttunement() {
 		return this.attunement;
+	}
+
+	private static List<Identifier> getElementalAttunementEmptyBaseSlotTextures() {
+		return List.of(
+			EMPTY_ARMOR_SLOT_HELMET_TEXTURE,
+			EMPTY_SLOT_SWORD_TEXTURE,
+			EMPTY_ARMOR_SLOT_CHESTPLATE_TEXTURE,
+			EMPTY_SLOT_AXE_TEXTURE,
+			EMPTY_ARMOR_SLOT_LEGGINGS_TEXTURE,
+			EMPTY_SLOT_MACE_TEXTURE,
+			EMPTY_ARMOR_SLOT_BOOTS_TEXTURE,
+			EMPTY_SLOT_TRIDENT_TEXTURE
+		);
+	}
+
+	private static List<Identifier> getElementalAttunementEmptyAdditionsSlotTextures() {
+		return List.of(
+			EMPTY_SLOT_RUNE_TEXTURE
+		);
 	}
 }
