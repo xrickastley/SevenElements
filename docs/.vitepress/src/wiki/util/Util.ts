@@ -27,7 +27,9 @@ namespace Util {
 		return obj === null || obj === undefined;
 	}
 
-	export function tryOrFallback<T>(supplier: Supplier<T>, fallback: T): T {
+	export function tryOrFallback<T>(supplier: Supplier<T>, fallback: T): T;
+	export function tryOrFallback<T, F>(supplier: Supplier<T>, fallback: F): T | F;
+	export function tryOrFallback<T, F>(supplier: Supplier<T>, fallback: F): T | F {
 		try {
 			return supplier();
 		} catch {

@@ -1,6 +1,8 @@
 <script lang="ts">
-import { cloneVNode, computed, defineComponent, h, onMounted, onUnmounted, Ref, ref, Slot, useSlots } from 'vue';
+import { cloneVNode, defineComponent, h, onMounted, onUnmounted, ref } from 'vue';
+
 import CraftingRecipe from './CraftingRecipe.vue';
+
 import Constants from '../../constants.ts';
 
 export default defineComponent({
@@ -50,7 +52,7 @@ export default defineComponent({
 					key: recipeIndex.value
 				})
 			);
-		}
+		};
 	},
 });
 </script>

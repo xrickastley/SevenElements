@@ -9,7 +9,7 @@ import Utils, { RestOrArray } from "./Util";
  * for faster and lazy evaluation of elements in an `Iterable<T>` instance, resulting in lesser
  * pointless calculations.
  * 
- * This class implements behavior similar to it's Java counterpart: `java.util.stream.Stream`.
+ * This class implements behavior similar to its Java counterpart: `java.util.stream.Stream`.
  * 
  * ## Stream Operations
  * 
@@ -83,7 +83,7 @@ import Utils, { RestOrArray } from "./Util";
  * found early, there is no point in calculating further, as the requirement for termination has
  * been already fulfilled.
  * 
- * This method works exactly like it's Array variant: {@link Array.some Array#some()}, which 
+ * This method works exactly like its Array variant: {@link Array.some Array#some()}, which 
  * terminates ahead of time when it sees an element that passes the given `predicate` early.
  */
 class Stream<T> implements Iterable<T> {
@@ -124,7 +124,7 @@ class Stream<T> implements Iterable<T> {
 	 * 
 	 * The first element of the stream at position `0` will be the provided seed. For elements
 	 * after, denoted as position `n`, have their value as the result of iteratively applying the
-	 * `next` function to the `seed` and it's resulting value `n - 1` times.
+	 * `next` function to the `seed` and its resulting value `n - 1` times.
 	 * 
 	 * @param seed The initial element.
 	 * @param next The function to be applied to the previous element to produce a new element.

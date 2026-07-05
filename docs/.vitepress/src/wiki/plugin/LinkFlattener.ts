@@ -4,6 +4,7 @@ import path from "path";
 
 import ExtendedCollection from "../util/ExtendedCollection";
 import Stream from "../util/Stream";
+import Util from "../util/Util";
 
 class LinkFlattener {
 	public constructor(basePath: string)
@@ -14,38 +15,49 @@ class LinkFlattener {
 		this.include = include;
 		this.preserve = preserve;
 		this.mappings = new Map();
+		this.reverseMappings = new ExtendedCollection<string, string[]>();
 
 		const docFiles = fg.sync(this.include, { cwd: this.path, onlyFiles: true })
 			.filter(file => file.endsWith(".md"));
 
-		const reverseMappings = new ExtendedCollection<string, string[]>();
-
 		for (const filePath of docFiles)
-			this.createMapping(filePath, reverseMappings);
+			this.createMapping(filePath);
 
-		for (const reverseMapping of reverseMappings.filter(mapped => mapped.length > 1)) {
-			console.warn(`[WARNING] Unable to flatten ${reverseMapping[1].map(path => `"${path}"`).join(", ")}, all links resolve to single path: "${reverseMapping[0]}"!`);
-
-			reverseMapping[1].forEach(mapping => this.mappings.set(mapping, mapping));
-		}
+		this.clearDuplicateMappings();
 	}
 
 	private readonly path: string;
 	private readonly include: string[];
 	private readonly preserve: string[];
 	private readonly mappings: Map<string, string>;
+	private readonly reverseMappings: ExtendedCollection<string, string[]>;
 
-	private createMapping(filePath: string, reverseMappings: ExtendedCollection<string, string[]>) {
+	private createMapping(filePath: string) {
 		const longestStrip = Stream.of(this.preserve)
 			.filter(strip => filePath.startsWith(strip))
 			.max(strip => strip.length) ?? ``;
 
-		const mappedPath = path.normalize(longestStrip ? path.relative(path.dirname(longestStrip), filePath) : path.basename(filePath)).replaceAll("\\", "/");
+		let mappedPath = longestStrip
+			? path.relative(path.dirname(longestStrip), filePath)
+			: path.basename(filePath);
 
-		this.setMapping(filePath, mappedPath, reverseMappings);
+		if (/\s+/g.test(path.basename(mappedPath)))
+			mappedPath = path.join(path.dirname(mappedPath), path.basename(mappedPath).replace(/\s+/g, "_"));
+
+		mappedPath = path.normalize(mappedPath).replaceAll("\\", "/");
+
+		this.setMapping(filePath, mappedPath, this.reverseMappings);
 
 		if (path.basename(filePath) === "index.md")
-			this.setMapping(path.dirname(filePath) === "." ? "" : path.dirname(filePath), mappedPath, reverseMappings);
+			this.setMapping(path.dirname(filePath) === "." ? "" : path.dirname(filePath), mappedPath, this.reverseMappings);
+	}
+
+	public clearDuplicateMappings() {
+		for (const reverseMapping of this.reverseMappings.filter(mapped => mapped.length > 1)) {
+			console.warn(`[WARNING] Unable to flatten ${reverseMapping[1].map(path => `"${path}"`).join(", ")}, all links resolve to single path: "${reverseMapping[0]}"!`);
+
+			reverseMapping[1].forEach(mapping => this.mappings.set(mapping, mapping));
+		}
 	}
 
 	private setMapping(filePath: string, mappedPath: string, reverseMappings: ExtendedCollection<string, string[]>) {
@@ -60,6 +72,7 @@ class LinkFlattener {
 
 	public getLinkMapping(original: string, includeExtension: boolean = false): string {
 		original = original.replaceAll("\\", "/");
+		original = original.replaceAll("%20", " ");
 
 		if (original.startsWith("/"))
 			original = original.slice(original.indexOf("/") + 1);
@@ -83,6 +96,23 @@ class LinkFlattener {
 			mapping += ".md";
 
 		return mapping;
+	}
+
+	public getOrAttemptLinkMapping(original: string, includeExtension: boolean = false): string {
+		const storedMapping = Util.tryOrFallback(() => this.getLinkMapping(original, includeExtension), null);
+
+		if (storedMapping)
+			return storedMapping;
+
+		this.createMapping(original);
+		this.clearDuplicateMappings();
+
+		const createdMapping = Util.tryOrCatch(() => this.getLinkMapping(original, includeExtension));
+
+		if (createdMapping.getLeft())
+			return createdMapping.getLeft() as string;
+		else
+			throw createdMapping.getRight();
 	}
 
 	private lastIndexOf(string: string, searchString: string, position: number) {

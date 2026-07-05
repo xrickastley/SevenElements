@@ -14,6 +14,8 @@ import Tooltip from "./components/Tooltip.vue";
 import Treeview from "./components/Treeview.vue";
 import TreeviewEntry from "./components/TreeviewEntry.vue";
 
+import ImgMode from "./components/img-mode.vue";
+
 export default {
 	extends: DefaultTheme,
 	Layout: () => {
@@ -28,5 +30,7 @@ export default {
 		app.component("Tooltip", Tooltip);
 		app.component("Treeview", Treeview);
 		app.component("TreeviewEntry", TreeviewEntry);
+
+		app.component(`img-mode`, ImgMode);
 	}
 } satisfies Theme;
