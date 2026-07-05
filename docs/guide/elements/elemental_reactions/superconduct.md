@@ -1,6 +1,5 @@
 ---
 outline: 1
-next: false
 prev:
     text: 'Elemental Reactions'
     link: '/guide/elements/elemental_reactions'

@@ -1,7 +1,3 @@
----
-next: false
----
-
 # Internal Cooldown
 
 **Internal Cooldown**, commonly abbreviated as **ICD**, is a game mechanic that regulates how often an ability can apply an element onto an entity.

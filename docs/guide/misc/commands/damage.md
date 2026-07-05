@@ -1,13 +1,12 @@
 ---
 outline: false
-next: false
 prev:
     text: 'Commands'
-    link: '/guide/misc/commands'
+    link: '/guide/misc/Commands'
 ---
 
-# `/damage`
-<sup>&nbsp; &nbsp; < [Commands](../commands.md)</sup>
+# /damage
+<sup>&nbsp; &nbsp; < [Commands](../Commands.md)</sup>
 
 The `/damage` command can be used to apply a set amount of damage to specified entities.
 
@@ -17,7 +16,7 @@ Original: [`/damage` (Minecraft Wiki)](https://minecraft.wiki/Commands/damage)
 This command is originally a Minecraft command, and has been modified by **Seven Elements** to add extra functionality to it. You can find the new subcommands below.
 :::
 
-### Syntax:
+## Syntax
 
 ```mcfunction
 damage <target> <amount> [<damageType>] [element <element> <gaugeUnits> <tag> <type>] [by <entity>] [from <cause>]

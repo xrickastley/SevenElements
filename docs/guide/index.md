@@ -1,14 +1,9 @@
----
-outline: false
-next: false
----
-
 <p align="center">
 	<img width="50%" height="50%" src="/header.png" alt="logo + mod name"/> <br> <br>
 	<b>Seven Elements</b> is a Minecraft mod that brings Genshin Impact's Elemental Combat System to Minecraft with the goal of staying faithful to the systems that hold it such as the <a href="https://genshin-impact.fandom.com/wiki/Elemental_Gauge_Theory">Elemental Gauge Theory</a> and <a href="https://genshin-impact.fandom.com/wiki/Internal_Cooldown">Internal Cooldown</a> while ensuring a smooth integration within Minecraft.
 </p>
 
-<br>
+<hr>
 
 <p align="center">Tired of standard vanilla combat? Ever wanted to spice things up a little bit?</p>
 
@@ -18,7 +13,7 @@ next: false
 
 ## Getting Started
 
-It all starts with the [Infusion Table](./workstations/infusion_table.md).
+It all starts with the [Infusion Table](./blocks/infusion_table.md).
 
 <p align="center">
 	<img width="50%" height="50%" src="./media/display/infusion_table.png" alt="The infusion table"/>
@@ -34,9 +29,9 @@ To begin, pick a item you want to be infused with and click **Infuse**. This wil
 
 Once done, the selected item will be **permanently** infused with a random Element, and will now deal damage of that element!
 
-Experiment with various elemental combos and master the elements to your advantage!
+Experiment with various elemental combinations and master the elements to your advantage!
 
-Alternatively, click [here](./elements/the_seven_elements.md) for a guide to the elements!
+Alternatively, click [here](./elements/the_seven_elements.md) for a more direct guide to the elements!
 
 <hr>
 
@@ -49,6 +44,7 @@ Alternatively, click [here](./elements/the_seven_elements.md) for a guide to the
 <p align="center">
 	<b>Copyright © 2025 xrickastley (_xRickAstley). All Rights Reserved.</b>
 </p>
-<p align="center">
-  <b>Special thanks to YaBoiYin (yin_n_yang) on Discord for the entity models!</b>
-</p>
+
+#### Special thanks to:
+- YaBoiYin (yin_n_yang @ Discord) - Entity Models
+- [LW-Arqiu1shz](https://github.com/LW-Arqiu1shz) - ZH-CN localization

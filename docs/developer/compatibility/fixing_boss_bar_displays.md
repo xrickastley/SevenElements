@@ -1,7 +1,3 @@
----
-next: false
----
-
 # Fixing Boss Bar Displays
 
 Bosses may have elements applied to them. Since they could be big (ex. Ender Dragon), it's quite hard to see the element currently applied on them. For a better experience, the currently applied elements on bosses are displayed at the bottom of the boss bar.

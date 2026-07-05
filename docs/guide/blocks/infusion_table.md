@@ -1,10 +1,6 @@
----
-prev: false
-next: false
----
-
 # Infusion Table
-<hr>
+
+<br>
 
 <div style="display: flex; align-items: flex-start; gap: 1rem;">
 	<div style="flex: 1;">The <b>Infusion Table</b> is a block used to spend <a href="https://minecraft.wiki/w/Experience">experience</a> to apply an elemental infusion to items!</div>
@@ -19,9 +15,20 @@ An infusion table requires an [iron pickaxe](https://minecraft.wiki/w/Pickaxe) o
 
 ### Crafting
 
-![Infusion Table Crafting Recipe](../media/blocks/infusion_table_recipe.gif)
+<br>
 
-**for Minecraft versions that don't have the specified items, i.e. [Wind Charge](https://minecraft.wiki/w/Wind_Charge) on 1.20.1, it is excluded from the recipe.*
+<CraftingRecipe>
+	<Ingredient id="minecraft:wind_charge" slotId=1></Ingredient>
+	<Ingredient id="minecraft:lightning_rod" slotId=2></Ingredient>
+	<Ingredient tag="minecraft:leaves" slotId=3></Ingredient>
+	<Ingredient id="minecraft:water_bucket" slotId=4></Ingredient>
+	<Ingredient id="minecraft:block_of_gold" slotId=5></Ingredient>
+	<Ingredient id="minecraft:blue_ice" slotId=6></Ingredient>
+	<Ingredient id="minecraft:fire_charge" slotId=7></Ingredient>
+	<Ingredient id="minecraft:smooth_stone_slab" slotId=8></Ingredient>
+	<Ingredient tag="minecraft:stone_crafting_materials" slotId=9></Ingredient>
+	<Ingredient id="seven-elements:infusion_table" slotId=0></Ingredient>
+</CraftingRecipe>
 
 ## Usage
 

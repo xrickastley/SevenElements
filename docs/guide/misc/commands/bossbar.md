@@ -1,13 +1,12 @@
 ---
 outline: false
-next: false
 prev:
     text: 'Commands'
-    link: '/guide/misc/commands'
+    link: '/guide/misc/Commands'
 ---
 
-# `/bossbar`
-<sup>&nbsp; &nbsp; < [Commands](../commands.md)</sup>
+# /bossbar
+<sup>&nbsp; &nbsp; < [Commands](../Commands.md)</sup>
 
 The `/bossbar` command can be used to create, modify and list bossbars.
 
@@ -17,7 +16,7 @@ Original: [`/bossbar` (Minecraft Wiki)](https://minecraft.wiki/Commands/bossbar)
 This command is originally a Minecraft command, and has been modified by **Seven Elements** to add extra functionality to it. You can find the new subcommands below.
 :::
 
-### Syntax:
+## Syntax
 
 ```mcfunction
 bossbar set <id> entity <entity>

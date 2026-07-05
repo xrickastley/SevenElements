@@ -1,8 +1,3 @@
----
-prev: false
-next: false
----
-
 # Depending on Seven Elements
 
 This page will guide you on how to add Seven Elements as a dependency to your project.

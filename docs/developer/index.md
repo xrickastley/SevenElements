@@ -1,8 +1,3 @@
----
-outline: false
-next: false
----
-
 <p align="center">
 	<img width="50%" height="50%" src="/header.png" alt="logo + mod name"/> <br> <br>
 	<b>Seven Elements</b> is a Minecraft mod that brings Genshin Impact's Elemental Combat System to Minecraft with the goal of staying faithful to the systems that hold it such as the <a href="https://genshin-impact.fandom.com/wiki/Elemental_Gauge_Theory">Elemental Gauge Theory</a> and <a href="https://genshin-impact.fandom.com/wiki/Internal_Cooldown">Internal Cooldown</a> while ensuring a smooth integration within Minecraft.
@@ -28,7 +23,4 @@ When developing a mod, if the documentation page you need does not exist, try lo
 </p>
 <p align="center">
 	<b>Copyright © 2025 xrickastley (_xRickAstley). All Rights Reserved.</b>
-</p>
-<p align="center">
-  <b>Special thanks to YaBoiYin (yin_n_yang) on Discord for the entity models!</b>
 </p>

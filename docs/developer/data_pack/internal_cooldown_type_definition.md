@@ -1,6 +1,5 @@
 ---
 outline: 2
-prev: false
 ---
 
 # Internal Cooldown Type definition
@@ -10,26 +9,17 @@ prev: false
 This excludes the default types: `seven-elements:default` and `seven-elements:none`, which **cannot** be overriden by data-driven means.
 
 ::: tip
-Before you create one, consider trying `seven-elements:default` for your use case. After all, elements should be applied strategically, not "spammingly".
+Before you create one, consider trying `seven-elements:default` for your use case. After all, elements should be applied strategically.
 :::
 
 ## JSON format
 
-<div class="treeview">
-	<ul>
-		<li>
-			<span title="NBT Compound / JSON Object" class="nbt-sprite sprite" style="background-position:-48px -16px;background-size:64px auto;height:16px;width:16px"></span>: The root object.
-			<ul>
-				<li>
-					<span title="Int" class="nbt-sprite sprite" style="background-position:-48px 0px;background-size:64px auto;height:16px;width:16px"></span> <b>gauge_sequence</b>: Value between 0 and 2,147,483,647 (inclusive) — Controls the amount of time in ticks before an Element can be applied again.
-				</li>
-				<li>
-					<span title="Int" class="nbt-sprite sprite" style="background-position:-48px 0px;background-size:64px auto;height:16px;width:16px"></span> <b>reset_interval</b>: Value between 0 and 2,147,483,647 (inclusive) — Controls the amount of hits needed before an Element can be applied <b>within</b> the reset interval's timer.
-				</li>
-			</ul>
-		</li>
-	</ul>
-</div>
+<Treeview>
+	<TreeviewEntry type="compound" description="The root object">
+		<TreeviewEntry type="int" title="gauge_sequence" description="(Optional) Value between 0 and 2,147,483,647 (inclusive) — Controls the amount of time in ticks before an Element can be applied again."/>
+		<TreeviewEntry type="int" title="reset_interval" description="(Optional) Value between 0 and 2,147,483,647 (inclusive) — Controls the amount of hits needed before an Element can be applied within the reset interval's timer."/>
+	</TreeviewEntry>
+</Treeview>
 
 ### Examples
 

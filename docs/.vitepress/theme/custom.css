@@ -5,13 +5,29 @@
 	font-display: swap;
 }
 
+@font-face {
+	font-family: "GNU Unifont";
+	src: url("unifont-17.0.05.otf") format("opentype");
+	font-weight: normal;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Mojangles";
+	src: url("Mojangles.woff") format("woff");
+	font-weight: normal;
+	font-display: swap;
+}
+
 :root {
 	--vp-c-brand-1: var(--vp-c-green-1);
 	--vp-c-brand-2: var(--vp-c-green-2);
 	--vp-c-brand-3: var(--vp-c-green-3);
 	--vp-c-brand-soft: var(--vp-c-green-soft);
 	--vp-home-hero-image-background-image: none;
-	--vp-home-hero-image-filter: none;      
+	--vp-home-hero-image-filter: none;
+	
+	--minecraft-font: "Mojangles", "GNU Unifont", sans-serif
 }
 
 :root {
@@ -25,6 +41,8 @@
 h1, h2, h3, h4, h5, h6 {
 	font-family: "Genshin", var(--vp-font-family-base);
 }
+
+
 
 .pyro {
 	color: #fda96f;
@@ -58,67 +76,77 @@ h1, h2, h3, h4, h5, h6 {
 	color: #f3d862;
 }
 
-.physical {
+.physical { 
 	color: #ffffff;
 }
 
-.nbt-sprite {
-	background-image: url(https://minecraft.wiki/images/Nbtsheet.png);
+
+
+.black {
+	color: #000000;
 }
 
-.nbt-sprite .root {
-	background-position: -48px -16px;
-	background-size: 64px auto;
-	height: 16px;
-	width: 16px;
+.dark_blue {
+	color: #0000aa;
 }
 
-.sprite {
-    display: inline-block;
-    vertical-align: text-top;
-    height: 16px;
-    width: 16px;
-    background-repeat: no-repeat;
+.dark_green {
+	color: #00aa00;
 }
 
-.treeview {
-	margin-top: 0.3em;
-    display: flow-root;
-	font-size: 16px;
+.dark_aqua {
+	color: #00aaaa;
 }
 
-.treeview ul, .treeview li {
-    margin: 0 !important;
-    padding: 0;
-    list-style-type: none;
-    list-style-image: none;
+.dark_red {
+	color: #aa0000;
 }
 
-.treeview li li {
-    position: relative;
-    padding-left: 13px;
-    margin-left: 7px !important;
-    border-left: 1px solid #636363;
+.dark_purple {
+	color: #aa00aa;
 }
 
-.treeview li li::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: -1px;
-    width: 11px;
-    height: 11px;
-    border-bottom: 1px solid #636363;
+.gold {
+	color: #ffaa00;
 }
 
-.treeview li li:last-child:not(.treeview-continue)::before {
-    border-left: 1px solid #636363;
-    width: 10px;
+.gray {
+	color: #aaaaaa;
 }
 
-.treeview li li:last-child:not(.treeview-continue) {
-    border-color: transparent;
+.dark_gray {
+	color: #555555;
 }
+
+.blue {
+	color: #5555FF;
+}
+
+.green {
+	color: #55FF55;
+}
+
+.aqua {
+	color: #55FFFF;
+}
+
+.red {
+	color: #FF5555;
+}
+
+.light_purple {
+	color: #FF55FF;
+}
+
+.yellow {
+	color: #FFFF55;
+}
+
+.white {
+	color: #FFFFFF;
+}
+
+
 
 mjx-container[jax="SVG"][display="true"] {
 	overflow: visible !important;
@@ -131,4 +159,49 @@ mjx-container[jax="SVG"][display="true"] {
 div.center-table table {
 	width: 100% !important;
 	table-layout: auto;
+}
+
+.pad-vertical {
+	padding: 1.5em 0em;
+}
+
+.grid {
+	display: grid;
+    justify-items: center;
+    align-items: start;
+	text-align: center;
+    grid-template-columns: 1fr 1fr;
+	row-gap: 1em;
+}	
+
+.small-images img {
+	width: 75%;
+	height: auto;
+	margin: 0 auto;
+	display: block;
+	align-self: center;
+	text-align: center;
+}
+
+.smaller-images img {
+	width: 50%;
+	height: auto;
+	margin: 0 auto;
+	display: block;
+	align-self: center;
+	text-align: center;
+}
+
+.smallest-images img {
+	width: 25%;
+	height: auto;
+	margin: 0 auto;
+	display: block;
+	align-self: center;
+	text-align: center;
+}
+
+.unifont {
+    font-family: "GNU Unifont", monospace;
+    font-synthesis: none;
 }

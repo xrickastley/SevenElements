@@ -1,7 +1,3 @@
----
-prev: false
----
-
 # Disabling Entity Elements
 
 Elements are only applied to inheritors of `LivingEntity`, as only living entities are able to take damage. As such, they are also the only entities who can have the Elements applied to them.

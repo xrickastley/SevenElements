@@ -10,118 +10,81 @@ Data pack or mod developers who may wish to add a compatibility layer between th
 
 Contains entity types that innately deal **1U** <span class="pyro">**Pyro**</span> with the tag `seven-elements:mob_damage` if no previous elemental infusion exists or the damage being dealt is **Physical**.
 
-<div class="treeview">
-	<ul>
-		<li>
-			<span title="NBT List / JSON Array" class="nbt-sprite sprite" style="background-position:-32px -32px;background-size:64px auto;height:16px;width:16px"></span> <b>#seven-elements:deals_pyro_damage</b> <i>(2 values)</i>
-			<ul>
-				<li><code>minecraft:blaze</code></li>
-				<li><code>minecraft:magma_cube</code></li>
-			</ul>
-		</li>
-	</ul>
-</div>
+<Treeview>
+	<TreeviewEntry type="list" title="#seven-elements:deals_pyro_damage" keyCount=true>
+		<code>minecraft:blaze</code>
+		<code>minecraft:magma_cube</code>
+	</TreeviewEntry>
+</Treeview>
 
 ### deals_hydro_damage
 
 Contains entity types that innately deal **1U** <span class="hydro">**Hydro**</span> with the tag `seven-elements:mob_damage` if no previous elemental infusion exists or the damage being dealt is **Physical**.
 
-<div class="treeview">
-	<ul>
-		<li>
-			<span title="NBT List / JSON Array" class="nbt-sprite sprite" style="background-position:-32px -32px;background-size:64px auto;height:16px;width:16px"></span> <b>#seven-elements:deals_hydro_damage</b> <i>(4 values)</i>
-			<ul>
-				<li><code>minecraft:axolotl</code></li>
-				<li><code>minecraft:elder_guardian</code></li>
-				<li><code>minecraft:drowned</code></li>
-				<li><code>minecraft:guardian</code></li>
-			</ul>
-		</li>
-	</ul>
-</div>
+<Treeview>
+	<TreeviewEntry type="list" title="#seven-elements:deals_hydro_damage" keyCount=true>
+		<code>minecraft:axolotl</code>
+		<code>minecraft:elder_guardian</code>
+		<code>minecraft:drowned</code>
+		<code>minecraft:guardian</code>
+	</TreeviewEntry>
+</Treeview>
 
 ### deals_anemo_damage
 
 Contains entity types that innately deal **1U** <span class="anemo">**Anemo**</span> with the tag `seven-elements:mob_damage` if no previous elemental infusion exists or the damage being dealt is **Physical**.
 
-<div class="treeview">
-	<ul>
-		<li>
-			<span title="NBT List / JSON Array" class="nbt-sprite sprite" style="background-position:-32px -32px;background-size:64px auto;height:16px;width:16px"></span> <b>#seven-elements:deals_anemo_damage</b> <i>(1 value)</i>
-			<ul>
-				<li><code>minecraft:breeze</code></li>
-			</ul>
-		</li>
-	</ul>
-</div>
+<Treeview>
+	<TreeviewEntry type="list" title="#seven-elements:deals_anemo_damage" keyCount=true>
+		<code>minecraft:breeze</code>
+	</TreeviewEntry>
+</Treeview>
 
 ### deals_electro_damage
 
 Contains entity types that innately deal **1U** <span class="electro">**Electro**</span> with the tag `seven-elements:mob_damage` if no previous elemental infusion exists or the damage being dealt is **Physical**.
 
-<div class="treeview">
-	<ul>
-		<li>
-			<span title="NBT List / JSON Array" class="nbt-sprite sprite" style="background-position:-32px -32px;background-size:64px auto;height:16px;width:16px"></span> <b>#seven-elements:deals_electro_damage</b> <i>(no values)</i>
-		</li>
-	</ul>
-</div>
+<Treeview>
+	<TreeviewEntry type="list" title="#seven-elements:deals_electro_damage" keyCount=true />
+</Treeview>
 
 ### deals_dendro_damage
 
 Contains entity types that innately deal **1U** <span class="dendro">**Dendro**</span> with the tag `seven-elements:mob_damage` if no previous elemental infusion exists or the damage being dealt is **Physical**.
 
-<div class="treeview">
-	<ul>
-		<li>
-			<span title="NBT List / JSON Array" class="nbt-sprite sprite" style="background-position:-32px -32px;background-size:64px auto;height:16px;width:16px"></span> <b>#seven-elements:deals_dendro_damage</b> <i>(no values)</i>
-		</li>
-	</ul>
-</div>
+<Treeview>
+	<TreeviewEntry type="list" title="#seven-elements:deals_dendro_damage" keyCount=true />
+</Treeview>
 
 ### deals_cryo_damage
 
 Contains entity types that innately deal **1U** <span class="cryo">**Cryo**</span> with the tag `seven-elements:mob_damage` if no previous elemental infusion exists or the damage being dealt is **Physical**.
 
-<div class="treeview">
-	<ul>
-		<li>
-			<span title="NBT List / JSON Array" class="nbt-sprite sprite" style="background-position:-32px -32px;background-size:64px auto;height:16px;width:16px"></span> <b>#seven-elements:deals_cryo_damage</b> <i>(2 values)</i>
-			<ul>
-				<li><code>minecraft:snow_golem</code></li>
-				<li><code>minecraft:stray</code></li>
-			</ul>
-		</li>
-	</ul>
-</div>
+<Treeview>
+	<TreeviewEntry type="list" title="#seven-elements:deals_cryo_damage" keyCount=true>
+		<code>minecraft:snow_golem</code>
+		<code>minecraft:stray</code>
+	</TreeviewEntry>
+</Treeview>
 
 ### deals_geo_damage
 
 Contains entity types that innately deal **1U** <span class="geo">**geo**</span> with the tag `seven-elements:mob_damage` if no previous elemental infusion exists or the damage being dealt is **Physical**.
 
-<div class="treeview">
-	<ul>
-		<li>
-			<span title="NBT List / JSON Array" class="nbt-sprite sprite" style="background-position:-32px -32px;background-size:64px auto;height:16px;width:16px"></span> <b>#seven-elements:deals_geo_damage</b> <i>(no values)</i>
-		</li>
-	</ul>
-</div>
+<Treeview>
+	<TreeviewEntry type="list" title="#seven-elements:deals_geo_damage" keyCount=true />
+</Treeview>
 
 ### ignored_targets
 
 Contains entity types that are ignored as targets for both the [Hyperbloom](../../guide/elements/elemental_reactions/bloom.md#hyperbloom) Elemental Reaction and the [Elemental Shard](../../guide/elements/elemental_reactions/crystallize.md#elemental-shard).
 
-Please consider only using this tag for entities that shouldn't be valid targets of these mechanics.
+Please consider only using this tag for entities that **truly** shouldn't be valid targets of these mechanics.
 
-<div class="treeview">
-	<ul>
-		<li>
-			<span title="NBT List / JSON Array" class="nbt-sprite sprite" style="background-position:-32px -32px;background-size:64px auto;height:16px;width:16px"></span> <b>#seven-elements:ignored_targets</b> <i>(3 values)</i>
-			<ul>
-				<li><code>minecraft:armor_stand</code></li>
-				<li><code>seven-elements:crystallize_shard</code></li>
-				<li><code>seven-elements:dendro_core</code></li>
-			</ul>
-		</li>
-	</ul>
-</div>
+<Treeview>
+	<TreeviewEntry type="list" title="#seven-elements:ignored_targets" keyCount=true>
+		<code>minecraft:armor_stand</code>
+		<code>seven-elements:crystallize_shard</code>
+		<code>seven-elements:dendro_core</code>
+	</TreeviewEntry>
+</Treeview>

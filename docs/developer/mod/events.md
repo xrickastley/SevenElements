@@ -1,7 +1,3 @@
----
-next: false
----
-
 # Events
 
 Seven Elements provides Events using the Fabric API that your mod can listen to.

@@ -1,0 +1,26 @@
+{
+	"compilerOptions": {
+		"target": "ES2022",
+		"moduleResolution": "bundler",
+		"module": "esnext",
+		"declaration": true,
+		"strict": false,
+		"resolveJsonModule": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"sourceMap": true,
+		"noImplicitAny": false,
+		"noImplicitOverride": true,
+		"forceConsistentCasingInFileNames": true,
+		"noPropertyAccessFromIndexSignature": false,
+		"strictNullChecks": true,
+		"allowImportingTsExtensions": true,
+		"noEmit": true,
+		"types": [
+			"vite/client"
+		]
+	},
+	"include": [
+		"docs/.vitepress/**/*"
+	]
+}

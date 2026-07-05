@@ -1,17 +1,16 @@
 ---
 outline: false
-next: false
 prev:
     text: 'Commands'
-    link: '/guide/misc/commands'
+    link: '/guide/misc/Commands'
 ---
 
-# `/element`
-<sup>&nbsp; &nbsp; < [Commands](../commands.md)</sup>
+# /element
+<sup>&nbsp; &nbsp; < [Commands](../Commands.md)</sup>
 
-The `/element` command can be used to check, add, remove and modify elements for an living entity, as well as apply elements infusions to items like the [Infusion Table](../../workstations/infusion_table.md).
+The `/element` command can be used to check, add, remove and modify elements for an living entity, as well as apply elements infusions to items like the [Infusion Table](../../blocks/infusion_table.md).
 
-### Syntax:
+## Syntax
 
 ```mcfunction
 element apply <target> <element> <gaugeUnits>
@@ -106,7 +105,7 @@ Queries the specified element of the specified target.
 element infusion apply <target> random
 ```
 
-Applies a random permanent elemental infusion to the target's held item, like using an [Infusion Table](../../workstations/infusion_table.md)
+Applies a random permanent elemental infusion to the target's held item, like using an [Infusion Table](../../blocks/infusion_table.md)
 
 - `<target>` being a target selector, username, or UUID; can only select one at a time.
     - (e.g: `@a[limit = 1]`, `@p`, `_xRickAstley`, `b1b981b6-4081-4abe-afd8-e79269c6a339`)

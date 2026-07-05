@@ -18,4 +18,4 @@ The following is a list of game rules you may edit for a world.
 | `pyro_from_fire`				| Whether standing in fire applies <span class="pyro">**Pyro**</span>		| `true`		| double	| Elements	|
 | `hydro_from_water`			| Whether touching water applies <span class="hydro">**Hydro**</span>		| `true`		| double	| Elements	|
 | `electro_from_lightning`		| Whether [Lightning Bolts](https://minecraft.wiki/w/Thunderstorm#Lightning) apply <span class="electro">**Electro**</span>	| `true`		| boolean	| Elements	|
-| `infusion_table`				| Whether the [Infusion Table](../workstations/infusion_table.md) is enabled.									| `true`		| boolean	| Elements	|
+| `infusion_table`				| Whether the [Infusion Table](../blocks/infusion_table.md) is enabled.									| `true`		| boolean	| Elements	|

@@ -1,16 +1,12 @@
----
-prev: false
----
-
 # Fixing Elemental Infusions
 
 ::: tip
 This compatibility layer only applies to mods! If you are a data pack developer, you may freely skip this page.
 :::
 
-From [Indirect Elemental Damage](../../guide/elements/elemental_combat.md#indirect-elemental-damage), you may have seen that supported items that shoot projectiles like the [Bow](https://minecraft.wiki/w/Bow), [Crossbow](https://minecraft.wiki/w/Crossbow) and [Trident](https://minecraft.wiki/w/Trident) will have their damage be infused with the same Element as the item.
+From [Indirect Elemental Damage](../../guide/elements/elemental_combat.md#Indirect-Elemental-Damage), you may have seen that supported items that shoot projectiles like the [Bow](https://minecraft.wiki/w/Bow), [Crossbow](https://minecraft.wiki/w/Crossbow) and [Trident](https://minecraft.wiki/w/Trident) will have their damage be infused with the same Element as the item.
 
-From [Direct Elemental Damage](../../guide/elements/elemental_combat.md#direct-elemental-damage), you may have seen that if damage is dealt directly, it would be infused with the same Element as the item.
+From [Direct Elemental Damage](../../guide/elements/elemental_combat.md#Direct-Elemental-Damage), you may have seen that if damage is dealt directly, it would be infused with the same Element as the item.
 
 If your mod adds an item that does this, does "direct" *indirect* or "indirect" *direct* elemental damage, you can test this by infusing the item with an Element and dealing damage with it.
 

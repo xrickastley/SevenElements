@@ -1,6 +1,5 @@
 ---
 outline: [1, 2]
-next: false
 prev:
     text: 'Elemental Reactions'
     link: '/guide/elements/elemental_reactions'
@@ -12,6 +11,8 @@ prev:
 Frozen is the [Elemental Reaction](../elemental_reactions.md) triggered when <span class="cryo">**Cryo**</span> is applied onto an entity already affected by <span class="hydro">**Hydro**</span> or vice versa.
 
 Frozen by itself deals **no damage**. Instead, it applies a <span class="cryo">**Freeze**</span> aura and the "Frozen" Status Effect onto the target for a certain period of time.
+
+While the "Frozen" Status Effect is active, the entity cannot place or break blocks, move normally, attack, or use (right-click) items.
 
 When an entity with the <span class="cryo">**Freeze**</span> aura receives <span class="geo">**Geo DMG**</span> or is hit by a [Heavy Weapon](../../../developer/data_pack/item_tag.md#heavy_weapon), the [**Shatter**](#shatter) reaction is triggered.
 
