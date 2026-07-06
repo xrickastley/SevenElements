@@ -34,7 +34,7 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 	private final Element shieldElement;
 
 	AbstractCrystallizeElementalReaction(Settings settings) {
-		this(settings, settings.getAuraElement());
+		this(settings.setType(Type.SHIELD), settings.getAuraElement());
 	}
 
 	AbstractCrystallizeElementalReaction(Settings settings, Element shieldElement) {
