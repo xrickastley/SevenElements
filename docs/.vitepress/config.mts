@@ -1,6 +1,7 @@
 
 import { fileURLToPath } from "url";
 import { HeadConfig, defineConfig } from "vitepress";
+import markdownItContainer from "markdown-it-container";
 import path from "path";
 
 import { flattenPages } from "./src/wiki/plugin/flattenPages";
@@ -80,6 +81,7 @@ export default defineConfig({
 			"/developer/": [
 				{ text: "Getting Started", link: linkFlattener.getLinkMapping("/developer/index.md") },
 				{ text: "Dependency", link: linkFlattener.getLinkMapping("/developer/dependency.md") },
+				{ text: "Changelog", link: linkFlattener.getLinkMapping("/developer/changelog.md") },
 				{
 					text: "Data pack",
 					items: [
@@ -151,6 +153,17 @@ export default defineConfig({
 		],
 		anchor: {
 			slugify
+		},
+		config(md) {
+			md.use(markdownItContainer, "shift", {
+				render(tokens, idx) {
+					const token = tokens[idx];
+
+					return token.nesting === 1
+						? `<div class="shift-box">\n`
+						: `</div>`;
+				}
+			} satisfies markdownItContainer.ContainerOpts);
 		}
 	},
 	vite: {
