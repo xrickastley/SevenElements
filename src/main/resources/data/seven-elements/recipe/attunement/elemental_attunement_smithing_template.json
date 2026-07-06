@@ -3,7 +3,7 @@
 	"category": "misc",
 	"key": {
 		"#": {
-			"item": "minecraft:cobblestone"
+			"item": "minecraft:diamond"
 		},
 		"R": {
 			"item": "seven-elements:elemental_rune"
