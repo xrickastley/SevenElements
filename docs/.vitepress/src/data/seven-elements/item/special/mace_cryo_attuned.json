@@ -1,0 +1,15 @@
+{
+	"name": "Mace <span class=\"cryo\">[Cryo ✨]</span>",
+	"link": "https://minecraft.wiki/w/Mace",
+	"icon": "seven-elements:textures/item/special/mace_cryo_attuned.gif",
+	"inventory_icon": "seven-elements:textures/item/special/mace_cryo_attuned.gif",
+	"rarity": "EPIC",
+	"attribute_modifiers": [
+		{ "id": "minecraft:base_attack_damage", "attribute": "minecraft:attack_damage", "slot": "MAINHAND", "amount": 6, "operation": "ADD_VALUE" },
+		{ "id": "minecraft:base_attack_speed", "attribute": "minecraft:attack_speed", "slot": "MAINHAND", "amount": 0.6, "operation": "ADD_VALUE" },
+		{ "id": "seven-elements:elemental_attunement", "attribute": "seven-elements:cryo_dmg_bonus", "slot": "MAINHAND", "amount": 0.5, "operation": "ADD_MULTIPLIED_BASE" }
+	],
+	"lore": [
+		"§7Elemental Attunement: <span class=\"cryo\">[Cryo]</span>"
+	]
+}

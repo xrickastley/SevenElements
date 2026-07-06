@@ -28,7 +28,21 @@ export default defineConfig({
 		],
 
 		search: {
-			provider: "local"
+			provider: "local",
+			options: {
+				miniSearch: {
+					searchOptions: {
+						fuzzy: 0.2,
+						boostDocument(_documentId, _term, storedFields) {
+							return storedFields
+								&& Array.isArray(storedFields.titles)
+								&& !storedFields?.titles.length
+								? 2
+								: 1;
+						}
+					}
+				}
+			}
 		},
 
 		logo: "/SevenElements/wiki/icon.png",
@@ -70,6 +84,7 @@ export default defineConfig({
 					text: "Data pack",
 					items: [
 						{ text: "ICD Type definition", link: linkFlattener.getLinkMapping("/wiki/data_pack/Internal Cooldown Type definition") },
+						{ text: "Block tag", link: linkFlattener.getLinkMapping("/wiki/tags/Block tag") },
 						{ text: "Damage type tag", link: linkFlattener.getLinkMapping("/wiki/tags/Damage type tag") },
 						{ text: "Entity type tag", link: linkFlattener.getLinkMapping("/wiki/tags/Entity type tag") },
 						{ text: "Item tag", link: linkFlattener.getLinkMapping("/wiki/tags/Item tag") }
@@ -161,5 +176,6 @@ export default defineConfig({
 
 		return config;
 	},
-	cleanUrls: true
+	cleanUrls: true,
+	ignoreDeadLinks: true
 });

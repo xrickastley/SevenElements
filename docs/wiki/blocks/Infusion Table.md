@@ -1,11 +1,11 @@
 # Infusion Table
 
-<br>
-
-<div style="display: flex; align-items: flex-start; gap: 1rem;">
-	<div style="flex: 1;">The <b>Infusion Table</b> is a block used to spend <a href="https://minecraft.wiki/w/Experience">experience</a> to apply an elemental infusion to items!</div>
-	<img src="../.media/blocks/infusion_table.png" alt="..." style="width: 150px;">
-</div>
+<p style="display: flex; align-items: flex-start; gap: 1.5em;">
+	<span style="flex: 1;">
+		An <b>infusion table</b> is a <a href="https://minecraft.wiki/w/Block">block</a> used to spend <a href="https://minecraft.wiki/w/Experience">experience</a> to apply an elemental infusion to items.
+	</span>
+	<img-texture src="seven-elements:textures/item/infusion_table.png" style="width: 160px;" />
+</p>
 
 ## Obtaining
 
@@ -18,30 +18,24 @@ An infusion table requires an [iron pickaxe](https://minecraft.wiki/w/Pickaxe) o
 <br>
 
 <CraftingRecipe>
-	<Ingredient id="minecraft:wind_charge" slotId=1></Ingredient>
-	<Ingredient id="minecraft:lightning_rod" slotId=2></Ingredient>
-	<Ingredient tag="minecraft:leaves" slotId=3></Ingredient>
-	<Ingredient id="minecraft:water_bucket" slotId=4></Ingredient>
+	<Ingredient id="seven-elements:elemental_rune" slotId=2></Ingredient>
 	<Ingredient id="minecraft:block_of_gold" slotId=5></Ingredient>
-	<Ingredient id="minecraft:blue_ice" slotId=6></Ingredient>
-	<Ingredient id="minecraft:fire_charge" slotId=7></Ingredient>
 	<Ingredient id="minecraft:smooth_stone_slab" slotId=8></Ingredient>
-	<Ingredient tag="minecraft:stone_crafting_materials" slotId=9></Ingredient>
 	<Ingredient id="seven-elements:infusion_table" slotId=0></Ingredient>
 </CraftingRecipe>
 
 ## Usage
 
-<div style="display: flex; align-items: flex-start; gap: 1rem;">
-	<p style="flex: 1;">
+<p style="display: flex; align-items: flex-start; gap: 1.25em;">
+	<span style="flex: 1;">
 		An item can be infused by using an infusion table and placing the item in the centered input slot. Once an item is placed, the "Infuse" button is shown. <br> <br>
 		To successfully infuse an item, the player must have at least 10 levels of experience. Otherwise, the Infuse button will appear disabled, and cannot be used. <br> <br>
 		The infusion table is 1 <sup>1</sup>/<sub>4</sub> blocks high.
-	</p>
+	</span>
 	<img src="../.media/blocks/infusion_table_interface.png" alt="Infusion Table Interface" style="width: 200px;">
-</div>
+</p>
 
-### Elemental Infusion
+### Elemental infusion
 
 &nbsp; &nbsp; *Main page: [Elemental Combat/Elemental Infusion](../../guide/elements/Elemental%20Combat.md#elemental-infusion)*
 
@@ -51,7 +45,7 @@ If an item is already infused with an element, it is replaced with another rando
 
 The elemental infusion on the item will also have a random selected amount of corresponding [Elemental Gauge Units](../../guide/elements/Elemental%20Combat.md) from either 1.0, 1.5 or 2.0.
 
-### Removing Elemental Infusions
+### Removing elemental infusions
 
 With a [Grindstone](https://minecraft.wiki/w/Grindstone), an item with an Elemental Infusion may be stripped of its Elemental Infusion.
 

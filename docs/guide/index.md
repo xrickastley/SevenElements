@@ -33,6 +33,8 @@ Experiment with various elemental combinations and master the elements to your a
 
 Alternatively, click [here](./elements/The%20Seven%20Elements.md) for a more direct guide to the elements!
 
+You can also search the wiki for what you need, either via the searchbar or `Ctrl` + `K`.
+
 <hr>
 
 <p align="center">

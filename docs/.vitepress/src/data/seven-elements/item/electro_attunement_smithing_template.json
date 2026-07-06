@@ -1,6 +1,15 @@
 {
-	"name": "Electro Attunement Smithing Template",
+	"name": "Smithing Template",
 	"link": "Electro_Attunement_Smithing_Template",
 	"icon": "seven-elements:textures/item/electro_attunement_smithing_template.png",
-	"inventory_icon": "seven-elements:textures/item/electro_attunement_smithing_template.png"
+	"inventory_icon": "seven-elements:textures/item/electro_attunement_smithing_template.png",
+	"rarity": "RARE",
+	"lore": [
+		"§7Electro Elemental Attunement",
+		"",
+		"§7Applies to:",
+		"§9&nbsp;Equipment",
+		"§7Ingredients:",
+		"§9&nbsp;Elemental Rune"
+	]
 }

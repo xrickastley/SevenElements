@@ -70,6 +70,7 @@ const result = computed(() =>
 	background-image: url("./crafting_menu.png");
 	width: 300px;
 	height: 132px;
+	image-rendering: pixelated;
 }
 
 .input {
@@ -78,8 +79,8 @@ const result = computed(() =>
 	grid-auto-rows: 32px;
 	gap: 4px;
 	position: absolute;
-	top: 14px;
 	left: 36px;
+	top: 13px;
 	padding: 0;
 	margin: 0;
 	width: fit-content;
@@ -87,8 +88,8 @@ const result = computed(() =>
 
 .result {
 	position: absolute;
-	bottom: 50px;
 	left: 224px;
+	top: 50px;
 	padding: 0;
 	margin: 0;
 	width: fit-content;

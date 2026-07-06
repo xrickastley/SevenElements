@@ -9,11 +9,11 @@ export default defineComponent({
 	setup(_, { slots }) {
 		const children = slots.default?.() ?? [];
 
-		if (children.some(child => child.type !== CraftingRecipe))
-			throw new Error("The children of <MultiCraftingRecipe> must all be of <CraftingRecipe>!");
-
 		if (children.length < 2)
-			throw new Error("The children of <MultiCraftingRecipe> must be at least 2 <CraftingRecipe>!");
+			throw new Error("The children of <MultiRecipe> must be at least 2 recipes!");
+
+		if (children.some(child => child.type !== children[0].type))
+			throw new Error("The children of <MultiRecipe> must all be of the same type!");
 
 		let recipeSwitcher: ReturnType<typeof setInterval>;
 

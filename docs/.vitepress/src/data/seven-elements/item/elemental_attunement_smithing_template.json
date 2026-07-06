@@ -2,5 +2,6 @@
 	"name": "Elemental Attunement Smithing Template",
 	"link": "Elemental_Attunement_Smithing_Template",
 	"icon": "seven-elements:textures/item/elemental_attunement_smithing_template.png",
-	"inventory_icon": "seven-elements:textures/item/elemental_attunement_smithing_template.png"
+	"inventory_icon": "seven-elements:textures/item/elemental_attunement_smithing_template.png",
+	"rarity": "RARE"
 }

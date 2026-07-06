@@ -34,7 +34,9 @@ export function slugifyMarkdown(slugify: Function<string, string>): Plugin {
 			if (!filePath.endsWith(".md"))
 				return;
 
-			return code.replaceAll(/href=\\"(.*?)\\"/gm, (match, href: string) => {
+			return code.replaceAll(/href(?:(?:=\\"(.*?)\\")|(?::\s*"(.*?)"))/gm, (match, href1: string, href2: string) => {
+				const href = href1 ?? href2;
+
 				if (!(href.startsWith(".") || href.startsWith("#")) || !href.includes("#"))
 					return match;
 

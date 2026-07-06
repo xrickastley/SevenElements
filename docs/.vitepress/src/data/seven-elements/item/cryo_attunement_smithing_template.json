@@ -1,6 +1,15 @@
 {
-	"name": "Cryo Attunement Smithing Template",
+	"name": "Smithing Template",
 	"link": "Cryo_Attunement_Smithing_Template",
 	"icon": "seven-elements:textures/item/cryo_attunement_smithing_template.png",
-	"inventory_icon": "seven-elements:textures/item/cryo_attunement_smithing_template.png"
+	"inventory_icon": "seven-elements:textures/item/cryo_attunement_smithing_template.png",
+	"rarity": "RARE",
+	"lore": [
+		"§7Cryo Elemental Attunement",
+		"",
+		"§7Applies to:",
+		"§9&nbsp;Equipment",
+		"§7Ingredients:",
+		"§9&nbsp;Elemental Rune"
+	]
 }

@@ -40,7 +40,7 @@ For non-supported items like the [Snowball](https://minecraft.wiki/w/Snowball) a
 
 ## Elemental Damage Sources
 
-Some damage sources like `minecraft:freeze` (from [Powdered Snow's Freeze DMG](https://minecraft.wiki/w/Powder_Snow#Freezing)), [`minecraft:drown`](https://minecraft.wiki/w/Damage#Drowning), and [`minecraft:explosion`](https://minecraft.wiki/w/Explosion#Damage) have innate Elemental infusions tied to them.
+Some damage sources like `minecraft:freeze` (from [Powder Snow's Freeze DMG](https://minecraft.wiki/w/Powder_Snow#Freezing)), [`minecraft:drown`](https://minecraft.wiki/w/Damage#Drowning), and [`minecraft:explosion`](https://minecraft.wiki/w/Explosion#Damage) have innate Elemental infusions tied to them.
 
 Like [Mob Elemental Damage](#mob-elemental-damage), these elemental damage instances apply **1 [gauge unit](./Elemental%20Gauge%20Theory.md)** of their corresponding Element, given that the element can be an [Aura Element](./Elemental%20Gauge%20Theory.md#elemental_auras_and_the_aura_tax).
 
@@ -112,6 +112,8 @@ The amount of <span class="pyro">**Pyro DMG**</span> an entity takes with and wi
 <span class="pyro">**Pyro DMG**</span> is only **not** modified by [Fire Resistance](https://minecraft.wiki/w/Fire_Resistance) and/or [Fire Protection](https://minecraft.wiki/w/Fire_Protection) **if** its damage type tag is not of `minecraft:is_fire`.
 
 In simpler terms, <span class="pyro">**Pyro DMG**</span> works like vanilla Minecraft damage; only modified by [Fire Resistance](https://minecraft.wiki/w/Fire_Resistance) and/or [Fire Protection](https://minecraft.wiki/w/Fire_Protection) when the [damage type **tag**](https://minecraft.wiki/w/Damage_type_tag_(Java_Edition)) used is modified by it. Otherwise, it is completely unaffected.
+
+In addition to this, Pyro-infused projectiles will apply Fire-related effects, such as setting [mobs](https://minecraft.wiki/w/Mob) on fire, lighting [campfires](https://minecraft.wiki/w/Campfire) and [TNT](https://minecraft.wiki/w/TNT), as well as explode a [Minecart with TNT](https://minecraft.wiki/w/Minecart_with_TNT), like a bow enchanted with [Flame](https://minecraft.wiki/w/Flame). This is toggled with the `seven-elements:pyro_does_fire_effects` game rule.
 
 ### Damage Type Tags
 

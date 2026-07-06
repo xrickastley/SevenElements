@@ -27,7 +27,7 @@
 	--vp-home-hero-image-background-image: none;
 	--vp-home-hero-image-filter: none;
 	--vp-home-hero-name-color: #000000;
-	
+
 	--minecraft-font: "Mojangles", "GNU Unifont", sans-serif;
 }
 
@@ -102,7 +102,7 @@ h1, h2, h3, h4, h5, h6 {
 	color: #f3d862;
 }
 
-.physical { 
+.physical {
 	color: #ffffff;
 }
 
@@ -178,10 +178,6 @@ mjx-container[jax="SVG"][display="true"] {
 	overflow: visible !important;
 }
 
-.jump:not(:hover) {
-	text-decoration: none;
-}
-
 div.center-table table {
 	width: 100% !important;
 	table-layout: auto;
@@ -198,7 +194,13 @@ div.center-table table {
 	text-align: center;
 	grid-template-columns: 1fr 1fr;
 	row-gap: 1em;
-}	
+}
+
+.nowrap {
+	display: inline-flex;
+	white-space: nowrap;
+	align-items: center;
+}
 
 
 

@@ -4,6 +4,18 @@ An item [tag](https://minecraft.wiki/w/Tag_(Java_Edition)) is a group of [items]
 
 ## List of tags
 
+### attunable_items
+
+Controls what items are attunable with an aligned [Elemental Attunement Smithing Template](../items/Elemental%20Attunement%20Smithing%20Template.md).
+
+<Treeview>
+	<TreeviewEntry type="list" title="#seven-elements:attunable_items" keyCount=true>
+		<code><a href="https://minecraft.wiki/w/Item_tag_(Java_Edition)#enchantable/armor">#minecraft:#enchantable/armor</a></code>
+		<code><a href="https://minecraft.wiki/w/Item_tag_(Java_Edition)#enchantable/weapon">#minecraft:#enchantable/weapon</a></code>
+		<code>minecraft:trident</code>
+	</TreeviewEntry>
+</Treeview>
+
 ### heavy_weapon
 
 Controls what items are considered "Heavy Weapons", which can trigger the [Shatter](../elemental_reactions/Frozen.md#shatter) reaction without the need to deal <span class="geo">**Geo DMG**</span>.

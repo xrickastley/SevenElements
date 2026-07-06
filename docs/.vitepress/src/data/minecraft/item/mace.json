@@ -1,0 +1,11 @@
+{
+	"name": "Mace",
+	"link": "https://minecraft.wiki/w/Mace",
+	"icon": "https://minecraft.wiki/images/Mace_JE1_BE1.png",
+	"inventory_icon": "https://minecraft.wiki/images/Invicon_Mace.png",
+	"rarity": "EPIC",
+	"attribute_modifiers": [
+		{ "id": "minecraft:base_attack_damage", "attribute": "minecraft:attack_damage", "slot": "MAINHAND", "amount": 6, "operation": "ADD_VALUE" },
+		{ "id": "minecraft:base_attack_speed", "attribute": "minecraft:attack_speed", "slot": "MAINHAND", "amount": 0.6, "operation": "ADD_VALUE" }
+	]
+}

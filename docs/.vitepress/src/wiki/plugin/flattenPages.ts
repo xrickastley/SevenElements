@@ -16,9 +16,12 @@ export function flattenPages(flattener: LinkFlattener): Plugin {
 
 			const remappedRelativeFrom = flattener.getLinkMapping(path.relative(flattener.getBasePath(), filePath), true);
 
-			return code.replaceAll(/href=\\"(.*?)\\"/gm, (match, href: string) => {
-				if (!href.startsWith("."))
+			return code.replaceAll(/href(?:(?:=\\"(.*?)\\")|(?::\s*"(.*?)"))/gm, (match, href1: string, href2: string) => {
+				const href = href1 ?? href2;
+
+				if (!href || !href.startsWith("."))
 					return match;
+
 
 				const link = href.substring(0, href.includes("#") ? href.lastIndexOf("#") : undefined);
 
