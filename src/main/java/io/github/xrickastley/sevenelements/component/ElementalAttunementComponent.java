@@ -2,16 +2,20 @@ package io.github.xrickastley.sevenelements.component;
 
 import com.google.common.collect.HashMultimap;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 
 import java.util.function.Consumer;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
+import io.github.xrickastley.sevenelements.component.interfaces.ElementModifyingComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes.ModifierType;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
+import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.TextHelper;
+
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
@@ -27,14 +31,24 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringIdentifiable;
 
-public record ElementalAttunementComponent(Element element) implements AttributeModifyingComponent, TooltipAppender {
-	public static final Codec<ElementalAttunementComponent> CODEC = Element.CODEC.xmap(ElementalAttunementComponent::new, ElementalAttunementComponent::element);
+public record ElementalAttunementComponent(Element element) implements AttributeModifyingComponent, ElementModifyingComponent, TooltipAppender {
+	public static final Codec<ElementalAttunementComponent> CODEC = Element.CODEC.comapFlatMap(ElementalAttunementComponent::validate, ElementalAttunementComponent::element);
+
+	private static DataResult<ElementalAttunementComponent> validate(Element element) {
+		if (ElementalAttunementComponent.isValidForAttunement(element))
+			return DataResult.success(new ElementalAttunementComponent(element));
+		else
+			return DataResult.error(() -> "Not a valid Element for attunement: " + element);
+	}
 
 	public static void applyAttunement(ItemStack stack, Element element) {
 		stack.set(
 			SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT,
 			new ElementalAttunementComponent(element)
 		);
+
+		if (ClassInstanceUtil.mapOrNull(stack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT), ElementalInfusionComponent::getElement) != element)
+			stack.remove(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 	}
 
 	public static boolean removeAttunement(ItemStack stack) {
@@ -47,6 +61,11 @@ public record ElementalAttunementComponent(Element element) implements Attribute
 
 	public static boolean hasAttunement(ItemStack stack) {
 		return stack.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT);
+	}
+
+	public static boolean isValidForAttunement(Element element) {
+		return element != Element.PHYSICAL
+			&& SevenElementsAttributes.hasElementalAttribute(element);
 	}
 
 	@Override
@@ -69,6 +88,16 @@ public record ElementalAttunementComponent(Element element) implements Attribute
 
 	public EntityAttributeModifier createAttributeModifier(StringIdentifiable suffix, double value, EntityAttributeModifier.Operation operation) {
 		return new EntityAttributeModifier(this.getModifierId(suffix), value, operation);
+	}
+
+	@Override
+	public Text getSymbol() {
+		return Text.translatable("symbols.seven-elements.elemental_infusion.elemental_attunment");
+	}
+
+	@Override
+	public boolean shouldModify(ElementalInfusionComponent infusion) {
+		return infusion.getElement() == this.element;
 	}
 
 	@Override

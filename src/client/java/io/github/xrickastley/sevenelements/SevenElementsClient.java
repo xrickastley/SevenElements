@@ -22,7 +22,10 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityModelLayerRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
+import net.minecraft.text.Text;
 
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
@@ -61,4 +64,14 @@ public class SevenElementsClient implements ClientModInitializer {
 		HandledScreens.register(SevenElementsScreenHandlers.ELEMENTAL_INFUSION_SCREEN_HANDLER, ElementalInfusionScreen::new);
 	}
 
+	public void overrideSidedImpl() {
+		SevenElementsSidedImpl.WRAP_LINES = (text, width) -> {
+			final TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
+
+			return textRenderer.wrapLines(text, width)
+				.stream()
+				.<Text>map(SevenElementsClientUtil.TextRebuilder::rebuild)
+				.toList();
+		};
+	}
 }

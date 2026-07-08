@@ -1,0 +1,32 @@
+{
+	"parent": "minecraft:recipes/root",
+	"criteria": {
+		"has_elemental_rune": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": "seven-elements:elemental_rune"
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "seven-elements:infusion_table"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_elemental_rune"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"seven-elements:infusion_table"
+		]
+	}
+}

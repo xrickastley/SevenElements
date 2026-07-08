@@ -2,68 +2,64 @@ package io.github.xrickastley.sevenelements.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
-import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
+import io.github.xrickastley.sevenelements.component.interfaces.ElementModifyingComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
+import io.github.xrickastley.sevenelements.interfaces.IItemStack;
+import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
+import io.github.xrickastley.sevenelements.util.Functions;
+import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 import io.github.xrickastley.sevenelements.util.Util;
 
 import net.minecraft.component.ComponentHolder;
 import net.minecraft.component.ComponentType;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArmorItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipAppender;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.AnvilScreenHandler;
 import net.minecraft.text.Text;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Hand;
-import net.minecraft.world.World;
 
 @Mixin(ItemStack.class)
-public abstract class ItemStackMixin implements ComponentHolder {
+public abstract class ItemStackMixin implements ComponentHolder, IItemStack {
+	@Shadow
+	private <T extends TooltipAppender> void appendTooltip(ComponentType<T> componentType, Item.TooltipContext context, Consumer<Text> textConsumer, TooltipType type) { throw new AssertionError(); }
+
 	@Shadow
 	public abstract Item getItem();
 
 	@Shadow
-	private <T extends TooltipAppender> void appendTooltip(ComponentType<T> componentType, Item.TooltipContext context, Consumer<Text> textConsumer, TooltipType type) { throw new AssertionError(); }
+	public abstract Text getName();
 
-	@WrapOperation(
-		method = "use",
-		at = @At(
-			value = "INVOKE",
-			target = "Lnet/minecraft/item/Item;use(Lnet/minecraft/world/World;Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/util/ActionResult;"
-		)
-	)
-	private ActionResult frozenPreventsItemUse(Item instance, World world, PlayerEntity user, Hand hand, Operation<ActionResult> original) {
-		return user.hasStatusEffect(SevenElementsStatusEffects.FROZEN)
-			? ActionResult.FAIL
-			: original.call(instance, world, user, hand);
-	}
+	@Shadow
+	public abstract boolean hasGlint();
 
 	@ModifyReturnValue(
 		method = "getName",
@@ -72,13 +68,26 @@ public abstract class ItemStackMixin implements ComponentHolder {
 	private Text modifyName(Text original) {
 		final @Nullable ElementalInfusionComponent component = this.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 
-		if (component == null || !component.hasElementalInfusion() || Util.isCalledBy("net.minecraft.client.gui.screen.ingame.AnvilScreen", "onSlotUpdate", 1) || Util.isCalledBy(AnvilScreenHandler.class, "updateResult", 2)) return original;
+		if (
+			component == null
+			|| !component.hasElementalInfusion()
+			|| Util.isCalledBy(ItemStack.class, "sevenelements$getTrueName", 1)
+		) return original;
 
 		final Element element = component.getElement();
 
+		final String symbols = this.getComponents()
+			.stream()
+			.<ElementModifyingComponent>mapMulti((component2, mapper) ->
+				ClassInstanceUtil.ifInstanceOf(component2.value(), ElementModifyingComponent.class, mapper::accept)
+			)
+			.filter(Functions.withArgument(ElementModifyingComponent::shouldModify, component))
+			.map(emc -> " " + emc.getSymbol().getString())
+			.collect(Collectors.joining());
+
 		return Text.empty()
 			.append(original)
-			.append(TextHelper.noModifiers(TextHelper.color(" [" + element.getString() + "]", element.getDamageColor())));
+			.append(TextHelper.noModifiers(TextHelper.color(" [" + element.getString() + symbols + "]", element.getDamageColor())));
 	}
 
 	@Inject(
@@ -128,5 +137,32 @@ public abstract class ItemStackMixin implements ComponentHolder {
 		return SevenElementsAttributes.isMultiplicativeLikeAttribute(attribute)
 			? 1
 			: original;
+	}
+
+	@Unique
+	@Override
+	public final Text sevenelements$getTrueName() {
+		// Do this so that any other injects to ItemStack#getName work properly with Seven Elements.
+		return this.getName();
+	}
+
+	@Unique
+	@Override
+	public final boolean sevenelements$hasElementalGlint() {
+		return JavaScriptUtil.nullishCoalesing(this.get(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE), Boolean.TRUE)
+			&& (this.contains(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT) || this.sevenelements$hasAttunementGlint());
+	}
+
+	@Unique
+	@Override
+	public final boolean sevenelements$hasAttunementGlint() {
+		return JavaScriptUtil.nullishCoalesing(this.get(DataComponentTypes.ENCHANTMENT_GLINT_OVERRIDE), Boolean.TRUE)
+			&& this.contains(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)
+			&& (this.getItem() instanceof ArmorItem
+				|| ClassInstanceUtil.nonNullEquals(
+					ClassInstanceUtil.mapOrNull(this.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT), ElementalInfusionComponent::getElement),
+					ClassInstanceUtil.mapOrNull(this.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT), ElementalAttunementComponent::element)
+				)
+			);
 	}
 }

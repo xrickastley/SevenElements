@@ -222,12 +222,12 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
 		}
 
-	    RenderSystem.enableBlend();
-	    RenderSystem.defaultBlendFunc();
-	    RenderSystem.disableCull();
+		RenderSystem.enableBlend();
+		RenderSystem.defaultBlendFunc();
+		RenderSystem.disableCull();
 		RenderSystem.enableDepthTest();
-	    RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
-	    RenderSystem.setShaderColor(1, 1, 1, 1);
+		RenderSystem.setShader(ShaderProgramKeys.RENDERTYPE_LINES);
+		RenderSystem.setShaderColor(1, 1, 1, 1);
 
 		RenderSystem.lineWidth(6.0f);
 		BufferRenderer.drawWithGlobalProgram(buffer.end());
