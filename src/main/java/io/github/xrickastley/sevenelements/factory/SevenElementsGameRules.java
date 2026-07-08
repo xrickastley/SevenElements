@@ -54,5 +54,11 @@ public class SevenElementsGameRules {
 		GameRuleFactory.createBooleanRule(true)
 	);
 
+	public static final GameRules.Key<GameRules.BooleanRule> PYRO_DOES_FIRE_EFFECTS = GameRuleRegistry.register(
+		"pyroDoesFireEffects",
+		GameRules.Category.MISC,
+		GameRuleFactory.createBooleanRule(true)
+	);
+
 	public static void register() {}
 }

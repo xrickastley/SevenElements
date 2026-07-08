@@ -112,7 +112,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		if (this.type != Type.NORMAL) throw new IllegalStateException("This DendroCoreEntity has already been transformed! Type: " + this.type);
 
 		this.type = Type.BURGEON;
-		this.explode(3.0);
+		this.explode(ElementalReactions.BURGEON.getReactionStrength(this.getRecentOwner(), this.getWorld()));
 	}
 
 	public boolean isNormal() {
@@ -205,7 +205,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			if (this.curTicksInHitbox < DendroCoreEntity.SPRAWLING_SHOT_DELAY) return;
 
 			for (final Entity target2 : ElementalReaction.getEntitiesInAoE(target, 1.0, e -> !owners.contains(e.getUuid())))
-				target2.damage(this.createDamageSource(target), ElementalReaction.getReactionDamage(this, 3.0));
+				target2.damage(this.createDamageSource(target), ElementalReactions.HYPERBLOOM.getReactionStrength(this.getRecentOwner(), this.getWorld()));
 
 			this.remove(RemovalReason.KILLED);
 
@@ -220,7 +220,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 	@Override
 	public void kill() {
-		this.explode(2.0);
+		this.explode(ElementalReactions.DENDRO_BLOOM.getReactionStrength(this.getRecentOwner(), this.getWorld()));
 	}
 
 	@Override
@@ -250,7 +250,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		if (this.type == Type.HYPERBLOOM) this.doHyperbloom();
 
 		if (this.age >= 120 && type != Type.HYPERBLOOM) {
-			this.explode(2.0);
+			this.explode(ElementalReactions.DENDRO_BLOOM.getReactionStrength(this.getRecentOwner(), this.getWorld()));
 			this.remove(RemovalReason.KILLED);
 		}
 	}
@@ -275,7 +275,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		while (queue.peek() != null && queue.size() > 5) queue.remove().kill();
 	}
 
-	private boolean explode(final double reactionMultiplier) {
+	private boolean explode(final float damage) {
 		if (this.exploded) return false;
 
 		this.exploded = true;
@@ -288,12 +288,9 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			if (target instanceof DendroCoreEntity) continue;
 
 			final ElementalDamageSource source = this.createDamageSource(target, recentOwner);
+			final float damageMultiplier = this.owners.contains(target.getUuid()) ? 0.02f : 1f;
 
-			float damage = ElementalReaction.getReactionDamage(this, reactionMultiplier);
-
-			if (this.owners.contains(target.getUuid())) damage *= 0.02f;
-
-			target.damage(source, damage);
+			target.damage(source, damage * damageMultiplier);
 		}
 
 		this.getWorld()

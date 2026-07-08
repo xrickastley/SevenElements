@@ -14,7 +14,8 @@ public class SevenElementsSoundEvents {
 	public static final SoundEvent CRYSTALLIZE_SHIELD = register("crystallize_shield");
 	public static final SoundEvent CRYSTALLIZE_SHIELD_HIT = register("crystallize_shield.hit");
 	public static final SoundEvent CRYSTALLIZE_SHIELD_BREAK = register("crystallize_shield.break");
-	public static final SoundEvent ITEM_INFUSION = register("item_infusion");
+	public static final SoundEvent ITEM_INFUSION_APPLY = register("item_infusion.apply");
+	public static final SoundEvent ITEM_INFUSION_REMOVE = register("item_infusion.remove");
 
 	// Initializes the class upon call by SevenElements.
 	public static void register() {}

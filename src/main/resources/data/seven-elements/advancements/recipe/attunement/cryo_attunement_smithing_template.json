@@ -1,0 +1,34 @@
+{
+	"parent": "minecraft:recipes/root",
+	"criteria": {
+		"has_cryo_attunement_smithing_template": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"seven-elements:cryo_attunement_smithing_template"
+						]
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "seven-elements:attunement/cryo_attunement_smithing_template"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_cryo_attunement_smithing_template"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"seven-elements:attunement/cryo_attunement_smithing_template"
+		]
+	}
+}

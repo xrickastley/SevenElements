@@ -26,23 +26,28 @@ public class SevenElementsAttributes {
 	private static final Set<EntityAttribute> MULTIPLICATIVE_LIKE_ATTRIBUTES = new HashSet<>();
 	private static boolean registered = false;
 
-	public static final EntityAttribute PHYSICAL_DMG_BONUS = register("physical_dmg_bonus", createAttribute("Physical DMG Bonus%", 0, 0, 400));
-	public static final EntityAttribute PYRO_DMG_BONUS = register("pyro_dmg_bonus", createAttribute("Pyro DMG Bonus%", 0, 0, 400));
-	public static final EntityAttribute HYDRO_DMG_BONUS = register("hydro_dmg_bonus", createAttribute("Hydro DMG Bonus%", 0, 0, 400));
-	public static final EntityAttribute ANEMO_DMG_BONUS = register("anemo_dmg_bonus", createAttribute("Anemo DMG Bonus%", 0, 0, 400));
-	public static final EntityAttribute ELECTRO_DMG_BONUS = register("electro_dmg_bonus", createAttribute("Electro DMG Bonus%", 0, 0, 400));
-	public static final EntityAttribute DENDRO_DMG_BONUS = register("dendro_dmg_bonus", createAttribute("Dendro DMG Bonus%", 0, 0, 400));
-	public static final EntityAttribute CRYO_DMG_BONUS = register("cryo_dmg_bonus", createAttribute("Cryo DMG Bonus%", 0, 0, 400));
-	public static final EntityAttribute GEO_DMG_BONUS = register("geo_dmg_bonus", createAttribute("Geo DMG Bonus%", 0, 0, 400));
+	public static final EntityAttribute PHYSICAL_DMG_BONUS = register("physical_dmg_bonus", createAttribute("Physical DMG Bonus%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute PYRO_DMG_BONUS = register("pyro_dmg_bonus", createAttribute("Pyro DMG Bonus%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute HYDRO_DMG_BONUS = register("hydro_dmg_bonus", createAttribute("Hydro DMG Bonus%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute ANEMO_DMG_BONUS = register("anemo_dmg_bonus", createAttribute("Anemo DMG Bonus%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute ELECTRO_DMG_BONUS = register("electro_dmg_bonus", createAttribute("Electro DMG Bonus%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute DENDRO_DMG_BONUS = register("dendro_dmg_bonus", createAttribute("Dendro DMG Bonus%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute CRYO_DMG_BONUS = register("cryo_dmg_bonus", createAttribute("Cryo DMG Bonus%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute GEO_DMG_BONUS = register("geo_dmg_bonus", createAttribute("Geo DMG Bonus%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
 
-	public static final EntityAttribute PHYSICAL_RES = register("physical_res", createAttribute("Physical RES%", 0, -200, 100));
-	public static final EntityAttribute PYRO_RES = register("pyro_res", createAttribute("Pyro RES%", 0, -200, 100));
-	public static final EntityAttribute HYDRO_RES = register("hydro_res", createAttribute("Hydro RES%", 0, -200, 100));
-	public static final EntityAttribute ANEMO_RES = register("anemo_res", createAttribute("Anemo RES%", 0, -200, 100));
-	public static final EntityAttribute ELECTRO_RES = register("electro_res", createAttribute("Electro RES%", 0, -200, 100));
-	public static final EntityAttribute DENDRO_RES = register("dendro_res", createAttribute("Dendro RES%", 0, -200, 100));
-	public static final EntityAttribute CRYO_RES = register("cryo_res", createAttribute("Cryo RES%", 0, -200, 100));
-	public static final EntityAttribute GEO_RES = register("geo_res", createAttribute("Geo RES%", 0, -200, 100));
+	public static final EntityAttribute PHYSICAL_RES = register("physical_res", createAttribute("Physical RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute PYRO_RES = register("pyro_res", createAttribute("Pyro RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute HYDRO_RES = register("hydro_res", createAttribute("Hydro RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute ANEMO_RES = register("anemo_res", createAttribute("Anemo RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute ELECTRO_RES = register("electro_res", createAttribute("Electro RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute DENDRO_RES = register("dendro_res", createAttribute("Dendro RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute CRYO_RES = register("cryo_res", createAttribute("Cryo RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute GEO_RES = register("geo_res", createAttribute("Geo RES%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+
+	public static final EntityAttribute ELEMENTAL_MASTERY = register("elemental_mastery", createAttribute("Elemental Mastery", 0, 0, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute CRITICAL_RATE = register("critical_rate", createAttribute("CRIT Rate%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute CRITICAL_DAMAGE = register("critical_damage", createAttribute("CRIT DMG%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
+	public static final EntityAttribute SHIELD_STRENGTH = register("shield_strength", createAttribute("Shield Strength%", 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
 
 	public static void register() {
 		if (registered) return;
@@ -86,7 +91,7 @@ public class SevenElementsAttributes {
 		final EntityAttribute resAttribute = modifierMap.get(ModifierType.RES);
 
 		final float dmgBonusMultiplier = 1 + (attacker.getAttributes().hasAttribute(dmgBonusAttribute) && source.applyDMGBonus()
-			? (float) (attacker.getAttributes().getValue(dmgBonusAttribute) / 100)
+			? (float) (attacker.getAttributeValue(dmgBonusAttribute) / 100)
 			: 0);
 
 		final float resMultiplier = target.getAttributes().hasAttribute(resAttribute) && source.applyRES()
@@ -102,6 +107,10 @@ public class SevenElementsAttributes {
 		SevenElementsAttributes.ADDED_ATTRIBUTES.forEach(builder::add);
 
 		return builder;
+	}
+
+	public static boolean hasElementalAttribute(final Element element) {
+		return SevenElementsAttributes.LINKS.containsKey(element);
 	}
 
 	public static EntityAttribute getElementalAttribute(final Element element, final ModifierType modifierType) {
@@ -155,6 +164,7 @@ public class SevenElementsAttributes {
 	}
 
 
+
 	static {
 		SevenElementsAttributes.addMultiplicativeLikeAttributes(List.of(
 			PHYSICAL_DMG_BONUS,
@@ -172,7 +182,10 @@ public class SevenElementsAttributes {
 			ELECTRO_RES,
 			DENDRO_RES,
 			CRYO_RES,
-			GEO_RES
+			GEO_RES,
+			CRITICAL_RATE,
+			CRITICAL_DAMAGE,
+			SHIELD_STRENGTH
 		));
 	}
 }

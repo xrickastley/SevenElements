@@ -8,7 +8,6 @@ import net.minecraft.entity.attribute.AttributeContainer;
 import net.minecraft.entity.attribute.EntityAttributeModifier;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffectCategory;
-import net.minecraft.entity.mob.MobEntity;
 
 public final class FrozenStatusEffect extends ElementalStatusEffect {
 	FrozenStatusEffect() {
@@ -37,16 +36,5 @@ public final class FrozenStatusEffect extends ElementalStatusEffect {
 		super.onRemoved(entity, amplifier);
 
 		FrozenEffectComponent.KEY.get(entity).unfreeze();
-	}
-
-	@Override
-	public void applyUpdateEffect(LivingEntity entity, int amplifier) {
-		if (entity.getStatusEffect(SevenElementsStatusEffects.FROZEN).getDuration() == 1 && entity instanceof final MobEntity mob)
-			mob.setAiDisabled(false);
-	}
-
-	@Override
-	public boolean canApplyUpdateEffect(int duration, int amplifier) {
-		return true;
 	}
 }

@@ -4,11 +4,16 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AbstractInventoryScreenMixin",
+    "AnvilScreenMixin",
+    "ArmorFeatureRendererMixin",
     "BossBarHud$1Mixin",
     "BossBarHudAccessor",
     "BossBarHudMixin",
+    "BufferBuilderStorageMixin",
+    "BuiltinModelItemRendererMixin",
     "InGameHudMixin",
     "ItemStackMixin",
+    "ItemRendererMixin",
     "LivingEntityMixin",
     "LivingEntityRendererMixin"
   ],

@@ -49,20 +49,26 @@
 	},
 	"custom": {
 		"loom:injected_interfaces": {
-			"net/minecraft/class_1291": [
-				"io/github/xrickastley/sevenelements/interfaces/EntityAwareEffect"
-			],
-			"net/minecraft/class_1309": [
-				"io/github/xrickastley/sevenelements/interfaces/ILivingEntity"
+			"net/minecraft/class_1259": [
+				"io/github/xrickastley/sevenelements/interfaces/IBossBar"
 			],
 			"net/minecraft/class_1282": [
 				"io/github/xrickastley/sevenelements/interfaces/IDamageSource"
 			],
-			"net/minecraft/class_1259": [
-				"io/github/xrickastley/sevenelements/interfaces/IBossBar"
+			"net/minecraft/class_1291": [
+				"io/github/xrickastley/sevenelements/interfaces/EntityAwareEffect"
+			],
+			"net/minecraft/class_1297": [
+				"io/github/xrickastley/sevenelements/interfaces/IEntity"
+			],
+			"net/minecraft/class_1309": [
+				"io/github/xrickastley/sevenelements/interfaces/ILivingEntity"
 			],
 			"net/minecraft/class_1676": [
 				"io/github/xrickastley/sevenelements/interfaces/InfusableProjectile"
+			],
+			"net/minecraft/class_1799": [
+				"io/github/xrickastley/sevenelements/interfaces/IItemStack"
 			]
 		},
 		"cardinal-components": [

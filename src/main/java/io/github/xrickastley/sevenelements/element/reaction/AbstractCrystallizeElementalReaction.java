@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
+import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity;
 import io.github.xrickastley.sevenelements.entity.SevenElementsEntityTypes;
@@ -30,8 +31,19 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 {
 	private static final Set<Block> AIR_BLOCKS = Set.of(Blocks.AIR, Blocks.CAVE_AIR, Blocks.VOID_AIR);
 
+	private final Element shieldElement;
+
 	AbstractCrystallizeElementalReaction(Settings settings) {
-		super(settings);
+		this(settings.setType(Type.SHIELD), settings.getAuraElement());
+	}
+
+	AbstractCrystallizeElementalReaction(Settings settings, Element shieldElement) {
+		super(
+			settings
+				.setReactionMultiplier(1.0)
+		);
+
+		this.shieldElement = shieldElement;
 	}
 
 	@Override
@@ -41,7 +53,7 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 		if (!(world instanceof final ServerWorld serverWorld)) return;
 
 		final Vec3d spawnPos = this.clampToGround(entity.getWorld(), this.toAbsolutePos(entity, new Vec3d(0, 0, 1)));
-		final CrystallizeShardEntity crystallizeShard = new CrystallizeShardEntity(SevenElementsEntityTypes.CRYSTALLIZE_SHARD, serverWorld, this.getAuraElement(), origin);
+		final CrystallizeShardEntity crystallizeShard = new CrystallizeShardEntity(SevenElementsEntityTypes.CRYSTALLIZE_SHARD, serverWorld, this.shieldElement, this.getReactionStrength(origin), origin);
 
 		crystallizeShard.setPosition(spawnPos);
 		serverWorld.spawnNewEntityAndPassengers(crystallizeShard);

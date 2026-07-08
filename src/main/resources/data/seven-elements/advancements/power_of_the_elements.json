@@ -1,0 +1,26 @@
+{
+	"parent": "seven-elements:elemental_awakening",
+	"display": {
+		"icon": {
+			"item": "seven-elements:elemental_rune",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.seven-elements.power_of_the_elements.title"
+		},
+		"description": {
+			"translate": "advancements.seven-elements.power_of_the_elements.description"
+		},
+		"frame": "task"
+	},
+	"criteria": {
+		"infuse_item": {
+			"trigger": "seven-elements:elemental_infusion"
+		}
+	},
+	"requirements": [
+		[
+			"infuse_item"
+		]
+	]
+}

@@ -53,10 +53,7 @@ public abstract sealed class AbstractSwirlElementalReaction
 	 * damage to the Swirl target instead, i.e. the entity the Swirl reaction was triggered on.
 	 */
 	AbstractSwirlElementalReaction(Settings settings, boolean elementalAbsorptionOnly) {
-		super(settings);
-
-		this.swirlElement = settings.getAuraElement();
-		this.elementalAbsorptionOnly = elementalAbsorptionOnly;
+		this(settings, settings.getAuraElement(), elementalAbsorptionOnly);
 	}
 
 	/**
@@ -75,10 +72,17 @@ public abstract sealed class AbstractSwirlElementalReaction
 	 * @param swirlElement The element to Swirl.
 	 */
 	AbstractSwirlElementalReaction(Settings settings, Element swirlElement) {
-		super(settings);
+		this(settings, swirlElement, false);
+	}
+
+	private AbstractSwirlElementalReaction(Settings settings, Element swirlElement, boolean elementalAbsorptionOnly) {
+		super(
+			settings
+				.setReactionMultiplier(0.6)
+		);
 
 		this.swirlElement = swirlElement;
-		this.elementalAbsorptionOnly = false;
+		this.elementalAbsorptionOnly = elementalAbsorptionOnly;
 	}
 
 	@Override
@@ -94,7 +98,7 @@ public abstract sealed class AbstractSwirlElementalReaction
 
 		for (final LivingEntity target : ElementalReaction.getEntitiesInAoE(entity, 6, t -> t != origin)) {
 			final float damage = !elementalAbsorptionOnly || target == entity
-				? ElementalReaction.getReactionDamage(entity, 0.6)
+				? this.getReactionStrength(origin, entity.getWorld())
 				: 0f;
 
 			/*

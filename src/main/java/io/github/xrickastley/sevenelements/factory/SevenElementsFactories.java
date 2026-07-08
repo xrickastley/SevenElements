@@ -5,6 +5,8 @@ import io.github.xrickastley.sevenelements.block.SevenElementsBlocks;
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReactions;
 import io.github.xrickastley.sevenelements.entity.SevenElementsEntityTypes;
+import io.github.xrickastley.sevenelements.item.SevenElementsItems;
+import io.github.xrickastley.sevenelements.recipe.SevenElementsRecipeSerializer;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistries;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistryKeys;
 import io.github.xrickastley.sevenelements.screen.SevenElementsScreenHandlers;
@@ -21,6 +23,7 @@ public class SevenElementsFactories {
 		SevenElementsGameRules.register();
 		SevenElementsItems.register();
 		SevenElementsParticleTypes.register();
+		SevenElementsRecipeSerializer.register();
 		SevenElementsScreenHandlers.register();
 		SevenElementsSoundEvents.register();
 		SevenElementsStatusEffects.register();

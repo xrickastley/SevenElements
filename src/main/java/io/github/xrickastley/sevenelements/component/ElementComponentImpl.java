@@ -31,6 +31,7 @@ import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.FrozenElementalReaction;
 import io.github.xrickastley.sevenelements.element.reaction.QuickenElementalReaction;
 import io.github.xrickastley.sevenelements.events.ElementEvents;
+import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypeTags;
@@ -64,6 +65,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	private final LivingEntity owner;
 	private final Map<Element, ElementHolder> elementHolders = new ConcurrentHashMap<>();
+	private final Map<Identifier, Integer> mechanicPityHolder = new ConcurrentHashMap<>();
 	private final FreezeDecayHandler freezeDecayHandler;
 	private Pair<ElementalReaction, Long> lastReaction = new Pair<>(null, -1L);
 	private long electroChargedCooldown = -1;
@@ -89,7 +91,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 	public ElementComponentImpl(LivingEntity owner) {
 		this.owner = owner;
-		this.freezeDecayHandler = new FreezeDecayHandler(this);
+		this.freezeDecayHandler = new FreezeDecayHandler();
 
 		for (final Element element : Element.values()) elementHolders.put(element, ElementHolder.of(owner, element));
 	}
@@ -193,7 +195,7 @@ public final class ElementComponentImpl implements ElementComponent {
 		return ImmutablePair.of(this.lastReaction);
 	}
 
-	// TO BE USED ONLY INTERNALLY.
+	@ApiStatus.Internal
 	public void setLastReaction(Pair<ElementalReaction, Long> lastReaction) {
 		this.lastReaction = lastReaction;
 	}
@@ -275,6 +277,15 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		if (this.crystallizeShield != null && !this.crystallizeShield.isEmpty())
 			crystallizeShield.writeToNbt(tag);
+
+		if (!this.mechanicPityHolder.isEmpty()) {
+			final NbtCompound mechanicPityHolders = new NbtCompound();
+
+			for (final Map.Entry<Identifier, Integer> holder : this.mechanicPityHolder.entrySet())
+				mechanicPityHolders.putInt(holder.getKey().toString(), holder.getValue());
+
+			tag.put("PityHolders", mechanicPityHolders);
+		}
 	}
 
 	@Override
@@ -292,7 +303,7 @@ public final class ElementComponentImpl implements ElementComponent {
 		}
 
 		this.crystallizeShield = tag.contains("CrystallizeShield")
-			? CrystallizeShield.ofNbt(tag.getCompound("CrystallizeShield"))
+			? new CrystallizeShield(tag.getCompound("CrystallizeShield"))
 			: null;
 
 		final NbtList list = tag.getList("AppliedElements", NbtElement.COMPOUND_TYPE);
@@ -315,12 +326,21 @@ public final class ElementComponentImpl implements ElementComponent {
 			tag.getCompound("FreezeDecay"),
 			this.owner.getWorld().getTime() - syncedAt
 		);
+
+		if (tag.contains("PityHolders")) {
+			final NbtCompound mechanicPityHolders = tag.getCompound("PityHolders");
+
+			this.mechanicPityHolder.clear();
+
+			for (final String holderKey : mechanicPityHolders.getKeys())
+				this.mechanicPityHolder.put(Identifier.tryParse(holderKey), mechanicPityHolders.getInt(holderKey));
+		}
  	}
 
 	@Override
 	public void tick() {
-		ElectroChargedElementalReaction.mixin$tick(this.owner);
-		AbstractBurningElementalReaction.mixin$tick(this.owner);
+		ElectroChargedElementalReaction.mixin$tick(this.owner, this);
+		AbstractBurningElementalReaction.mixin$tick(this.owner, this);
 
 		final Array<ElementalApplication> appliedElements = this.getAppliedElements();
 
@@ -330,7 +350,8 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		if (tickedElements > 0) this.removeConsumedElements();
 
-		if (this.crystallizeShield != null) crystallizeShield.tick(this);
+		if (this.crystallizeShield != null)
+			crystallizeShield.tick();
 
 		this.freezeDecayHandler.tick(appliedElements.anyMatch(a -> a.getElement() == Element.FREEZE));
 	}
@@ -533,10 +554,40 @@ public final class ElementComponentImpl implements ElementComponent {
 		return triggeredReactions;
 	}
 
-	private static class CrystallizeShield {
+
+
+	@ApiStatus.Internal
+	public void resetPityCounter(Identifier id) {
+		this.mechanicPityHolder.remove(id);
+	}
+
+	@ApiStatus.Internal
+	public void incrementPityCounter(Identifier id) {
+		this.incrementPityCounter(id, 1);
+	}
+
+	@ApiStatus.Internal
+	public void incrementPityCounter(Identifier id, int increment) {
+		this.mechanicPityHolder.merge(id, increment, Integer::sum);
+	}
+
+	@ApiStatus.Internal
+	public double getChanceFromPityCounter(Identifier id, double baseChance, int pityStart, double chancePerPity) {
+		final int pity = this.mechanicPityHolder.getOrDefault(id, 0);
+
+		return baseChance + Math.max(pity - pityStart, 0) * chancePerPity;
+	}
+
+
+
+	private class CrystallizeShield {
 		private final Element element;
 		private final long appliedAt;
 		private double amount;
+
+		private CrystallizeShield(final NbtCompound tag) {
+			this(Element.valueOf(tag.getString("Element")), tag.getDouble("Amount"), tag.getLong("AppliedAt"));
+		}
 
 		private CrystallizeShield(final Element element, final double amount, final long appliedAt) {
 			this.element = element;
@@ -544,20 +595,18 @@ public final class ElementComponentImpl implements ElementComponent {
 			this.amount = amount;
 		}
 
-		private static CrystallizeShield ofNbt(final NbtCompound tag) {
-			return new CrystallizeShield(Element.valueOf(tag.getString("Element")), tag.getDouble("Amount"), tag.getLong("AppliedAt"));
-		}
-
 		private float reduce(ElementalDamageSource source, float amount) {
+			final double shieldStrength = 1 + (ElementComponentImpl.this.owner.getAttributeValue(SevenElementsAttributes.SHIELD_STRENGTH) / 100);
+			// final double shieldStrength = 1 +
 			final double elementBonus = this.element == Element.GEO
 				? 1.5 // 150% "effectiveness"
 				: source.getElementalApplication().getElement() == this.element
 					? 2.5 // 250% "effectiveness"
 					: 1; // No "effectiveness"
 
-			final double dmgTakenByShield = Math.min(this.amount * elementBonus, amount);
+			final double dmgTakenByShield = Math.min(this.amount * elementBonus * shieldStrength, amount);
 			// Use Math.max to guarantee >= 0 in case of FP errors.
-			this.amount = Math.max(this.amount - (dmgTakenByShield / elementBonus), 0);
+			this.amount = Math.max(this.amount - (dmgTakenByShield / (elementBonus * shieldStrength)), 0);
 
 			return (float) dmgTakenByShield;
 		}
@@ -576,7 +625,9 @@ public final class ElementComponentImpl implements ElementComponent {
 			return this.amount <= 0 || this.element == null;
 		}
 
-		private void tick(ElementComponentImpl impl) {
+		private void tick() {
+			final ElementComponentImpl impl = ElementComponentImpl.this;
+
 			if ((this.appliedAt + 300 >= impl.owner.getWorld().getTime() && !this.isEmpty()) || impl.crystallizeShield == null) return;
 
 			impl.crystallizeShield = null;
@@ -588,16 +639,11 @@ public final class ElementComponentImpl implements ElementComponent {
 		}
 	}
 
-	private static class FreezeDecayHandler {
-		private final ElementComponentImpl impl;
+	private class FreezeDecayHandler {
 		private boolean isFreezeReapplied = false;
 		private long freezeReappliedAt;
 		private int freezeTicks;
 		private int unfreezeTicks;
-
-		private FreezeDecayHandler(ElementComponentImpl impl) {
-			this.impl = impl;
-		}
 
 		private double getDecayTimeModifier() {
 			return Math.max(0, freezeTicks - (2 * unfreezeTicks)) / 20.0;
@@ -620,7 +666,7 @@ public final class ElementComponentImpl implements ElementComponent {
 			this.freezeTicks = 0;
 			this.unfreezeTicks = 0;
 
-			ElementComponent.sync(impl.owner);
+			ElementComponent.sync(ElementComponentImpl.this.owner);
 		}
 
 		public void writeToNbt(NbtCompound tag) {
@@ -635,7 +681,7 @@ public final class ElementComponentImpl implements ElementComponent {
 			this.freezeReappliedAt = tag.getLong("FreezeReappliedAt");
 			this.freezeTicks = tag.getInt("FreezeTicks");
 
-			final @Nullable ElementalApplication freezeApp = impl.getElementalApplication(Element.FREEZE);
+			final @Nullable ElementalApplication freezeApp = ElementComponentImpl.this.getElementalApplication(Element.FREEZE);
 			final int syncUnfrozenTicks = JavaScriptUtil.nullishCoalesing(ClassInstanceUtil.mapOrNull(freezeApp, ElementalApplication::getRemainingTicks), 0);
 
 			this.unfreezeTicks = tag.getInt("UnfreezeTicks") + (int) Math.max(0, syncDiff - syncUnfrozenTicks);
@@ -743,5 +789,4 @@ public final class ElementComponentImpl implements ElementComponent {
 			? projectile.sevenelements$attemptInfusion(source, target)
 			: Optional.empty();
 	}
-
 }

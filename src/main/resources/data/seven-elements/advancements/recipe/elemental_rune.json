@@ -1,0 +1,95 @@
+{
+	"parent": "minecraft:recipes/root",
+	"criteria": {
+		"has_fire_charge": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:fire_charge"
+						]
+					}
+				]
+			}
+		},
+		"has_water_bucket": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:water_bucket"
+						]
+					}
+				]
+			}
+		},
+		"has_lightning_rod": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:lightning_rod"
+						]
+					}
+				]
+			}
+		},
+		"has_leaves": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"tag": "minecraft:leaves"
+					}
+				]
+			}
+		},
+		"has_blue_ice": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"minecraft:blue_ice"
+						]
+					}
+				]
+			}
+		},
+		"has_stone": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"tag": "minecraft:stone_crafting_materials"
+					}
+				]
+			}
+		},
+		"has_the_recipe": {
+			"trigger": "minecraft:recipe_unlocked",
+			"conditions": {
+				"recipe": "seven-elements:elemental_rune"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"has_the_recipe",
+			"has_fire_charge",
+			"has_water_bucket",
+			"has_lightning_rod",
+			"has_leaves",
+			"has_blue_ice",
+			"has_stone"
+		]
+	],
+	"rewards": {
+		"recipes": [
+			"seven-elements:elemental_rune"
+		]
+	}
+}

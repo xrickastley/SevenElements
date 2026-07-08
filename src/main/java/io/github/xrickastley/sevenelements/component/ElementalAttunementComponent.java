@@ -1,6 +1,8 @@
 package io.github.xrickastley.sevenelements.component;
 
 import com.google.common.collect.HashMultimap;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -12,10 +14,12 @@ import org.slf4j.Logger;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
+import io.github.xrickastley.sevenelements.component.interfaces.ElementModifyingComponent;
 import io.github.xrickastley.sevenelements.component.interfaces.TooltipProvider;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes.ModifierType;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
+import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 
 import net.minecraft.client.item.TooltipContext;
@@ -39,11 +43,20 @@ import dev.onyxstudios.cca.api.v3.item.ItemComponent;
 
 public final class ElementalAttunementComponent
 	extends ItemComponent
-	implements AttributeModifyingComponent, TooltipProvider
+	implements AttributeModifyingComponent, ElementModifyingComponent, TooltipProvider
 {
 	private static final Logger LOGGER = SevenElements.sublogger();
 
 	public static final ComponentKey<ElementalAttunementComponent> KEY = ComponentRegistry.getOrCreate(SevenElements.identifier("elemental_attunement"), ElementalAttunementComponent.class);
+
+	public static final Codec<Element> CODEC = Element.CODEC.comapFlatMap(ElementalAttunementComponent::validate, e -> e);
+
+	private static DataResult<Element> validate(Element element) {
+		if (ElementalAttunementComponent.isValidForAttunement(element))
+			return DataResult.success(element);
+		else
+			return DataResult.error(() -> "Not a valid Element for attunement: " + element);
+	}
 
 	public ElementalAttunementComponent(ItemStack stack) {
 		super(stack);
@@ -56,7 +69,8 @@ public final class ElementalAttunementComponent
 
 		component.setElementalAttunement(element);
 
-		return;
+		if (ClassInstanceUtil.mapOrNull(ElementalInfusionComponent.get(stack), ElementalInfusionComponent::getElement) != element)
+			ElementalInfusionComponent.removeInfusion(stack);
 	}
 
 	public static boolean removeAttunement(ItemStack stack) {
@@ -73,9 +87,14 @@ public final class ElementalAttunementComponent
 
 	public static boolean hasAttunement(ItemStack stack) {
 		return Optional
-			.of(ElementalAttunementComponent.get(stack))
+			.ofNullable(ElementalAttunementComponent.get(stack))
 			.map(ElementalAttunementComponent::hasElementalAttunement)
 			.orElse(false);
+	}
+
+	public static boolean isValidForAttunement(Element element) {
+		return element != Element.PHYSICAL
+			&& SevenElementsAttributes.hasElementalAttribute(element);
 	}
 
 	public static @Nullable ElementalAttunementComponent get(ItemStack stack) {
@@ -84,7 +103,7 @@ public final class ElementalAttunementComponent
 
 	public @Nullable Element element() {
 		return this.hasElementalAttunement()
-			? Element.CODEC
+			? ElementalAttunementComponent.CODEC
 				.parse(NbtOps.INSTANCE, this.getTag("element", NbtElement.STRING_TYPE))
 				.resultOrPartial(LOGGER::error)
 				.orElseThrow()
@@ -98,7 +117,7 @@ public final class ElementalAttunementComponent
 	private void setElementalAttunement(Element element) {
 		this.putString(
 			"element",
-			((NbtString) Element.CODEC.encodeStart(NbtOps.INSTANCE, element)
+			((NbtString) ElementalAttunementComponent.CODEC.encodeStart(NbtOps.INSTANCE, element)
 				.resultOrPartial(LOGGER::error)
 				.orElseThrow()).asString()
 		);
@@ -107,7 +126,7 @@ public final class ElementalAttunementComponent
 	@Override
 	public HashMultimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack itemStack, EquipmentSlot slot) {
 		final HashMultimap<EntityAttribute, EntityAttributeModifier> attributeMultimap = HashMultimap.create();
-		
+
 		if (!this.hasElementalAttunement()) return attributeMultimap;
 
 		if (itemStack.getItem() instanceof final ArmorItem armor) {
@@ -136,6 +155,16 @@ public final class ElementalAttunementComponent
 	}
 
 	@Override
+	public Text getSymbol() {
+		return Text.translatable("symbols.seven-elements.elemental_infusion.elemental_attunment");
+	}
+
+	@Override
+	public boolean shouldModify(ElementalInfusionComponent infusion) {
+		return infusion.getElement() == this.element();
+	}
+
+	@Override
 	public void appendTooltip(@Nullable PlayerEntity player, TooltipContext context, Consumer<Text> textConsumer) {
 		if (!this.hasElementalAttunement()) return;
 
@@ -155,5 +184,6 @@ public final class ElementalAttunementComponent
 
 	static {
 		AttributeModifyingComponent.addAttributeComponent(ElementalAttunementComponent.KEY);
+		ElementModifyingComponent.addElementModifyingComponent(ElementalAttunementComponent.KEY);
 	}
 }
