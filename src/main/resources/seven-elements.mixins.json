@@ -24,10 +24,10 @@
     "PrioritizedLivingEntityMixin",
     "PrioritizedPlayerEntityMixin",
     "ProjectileEntityMixin",
-    "ArrowItemMixin",
     "RegistryLoaderMixin",
     "ServerBossBarMixin",
     "StatusEffectMixin",
+    "TridentEntityMixin",
     "WitherEntityMixin"
   ],
   "injectors": {
