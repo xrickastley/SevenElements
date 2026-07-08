@@ -1,0 +1,19 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "misc",
+	"key": {
+		"#": "minecraft:diamond",
+		"R": "seven-elements:elemental_rune",
+		"T": "minecraft:totem_of_undying",
+		"S": "seven-elements:elemental_attunement_smithing_template"
+	},
+	"pattern": [
+		"#S#",
+		"#T#",
+		"#R#"
+	],
+	"result": {
+		"count": 2,
+		"id": "seven-elements:elemental_attunement_smithing_template"
+	}
+}

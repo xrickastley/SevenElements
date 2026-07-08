@@ -1,0 +1,6 @@
+{
+	"parent": "minecraft:item/generated",
+	"textures": {
+		"layer0": "seven-elements:item/anemo_attunement_smithing_template"
+	}
+}

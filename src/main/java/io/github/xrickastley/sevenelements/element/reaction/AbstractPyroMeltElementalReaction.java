@@ -2,6 +2,7 @@ package io.github.xrickastley.sevenelements.element.reaction;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.element.Element;
+import io.github.xrickastley.sevenelements.element.reaction.base.AmplifyingElementalReaction;
 import io.github.xrickastley.sevenelements.util.TextHelper;
 
 public abstract sealed class AbstractPyroMeltElementalReaction
@@ -12,10 +13,10 @@ public abstract sealed class AbstractPyroMeltElementalReaction
 		super(
 			new Settings(name, SevenElements.identifier(idPath), TextHelper.reaction("reaction.seven-elements.melt", "#f2be87"))
 				.setReactionCoefficient(2.0)
+				.setReactionMultiplier(2.0)
 				.setAuraElement(auraElement)
 				.setTriggeringElement(Element.PYRO, 5)
-				.preventsReactionsAfter(SevenElements.identifier("vaporize_pyro"), SevenElements.identifier("melt_pyro-frozen")),
-			2
+				.preventsReactionsAfter(SevenElements.identifier("vaporize_pyro"), SevenElements.identifier("melt_pyro-frozen"))
 		);
 	}
 }

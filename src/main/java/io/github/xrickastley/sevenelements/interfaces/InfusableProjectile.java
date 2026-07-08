@@ -11,6 +11,8 @@ import net.minecraft.item.ItemStack;
 public interface InfusableProjectile {
 	default void sevenelements$setOriginStack(ItemStack originStack) {}
 
+	default void sevenelements$setProjectileStack(ItemStack projectileStack) {}
+
 	default Optional<ElementalDamageSource> sevenelements$attemptInfusion(DamageSource source, Entity target) {
 		return Optional.empty();
 	}
