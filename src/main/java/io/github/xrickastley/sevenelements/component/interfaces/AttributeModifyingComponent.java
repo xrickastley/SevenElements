@@ -14,6 +14,18 @@ import net.minecraft.item.ItemStack;
 
 import dev.onyxstudios.cca.api.v3.component.ComponentKey;
 
+/**
+ * An interface for data components that modify attributes on their own. <br> <br>
+ *
+ * This allows other data components than the {@link AttributeModifiersComponent} to easily apply
+ * attribute modifiers to entities holding an item stack with their data component. <br> <br>
+ *
+ * Note that modifiers may <b>not</b>, under any circumstances, be <i>too</i> dynamic or
+ * conditional, i.e. give the entity an attribute modifier <b>if</b> they're flying; attribute
+ * modifiers are calculated <b>only</b> when the stack in the attribute modifier slot changes. To
+ * avoid unintentional errors when making conditional modifiers, the returned modifier <b>must
+ * always</b> be the same for the stack until it changes.
+ */
 public interface AttributeModifyingComponent {
 	public HashMultimap<EntityAttribute, EntityAttributeModifier> getModifiers(ItemStack stack, EquipmentSlot slot);
 

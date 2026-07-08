@@ -29,7 +29,10 @@ import dev.onyxstudios.cca.api.v3.component.ComponentRegistry;
 import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import dev.onyxstudios.cca.api.v3.component.tick.CommonTickingComponent;
 
-public interface ElementComponent extends AutoSyncedComponent, CommonTickingComponent {
+public sealed interface ElementComponent
+	extends AutoSyncedComponent, CommonTickingComponent
+	permits ElementComponentImpl
+{
 	public static final ComponentKey<ElementComponent> KEY = ComponentRegistry.getOrCreate(SevenElements.identifier("elements"), ElementComponent.class);
 
 	/**

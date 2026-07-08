@@ -57,7 +57,7 @@ public final class ElementalInfusionComponent
 
 	@ApiStatus.Internal
 	public static Pair<Element, Double> generateAndApplyInfusion(ItemStack stack, World world) {
-		final Element element = Optional.of(ElementalAttunementComponent.get(stack))
+		final Element element = Optional.ofNullable(ElementalAttunementComponent.get(stack))
 			.map(ElementalAttunementComponent::element)
 			.orElse(ELEMENTS.get(world.getRandom().nextInt(ELEMENTS.size())));
 		final double gaugeUnits = GAUGE_UNITS.get(world.getRandom().nextInt(GAUGE_UNITS.size()));
@@ -96,15 +96,20 @@ public final class ElementalInfusionComponent
 		}
 	}
 
-	public static void applyInfusion(ItemStack stack, ElementalApplication.Builder applicationBuilder, InternalCooldownContext.Builder icdBuilder) {
+	public static boolean applyInfusion(ItemStack stack, ElementalApplication.Builder applicationBuilder, InternalCooldownContext.Builder icdBuilder) {
+		if (
+			ElementalAttunementComponent.hasAttunement(stack)
+			&& ElementalAttunementComponent.get(stack).element() != applicationBuilder.getElement()
+		) return false;
+
 		final ElementalInfusionComponent component = ElementalInfusionComponent.get(stack);
 
-		if (component == null) return;
+		if (component == null) return false;
 
 		component.setElementalInfusion(applicationBuilder);
 		component.setInternalCooldown(icdBuilder);
 
-		return;
+		return true;
 	}
 
 	public static boolean removeInfusion(ItemStack stack) {
@@ -122,7 +127,7 @@ public final class ElementalInfusionComponent
 
 	public static boolean hasInfusion(ItemStack stack) {
 		return Optional
-			.of(ElementalInfusionComponent.get(stack))
+			.ofNullable(ElementalInfusionComponent.get(stack))
 			.map(ElementalInfusionComponent::hasElementalInfusion)
 			.orElse(false);
 	}

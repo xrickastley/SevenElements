@@ -15,7 +15,10 @@ public abstract sealed class AbstractBloomElementalReaction
 	permits DendroBloomElementalReaction, HydroBloomElementalReaction, QuickenBloomElementalReaction
 {
 	AbstractBloomElementalReaction(Settings settings) {
-		super(settings);
+		super(
+			settings
+				.setReactionMultiplier(2.0)
+		);
 	}
 
 	@Override

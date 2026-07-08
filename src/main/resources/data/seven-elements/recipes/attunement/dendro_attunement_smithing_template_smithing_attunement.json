@@ -1,0 +1,12 @@
+{
+	"type": "seven-elements:smithing_attunement",
+	"addition": {
+		"item": "seven-elements:elemental_rune"
+	},
+	"base": {
+		"tag": "seven-elements:attunable_items"
+	},
+	"template": {
+		"item": "seven-elements:dendro_attunement_smithing_template"
+	}
+}

@@ -1,0 +1,36 @@
+{
+	"parent": "seven-elements:power_of_the_elements",
+	"display": {
+		"icon": {
+			"item": "seven-elements:elemental_attunement_smithing_template",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.seven-elements.elements_reborn.title"
+		},
+		"description": {
+			"translate": "advancements.seven-elements.elements_reborn.description"
+		},
+		"frame": "goal",
+		"hidden": true
+	},
+	"criteria": {
+		"obtain_template": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"seven-elements:elemental_attunement_smithing_template"
+						]
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"obtain_template"
+		]
+	]
+}

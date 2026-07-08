@@ -1,0 +1,163 @@
+package io.github.xrickastley.sevenelements.renderer;
+
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
+
+import io.github.xrickastley.sevenelements.SevenElements;
+import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
+import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
+import io.github.xrickastley.sevenelements.element.Element;
+
+import net.minecraft.client.render.OverlayVertexConsumer;
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.VertexConsumers;
+import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.Identifier;
+
+public final class ElementGlintRenderer {
+	public static final GlintRenderLayer ARMOR_GLINT = new GlintRenderLayer(SevenElementsRenderLayer.getArmorEntityElementGlint(), GlintType.ENTITY);
+	public static final GlintRenderLayer ARMOR_ENTITY_GLINT = new GlintRenderLayer(SevenElementsRenderLayer.getArmorEntityElementGlint(), GlintType.ENTITY);
+	public static final GlintRenderLayer GLINT = new GlintRenderLayer(SevenElementsRenderLayer.getElementGlint(), GlintType.ITEM);
+	public static final GlintRenderLayer STATIC_GLINT = new GlintRenderLayer(SevenElementsRenderLayer.getStaticElementGlint(), GlintType.ITEM);
+	public static final GlintRenderLayer ENTITY_GLINT = new GlintRenderLayer(SevenElementsRenderLayer.getEntityElementGlint(), GlintType.ENTITY);
+	public static final GlintRenderLayer STATIC_ENTITY_GLINT = new GlintRenderLayer(SevenElementsRenderLayer.getStaticEntityElementGlint(), GlintType.ENTITY);
+	public static final GlintRenderLayer DIRECT_GLINT = new GlintRenderLayer(SevenElementsRenderLayer.getDirectElementGlint(), GlintType.ITEM);
+	public static final GlintRenderLayer STATIC_DIRECT_GLINT = new GlintRenderLayer(SevenElementsRenderLayer.getStaticDirectElementGlint(), GlintType.ITEM);
+	public static final GlintRenderLayer DIRECT_ENTITY_GLINT = new GlintRenderLayer(SevenElementsRenderLayer.getDirectEntityElementGlint(), GlintType.ENTITY);
+	public static final GlintRenderLayer STATIC_DIRECT_ENTITY_GLINT = new GlintRenderLayer(SevenElementsRenderLayer.getStaticDirectEntityElementGlint(), GlintType.ENTITY);
+
+	public static VertexConsumer getArmorGlintConsumer(VertexConsumerProvider provider, RenderLayer layer, boolean solid, boolean glint, ItemStack stack) {
+		return stack.sevenelements$hasAttunementGlint()
+			? VertexConsumers.union(
+				provider.getBuffer(
+					solid
+						? ElementGlintRenderer.ARMOR_GLINT.getLayer(ElementalAttunementComponent.get(stack).element())
+						: ElementGlintRenderer.ARMOR_ENTITY_GLINT.getLayer(ElementalAttunementComponent.get(stack).element())
+				),
+				provider.getBuffer(layer)
+			)
+			: ItemRenderer.getArmorGlintConsumer(provider, layer, solid, glint);
+	}
+
+	public static VertexConsumer getDynamicDisplayGlintConsumer(VertexConsumerProvider provider, RenderLayer layer, MatrixStack.Entry entry, ItemStack stack) {
+		return ElementGlintRenderer.getDynamicDisplayGlintConsumer(() -> ItemRenderer.getDynamicDisplayGlintConsumer(provider, layer, entry), provider, layer, entry, stack);
+	}
+
+	public static VertexConsumer getDynamicDisplayGlintConsumer(Supplier<VertexConsumer> original, VertexConsumerProvider provider, RenderLayer layer, MatrixStack.Entry entry, ItemStack stack) {
+		return stack.sevenelements$hasElementalGlint()
+			? ElementGlintRenderer.getCombinedGlintConsumer(
+				stack,
+				provider,
+				layer,
+				original,
+				new OverlayVertexConsumer(provider.getBuffer(ElementGlintRenderer.getGlintLayer(stack, ElementGlintRenderer.STATIC_GLINT, ElementGlintRenderer.GLINT)), entry.getPositionMatrix(), entry.getNormalMatrix(), 0.0078125F)
+			)
+			: original.get();
+	}
+
+	public static VertexConsumer getItemGlintConsumer(VertexConsumerProvider vertexConsumers, RenderLayer layer, boolean solid, boolean glint, ItemStack stack) {
+		return ElementGlintRenderer.getItemGlintConsumer(() -> ItemRenderer.getItemGlintConsumer(vertexConsumers, layer, solid, glint), vertexConsumers, layer, solid, glint, stack);
+	}
+
+	public static VertexConsumer getItemGlintConsumer(Supplier<VertexConsumer> original, VertexConsumerProvider vertexConsumers, RenderLayer layer, boolean solid, boolean glint, ItemStack stack) {
+		return stack.sevenelements$hasElementalGlint()
+			? ElementGlintRenderer.getCombinedGlintConsumer(
+				stack,
+				vertexConsumers,
+				layer,
+				original,
+				solid ? ElementGlintRenderer.STATIC_GLINT : ElementGlintRenderer.STATIC_ENTITY_GLINT,
+				solid ? ElementGlintRenderer.GLINT : ElementGlintRenderer.ENTITY_GLINT
+			)
+			: original.get();
+	}
+
+	public static VertexConsumer getDirectItemGlintConsumer(VertexConsumerProvider provider, RenderLayer layer, boolean solid, boolean glint, ItemStack stack) {
+		return ElementGlintRenderer.getDirectItemGlintConsumer(() -> ItemRenderer.getDirectItemGlintConsumer(provider, layer, solid, glint), provider, layer, solid, glint, stack);
+	}
+
+	public static VertexConsumer getDirectItemGlintConsumer(Supplier<VertexConsumer> original, VertexConsumerProvider provider, RenderLayer layer, boolean solid, boolean glint, ItemStack stack) {
+		return stack.sevenelements$hasElementalGlint()
+			? ElementGlintRenderer.getCombinedGlintConsumer(
+				stack,
+				provider,
+				layer,
+				original,
+				solid ? ElementGlintRenderer.STATIC_GLINT : ElementGlintRenderer.STATIC_DIRECT_ENTITY_GLINT,
+				solid ? ElementGlintRenderer.GLINT : ElementGlintRenderer.DIRECT_ENTITY_GLINT
+			)
+			: original.get();
+	}
+
+
+
+	@ApiStatus.Internal
+	public static VertexConsumer getCombinedGlintConsumer(ItemStack stack, VertexConsumerProvider provider, RenderLayer layer, Supplier<VertexConsumer> glintConsumer, final GlintRenderLayer infusionLayer, final GlintRenderLayer attunementLayer) {
+		return ElementGlintRenderer.getCombinedGlintConsumer(
+			stack,
+			provider,
+			layer,
+			glintConsumer,
+			provider.getBuffer(ElementGlintRenderer.getGlintLayer(stack, infusionLayer, attunementLayer))
+		);
+	}
+
+	@ApiStatus.Internal
+	public static VertexConsumer getCombinedGlintConsumer(ItemStack stack, VertexConsumerProvider provider, RenderLayer layer, Supplier<VertexConsumer> glintConsumer, VertexConsumer elementGlintConsumer) {
+		return VertexConsumers.union(
+			elementGlintConsumer,
+			!stack.sevenelements$hasAttunementGlint()
+				? glintConsumer.get()
+				: provider.getBuffer(layer)
+		);
+	}
+
+	@ApiStatus.Internal
+	public static RenderLayer getGlintLayer(ItemStack stack, final GlintRenderLayer infusionLayer, final GlintRenderLayer attunementLayer) {
+		final @Nullable ElementalInfusionComponent infusion = ElementalInfusionComponent.get(stack);
+		final @Nullable ElementalAttunementComponent attunement = ElementalAttunementComponent.get(stack);
+
+		if (infusion == null && attunement == null)
+			throw new IllegalArgumentException("The provided item must have either the \"seven-elements:elemental_infusion\" or the \"seven-elements:elemental_attunement\" item components!");
+
+		return stack.sevenelements$hasAttunementGlint()
+			? attunementLayer.getLayer(attunement.element())
+			: infusionLayer.getLayer(infusion.getElement());
+	}
+
+	public static class GlintRenderLayer {
+		private final Function<Identifier, RenderLayer> renderLayerFunction;
+		private final GlintType glintType;
+
+		private GlintRenderLayer(Function<Identifier, RenderLayer> renderLayerFunction, GlintType glintType) {
+			this.renderLayerFunction = renderLayerFunction;
+			this.glintType = glintType;
+		}
+
+		public RenderLayer getLayer(Element element) {
+			return renderLayerFunction.apply(glintType.getElementGlintPath(element));
+		}
+	}
+
+	private static enum GlintType {
+		ITEM("_enchanted_glint_item.png"),
+		ENTITY("_enchanted_glint_entity.png");
+
+		private final String suffix;
+
+		private GlintType(String suffix) {
+			this.suffix = suffix;
+		}
+
+		private Identifier getElementGlintPath(Element element) {
+			return SevenElements.identifier("textures/misc/" + element.getId().getPath() + suffix);
+		}
+	}
+}

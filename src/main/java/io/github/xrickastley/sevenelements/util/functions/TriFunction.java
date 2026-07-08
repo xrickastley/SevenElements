@@ -2,7 +2,7 @@ package io.github.xrickastley.sevenelements.util.functions;
 
 /**
  * Represents a function that accepts three arguments and produces a result.
- * This is the three-arity specialization of {@link java.util.function.Function}.
+ * This is the three-arity specialization of {@link java.util.function.Function Function}.
  *
  * <p>This is a <a href="package-summary.html">functional interface</a>
  * whose functional method is {@link #apply(Object, Object, Object)}.

@@ -5,6 +5,8 @@
   "mixins": [
     "AbstractBlockStateMixin",
     "ArrowItemMixin",
+    "AbstractFireBlockMixin",
+    "AnvilScreenHandlerMixin",
     "BlockItemMixin",
     "BossBarMixin",
     "CrossbowItemMixin",
@@ -16,18 +18,25 @@
     "GrindstoneScreenHandler$23Mixin",
     "GrindstoneScreenHandler$4Mixin",
     "GrindstoneScreenHandlerMixin",
+    "ItemMixin",
     "ItemStackMixin",
+    "LivingEntityAndPlayerEntityMixin",
     "LivingEntityMixin",
     "PlayerEntityMixin",
-    "PrioritizedItemStackMixin",
-    "PrioritizedLivingEntityMixin",
-    "PrioritizedPlayerEntityMixin",
     "ProjectileEntityMixin",
     "ArrowItemMixin",
     "RegistryLoaderMixin",
     "ServerBossBarMixin",
+    "ServerPlayNetworkHandlerMixin",
+    "SmithingTemplateItemAccessor",
     "StatusEffectMixin",
-    "WitherEntityMixin"
+    "TridentEntityMixin",
+    "WitherEntityMixin",
+    "priority.EntityMixin",
+    "priority.ItemStackMixin",
+    "priority.JumpingEntityMixin",
+    "priority.LivingEntityMixin",
+    "priority.PlayerEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

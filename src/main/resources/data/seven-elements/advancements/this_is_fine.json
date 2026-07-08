@@ -1,0 +1,31 @@
+{
+	"parent": "seven-elements:elements_reborn",
+	"display": {
+		"icon": {
+			"item": "seven-elements:pyro_attunement_smithing_template",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.seven-elements.this_is_fine.title"
+		},
+		"description": {
+			"translate": "advancements.seven-elements.this_is_fine.description"
+		},
+		"frame": "goal",
+		"announce_to_chat": false,
+		"hidden": true
+	},
+	"criteria": {
+		"perform_pyro_attunement": {
+			"trigger": "seven-elements:perform_attunement",
+			"conditions": {
+				"element": "PYRO"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"perform_pyro_attunement"
+		]
+	]
+}

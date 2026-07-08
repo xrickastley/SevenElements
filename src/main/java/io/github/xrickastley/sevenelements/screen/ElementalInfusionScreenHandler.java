@@ -18,7 +18,8 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.server.network.ServerPlayerEntity;
 
 public final class ElementalInfusionScreenHandler extends ScreenHandler {
-	private static final int REQUIRED_LEVEL = 10;
+	private static final int INFUSE_REQUIRED_LEVEL = 10;
+	private static final int UNINFUSE_REQUIRED_LEVEL = 2;
 
 	private final ScreenHandlerContext context;
 	private final CraftingResultInventory output = new CraftingResultInventory();
@@ -75,7 +76,17 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 	}
 
 	public boolean canInfuse(PlayerEntity player) {
-		return (player.experienceLevel >= REQUIRED_LEVEL || player.isCreative()) && this.getResultSlot().hasStack();
+		return (player.experienceLevel >= INFUSE_REQUIRED_LEVEL || player.isCreative())
+			&& this.getResultSlot().hasStack();
+	}
+
+	public boolean canUninfuse(PlayerEntity player) {
+		return (player.experienceLevel >= UNINFUSE_REQUIRED_LEVEL || player.isCreative())
+			&& ElementalInfusionComponent.hasInfusion(this.getResultSlot().getStack());
+	}
+
+	public boolean canPerformUninfuse() {
+		return ElementalInfusionComponent.hasInfusion(this.getResultSlot().getStack());
 	}
 
 	public boolean infuse(PlayerEntity player) {
@@ -88,13 +99,33 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 		final ItemStack stack = slot.getStack();
 		final Element infusedElement = ElementalInfusionComponent.generateAndApplyInfusion(stack, player.getWorld()).getLeft();
 
-		if (!player.isCreative()) serverPlayer.addExperienceLevels(-REQUIRED_LEVEL);
+		if (!player.isCreative()) serverPlayer.addExperienceLevels(-INFUSE_REQUIRED_LEVEL);
 
 		slot.setStack(stack);
 		slot.markDirty();
 
 		ServerPlayNetworking.send(serverPlayer, new FinishElementalInfusionS2CPayload(this));
 		SevenElementsCriteria.ELEMENTAL_INFUSION.trigger(serverPlayer, stack, infusedElement);
+
+		return true;
+	}
+
+	public boolean uninfuse(PlayerEntity player) {
+		if (!this.canPerformUninfuse() || !(player instanceof final ServerPlayerEntity serverPlayer)) return false;
+
+		final Slot slot = this.slots.get(0);
+
+		if (slot == null || !slot.hasStack()) return false;
+
+		final ItemStack stack = slot.getStack();
+		ElementalInfusionComponent.removeInfusion(stack);
+
+		if (!player.isCreative()) serverPlayer.addExperienceLevels(-UNINFUSE_REQUIRED_LEVEL);
+
+		slot.setStack(stack);
+		slot.markDirty();
+
+		ServerPlayNetworking.send(serverPlayer, new FinishElementalInfusionS2CPayload(this));
 
 		return true;
 	}
@@ -106,9 +137,14 @@ public final class ElementalInfusionScreenHandler extends ScreenHandler {
 
 	@Override
 	public boolean onButtonClick(PlayerEntity player, int id) {
-		if (!this.canInfuse(player)) return false;
-
-		return this.infuse(player);
+		switch (id) {
+			case 0:
+				return this.infuse(player);
+			case 1:
+				return this.uninfuse(player);
+			default:
+				return false;
+		}
 	}
 
 	@Override

@@ -1,13 +1,13 @@
 package io.github.xrickastley.sevenelements.advancement.criterion;
 
-import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
 
 import java.util.Optional;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.minecraft.advancement.criterion.AbstractCriterion;
@@ -22,17 +22,10 @@ import net.minecraft.util.Identifier;
 public class ElementalInfusionCriterion extends AbstractCriterion<ElementalInfusionCriterion.Conditions> {
 	public static final Identifier ID = SevenElements.identifier("elemental_infusion");
 
-	public Identifier getId() {
-		return ID;
-	}
-
 	@Override
 	protected Conditions conditionsFromJson(JsonObject obj, Optional<LootContextPredicate> playerPredicate, AdvancementEntityPredicateDeserializer predicateDeserializer) {
 		final Optional<ItemPredicate> item = ItemPredicate.fromJson(obj.get("item"));
-
-		final Optional<Element> element = Optional.ofNullable(
-			ClassInstanceUtil.mapOrNull(obj.get("element"), Functions.compose(JsonElement::getAsString, s -> Element.valueOf(s)))
-		);
+		final Optional<Element> element = SevenElementsCriteria.optionalStrictParse(Element.CODEC, JsonOps.INSTANCE, obj.get("element"));
 
 		return new Conditions(playerPredicate, item, element);
 	}
@@ -61,8 +54,16 @@ public class ElementalInfusionCriterion extends AbstractCriterion<ElementalInfus
 		}
 
 		public boolean requirementsMet(ItemStack stack, Element infused) {
-			return (element.isEmpty() || element.get() == infused)
-				&& (item.isEmpty() || item.get().test(stack));
+			return SevenElementsCriteria.emptyOrEqual(element, infused)
+				&& SevenElementsCriteria.emptyOrPasses(item, ItemPredicate::test, stack);
+		}
+
+		@Override
+		public JsonObject toJson() {
+			JsonObject jsonObject = super.toJson();
+			jsonObject.add("item", this.item.map(ItemPredicate::toJson).orElse(JsonNull.INSTANCE));
+			jsonObject.add("element", SevenElementsCriteria.optionalEncodeStart(Element.CODEC, JsonOps.INSTANCE, this.element).orElse(JsonNull.INSTANCE));
+			return jsonObject;
 		}
 	}
 }

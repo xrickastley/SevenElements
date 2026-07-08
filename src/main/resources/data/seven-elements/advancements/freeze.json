@@ -1,0 +1,31 @@
+{
+	"parent": "seven-elements:elements_reborn",
+	"display": {
+		"icon": {
+			"item": "seven-elements:cryo_attunement_smithing_template",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.seven-elements.freeze.title"
+		},
+		"description": {
+			"translate": "advancements.seven-elements.freeze.description"
+		},
+		"frame": "goal",
+		"announce_to_chat": false,
+		"hidden": true
+	},
+	"criteria": {
+		"perform_cryo_attunement": {
+			"trigger": "seven-elements:perform_attunement",
+			"conditions": {
+				"element": "CRYO"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"perform_cryo_attunement"
+		]
+	]
+}

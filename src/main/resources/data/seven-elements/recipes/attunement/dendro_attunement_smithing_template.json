@@ -1,0 +1,24 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "misc",
+	"key": {
+		"R": {
+			"item": "seven-elements:elemental_rune"
+		},
+		"B": {
+			"item": "seven-elements:elemental_attunement_smithing_template"
+		},
+		"S": {
+			"item": "seven-elements:dendro_attunement_smithing_template"
+		}
+	},
+	"pattern": [
+		"S",
+		"B",
+		"R"
+	],
+	"result": {
+		"count": 2,
+		"item": "seven-elements:dendro_attunement_smithing_template"
+	}
+}

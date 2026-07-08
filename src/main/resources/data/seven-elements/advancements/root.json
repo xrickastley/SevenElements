@@ -1,0 +1,37 @@
+{
+	"display": {
+		"icon": {
+			"item": "minecraft:nether_star",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.seven-elements.root.title"
+		},
+		"description": {
+			"translate": "advancements.seven-elements.root.description"
+		},
+		"background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
+		"frame": "task",
+		"show_toast": false,
+		"announce_to_chat": false
+	},
+	"criteria": {
+		"infusion_table": {
+			"trigger": "minecraft:inventory_changed",
+			"conditions": {
+				"items": [
+					{
+						"items": [
+							"seven-elements:infusion_table"
+						]
+					}
+				]
+			}
+		}
+	},
+	"requirements": [
+		[
+			"infusion_table"
+		]
+	]
+}

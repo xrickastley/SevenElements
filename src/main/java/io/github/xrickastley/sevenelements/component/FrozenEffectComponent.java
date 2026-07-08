@@ -11,7 +11,10 @@ import dev.onyxstudios.cca.api.v3.component.sync.AutoSyncedComponent;
 import dev.onyxstudios.cca.api.v3.component.tick.ClientTickingComponent;
 import dev.onyxstudios.cca.api.v3.component.tick.ServerTickingComponent;
 
-public interface FrozenEffectComponent extends AutoSyncedComponent, ClientTickingComponent, ServerTickingComponent {
+public sealed interface FrozenEffectComponent
+	extends AutoSyncedComponent, ClientTickingComponent, ServerTickingComponent
+	permits FrozenEffectComponentImpl
+{
 	public static final ComponentKey<FrozenEffectComponent> KEY = ComponentRegistry.getOrCreate(SevenElements.identifier("frozen_effect"), FrozenEffectComponent.class);
 
 	public boolean isFrozen();
