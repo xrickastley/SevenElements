@@ -100,7 +100,7 @@ loadScripts(document, 'script');</script>
 <dd><code><a href="SevenElementsSlotDisplay.html" title="class in io.github.xrickastley.sevenelements.recipe.display">SevenElementsSlotDisplay</a></code></dd>
 </dl>
 <hr>
-<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">SevenElementsSlotDisplay.SmithingAttunementSlotDisplay</span>(<a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;base, <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;material, <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;pattern)
+<div class="type-signature"><span class="modifiers">public static record </span><span class="element-name type-name-label">SevenElementsSlotDisplay.SmithingAttunementSlotDisplay</span>(<a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;base, <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;element)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a>
 implements <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></span></div>
 </section>
@@ -133,21 +133,16 @@ implements <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/mine
 <div class="col-second odd-row-color"><code><a href="#CODEC" class="member-name-link">CODEC</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
 <div class="col-first even-row-color"><code>private final <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></code></div>
-<div class="col-second even-row-color"><code><a href="#material" class="member-name-link">material</a></code></div>
+<div class="col-second even-row-color"><code><a href="#element" class="member-name-link">element</a></code></div>
 <div class="col-last even-row-color">
-<div class="block">The field for the <code>material</code> record component.</div>
+<div class="block">The field for the <code>element</code> record component.</div>
 </div>
 <div class="col-first odd-row-color"><code>static final <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/network/codec/PacketCodec.html" title="class or interface in net.minecraft.network.codec" class="external-link">PacketCodec</a><wbr>&lt;<a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/network/RegistryByteBuf.html" title="class or interface in net.minecraft.network" class="external-link">RegistryByteBuf</a>,<wbr><a href="SevenElementsSlotDisplay.SmithingAttunementSlotDisplay.html" title="class in io.github.xrickastley.sevenelements.recipe.display">SevenElementsSlotDisplay.SmithingAttunementSlotDisplay</a>&gt;</code></div>
 <div class="col-second odd-row-color"><code><a href="#PACKET_CODEC" class="member-name-link">PACKET_CODEC</a></code></div>
 <div class="col-last odd-row-color">&nbsp;</div>
-<div class="col-first even-row-color"><code>private final <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></code></div>
-<div class="col-second even-row-color"><code><a href="#pattern" class="member-name-link">pattern</a></code></div>
-<div class="col-last even-row-color">
-<div class="block">The field for the <code>pattern</code> record component.</div>
-</div>
-<div class="col-first odd-row-color"><code>static final <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.Serializer.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay.Serializer</a><wbr>&lt;<a href="SevenElementsSlotDisplay.SmithingAttunementSlotDisplay.html" title="class in io.github.xrickastley.sevenelements.recipe.display">SevenElementsSlotDisplay.SmithingAttunementSlotDisplay</a>&gt;</code></div>
-<div class="col-second odd-row-color"><code><a href="#SERIALIZER" class="member-name-link">SERIALIZER</a></code></div>
-<div class="col-last odd-row-color">&nbsp;</div>
+<div class="col-first even-row-color"><code>static final <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.Serializer.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay.Serializer</a><wbr>&lt;<a href="SevenElementsSlotDisplay.SmithingAttunementSlotDisplay.html" title="class in io.github.xrickastley.sevenelements.recipe.display">SevenElementsSlotDisplay.SmithingAttunementSlotDisplay</a>&gt;</code></div>
+<div class="col-second even-row-color"><code><a href="#SERIALIZER" class="member-name-link">SERIALIZER</a></code></div>
+<div class="col-last even-row-color">&nbsp;</div>
 </div>
 </section>
 </li>
@@ -159,9 +154,8 @@ implements <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/mine
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(net.minecraft.recipe.display.SlotDisplay,net.minecraft.recipe.display.SlotDisplay,net.minecraft.recipe.display.SlotDisplay)" class="member-name-link">SmithingAttunementSlotDisplay</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;base,
- <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;material,
- <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;pattern)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(net.minecraft.recipe.display.SlotDisplay,net.minecraft.recipe.display.SlotDisplay)" class="member-name-link">SmithingAttunementSlotDisplay</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;base,
+ <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;element)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates an instance of a <code>SmithingAttunementSlotDisplay</code> record class.</div>
 </div>
@@ -188,32 +182,27 @@ implements <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/mine
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>base</code> record component.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#element()" class="member-name-link">element</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the value of the <code>element</code> record component.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final boolean</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#equals(java.lang.Object)" class="member-name-link">equals</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a>&nbsp;o)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final int</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#hashCode()" class="member-name-link">hashCode</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a hash code value for this object.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#material()" class="member-name-link">material</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.Serializer.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay.Serializer</a><wbr>&lt;<a href="SevenElementsSlotDisplay.SmithingAttunementSlotDisplay.html" title="class in io.github.xrickastley.sevenelements.recipe.display">SevenElementsSlotDisplay.SmithingAttunementSlotDisplay</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#serializer()" class="member-name-link">serializer</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>material</code> record component.</div>
-</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#pattern()" class="member-name-link">pattern</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Returns the value of the <code>pattern</code> record component.</div>
-</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.Serializer.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay.Serializer</a><wbr>&lt;<a href="SevenElementsSlotDisplay.SmithingAttunementSlotDisplay.html" title="class in io.github.xrickastley.sevenelements.recipe.display">SevenElementsSlotDisplay.SmithingAttunementSlotDisplay</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#serializer()" class="member-name-link">serializer</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>final <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toString()" class="member-name-link">toString</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns a string representation of this record class.</div>
 </div>
 </div>
@@ -244,17 +233,10 @@ implements <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/mine
 </section>
 </li>
 <li>
-<section class="detail" id="material">
-<h3>material</h3>
-<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></span>&nbsp;<span class="element-name">material</span></div>
-<div class="block">The field for the <code>material</code> record component.</div>
-</section>
-</li>
-<li>
-<section class="detail" id="pattern">
-<h3>pattern</h3>
-<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></span>&nbsp;<span class="element-name">pattern</span></div>
-<div class="block">The field for the <code>pattern</code> record component.</div>
+<section class="detail" id="element">
+<h3>element</h3>
+<div class="member-signature"><span class="modifiers">private final</span>&nbsp;<span class="return-type"><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></span>&nbsp;<span class="element-name">element</span></div>
+<div class="block">The field for the <code>element</code> record component.</div>
 </section>
 </li>
 <li>
@@ -284,17 +266,15 @@ implements <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/mine
 <h2>Constructor Details</h2>
 <ul class="member-list">
 <li>
-<section class="detail" id="&lt;init&gt;(net.minecraft.recipe.display.SlotDisplay,net.minecraft.recipe.display.SlotDisplay,net.minecraft.recipe.display.SlotDisplay)">
+<section class="detail" id="&lt;init&gt;(net.minecraft.recipe.display.SlotDisplay,net.minecraft.recipe.display.SlotDisplay)">
 <h3>SmithingAttunementSlotDisplay</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">SmithingAttunementSlotDisplay</span><wbr><span class="parameters">(<a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;base,
- <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;material,
- <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;pattern)</span></div>
+ <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a>&nbsp;element)</span></div>
 <div class="block">Creates an instance of a <code>SmithingAttunementSlotDisplay</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
 <dd><code>base</code> - the value for the <code>base</code> record component</dd>
-<dd><code>material</code> - the value for the <code>material</code> record component</dd>
-<dd><code>pattern</code> - the value for the <code>pattern</code> record component</dd>
+<dd><code>element</code> - the value for the <code>element</code> record component</dd>
 </dl>
 </section>
 </li>
@@ -380,24 +360,13 @@ implements <a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/mine
 </section>
 </li>
 <li>
-<section class="detail" id="material()">
-<h3>material</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></span>&nbsp;<span class="element-name">material</span>()</div>
-<div class="block">Returns the value of the <code>material</code> record component.</div>
+<section class="detail" id="element()">
+<h3>element</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></span>&nbsp;<span class="element-name">element</span>()</div>
+<div class="block">Returns the value of the <code>element</code> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>the value of the <code>material</code> record component</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="pattern()">
-<h3>pattern</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://maven.fabricmc.net/docs/yarn-1.21.2+build.1/net/minecraft/recipe/display/SlotDisplay.html" title="class or interface in net.minecraft.recipe.display" class="external-link">SlotDisplay</a></span>&nbsp;<span class="element-name">pattern</span>()</div>
-<div class="block">Returns the value of the <code>pattern</code> record component.</div>
-<dl class="notes">
-<dt>Returns:</dt>
-<dd>the value of the <code>pattern</code> record component</dd>
+<dd>the value of the <code>element</code> record component</dd>
 </dl>
 </section>
 </li>
