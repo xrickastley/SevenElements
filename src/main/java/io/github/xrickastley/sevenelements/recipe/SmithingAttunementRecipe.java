@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import io.github.xrickastley.sevenelements.component.ElementalAttunementComponent;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.item.SevenElementsSmithingTemplateItem;
+import io.github.xrickastley.sevenelements.recipe.display.SevenElementsSlotDisplay;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -39,10 +40,10 @@ public class SmithingAttunementRecipe implements SmithingRecipe {
 	}
 
 	public ItemStack craft(SmithingRecipeInput smithingRecipeInput, RegistryWrapper.WrapperLookup wrapperLookup) {
-		return SmithingAttunementRecipe.craft(wrapperLookup, smithingRecipeInput.base(), smithingRecipeInput.addition(), smithingRecipeInput.template());
+		return SmithingAttunementRecipe.craft(wrapperLookup, smithingRecipeInput.base(), smithingRecipeInput.template());
 	}
 
-	public static ItemStack craft(RegistryWrapper.WrapperLookup registries, ItemStack base, ItemStack addition, ItemStack template) {
+	public static ItemStack craft(RegistryWrapper.WrapperLookup registries, ItemStack base, ItemStack template) {
 		if (!(template.getItem() instanceof final SevenElementsSmithingTemplateItem template2))
 			return ItemStack.EMPTY;
 
@@ -97,7 +98,7 @@ public class SmithingAttunementRecipe implements SmithingRecipe {
 				slotDisplay3,
 				slotDisplay,
 				slotDisplay2,
-				new SlotDisplay.SmithingTrimSlotDisplay(slotDisplay, slotDisplay2, slotDisplay3),
+				new SevenElementsSlotDisplay.SmithingAttunementSlotDisplay(slotDisplay, slotDisplay3),
 				new SlotDisplay.ItemSlotDisplay(Items.SMITHING_TABLE)
 			)
 		);
