@@ -7,12 +7,12 @@
     "BossBarHudAccessor",
     "BossBarHudMixin",
     "BufferBuilderAccessor",
-    "EntityRendererMixin",
-    "EntityRenderStateMixin",
+    "BufferBuilderStorageMixin",
     "GameRendererMixin",
     "InGameHudMixin",
     "LivingEntityMixin",
-    "LivingEntityRendererMixin"
+    "LivingEntityRendererMixin",
+    "LivingEntityRenderStateMixin"
   ],
   "injectors": {
     "defaultRequire": 1

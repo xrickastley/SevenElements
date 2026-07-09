@@ -61,8 +61,8 @@
 			"net/minecraft/class_1676": [
 				"io/github/xrickastley/sevenelements/interfaces/InfusableProjectile"
 			],
-			"net/minecraft/class_10017": [
-				"io/github/xrickastley/sevenelements/interfaces/EntityAwareRenderState"
+			"net/minecraft/class_10042": [
+				"io/github/xrickastley/sevenelements/interfaces/SevenElementsLivingEntityRenderState"
 			]
 		},
 		"cardinal-components": [

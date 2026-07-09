@@ -31,7 +31,7 @@ public final class JavaScriptUtil {
 	 * @param <T> The type of the array.
 	 * @param values The values to perform the nullish coalesing operation on.
 	 */
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T> @Nullable T nullishCoalesing(@Nullable T... values) {
 		for (final T value : values) if (value != null) return value;
 

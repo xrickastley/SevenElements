@@ -17,6 +17,7 @@ import org.joml.Matrix4f;
 import io.github.xrickastley.sevenelements.SevenElements;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
+import io.github.xrickastley.sevenelements.interfaces.SevenElementsLivingEntityRenderState;
 import io.github.xrickastley.sevenelements.networking.PayloadHandler;
 import io.github.xrickastley.sevenelements.networking.ShowElectroChargeS2CPayload;
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
@@ -68,6 +69,18 @@ public final class SpecialEffectsRenderer implements PayloadHandler<ShowElectroC
 
 		return entity.isAlive()
 			&& (entity != client.player || client.gameRenderer.getCamera().isThirdPerson());
+	}
+
+	/**
+	 * Returns whether effects should be rendered for the provided entity state.
+	 * 
+	 * @param state The entity state to be rendered effects for.
+	 */
+	public static boolean shouldRender(SevenElementsLivingEntityRenderState state) {
+		final MinecraftClient client = MinecraftClient.getInstance();
+
+		return !state.sevenelements$isDead()
+			&& (!state.sevenelements$isClientPlayer() || client.gameRenderer.getCamera().isThirdPerson());
 	}
 
 	@Override

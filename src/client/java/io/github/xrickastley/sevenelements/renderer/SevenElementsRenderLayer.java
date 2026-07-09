@@ -39,8 +39,8 @@ public class SevenElementsRenderLayer {
 		MultiPhaseParameters.builder().build(OutlineMode.NONE)
 	);
 
-	private static final RenderLayer QUADS = RenderLayer.of(
-		"seven-elements:quads",
+	private static final RenderLayer GAUGE_DISPLAY = RenderLayer.of(
+		"seven-elements:gauge_display",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.QUADS,
 		MultiPhaseParameters.builder().build(OutlineMode.NONE)
@@ -111,6 +111,13 @@ public class SevenElementsRenderLayer {
 		MultiPhaseParameters.builder().build(OutlineMode.NONE)
 	);
 
+	private static final RenderLayer CRYSTALLIZE_SHIELD = RenderLayer.of(
+		"seven-elements:crystallize_shield",
+		RenderLayer.SOLID_BUFFER_SIZE,
+		SevenElementsRenderPipelines.SPHERE,
+		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+	);
+
 	private static final SequencedMap<RenderLayer, BufferAllocator> WORLD_TEXT_SEQUENCED_MAP = Util.make(
 		new Object2ObjectLinkedOpenHashMap<>(), map -> {
 			map.put(SevenElementsRenderLayer.WORLD_TEXT, SevenElementsRenderer.createAllocator(RenderLayer.SOLID_BUFFER_SIZE));
@@ -131,8 +138,8 @@ public class SevenElementsRenderLayer {
 		return SevenElementsRenderLayer.TRIANGLE_STRIP;
 	}
 
-	public static RenderLayer getQuads() {
-		return SevenElementsRenderLayer.QUADS;
+	public static RenderLayer getGaugeDisplay() {
+		return SevenElementsRenderLayer.GAUGE_DISPLAY;
 	}
 
 	public static RenderLayer getThinLines() {
@@ -165,6 +172,10 @@ public class SevenElementsRenderLayer {
 
 	public static RenderLayer getSphere() {
 		return SevenElementsRenderLayer.SPHERE;
+	}
+
+	public static RenderLayer getCrystallizeShield() {
+		return SevenElementsRenderLayer.CRYSTALLIZE_SHIELD;
 	}
 
 	public static VertexConsumerProvider.Immediate getWorldTextImmediate() {
