@@ -26,8 +26,8 @@
 	"text.autoconfig.seven-elements.option.developer.displayElementalGauges.@Tooltip": "控制是否在有元素附着的目标身边渲染展示该目标元素附着量的量槽。",
 	"text.autoconfig.seven-elements.option.developer.displayGaugeRuler": "展示元素量槽尺标",
 	"text.autoconfig.seven-elements.option.developer.displayGaugeRuler.@Tooltip": "控制元素量槽是否有标尺——它可以帮你更清楚地观察目标元素附着量。",
-	"text.autoconfig.seven-elements.option.developer.genshinDamageLim": "原神同款伤害上限",
-	"text.autoconfig.seven-elements.option.developer.genshinDamageLim.@Tooltip": "控制元素伤害是否有原神同款2000万伤害上限。",
+	"text.autoconfig.seven-elements.option.developer.genshinDamageLim": "元素伤害上限",
+	"text.autoconfig.seven-elements.option.developer.genshinDamageLim.@Tooltip": "控制元素伤害是否有原神同款的2000万伤害上限。",
 	"text.autoconfig.seven-elements.option.developer.commafyDamage": "伤害逗号化",
 	"text.autoconfig.seven-elements.option.developer.commafyDamage.@Tooltip": "控制伤害跳字是否会每三位被逗号分隔。",
 
@@ -39,12 +39,12 @@
 	"effect.seven-elements.superconduct": "超导",
 
 	"death.attack.burning": "%1$s 燃尽了",
-	"death.attack.burning.item": "%1$s 被 %2$s 使用 %3$s 被焚烧至死 ",
+	"death.attack.burning.item": "%1$s 被 %2$s 使用 %3$s 焚烧至死 ",
 	"death.attack.burning.player": "%1$s 在逃离 %2$s 时被焚烧至死",
 
 	"death.attack.dendro_core": "%1$s 被草原核爆破了",
 	"death.attack.dendro_core.player": "%1$s 在逃离 %2$s 时感受到了自然的力量",
-	"death.attack.dendro_core.item": "%1$s 感受到了自然的力量，这得谢谢 %2$s 对其使用了 %3$s",
+	"death.attack.dendro_core.item": "%1$s 感受到了自然的力量，这多亏了 %2$s 对其使用了 %3$s",
 
 	"death.attack.electro-charged": "%1$s 变得酥酥麻麻了",
 	"death.attack.electro-charged.item": "%1$s 被 %2$s 用 %3$s 电麻了",
@@ -138,7 +138,7 @@
 	"container.seven-elements.infusion_table": "元素灌注台",
 	"container.seven-elements.infusion_table.infuse": "灌注元素",
 	"container.seven-elements.infusion_table.uninfuse": "祛除元素",
-	"container.seven-elements.infusion_table.fail_by_gamerule": "来自世界之外的神秘小力量阻止你使用元素灌注台!",
+	"container.seven-elements.infusion_table.fail_by_gamerule": "来自世界之外的神秘力量阻止你使用元素灌注台!",
 
 	"block.seven-elements.infusion_table": "元素灌注台",
 	
@@ -173,7 +173,7 @@
 
 	"subtitles.seven-elements.elemental_reaction": "元素反应已被触发",
 	"subtitles.seven-elements.entity.dendro_core.explode": "草原核迸发了",
-	"subtitles.seven-elements.entity.dendro_core.hit": "蔓生弹已命中",
+	"subtitles.seven-elements.entity.dendro_core.hit": "蔓生弹命中了目标",
 	"subtitles.seven-elements.entity.crystallize_shield.absorb": "结晶盾被吸收了",
 	"subtitles.seven-elements.entity.crystallize_shield.hit": "结晶盾被击中了",
 	"subtitles.seven-elements.entity.crystallize_shield.break": "结晶盾破碎了",
@@ -204,7 +204,7 @@
 	"advancements.seven-elements.this_is_fine.title": "没事，问题不大……",
 	"advancements.seven-elements.this_is_fine.description": "通过在下界的岩浆里沐浴，为空白元素调谐锻造模板灌注火元素",
 	"advancements.seven-elements.shipwreck_sailor_experience.title": "“绝望的船长”",
-	"advancements.seven-elements.shipwreck_sailor_experience.description": "通过在水里和鱼比憋气，为空白元素调谐锻造模板灌注水元素",
+	"advancements.seven-elements.shipwreck_sailor_experience.description": "通过在水里和鱼比憋气落败，为空白元素调谐锻造模板灌注水元素",
 	"advancements.seven-elements.fly_like_a_feather.title": "飞一样的感觉~",
 	"advancements.seven-elements.fly_like_a_feather.description": "通过在空中飘……飘……飘……好一会儿，为空白元素调谐锻造模板灌注风元素",
 	"advancements.seven-elements.stormy_execution.title": "直流还是交流？",
@@ -215,4 +215,4 @@
 	"advancements.seven-elements.freeze.description": "通过体验刺骨的寒冷，为空白元素调谐锻造模板灌注冰元素",
 	"advancements.seven-elements.the_wrath_of_the_rock.title": "你惹到了石头……",
 	"advancements.seven-elements.the_wrath_of_the_rock.description": "通过把你的头卡进世界深处的石头里，为空白元素调谐锻造模板灌注岩元素"
-}
+} 
