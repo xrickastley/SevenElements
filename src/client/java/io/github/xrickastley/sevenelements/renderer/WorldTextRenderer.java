@@ -42,6 +42,9 @@ public final class WorldTextRenderer {
 	}
 
 	public void tick(ClientWorld world) {
+		if (!world.getTickManager().shouldTick())
+			return;
+
 		entries.forEach(Entry::tick);
 		entries.removeIf(Entry::shouldRemove);
 	}
