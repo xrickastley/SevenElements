@@ -7,12 +7,13 @@ import io.github.xrickastley.sevenelements.entity.SevenElementsEntityTypes;
 import io.github.xrickastley.sevenelements.gui.screen.ingame.ElementalInfusionScreen;
 import io.github.xrickastley.sevenelements.networking.SevenElementsPacketsS2C;
 import io.github.xrickastley.sevenelements.networking.SyncBossBarEntityPayloadHandler;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderers;
 import io.github.xrickastley.sevenelements.renderer.WorldTextRenderer;
 import io.github.xrickastley.sevenelements.renderer.entity.CrystallizeShardEntityRenderer;
 import io.github.xrickastley.sevenelements.renderer.entity.DendroCoreEntityRenderer;
 import io.github.xrickastley.sevenelements.renderer.entity.model.CrystallizeShardEntityModel;
 import io.github.xrickastley.sevenelements.renderer.entity.model.DendroCoreEntityModel;
-import io.github.xrickastley.sevenelements.renderer.genshin.SpecialEffectsRenderer;
 import io.github.xrickastley.sevenelements.screen.SevenElementsScreenHandlers;
 import io.github.xrickastley.sevenelements.util.ClientConfig;
 
@@ -30,7 +31,6 @@ public class SevenElementsClient implements ClientModInitializer {
 	public static final String MOD_ID = SevenElements.MOD_ID;
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	private static final SpecialEffectsRenderer SPECIAL_EFFECTS_RENDERER = new SpecialEffectsRenderer();
 	public static final WorldTextRenderer WORLD_TEXT_RENDERER = new WorldTextRenderer();
 	public static final SyncBossBarEntityPayloadHandler SYNC_BOSS_BAR_ENTITY_HANDLER = new SyncBossBarEntityPayloadHandler();
 
@@ -38,11 +38,11 @@ public class SevenElementsClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		SevenElementsClient.LOGGER.info("Seven Elements (Client) Initialized!");
 
-		SevenElementsPacketsS2C.registerHandler(SevenElementsClient.SPECIAL_EFFECTS_RENDERER);
+		SevenElementsPacketsS2C.registerHandler(SevenElementsRenderers.CHARGE_AURA_EFFECT);
 		SevenElementsPacketsS2C.registerHandler(SevenElementsClient.SYNC_BOSS_BAR_ENTITY_HANDLER);
 
-		WorldRenderEvents.END.register(SevenElementsClient.SPECIAL_EFFECTS_RENDERER::render);
-		ClientTickEvents.START_WORLD_TICK.register(SevenElementsClient.SPECIAL_EFFECTS_RENDERER::tick);
+		WorldRenderEvents.END.register(SevenElementsRenderer::renderAll);
+		ClientTickEvents.START_WORLD_TICK.register(SevenElementsRenderer::tickAll);
 
 		WorldRenderEvents.END.register(SevenElementsClient.WORLD_TEXT_RENDERER::render);
 		ClientTickEvents.START_WORLD_TICK.register(SevenElementsClient.WORLD_TEXT_RENDERER::tick);
@@ -53,6 +53,7 @@ public class SevenElementsClient implements ClientModInitializer {
 		EntityModelLayerRegistry.registerModelLayer(CrystallizeShardEntityModel.MODEL_LAYER, CrystallizeShardEntityModel::getTexturedModelData);
 
 		SevenElementsPacketsS2C.register();
+		SevenElementsRenderers.register();
 
 		AutoConfig.register(ClientConfig.class, GsonConfigSerializer::new);
 

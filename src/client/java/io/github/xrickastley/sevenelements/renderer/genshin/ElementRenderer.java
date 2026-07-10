@@ -30,8 +30,8 @@ public final class ElementRenderer {
 
 	public static ElementRenderer.ElementState elementState(ElementalApplication application, float tickDelta) {
 		return new ElementRenderer.ElementState(
-			application.getElement(), 
-			(application.getRemainingTicks() - tickDelta) / 20.0, 
+			application.getElement(),
+			(application.getRemainingTicks() - tickDelta) / 20.0,
 			application.getEntity().getWorld().getTime() - application.getAppliedAt(),
 			tickDelta
 		);

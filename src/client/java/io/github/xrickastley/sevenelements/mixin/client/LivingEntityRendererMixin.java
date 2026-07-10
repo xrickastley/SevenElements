@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import net.minecraft.entity.EntityPose;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,6 +32,7 @@ import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
@@ -73,7 +73,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 		final List<ElementRenderer.ElementState> elementStates = entityState.sevenelements$getElementStates();
 
 		if (elementStates.isEmpty()) return;
-		
+
 		final int length = 1;
 		final int amount = elementStates.size();
 

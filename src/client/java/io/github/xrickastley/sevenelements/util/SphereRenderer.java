@@ -33,7 +33,7 @@ public final class SphereRenderer {
 	public static void render(MatrixStack matrices, Vec3d origin, float radius, int latSteps, int lonSteps, int color) {
 		SphereRenderer.render(matrices, origin, radius, latSteps, lonSteps, pos -> color);
 	}
-	
+
 	/**
 	 * Render a sphere centered at (x, y, z) in world coordinates.
 	 *

@@ -4,7 +4,6 @@ import java.util.OptionalDouble;
 import java.util.SequencedMap;
 import java.util.function.Function;
 
-import net.minecraft.client.render.RenderLayer.MultiPhaseParameters;
 import net.minecraft.client.render.RenderLayer.OutlineMode;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderPhase.LineWidth;
@@ -22,35 +21,35 @@ public class SevenElementsRenderLayer {
 		"seven-elements:triangles",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.TRIANGLES,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+		RenderLayer.MultiPhaseParameters.builder().build(OutlineMode.NONE)
 	);
 
 	private static final RenderLayer TRIANGLE_FAN = RenderLayer.of(
 		"seven-elements:triangle_fan",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.TRIANGLE_FAN,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+		RenderLayer.MultiPhaseParameters.builder().build(OutlineMode.NONE)
 	);
 
 	private static final RenderLayer TRIANGLE_STRIP = RenderLayer.of(
 		"seven-elements:triangle_strip",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.TRIANGLE_STRIP,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+		RenderLayer.MultiPhaseParameters.builder().build(OutlineMode.NONE)
 	);
 
 	private static final RenderLayer GAUGE_DISPLAY = RenderLayer.of(
 		"seven-elements:gauge_display",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.QUADS,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+		RenderLayer.MultiPhaseParameters.builder().build(OutlineMode.NONE)
 	);
 
 	private static final RenderLayer THIN_LINES = RenderLayer.of(
 		"seven-elements:thin_lines",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.LINES,
-		MultiPhaseParameters.builder()
+		RenderLayer.MultiPhaseParameters.builder()
 			.lineWidth(new LineWidth(OptionalDouble.of(5)))
 			.build(OutlineMode.NONE)
 	);
@@ -59,63 +58,41 @@ public class SevenElementsRenderLayer {
 		"seven-elements:thick_lines",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.LINES,
-		MultiPhaseParameters.builder()
+		RenderLayer.MultiPhaseParameters.builder()
 			.lineWidth(new LineWidth(OptionalDouble.of(10)))
 			.build(OutlineMode.NONE)
 	);
 
 	private static final Function<Identifier, RenderLayer> ELEMENTS = Util.memoize(
-		texture -> {
-			MultiPhaseParameters multiPhaseParameters = MultiPhaseParameters.builder()
+		texture -> RenderLayer.of(
+			"seven-elements:elements",
+			RenderLayer.SOLID_BUFFER_SIZE,
+			SevenElementsRenderPipelines.ELEMENTS,
+			RenderLayer.MultiPhaseParameters.builder()
 				.texture(new RenderPhase.Texture(texture, TriState.FALSE, false))
-				.build(OutlineMode.NONE);
-
-			return RenderLayer.of(
-				"seven-elements:elements",
-				RenderLayer.SOLID_BUFFER_SIZE,
-				SevenElementsRenderPipelines.ELEMENTS,
-				multiPhaseParameters
-			);
-		}
+				.build(OutlineMode.NONE)
+		)
 	);
 
 	private static final RenderLayer WORLD_TEXT = RenderLayer.of(
 		"seven-elements:world/text",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.WORLD_TEXT,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
-	);
-
-	private static final RenderLayer INNER_CHARGE_LINE = RenderLayer.of(
-		"seven-elements:world/charge_line/inner",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.CHARGE_LINE,
-		MultiPhaseParameters.builder()
-			.lineWidth(new LineWidth(OptionalDouble.of(2.0)))
-			.build(OutlineMode.NONE)
-	);
-
-	private static final RenderLayer OUTER_CHARGE_LINE = RenderLayer.of(
-		"seven-elements:world/charge_line/outer",
-		RenderLayer.SOLID_BUFFER_SIZE,
-		SevenElementsRenderPipelines.CHARGE_LINE,
-		MultiPhaseParameters.builder()
-			.lineWidth(new LineWidth(OptionalDouble.of(6.0)))
-			.build(OutlineMode.NONE)
+		RenderLayer.MultiPhaseParameters.builder().build(OutlineMode.NONE)
 	);
 
 	private static final RenderLayer SPHERE = RenderLayer.of(
 		"seven-elements:sphere",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.SPHERE,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+		RenderLayer.MultiPhaseParameters.builder().build(OutlineMode.NONE)
 	);
 
 	private static final RenderLayer CRYSTALLIZE_SHIELD = RenderLayer.of(
 		"seven-elements:crystallize_shield",
 		RenderLayer.SOLID_BUFFER_SIZE,
 		SevenElementsRenderPipelines.SPHERE,
-		MultiPhaseParameters.builder().build(OutlineMode.NONE)
+		RenderLayer.MultiPhaseParameters.builder().build(OutlineMode.NONE)
 	);
 
 	private static final SequencedMap<RenderLayer, BufferAllocator> WORLD_TEXT_SEQUENCED_MAP = Util.make(
@@ -160,14 +137,6 @@ public class SevenElementsRenderLayer {
 
 	public static RenderLayer getWorldText() {
 		return SevenElementsRenderLayer.WORLD_TEXT;
-	}
-
-	public static RenderLayer getInnerChargeLine() {
-		return SevenElementsRenderLayer.INNER_CHARGE_LINE;
-	}
-
-	public static RenderLayer getOuterChargeLine() {
-		return SevenElementsRenderLayer.OUTER_CHARGE_LINE;
 	}
 
 	public static RenderLayer getSphere() {

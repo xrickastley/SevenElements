@@ -42,14 +42,14 @@ public final class Util {
 
 	/**
 	 * To normally be used with {@link Stream#filter()}.
-	 * 
-	 * <p>Imitates {@link Stream#distinct()}, except with a mapping argument. The predicate 
+	 *
+	 * <p>Imitates {@link Stream#distinct()}, except with a mapping argument. The predicate
 	 * returns {@code true} if the mapped element is distinct with the {@code Predicate} instance
 	 * created by this method, {@code false} otherwise.
-	 * 
+	 *
 	 * @param <T> The type of the input.
 	 * @param <K> The type of the result after mapping the input.
-	 * @param keyMapper A function that transforms the input into an element to be used for 
+	 * @param keyMapper A function that transforms the input into an element to be used for
 	 * distinct element comparison.
 	 */
 	public static <T, K> Predicate<T> distinctKeyed(Function<T, ? extends K> keyMapper) {

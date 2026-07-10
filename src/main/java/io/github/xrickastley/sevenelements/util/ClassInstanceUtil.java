@@ -2,6 +2,7 @@ package io.github.xrickastley.sevenelements.util;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -60,5 +61,22 @@ public final class ClassInstanceUtil {
 		if (value == null) return;
 
 		ifNonNull.accept(value);
+	}
+
+	/**
+	 * If {@code obj} is {@code null}, returns the result of calling {@code ifAbsent}. Otherwise,
+	 * returns {@code obj}.
+	 *
+	 * @param <T> The type of the object.
+	 * @param obj The possibly null object.
+	 * @param ifAbsent A supplier returning an instance of {@code T}, to be computed if {@code obj}
+	 * is {@code null}.
+	 *
+	 * @return {@code obj} if it is not {@code null}, the result of {@code ifAbsent} otherwise.
+	 */
+	public static <T> T computeIfAbsent(@Nullable T obj, Supplier<T> ifAbsent) {
+		return obj == null
+			? ifAbsent.get()
+			: obj;
 	}
 }

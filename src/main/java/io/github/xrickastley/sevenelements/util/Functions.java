@@ -61,6 +61,10 @@ public final class Functions {
 		return fn::apply;
 	}
 
+	public static <R> Supplier<R> supplier(R value) {
+		return () -> value;
+	}
+
 	public static <T, R> Supplier<R> supplier(Function<T, R> fn, T value) {
 		return () -> fn.apply(value);
 	}

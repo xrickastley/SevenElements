@@ -49,7 +49,7 @@ public final class JavaScriptUtil {
 	 * @param <T> The type of the array.
 	 * @param suppliers The {@code Suppliers} to perform the nullish coalesing operation on.
 	 */
-	@SuppressWarnings("unchecked")
+	@SafeVarargs
 	public static <T> @Nullable T nullishCoalesingFn(Supplier<? extends T>... suppliers) {
 		for (final Supplier<? extends T> supplier : suppliers) {
 			final T value = supplier.get();
