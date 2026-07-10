@@ -15,9 +15,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 
-// Prioritized since Frozen **MUST** disable block placements.
 @Mixin(value = AbstractBlockState.class, priority = Integer.MIN_VALUE)
 public class AbstractBlockStateMixin {
+	// Frozen **must** disable block placements.
 	@ModifyReturnValue(
 		method = "getOutlineShape(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/ShapeContext;)Lnet/minecraft/util/shape/VoxelShape;",
 		at = @At("RETURN")

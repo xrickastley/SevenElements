@@ -8,21 +8,27 @@ import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
 
+import io.github.xrickastley.sevenelements.util.functions.MemoizedFunction;
+
 public final class Util {
 	public static boolean isCalledBy(Class<?> clazz) {
-		return Util.isCalledBy(clazz, null, 0);
+		// offset accounting this method
+		return Util.isCalledBy(clazz, null, 1);
 	}
 
 	public static boolean isCalledBy(Class<?> clazz, int offset) {
-		return Util.isCalledBy(clazz, null, offset);
+		// offset accounting this method
+		return Util.isCalledBy(clazz, null, offset + 1);
 	}
 
 	public static boolean isCalledBy(Class<?> clazz, @Nullable String method) {
-		return Util.isCalledBy(clazz, method, 0);
+		// offset accounting this method
+		return Util.isCalledBy(clazz, method, 1);
 	}
 
 	public static boolean isCalledBy(Class<?> clazz, @Nullable String method, int offset) {
-		return Util.isCalledBy(clazz.getName(), method, offset);
+		// offset accounting this method
+		return Util.isCalledBy(clazz.getName(), method, offset + 1);
 	}
 
 	public static boolean isCalledBy(String className, @Nullable String method, int offset) {
@@ -38,7 +44,9 @@ public final class Util {
 		return caller.getClassName().equals(className) && (method == null || caller.getMethodName().equals(method));
 	}
 
-
+	public static <T, R> MemoizedFunction<T, R> memoize(final Function<T, R> function) {
+		return new MemoizedFunction<>(function);
+	}
 
 	/**
 	 * To normally be used with {@link Stream#filter()}.

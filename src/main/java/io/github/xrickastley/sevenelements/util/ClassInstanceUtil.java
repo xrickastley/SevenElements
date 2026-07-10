@@ -1,8 +1,10 @@
 package io.github.xrickastley.sevenelements.util;
 
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -78,5 +80,59 @@ public final class ClassInstanceUtil {
 		return obj == null
 			? ifAbsent.get()
 			: obj;
+	}
+
+	/**
+	 * If {@code obj} isn't null and {@code obj} is an instance of {@code clazz}, calls the
+	 * {@code ifClassInstance} consumer with {@code obj} as an instance of {@code clazz}.
+	 *
+	 * @param <T> The type of the expected class.
+	 * @param obj The object to check as an instance of {@code clazz} if it isn't null.
+	 * @param clazz The expected class {@code obj} is an instance of.
+	 * @param ifClassInstance The consumer to call if {@code obj} is an instance of {@code clazz}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> void ifInstanceOf(@Nullable Object obj, Class<T> clazz, Consumer<T> ifClassInstance) {
+		if (obj == null || !clazz.isInstance(obj)) return;
+
+		ifClassInstance.accept((T) obj);
+	}
+
+	/**
+	 * If {@code obj} isn't null, is an instance of {@code clazz} and {@code predicate.test(obj)}
+	 * is {@code true}, calls the {@code ifInstanceAnd} consumer with {@code obj} as an instance of
+	 * {@code clazz}.
+	 *
+	 * @param <T> The type of the expected class.
+	 * @param obj The object to check as an instance of {@code clazz} if it isn't null.
+	 * @param clazz The expected class {@code obj} is an instance of.
+	 * @param predicate The test to perform on {@code obj} if it is an instance of {@code T}.
+	 * @param ifInstanceAnd The consumer to call if {@code obj} is an instance of {@code clazz} and {@code predicate.test(obj)} is {@code true}.
+	 */
+	@SuppressWarnings("unchecked")
+	public static <T> void ifInstanceOfAnd(@Nullable Object obj, Class<T> clazz, Predicate<T> predicate, Consumer<T> ifInstanceAnd) {
+		if (obj == null || !clazz.isInstance(obj) || !predicate.test((T) obj)) return;
+
+		ifInstanceAnd.accept((T) obj);
+	}
+
+	/**
+	 * Returns {@code true} if the arguments are equal to each other
+	 * and {@code false} otherwise.
+	 * If both arguments are {@code null}, {@code false} is returned.
+	 * Otherwise, equality is determined by calling the
+	 * {@link Objects#equals(Object, Object) Objects#equals} method with
+	 * the arguments of this method.
+	 *
+	 * @param a an object
+	 * @param b an object to be compared with {@code a} for equality
+	 * @return {@code true} if the arguments are equal to each other
+	 * and are both not null, {@code false} otherwise
+	 *
+	 * @see Object#equals(Object, Object)
+	 */
+	public static boolean nonNullEquals(@Nullable Object a, @Nullable Object b) {
+		return (a != null && b != null)
+			&& Objects.equals(a, b);
 	}
 }

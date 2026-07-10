@@ -1,5 +1,7 @@
 package io.github.xrickastley.sevenelements.util;
 
+import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.Nullable;
@@ -17,8 +19,8 @@ public final class JavaScriptUtil {
 	 * @param <T> The type of the array.
 	 * @param values The values to perform the logical OR operation on.
 	 */
-	@SuppressWarnings("unchecked")
-	public static <T> T logicalOR(@Nullable T... values) {
+	@SafeVarargs
+	public static <T> T logicalOr(@Nullable T... values) {
 		for (final T value : values) if (isTruthy(value)) return value;
 
 		return values[values.length - 1];
@@ -94,5 +96,29 @@ public final class JavaScriptUtil {
 	 */
 	public static boolean isTruthy(@Nullable Object any) {
 		return !JavaScriptUtil.isFalsy(any);
+	}
+
+	public static <A, R> @Nullable R optionalChain(@Nullable A obj, Function<A, R> a) {
+		return Optional.ofNullable(obj)
+			.map(a)
+			.orElse(null);
+	}
+
+	public static <A, B, R> @Nullable R optionalChain(@Nullable A obj, Function<A, B> a, Function<B, R> b) {
+		return Optional.ofNullable(obj)
+			.map(a).map(b)
+			.orElse(null);
+	}
+
+	public static <A, B, C, R> @Nullable R optionalChain(@Nullable A obj, Function<A, B> a, Function<B, C> b, Function<C, R> c) {
+		return Optional.ofNullable(obj)
+			.map(a).map(b).map(c)
+			.orElse(null);
+	}
+
+	public static <A, B, C, D, R> @Nullable R optionalChain(@Nullable A obj, Function<A, B> a, Function<B, C> b, Function<C, D> c, Function<D, R> d) {
+		return Optional.ofNullable(obj)
+			.map(a).map(b).map(c).map(d)
+			.orElse(null);
 	}
 }

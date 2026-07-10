@@ -1,0 +1,42 @@
+package io.github.xrickastley.sevenelements.mixin.client;
+
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+
+import io.github.xrickastley.sevenelements.renderer.ElementGlintRenderer;
+
+import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.item.ItemRenderState;
+import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.util.math.MatrixStack;
+
+@Mixin(ItemRenderer.class)
+public class ItemRendererMixin {
+	@WrapOperation(
+		method = "renderItem(Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II[ILjava/util/List;Lnet/minecraft/client/render/RenderLayer;Lnet/minecraft/client/render/item/ItemRenderState$Glint;)V",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/client/render/item/ItemRenderer;getDynamicDisplayGlintConsumer(Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/client/render/RenderLayer;Lnet/minecraft/client/util/math/MatrixStack$Entry;)Lnet/minecraft/client/render/VertexConsumer;"
+		)
+	)
+	private static VertexConsumer renderAttunementGlint$1(VertexConsumerProvider provider, RenderLayer layer, MatrixStack.Entry entry, Operation<VertexConsumer> original, @Local(argsOnly = true) ItemRenderState.Glint glintState) {
+		return ElementGlintRenderer.getDynamicDisplayGlintConsumer(original.call(provider, layer, entry), provider, layer, entry, glintState);
+	}
+
+	@WrapOperation(
+		method = "renderItem(Lnet/minecraft/item/ItemDisplayContext;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II[ILjava/util/List;Lnet/minecraft/client/render/RenderLayer;Lnet/minecraft/client/render/item/ItemRenderState$Glint;)V",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/client/render/item/ItemRenderer;getItemGlintConsumer(Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/client/render/RenderLayer;ZZ)Lnet/minecraft/client/render/VertexConsumer;"
+		)
+	)
+	private static VertexConsumer renderAttunementGlint$2(VertexConsumerProvider vertexConsumers, RenderLayer layer, boolean solid, boolean glint, Operation<VertexConsumer> original, @Local(argsOnly = true) ItemRenderState.Glint glintState) {
+		return ElementGlintRenderer.getItemGlintConsumer(original.call(vertexConsumers, layer, solid, glint), vertexConsumers, layer, solid, glint, glintState);
+	}
+}

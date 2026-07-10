@@ -73,6 +73,13 @@ public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
 	public void serverTick() {
 		if (!this.owner.hasStatusEffect(SevenElementsStatusEffects.FROZEN) && this.isFrozen)
 			this.unfreeze();
+
+		if (!this.isFrozen()) return;
+
+		owner.setPose(this.forcePose);
+		owner.setHeadYaw(this.forceBodyYaw);
+		owner.setBodyYaw(this.forceBodyYaw);
+		owner.setPitch(this.forcePitch);
 	}
 
 	public boolean isFrozen() {

@@ -108,10 +108,12 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 	}
 
 	public void setAsBurgeon() {
+		if (!(this.getWorld() instanceof final ServerWorld world)) return;
+
 		if (this.type != Type.NORMAL) throw new IllegalStateException("This DendroCoreEntity has already been transformed! Type: " + this.type);
 
 		this.type = Type.BURGEON;
-		this.explode(3.0);
+		this.explode(ElementalReactions.BURGEON.getReactionStrength(this.getRecentOwner(), world));
 	}
 
 	public boolean isNormal() {
@@ -124,6 +126,11 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 	public boolean isBurgeon() {
 		return this.type == Type.BURGEON;
+	}
+
+	public void syncFromPayload(SyncDendroCoreStateS2CPayload payload) {
+		this.type = payload.type;
+		this.age = payload.age;
 	}
 
 	@Override
@@ -182,7 +189,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 			if (this.curTicksInHitbox < DendroCoreEntity.SPRAWLING_SHOT_DELAY) return;
 
 			for (final Entity target2 : ElementalReaction.getEntitiesInAoE(target, 1.0, e -> !owners.contains(e.getUuid())))
-				target2.damage(world, this.createDamageSource(target), ElementalReaction.getReactionDamage(this, 3.0));
+				target2.damage(world, this.createDamageSource(target), ElementalReactions.HYPERBLOOM.getReactionStrength(this.getRecentOwner(), world));
 
 			this.remove(RemovalReason.KILLED);
 
@@ -197,7 +204,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 	@Override
 	public void kill(ServerWorld world) {
-		this.explode(2.0);
+		this.explode(ElementalReactions.DENDRO_BLOOM.getReactionStrength(this.getRecentOwner(), world));
 	}
 
 	@Override
@@ -227,8 +234,8 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 
 		if (this.type == Type.HYPERBLOOM) this.doHyperbloom();
 
-		if (this.age >= 120 && type != Type.HYPERBLOOM) {
-			this.explode(2.0);
+		if (this.age >= 120 && type != Type.HYPERBLOOM && this.getWorld() instanceof final ServerWorld world) {
+			this.explode(ElementalReactions.DENDRO_BLOOM.getReactionStrength(this.getRecentOwner(), world));
 			this.remove(RemovalReason.KILLED);
 		}
 	}
@@ -253,7 +260,7 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		while (queue.peek() != null && queue.size() > 5) queue.remove().kill(world);
 	}
 
-	private boolean explode(final double reactionMultiplier) {
+	private boolean explode(final float damage) {
 		if (!(this.getWorld() instanceof final ServerWorld world)) return false;
 
 		if (this.exploded) return false;
@@ -262,20 +269,15 @@ public final class DendroCoreEntity extends SevenElementsEntity {
 		this.age = 117;
 		this.sendStateUpdate();
 
-		if (!this.getWorld().isClient) this.sendStateUpdate();
-
 		final @Nullable LivingEntity recentOwner = this.getRecentOwner();
 
 		for (final LivingEntity target : ElementalReaction.getEntitiesInAoE(this, 5.0)) {
 			if (target instanceof DendroCoreEntity) continue;
 
 			final ElementalDamageSource source = this.createDamageSource(target, recentOwner);
+			final float damageMultiplier = this.owners.contains(target.getUuid()) ? 0.02f : 1f;
 
-			float damage = ElementalReaction.getReactionDamage(this, reactionMultiplier);
-
-			if (this.owners.contains(target.getUuid())) damage *= 0.02f;
-
-			target.damage(world, source, damage);
+			target.damage(world, source, damage * damageMultiplier);
 		}
 
 		this.getWorld()
