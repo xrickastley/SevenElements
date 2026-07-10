@@ -34,7 +34,7 @@ public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
 	public void readFromNbt(NbtCompound tag, RegistryWrapper.WrapperLookup registry) {
 		this.isFrozen = NbtHelper.get(tag, "IsFrozen", Codec.BOOL);
 		this.hadNoAi = NbtHelper.get(tag, "HadNoAi", Codec.BOOL);
-		this.forcePose = NbtHelper.get(tag, "ForcePose", ENTITY_POSE_CODEC);
+		this.forcePose = tag.get("ForcePose", ENTITY_POSE_CODEC).orElse(this.forcePose);
 		this.forceHeadYaw = NbtHelper.get(tag, "ForceHeadYaw", Codec.FLOAT);
 		this.forceBodyYaw = NbtHelper.get(tag, "ForceBodyYaw", Codec.FLOAT);
 		this.forcePitch = NbtHelper.get(tag, "ForcePitch", Codec.FLOAT);
