@@ -1,6 +1,7 @@
 package io.github.xrickastley.sevenelements.component;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 import io.github.xrickastley.sevenelements.util.NbtHelper;
@@ -13,7 +14,10 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.math.MathHelper;
 
 public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
-	private static final Codec<EntityPose> ENTITY_POSE_CODEC = Codec.INT.xmap(EntityPose.INDEX_TO_VALUE::apply, EntityPose::getIndex);
+	private static final Codec<EntityPose> ENTITY_POSE_CODEC = Codec.withAlternative(
+		Codec.INT.xmap(EntityPose.INDEX_TO_VALUE::apply, EntityPose::getIndex),
+		Codec.STRING.comapFlatMap(FrozenEffectComponentImpl::validatePose, EntityPose::toString)
+	);
 
 	private final LivingEntity owner;
 	private boolean isFrozen = false;
@@ -28,6 +32,14 @@ public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
 
 	public FrozenEffectComponentImpl(LivingEntity owner) {
 		this.owner = owner;
+	}
+
+	private static final DataResult<EntityPose> validatePose(String entityPose) {
+		try {
+			return DataResult.success(EntityPose.valueOf(entityPose));
+		} catch (IllegalArgumentException e) {
+			return DataResult.error(() -> "Not a valid EntityPose: " + entityPose + " " + e.getMessage());
+		}
 	}
 
 	@Override
