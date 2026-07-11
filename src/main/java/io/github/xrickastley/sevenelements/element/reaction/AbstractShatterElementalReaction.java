@@ -10,6 +10,7 @@ import io.github.xrickastley.sevenelements.element.ElementalApplications;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypes;
+import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -26,7 +27,10 @@ public abstract sealed class AbstractShatterElementalReaction
 	permits GeoShatterElementalReaction, HeavyShatterElementalReaction
 {
 	AbstractShatterElementalReaction(Settings settings) {
-		super(settings);
+		super(
+			settings
+				.setReactionMultiplier(3.0)
+		);
 	}
 
 	@Override
@@ -35,7 +39,7 @@ public abstract sealed class AbstractShatterElementalReaction
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getLeft());
-		final ElementalApplication triggeringElement = component.getElementalApplication(this.triggeringElement.getLeft());
+		final ElementalApplication triggeringElement = JavaScriptUtil.nullishCoalesing(component.getElementalApplication(this.triggeringElement.getLeft()), ElementalApplications.gaugeUnits(entity, Element.PHYSICAL, 0.0));
 
 		final double reducedGauge = auraElement.reduceGauge(Double.MAX_VALUE);
 
@@ -48,7 +52,7 @@ public abstract sealed class AbstractShatterElementalReaction
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
 		if (!(entity.getWorld() instanceof final ServerWorld world)) return;
 
-		final float damage = ElementalReaction.getReactionDamage(entity, 3.0);
+		final float damage = this.getReactionStrength(origin, world);
 		final ElementalDamageSource source = new ElementalDamageSource(
 			entity
 				.getDamageSources()

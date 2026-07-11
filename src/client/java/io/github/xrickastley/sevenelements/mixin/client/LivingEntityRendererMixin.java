@@ -5,50 +5,34 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.jetbrains.annotations.Nullable;
-import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.FrozenEffectComponent;
-import io.github.xrickastley.sevenelements.element.DurationElementalApplication;
-import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.element.ElementalApplication;
-import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
-import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
-import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
-import io.github.xrickastley.sevenelements.renderer.genshin.ElementEntry;
+import io.github.xrickastley.sevenelements.renderer.genshin.ElementRenderer;
 import io.github.xrickastley.sevenelements.renderer.genshin.SpecialEffectsRenderer;
 import io.github.xrickastley.sevenelements.util.ClientConfig;
-import io.github.xrickastley.sevenelements.util.Color;
 import io.github.xrickastley.sevenelements.util.SphereRenderer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.model.EntityModel;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.client.util.BufferAllocator;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
@@ -64,232 +48,93 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 		throw new AssertionError();
 	}
 
-	@Unique
-	private static final BufferAllocator sevenelements$quadAllocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer::getQuads);
-	@Unique
-	private static final BufferAllocator sevenelements$linesAllocator = SevenElementsRenderer.createAllocator(RenderLayer.SOLID_BUFFER_SIZE);
+	@Inject(
+		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
+		at = @At("TAIL")
+	)
+	private void addSevenElementsLivingEntityRenderState(T livingEntity, S livingEntityRenderState, float f, CallbackInfo ci) {
+		livingEntityRenderState.sevenelements$fillRenderState(livingEntity, f);
+	}
 
 	@Inject(
 		method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
 		at = @At("TAIL")
 	)
-	private void addRenderers(S state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-		if (!(state.sevenelements$getEntity() instanceof final LivingEntity entity)) return;
+	private void addRenderers(S state, MatrixStack matrixStack, VertexConsumerProvider provider, int i, CallbackInfo ci) {
+		if (state.sevenelements$isDead()) return;
 
-		final float tickDelta = MinecraftClient.getInstance().getRenderTickCounter().getTickProgress(false);
-
-		this.sevenelements$renderElementsIfPresent(entity, matrixStack, tickDelta);
-		this.sevenelements$renderElementalGauges(entity, matrixStack, tickDelta);
-		this.sevenelements$renderCrystallizeShield(entity, matrixStack);
+		this.sevenelements$renderElements(state, provider, matrixStack);
+		this.sevenelements$renderElementalGauges(state, provider, matrixStack);
+		this.sevenelements$renderCrystallizeShield(state, provider, matrixStack);
 	}
 
 	@Unique
-	private void sevenelements$renderElementsIfPresent(final LivingEntity entity, final MatrixStack matrixStack, final float tickDelta) {
-		if (entity.isDead()) return;
+	private void sevenelements$renderElements(final S entityState, final VertexConsumerProvider provider, final MatrixStack matrixStack) {
+		final List<ElementRenderer.ElementState> elementStates = entityState.sevenelements$getElementStates();
 
-		final ElementComponent component = ElementComponent.KEY.get(entity);
-		final List<ElementEntry> elementArray = new ArrayList<>();
+		if (elementStates.isEmpty()) return;
 
-		if (component.hasValidLastReaction()) {
-			final ElementalReaction reaction = component.getLastReaction().getLeft();
-			final long reactionAt = component.getLastReaction().getRight();
+		final int length = 1;
+		final int amount = elementStates.size();
 
-			reaction
-				.getReactionDisplayOrder()
-				.forEach(element -> elementArray.add(new ElementEntry(element, 60.0, reactionAt, tickDelta)));
-		} else {
-			if (component.getAppliedElements().isEmpty()) return;
-
-			final Optional<Integer> priority = component.getHighestElementPriority();
-
-			if (priority.isEmpty()) return;
-
-			elementArray.addAll(
-				component
-					.getAppliedElements()
-					.filter(application -> application.getElement().getPriority() == priority.get())
-					.map(a -> ElementEntry.of(a, tickDelta))
-			);
-		}
-
-		final Set<Identifier> textures = new HashSet<>();
-
-		elementArray.removeIf(entry -> !entry.getElement().hasTexture() || !textures.add(entry.getElement().getTexture()));
-
-		final Iterator<Vec3d> coords = this
-			.sevenelements$generateTexturesUsingCenter(new Vec3d(0, 0, 0), 1, elementArray.size())
-			.iterator();
-
-		final Set<Identifier> elementTexs = new HashSet<>();
-
-		elementArray.removeIf(entry -> !elementTexs.add(entry.getElement().getTexture()));
-		elementArray.forEach(entry -> entry.render(entity, matrixStack, dispatcher.camera, (float) coords.next().getZ()));
-	}
-
-	@Unique
-	private ArrayList<Vec3d> sevenelements$generateTexturesUsingCenter(Vec3d center, double length, int amount) {
-		double totalDistance = length * (amount - 1);
-		double offset = totalDistance / 2;
+		final double totalDistance = length * (amount - 1);
+		final double offset = totalDistance / 2;
 
 		final ArrayList<Vec3d> result = new ArrayList<>();
-		double curDistance = center.getZ() + offset;
+		double curDistance = offset;
 		for (int i = 0; i < amount; i++) {
-			result.add(new Vec3d(center.getX(), center.getY(), curDistance));
+			result.add(new Vec3d(0, 0, curDistance));
 
 			curDistance -= length;
 		}
 
-		return result;
+		final Iterator<Vec3d> coords = result.iterator();
+
+		elementStates
+			.stream()
+			.map(state -> new Pair<>(state, (float) coords.next().getZ()))
+			.forEachOrdered(statePair -> ElementRenderer.renderElement(entityState, statePair.getLeft(), provider, matrixStack, dispatcher.camera, statePair.getRight()));
 	}
 
 	@Unique
-	private void sevenelements$renderElementalGauges(final LivingEntity entity, final MatrixStack matrixStack, final float tickDelta) {
+	private void sevenelements$renderElementalGauges(final S entityState, final VertexConsumerProvider provider, final MatrixStack matrixStack) {
 		final ClientConfig config = ClientConfig.get();
+		final List<ElementRenderer.ElementGaugeState> gaugeStates = entityState.sevenelements$getGaugeStates();
 
-		if (!config.developer.displayElementalGauges) return;
+		if (!config.developer.displayElementalGauges || gaugeStates.isEmpty()) return;
 
-		if (!entity.isAlive()) return;
-
-		final ElementComponent component = ElementComponent.KEY.get(entity);
-		final ArrayList<ElementalApplication> appliedElements = new ArrayList<>(component
-			.getAppliedElements()
-			.sortElements((a, b) -> a.getElement().getPriority() - b.getElement().getPriority()));
-
-		final int elementCount = appliedElements.size();
-		final Iterator<ElementalApplication> aeIterator = appliedElements.iterator();
+		final int elementCount = gaugeStates.size();
+		final Iterator<ElementRenderer.ElementGaugeState> stateIterator = gaugeStates.iterator();
 
 		Stream
 			.iterate(0.0f, n -> (n / 1.25f) < elementCount, n -> n + 1.25f)
-			.forEachOrdered(yOffset ->
-				sevenelements$renderElementalGauge(entity, aeIterator.next(), yOffset - 0.5f, matrixStack, tickDelta)
-			);
+			.map(yOffset -> new Pair<>(stateIterator.next(), yOffset))
+			.forEachOrdered(statePair -> ElementRenderer.renderElementalGauge(entityState, statePair.getLeft(), provider, matrixStack, dispatcher.camera, statePair.getRight() - 0.5f));
 	}
 
 	@Unique
-	private void sevenelements$renderElementalGauge(final LivingEntity entity, final ElementalApplication application, final float yOffset, final MatrixStack matrixStack, final float tickDelta) {
-		if (application.isEmpty()) return;
-
-		final float GAUGE_SCALE = 0.35f;
-		final float SCALE_PER_GU = 2.5f;
-
+	private void sevenelements$renderCrystallizeShield(final S state, final VertexConsumerProvider provider, final MatrixStack matrixStack) {
 		final ClientConfig config = ClientConfig.get();
 
-		matrixStack.push();
-		matrixStack.translate(0f, entity.getBoundingBox().getLengthY() * 1.15, 0f);
-		matrixStack.multiplyPositionMatrix(new Matrix4f().rotation(dispatcher.camera.getRotation()));
-		matrixStack.scale(GAUGE_SCALE, GAUGE_SCALE * 0.5f, GAUGE_SCALE);
+		if (!SpecialEffectsRenderer.shouldRender(state) || state.sevenelements$getCrystallizeShieldElement() == null) return;
 
-		final float xOffset = (float) (entity.getBoundingBox().getLengthX() * 1.5f) / GAUGE_SCALE;
-		final float gaugeWidth = application.isGaugeUnits()
-			? (float) Math.min(SCALE_PER_GU * application.getGaugeUnits(), SCALE_PER_GU * 4)
-			: 2 * SCALE_PER_GU;
-
-		final Matrix4f positionMatrix = matrixStack.peek().getPositionMatrix();
-		final MatrixStack.Entry entry = matrixStack.peek();
-
-		BufferBuilder buffer = SevenElementsRenderer.createBuffer(sevenelements$quadAllocator, SevenElementsRenderPipelines.QUADS);
-		buffer.vertex(positionMatrix, 0 + xOffset, 0 - yOffset, 0).color(0xffffffff);
-		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 0 - yOffset, 0).color(0xffffffff);
-		buffer.vertex(positionMatrix, gaugeWidth + xOffset, 1 - yOffset, 0).color(0xffffffff);
-		buffer.vertex(positionMatrix, 0 + xOffset, 1 - yOffset, 0).color(0xffffffff);
-
-		final float progress = this.sevenelements$getProgress(application, tickDelta);
-		final Color elementColor = application.getElement().getDamageColor();
-		final int color = application.isGaugeUnits()
-			? elementColor.asARGB()
-			: elementColor.multiply(1, 1, 1, 0.5).asARGB();
-
-		buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color);
-		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 0 - yOffset, 0.0001f).color(color);
-		buffer.vertex(positionMatrix, (gaugeWidth * progress) + xOffset, 1 - yOffset, 0.0001f).color(color);
-		buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color);
-
-		if (application.isDuration()) {
-			final float gaugeProgress = (float) (application.getCurrentGauge() / application.getGaugeUnits());
-
-			buffer.vertex(positionMatrix, xOffset, 0 - yOffset, 0.0001f).color(color);
-			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 0 - yOffset, 0.0001f).color(color);
-			buffer.vertex(positionMatrix, (gaugeWidth * gaugeProgress) + xOffset, 1 - yOffset, 0.0001f).color(color);
-			buffer.vertex(positionMatrix, xOffset, 1 - yOffset, 0.0001f).color(color);
-		}
-
-		SevenElementsRenderLayer.getQuads().draw(buffer.end());
-
-		final float scaledGauge = (float) (0.1 * gaugeWidth / application.getGaugeUnits());
-		final int splits = (int) Math.floor(gaugeWidth / (0.1 * gaugeWidth / application.getGaugeUnits()));
-
-		for (int c = 1; c < splits && config.developer.displayGaugeRuler; c++) {
-			final float i = c * scaledGauge;
-
-			final float addedY = c % 10 == 0
-				? 1f
-				: c % 5 == 0
-					? 0.5f
-					: 0.25f;
-
-			final RenderLayer layer = c % 10 == 0
-				? SevenElementsRenderLayer.getThickLines()
-				: SevenElementsRenderLayer.getThinLines();
-
-			final Vec3d start = new Vec3d(xOffset + i, 0 - yOffset, -0.0005f);
-			final Vec3d end = new Vec3d(xOffset + i, addedY - yOffset, -0.0005f);
-			final Vec3d normal = end.normalize();
-
-			buffer = SevenElementsRenderer.createBuffer(sevenelements$quadAllocator, SevenElementsRenderPipelines.LINES);
-			buffer
-				.vertex(positionMatrix, (float) start.x, (float) start.y, (float) start.z)
-				.color(0xff000000)
-				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
-			buffer
-				.vertex(positionMatrix, (float) end.x, (float) end.y, (float) end.z)
-				.color(0xff000000)
-				.normal(entry, (float) normal.x, (float) normal.y, (float) normal.z);
-
-			layer.draw(buffer.end());
-		}
-
-		matrixStack.pop();
-	}
-
-	@Unique
-	private float sevenelements$getProgress(ElementalApplication application, float tickDelta) {
-		return application instanceof final DurationElementalApplication durationApp
-			? (float) ((application.getRemainingTicks() - tickDelta) / durationApp.getDuration())
-			: (float) (application.getCurrentGauge() / application.getGaugeUnits());
-	}
-
-	@Unique
-	private void sevenelements$renderCrystallizeShield(final LivingEntity entity, final MatrixStack matrixStack) {
-		final ClientConfig config = ClientConfig.get();
-
-		if (!SpecialEffectsRenderer.shouldRender(entity)) return;
-
-		final ElementComponent component = ElementComponent.KEY.get(entity);
-		final @Nullable Pair<Element, Double> crystallizeShield = component.getCrystallizeShield();
-
-		if (crystallizeShield == null) return;
-
-		final double lengthY = entity.getBoundingBox().getLengthY();
+		final double lengthY = state.sevenelements$getBoundingBoxLength().getY();
 
 		matrixStack.push();
 		matrixStack.multiply(RotationAxis.NEGATIVE_Y.rotationDegrees(dispatcher.camera.getYaw()));
 		matrixStack.translate(0, lengthY * 0.6, 0);
 
 		SphereRenderer.render(
+			provider.getBuffer(SevenElementsRenderLayer.getCrystallizeShield()),
 			matrixStack,
 			new Vec3d(0, 0, 0),
 			(float) (lengthY / 2 * 1.25),
 			config.rendering.elements.sphereResolution,
 			config.rendering.elements.sphereResolution * 2,
-			pos -> crystallizeShield.getLeft().getDamageColor().multiply(1, 1, 1, 0.75 * Math.pow(pos.x, 4)).asARGB()
+			pos -> state.sevenelements$getCrystallizeShieldElement().getDamageColor().multiply(1, 1, 1, 0.75 * Math.pow(pos.x, 4)).asARGB()
 		);
 
 		matrixStack.pop();
-	}
-
-	@Unique
-	private FrozenEffectComponent sevenelements$getComponent(LivingEntity entity) {
-		return FrozenEffectComponent.KEY.get(entity);
 	}
 
 	@Unique
@@ -309,10 +154,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 		)
 	)
 	private Identifier renderFrostedModel(Identifier original, @Local(argsOnly = true) LivingEntityRenderState state) {
-		if (!ClientConfig.getEffectRenderType().allowsSpecialEffects()) return original;
-
-		return state.sevenelements$getEntity() instanceof final LivingEntity entity
-			? this.sevenelements$ifFrozen(entity, c -> Identifier.of("minecraft", "textures/block/ice.png"), original)
+		return ClientConfig.getEffectRenderType().allowsSpecialEffects() && state.sevenelements$isFrozen()
+			? Identifier.ofVanilla("textures/block/ice.png")
 			: original;
 	}
 
@@ -321,20 +164,18 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 		at = @At("RETURN")
 	)
 	private boolean isShakingWhenFrozen(boolean original, @Local(argsOnly = true) LivingEntityRenderState state) {
-		return original
-			|| (state.sevenelements$getEntity() instanceof final LivingEntity entity && this.sevenelements$getComponent(entity).isFrozen());
+		return original || state.sevenelements$isFrozen();
 	}
 
-	@Inject(
-		method = "render(Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V",
-		at = @At("HEAD")
+	@ModifyExpressionValue(
+		method = "updateRenderState(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/render/entity/state/LivingEntityRenderState;F)V",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/entity/LivingEntity;getPose()Lnet/minecraft/entity/EntityPose;"
+		)
 	)
-	private void forceFrozenPose(S state, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-		if (!(state.sevenelements$getEntity() instanceof final LivingEntity entity)) return;
-
-		final FrozenEffectComponent component = FrozenEffectComponent.KEY.get(entity);
-
-		if (component.isFrozen()) entity.setPose(component.getForcePose());
+	private EntityPose forceFrozenPose(EntityPose original, @Local(argsOnly = true) LivingEntity entity) {
+		return this.sevenelements$ifFrozen(entity, FrozenEffectComponent::getForcePose, original);
 	}
 
 	@ModifyExpressionValue(

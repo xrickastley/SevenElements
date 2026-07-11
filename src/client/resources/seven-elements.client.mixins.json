@@ -3,17 +3,25 @@
   "package": "io.github.xrickastley.sevenelements.mixin.client",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AnvilScreenMixin",
+    "BasicAndSpecialItemModelMixin",
     "BossBarHud$1Mixin",
     "BossBarHudAccessor",
     "BossBarHudMixin",
     "BufferBuilderAccessor",
+    "BufferBuilderStorageMixin",
     "DrawContextMixin",
-    "EntityRendererMixin",
-    "EntityRenderStateMixin",
+    "EnchantmentScreenAccessor",
+    "EquipmentRendererMixin",
     "GameRendererMixin",
     "InGameHudMixin",
+    "ItemRendererMixin",
+    "ItemRenderState$ElementGlintStateMixin",
+    "ItemRenderState$LayerRenderStateMixin",
     "LivingEntityMixin",
-    "LivingEntityRendererMixin"
+    "LivingEntityRendererMixin",
+    "LivingEntityRenderStateMixin",
+    "TridentModelRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

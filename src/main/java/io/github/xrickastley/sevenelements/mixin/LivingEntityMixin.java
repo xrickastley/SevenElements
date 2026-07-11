@@ -3,13 +3,13 @@ package io.github.xrickastley.sevenelements.mixin;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
-import com.llamalad7.mixinextras.sugar.Share;
-import com.llamalad7.mixinextras.sugar.ref.LocalBooleanRef;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -17,23 +17,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.component.interfaces.AttributeModifyingComponent;
-import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.element.ElementalApplications;
-import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
-import io.github.xrickastley.sevenelements.element.InternalCooldownContext;
-import io.github.xrickastley.sevenelements.element.InternalCooldownType;
-import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
+import io.github.xrickastley.sevenelements.effect.ElementalStatusEffect;
+import io.github.xrickastley.sevenelements.element.*;
 import io.github.xrickastley.sevenelements.factory.SevenElementsAttributes;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.interfaces.ILivingEntity;
-import io.github.xrickastley.sevenelements.interfaces.IPlayerEntity;
-import io.github.xrickastley.sevenelements.networking.ShowElementalDamageS2CPayload;
 import io.github.xrickastley.sevenelements.registry.SevenElementsDamageTypeTags;
-import io.github.xrickastley.sevenelements.util.BoxUtil;
+import io.github.xrickastley.sevenelements.util.Functions;
 
-import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.Blocks;
 import net.minecraft.component.type.AttributeModifierSlot;
 import net.minecraft.entity.Entity;
@@ -41,15 +33,14 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.server.network.ServerPlayerEntity;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 @Mixin(LivingEntity.class)
@@ -62,8 +53,15 @@ public abstract class LivingEntityMixin
 		throw new AssertionError();
 	}
 
-	@Unique
-	private float sevenelements$subdamage;
+	@Shadow
+	public abstract double getAttributeValue(RegistryEntry<EntityAttribute> attribute);
+
+	@Shadow
+	public abstract boolean hasStatusEffect(RegistryEntry<StatusEffect> effect);
+
+	@Shadow
+	public abstract boolean removeStatusEffect(RegistryEntry<StatusEffect> effect);
+
 	@Unique
 	private boolean sevenelements$blockedByCrystallizeShield = true; // true ONLY if ALL received DMG is blocked.
 
@@ -73,6 +71,44 @@ public abstract class LivingEntityMixin
 	)
 	private static DefaultAttributeContainer.Builder addToLivingAttributes(DefaultAttributeContainer.Builder builder) {
 		return SevenElementsAttributes.apply(builder);
+	}
+
+	@Inject(
+		method = "onDeath",
+		at = @At(
+			value = "INVOKE",
+			target = "Lnet/minecraft/entity/LivingEntity;setPose(Lnet/minecraft/entity/EntityPose;)V"
+		)
+	)
+	private void applyOnDeathEffects(DamageSource damageSource, CallbackInfo ci) {
+		ElementalStatusEffect
+			.getElementEffects()
+			.forEach(this::removeStatusEffect);
+
+		final ElementComponent component = ElementComponent.KEY.get(this);
+
+		component
+			.getAppliedElements()
+			.stream()
+			.map(Functions.compose(ElementalApplication::getElement, component::getElementHolder))
+			.forEach(ElementHolder::reset);
+	}
+
+	@Inject(
+		method = "tick",
+		at = @At("HEAD")
+	)
+	private void removeExpiredElementEffects(CallbackInfo ci) {
+		final ElementComponent component = ElementComponent.KEY.get(this);
+
+		ElementalStatusEffect
+			.getElementEffects()
+			.stream()
+			.filter(this::hasStatusEffect)
+			.filter(Predicate.not(
+				Functions.composePredicate(RegistryEntry::value, ElementalStatusEffect.class::cast, ElementalStatusEffect::getElement, component::hasElementalApplication)
+			))
+			.forEach(this::removeStatusEffect);
 	}
 
 	@Inject(
@@ -107,16 +143,6 @@ public abstract class LivingEntityMixin
 					.forced(),
 				1.0
 			);
-		} else if (this.getBlockStateAtPos().getBlock() == Blocks.FIRE && world.getGameRules().getBoolean(SevenElementsGameRules.PYRO_FROM_FIRE)) {
-			final ElementComponent component = ElementComponent.KEY.get(this);
-
-			component.addElementalApplication(
-				Element.PYRO,
-				InternalCooldownContext
-					.ofType(null, "seven-elements:natural_environment", InternalCooldownType.INTERVAL_ONLY)
-					.forced(),
-				1.0
-			);
 		}
 	}
 
@@ -137,16 +163,8 @@ public abstract class LivingEntityMixin
 		ordinal = 0,
 		argsOnly = true
 	)
-	private float applyCrystallizeShield(float amount, @Local(argsOnly = true) DamageSource source) {
-		final ElementComponent component = ElementComponent.KEY.get(this);
-		final float finalAmount = amount - component.reduceCrystallizeShield(source, amount);
-
-		if (finalAmount < amount)
-			this.getWorld().playSound(null, this.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_HIT, SoundCategory.PLAYERS, 1.0f, 1.0f);
-
-		if (finalAmount <= 0) this.sevenelements$blockedByCrystallizeShield = true;
-
-		return finalAmount;
+	private float applyCrystallizeShield$LivingEntity(float amount, @Local(argsOnly = true) DamageSource source) {
+		return this.sevenelements$applyCrystallizeShield(amount, source);
 	}
 
 	@Inject(
@@ -170,52 +188,8 @@ public abstract class LivingEntityMixin
 			ordinal = 5
 		)
 	)
-	private boolean preventKnockbackIfCrystallize(boolean original, @Local(argsOnly = true) DamageSource source, @Share("sevenelements$hasCrystallizeShield") LocalBooleanRef hasCrystallizeShield) {
-		final ElementComponent component = ElementComponent.KEY.get(this);
-
-		return original || component.reducedCrystallizeShield();
-	}
-
-	@Inject(
-		method = "applyDamage",
-		at = @At("TAIL")
-	)
-	private void elementDamageHandler(ServerWorld world, DamageSource source, float _amount, CallbackInfo ci, @Local(ordinal = 1) float amount) {
-		this.sevenelements$triggerDendroCoreReactions(world, source);
-
-		if (!source.sevenelements$displayDamage()) return;
-
-		final ElementalDamageSource eds = source instanceof final ElementalDamageSource eds2
-			? eds2
-			: new ElementalDamageSource(source, ElementalApplications.gaugeUnits((LivingEntity)(Entity) this, Element.PHYSICAL, 0), InternalCooldownContext.ofNone(source.getAttacker()));
-
-		sevenelements$subdamage += amount;
-
-		if (sevenelements$subdamage < 1) return;
-
-		final float extra = sevenelements$subdamage - (float) Math.floor(sevenelements$subdamage);
-
-		sevenelements$subdamage = (float) Math.floor(sevenelements$subdamage);
-
-		final Box boundingBox = this.getBoundingBox();
-
-		final double x = this.getX() + (boundingBox.getLengthX() * 1.25 * Math.random());
-		final double y = this.getY() + (boundingBox.getLengthY() * 0.50 * Math.random()) + 0.50;
-		final double z = this.getZ() + (boundingBox.getLengthZ() * 1.25 * Math.random());
-		final Vec3d pos = new Vec3d(x, y, z);
-		final boolean isCrit = source.getAttacker() instanceof final PlayerEntity player
-			&& ((IPlayerEntity) player).sevenelements$isCrit(eds);
-
-		final Element element = eds.getElementalApplication().getElement();
-		final ShowElementalDamageS2CPayload showElementalDMGPacket = new ShowElementalDamageS2CPayload(pos, element, sevenelements$subdamage, isCrit);
-
-		sevenelements$subdamage = extra;
-
-		for (final ServerPlayerEntity player : PlayerLookup.tracking(this)) {
-			if (player.getId() == this.getId()) return;
-
-			ServerPlayNetworking.send(player, showElementalDMGPacket);
-		}
+	private boolean preventKnockbackIfCrystallize(boolean original) {
+		return this.sevenelements$modifyKnockback(original, this);
 	}
 
 	@ModifyConstant(
@@ -251,19 +225,6 @@ public abstract class LivingEntityMixin
 	}
 
 	@Unique
-	private void sevenelements$triggerDendroCoreReactions(final ServerWorld world, final DamageSource source) {
-		if (!(source instanceof final ElementalDamageSource eds)) return;
-
-		final Element element = eds.getElementalApplication().getElement();
-
-		if (element != Element.PYRO && element != Element.ELECTRO) return;
-
-		this.getWorld()
-			.getEntitiesByClass(DendroCoreEntity.class, BoxUtil.multiplyBox(this.getBoundingBox(), 2), dc -> true)
-			.forEach(dc -> dc.damage(world, source, 1));
-	}
-
-	@Unique
 	@Override
 	public void sevenelements$setBlockedByCrystallizeShield(boolean blocked) {
 		this.sevenelements$blockedByCrystallizeShield = blocked;
@@ -273,5 +234,24 @@ public abstract class LivingEntityMixin
 	@Override
 	public boolean sevenelements$isWet() {
 		return this.isTouchingWaterOrRain() || this.getBlockStateAtPos().isOf(Blocks.BUBBLE_COLUMN);
+	}
+
+	@Unique
+	protected float sevenelements$applyCrystallizeShield(float amount, DamageSource source) {
+		final ElementComponent component = ElementComponent.KEY.get(this);
+		final float finalAmount = amount - component.reduceCrystallizeShield(source, amount);
+
+		if (finalAmount < amount)
+			this.getWorld().playSound(null, this.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD_HIT, SoundCategory.PLAYERS, 1.0f, 1.0f);
+
+		if (finalAmount <= 0 && finalAmount != amount) this.sevenelements$setBlockedByCrystallizeShield(true);
+
+		return finalAmount;
+	}
+
+	@Unique
+	protected boolean sevenelements$modifyKnockback(boolean doesKnockback, Entity entity) {
+		return doesKnockback
+			&& !(entity instanceof final LivingEntity livingEntity && ElementComponent.KEY.get(livingEntity).reducedCrystallizeShield());
 	}
 }

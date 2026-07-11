@@ -2,6 +2,7 @@ package io.github.xrickastley.sevenelements.util;
 
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 
 public final class MathHelper2 {
 	public static double endOffset(double value, double offset, double start, double end) {
@@ -38,5 +39,29 @@ public final class MathHelper2 {
 
 	public static boolean inRange(double value, double start, double end) {
 		return start <= value && value <= end;
+	}
+
+	/**
+	 * Generates a Poisson random integer via Knuth's algorithm.
+	 *
+	 * <p>A "Poisson random integer" is a random non-negative integer whose probability follows
+	 * the Poisson distribution with mean λ.
+	 *
+	 * <p>In other words, it generates random values close to the mean, which is λ.
+	 *
+	 * @param lambda The mean to generate a Poisson random integer from.
+	 * @return A Poisson random integer.
+	 */
+	public static int randomPoissonInt(double lambda) {
+		final double L = Math.exp(-lambda);
+
+		int k = 0;
+		double p = 1.0;
+		do {
+			k++;
+			p *= Random.createLocal().nextDouble();
+		} while (p > L);
+
+		return k - 1;
 	}
 }

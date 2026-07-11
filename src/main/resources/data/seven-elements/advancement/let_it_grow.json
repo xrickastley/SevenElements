@@ -1,0 +1,31 @@
+{
+	"parent": "seven-elements:elements_reborn",
+	"display": {
+		"icon": {
+			"id": "seven-elements:dendro_attunement_smithing_template",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.seven-elements.let_it_grow.title"
+		},
+		"description": {
+			"translate": "advancements.seven-elements.let_it_grow.description"
+		},
+		"frame": "goal",
+		"announce_to_chat": false,
+		"hidden": true
+	},
+	"criteria": {
+		"perform_dendro_attunement": {
+			"trigger": "seven-elements:perform_attunement",
+			"conditions": {
+				"element": "DENDRO"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"perform_dendro_attunement"
+		]
+	]
+}

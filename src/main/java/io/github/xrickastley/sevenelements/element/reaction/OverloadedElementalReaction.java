@@ -30,6 +30,7 @@ public class OverloadedElementalReaction extends ElementalReaction {
 		super(
 			new Settings("Overloaded", SevenElements.identifier("overloaded"), TextHelper.reaction("reaction.seven-elements.overloaded", "#fc7fa4"))
 				.setReactionCoefficient(1.0)
+				.setReactionMultiplier(2.75)
 				.setAuraElement(Element.PYRO, 2)
 				.setTriggeringElement(Element.ELECTRO, 3)
 				.reversable(true)
@@ -87,7 +88,7 @@ public class OverloadedElementalReaction extends ElementalReaction {
 			InternalCooldownContext.ofNone(entity)
 		).shouldApplyDMGBonus(false);
 
-		float amount = ElementalReaction.getReactionDamage(entity, 2.75);
+		float amount = this.getReactionStrength(origin, world);
 
 		if (entity == origin) amount = 0;
 
