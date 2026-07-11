@@ -201,7 +201,7 @@ public class ChargeEffectRenderer
 	}
 
 	private void extractElementalAura(final Entity entity) {
-		if (!(entity instanceof final LivingEntity livingEntity)) return;
+		if (!(entity instanceof final LivingEntity livingEntity) || !SpecialEffectsRenderer.shouldRender(entity)) return;
 
 		final ElementComponent component = ElementComponent.KEY.get(livingEntity);
 
