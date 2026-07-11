@@ -166,7 +166,7 @@ implements <a href="FrozenEffectComponent.html" title="interface in io.github.xr
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab2" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab2', 3)" class="table-tab">Instance Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel">
 <div class="summary-table three-column-summary" aria-labelledby="method-summary-table-tab0">
 <div class="table-header col-first">Modifier and Type</div>
@@ -209,10 +209,13 @@ implements <a href="FrozenEffectComponent.html" title="interface in io.github.xr
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#unfreeze()" class="member-name-link">unfreeze</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#writeToNbt(net.minecraft.nbt.NbtCompound,net.minecraft.registry.RegistryWrapper.WrapperLookup)" class="member-name-link">writeToNbt</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/net/minecraft/nbt/NbtCompound.html" title="class or interface in net.minecraft.nbt" class="external-link">NbtCompound</a>&nbsp;tag,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>private static final com.mojang.serialization.DataResult<wbr>&lt;<a href="https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/net/minecraft/entity/EntityPose.html" title="class or interface in net.minecraft.entity" class="external-link">EntityPose</a>&gt;</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#validatePose(java.lang.String)" class="member-name-link">validatePose</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;entityPose)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#writeToNbt(net.minecraft.nbt.NbtCompound,net.minecraft.registry.RegistryWrapper.WrapperLookup)" class="member-name-link">writeToNbt</a><wbr>(<a href="https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/net/minecraft/nbt/NbtCompound.html" title="class or interface in net.minecraft.nbt" class="external-link">NbtCompound</a>&nbsp;tag,
  <a href="https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/net/minecraft/registry/RegistryWrapper.WrapperLookup.html" title="class or interface in net.minecraft.registry" class="external-link">RegistryWrapper.WrapperLookup</a>&nbsp;registry)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
 </div>
 </div>
 </div>
@@ -324,6 +327,12 @@ implements <a href="FrozenEffectComponent.html" title="interface in io.github.xr
 <section class="method-details" id="method-detail">
 <h2>Method Details</h2>
 <ul class="member-list">
+<li>
+<section class="detail" id="validatePose(java.lang.String)">
+<h3>validatePose</h3>
+<div class="member-signature"><span class="modifiers">private static final</span>&nbsp;<span class="return-type">com.mojang.serialization.DataResult&lt;<a href="https://maven.fabricmc.net/docs/yarn-1.21.5+build.1/net/minecraft/entity/EntityPose.html" title="class or interface in net.minecraft.entity" class="external-link">EntityPose</a>&gt;</span>&nbsp;<span class="element-name">validatePose</span><wbr><span class="parameters">(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;entityPose)</span></div>
+</section>
+</li>
 <li>
 <section class="detail" id="readFromNbt(net.minecraft.nbt.NbtCompound,net.minecraft.registry.RegistryWrapper.WrapperLookup)">
 <h3>readFromNbt</h3>
