@@ -19,8 +19,9 @@ public class CrossbowItemMixin {
 			ordinal = 0
 		)
 	)
-	private ProjectileEntity addInfusionToFireworkRocket(ProjectileEntity original, @Local(ordinal = 0, argsOnly = true) ItemStack weaponStack) {
+	private ProjectileEntity addInfusionToFireworkRocket(ProjectileEntity original, @Local(ordinal = 0, argsOnly = true) ItemStack weaponStack, @Local(ordinal = 1, argsOnly = true) ItemStack projectileStack) {
 		original.sevenelements$setOriginStack(weaponStack);
+		original.sevenelements$setProjectileStack(projectileStack);
 
 		return original;
 	}

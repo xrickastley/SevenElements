@@ -5,6 +5,7 @@ import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.registry.SevenElementsItemTags;
 import io.github.xrickastley.sevenelements.util.TextHelper;
+
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.registry.Registries;
 

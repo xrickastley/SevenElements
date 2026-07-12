@@ -13,6 +13,7 @@ public final class BurgeonElementalReaction extends AbstractDendroCoreElementalR
 	BurgeonElementalReaction() {
 		super(
 			new Settings("Burgeon", SevenElements.identifier("burgeon"), TextHelper.reaction("reaction.seven-elements.burgeon", Colors.PYRO))
+				.setReactionMultiplier(3.0)
 		);
 	}
 

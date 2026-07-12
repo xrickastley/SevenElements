@@ -1,6 +1,7 @@
 package io.github.xrickastley.sevenelements.component;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 
 import io.github.xrickastley.sevenelements.effect.SevenElementsStatusEffects;
 
@@ -12,7 +13,10 @@ import net.minecraft.storage.WriteView;
 import net.minecraft.util.math.MathHelper;
 
 public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
-	private static final Codec<EntityPose> ENTITY_POSE_CODEC = Codec.INT.xmap(EntityPose.INDEX_TO_VALUE::apply, EntityPose::getIndex);
+	private static final Codec<EntityPose> ENTITY_POSE_CODEC = Codec.withAlternative(
+		Codec.INT.xmap(EntityPose.INDEX_TO_VALUE::apply, EntityPose::getIndex),
+		Codec.STRING.comapFlatMap(FrozenEffectComponentImpl::validatePose, EntityPose::toString)
+	);
 
 	private final LivingEntity owner;
 	private boolean isFrozen = false;
@@ -27,6 +31,14 @@ public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
 
 	public FrozenEffectComponentImpl(LivingEntity owner) {
 		this.owner = owner;
+	}
+
+	private static final DataResult<EntityPose> validatePose(String entityPose) {
+		try {
+			return DataResult.success(EntityPose.valueOf(entityPose));
+		} catch (IllegalArgumentException e) {
+			return DataResult.error(() -> "Not a valid EntityPose: " + entityPose + " " + e.getMessage());
+		}
 	}
 
 	@Override
@@ -72,6 +84,13 @@ public final class FrozenEffectComponentImpl implements FrozenEffectComponent {
 	public void serverTick() {
 		if (!this.owner.hasStatusEffect(SevenElementsStatusEffects.FROZEN) && this.isFrozen)
 			this.unfreeze();
+
+		if (!this.isFrozen()) return;
+
+		owner.setPose(this.forcePose);
+		owner.setHeadYaw(this.forceBodyYaw);
+		owner.setBodyYaw(this.forceBodyYaw);
+		owner.setPitch(this.forcePitch);
 	}
 
 	public boolean isFrozen() {

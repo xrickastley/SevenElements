@@ -41,6 +41,7 @@ import net.minecraft.world.explosion.EntityExplosionBehavior;
 import net.minecraft.world.explosion.Explosion;
 import net.minecraft.world.explosion.ExplosionBehavior;
 import net.minecraft.world.rule.GameRules;
+
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
 /**

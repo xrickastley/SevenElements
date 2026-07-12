@@ -47,12 +47,16 @@ public abstract sealed class AbstractBurningElementalReaction
 	);
 
 	AbstractBurningElementalReaction(Settings settings) {
-		super(settings);
+		super(
+			settings
+				.setReactionMultiplier(0.25)
+		);
 	}
 
 	@Override
 	public boolean isTriggerable(LivingEntity entity) {
-		return super.isTriggerable(entity) && !ElementComponent.KEY.get(entity).hasElementalApplication(Element.BURNING);
+		return super.isTriggerable(entity)
+			&& !ElementComponent.KEY.get(entity).hasElementalApplication(Element.BURNING);
 	}
 
 	@Override
@@ -137,10 +141,8 @@ public abstract sealed class AbstractBurningElementalReaction
 		method = "Lio/github/xrickastley/sevenelements/component/ElementComponentImpl;tick()V",
 		at = @At("HEAD")
 	)
-	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity) {
+	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity, @Local(self = true) ElementComponent component) {
 		if (!(entity.getEntityWorld() instanceof final ServerWorld world)) return;
-
-		final ElementComponent component = ElementComponent.KEY.get(entity);
 
 		if (!component.hasElementalApplication(Element.BURNING) || component.isBurningOnCD() || entity.getEntityWorld().isClient()) return;
 
@@ -153,7 +155,7 @@ public abstract sealed class AbstractBurningElementalReaction
 		}
 
 		for (final LivingEntity target : ElementalReaction.getEntitiesInAoE(entity, 1, t -> !ElementComponent.KEY.get(t).isBurningOnCD())) {
-			final float damage = ElementalReaction.getReactionDamage(entity, 0.25);
+			final float damage = ElementalReactions.BURNING.getReactionStrength(component.getBurningOrigin(), world);
 			final ElementalDamageSource source = new ElementalDamageSource(
 				entity
 					.getDamageSources()

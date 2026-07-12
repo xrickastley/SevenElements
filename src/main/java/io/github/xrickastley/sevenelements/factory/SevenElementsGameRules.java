@@ -1,6 +1,7 @@
 package io.github.xrickastley.sevenelements.factory;
 
 import io.github.xrickastley.sevenelements.SevenElements;
+
 import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
 import net.minecraft.world.rule.GameRule;
 import net.minecraft.world.rule.GameRuleCategory;
@@ -55,6 +56,12 @@ public class SevenElementsGameRules {
 			.forBoolean(true)
 			.category(ELEMENTS_CATEGORY)
 			.buildAndRegister(SevenElements.identifier("infusion_table"));
+
+	public static final GameRule<Boolean> PYRO_DOES_FIRE_EFFECTS
+		 = GameRuleBuilder
+		 	.forBoolean(true)
+			.category(ELEMENTS_CATEGORY)
+			.buildAndRegister(SevenElements.identifier("pyro_does_fire_effects"));
 
 	public static void register() {}
 }

@@ -1,0 +1,31 @@
+{
+	"parent": "seven-elements:elements_reborn",
+	"display": {
+		"icon": {
+			"id": "seven-elements:hydro_attunement_smithing_template",
+			"count": 1
+		},
+		"title": {
+			"translate": "advancements.seven-elements.shipwreck_sailor_experience.title"
+		},
+		"description": {
+			"translate": "advancements.seven-elements.shipwreck_sailor_experience.description"
+		},
+		"frame": "goal",
+		"announce_to_chat": false,
+		"hidden": true
+	},
+	"criteria": {
+		"perform_hydro_attunement": {
+			"trigger": "seven-elements:perform_attunement",
+			"conditions": {
+				"element": "HYDRO"
+			}
+		}
+	},
+	"requirements": [
+		[
+			"perform_hydro_attunement"
+		]
+	]
+}
