@@ -20,6 +20,7 @@ package io.github.xrickastley.sevenelements.util.polyfill.rendering;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 
 public final class WorldRenderContextImpl implements WorldRenderContext {
@@ -27,6 +28,7 @@ public final class WorldRenderContextImpl implements WorldRenderContext {
 	private RenderTickCounter tickCounter;
 	private Camera camera;
 	private ClientWorld world;
+	private MatrixStack matrixStack;
 
 	public void prepare(
 			WorldRenderer worldRenderer,
@@ -38,6 +40,7 @@ public final class WorldRenderContextImpl implements WorldRenderContext {
 		this.tickCounter = tickCounter;
 		this.camera = camera;
 		this.world = world;
+		this.matrixStack = new MatrixStack();
 	}
 
 	@Override
@@ -58,5 +61,10 @@ public final class WorldRenderContextImpl implements WorldRenderContext {
 	@Override
 	public ClientWorld world() {
 		return world;
+	}
+
+	@Override
+	public MatrixStack matrixStack() {
+		return this.matrixStack;
 	}
 }

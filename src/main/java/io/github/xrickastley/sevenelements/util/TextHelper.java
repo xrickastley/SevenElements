@@ -1,6 +1,9 @@
 package io.github.xrickastley.sevenelements.util;
 
+import java.util.List;
+
 import io.github.xrickastley.sevenelements.SevenElements;
+import io.github.xrickastley.sevenelements.SevenElementsSidedImpl;
 
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
@@ -83,5 +86,9 @@ public final class TextHelper {
 				.withObfuscated(false)
 				.withUnderline(false)
 		);
+	}
+
+	public static List<Text> wrapLines(Text text, int width) {
+		return SevenElementsSidedImpl.getWrapLinesFunction().apply(text, width);
 	}
 }

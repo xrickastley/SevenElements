@@ -44,10 +44,10 @@ public interface ILivingEntity {
 	/**
 	 * {@return whether this entity is touching water, is being rained on, or is touching a bubble
 	 * column} <br> <br>
-	 * 
+	 *
 	 * Seven Elements's reimplementation of {@code Entity#isWet}, on living entities handled via
 	 * Mixin and Interface Injection.
-	 * 
+	 *
 	 * @see net.minecraft.entity.Entity#isTouchingWater()
 	 * @see net.minecraft.entity.Entity#isBeingRainedOn()
 	 */

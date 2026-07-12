@@ -1,10 +1,9 @@
 package io.github.xrickastley.sevenelements.util.functions;
 
 /**
- * Represents an operation that accepts three input arguments and returns no result.
- * This is the three-arity specialization of {@link java.util.function.Consumer}. <br> <br>
- * 
- * Unlike most other functional interfaces, {@code BiConsumer} is expected
+ * Represents an operation that accepts three input arguments and returns no 
+ * result. This is the three-arity specialization of {@link java.util.function.Consumer Consumer}.
+ * Unlike most other functional interfaces, {@code TriConsumer} is expected
  * to operate via side effects.
  *
  * <p>This is a <a href="package-summary.html">functional interface</a>

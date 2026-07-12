@@ -32,7 +32,7 @@ public final class WorldTextRenderer {
 
 		matrixStack.push();
 
-		// Implement legacy renderWorld transforms.
+		// Implement legacy WorldRenderer#renderWorld transforms.
 		matrixStack.multiply(RotationAxis.POSITIVE_X.rotationDegrees(camera.getPitch()));
 		matrixStack.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(camera.getYaw() + 180.0F));
 
@@ -42,6 +42,9 @@ public final class WorldTextRenderer {
 	}
 
 	public void tick(ClientWorld world) {
+		if (!world.getTickManager().shouldTick())
+			return;
+
 		entries.forEach(Entry::tick);
 		entries.removeIf(Entry::shouldRemove);
 	}

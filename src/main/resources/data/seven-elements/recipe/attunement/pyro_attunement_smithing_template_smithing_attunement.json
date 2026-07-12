@@ -1,0 +1,6 @@
+{
+	"type": "seven-elements:smithing_attunement",
+	"addition": "seven-elements:elemental_rune",
+	"base": "#seven-elements:attunable_items",
+	"template": "seven-elements:pyro_attunement_smithing_template"
+}

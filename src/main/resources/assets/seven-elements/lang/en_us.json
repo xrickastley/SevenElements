@@ -84,10 +84,11 @@
 	"commands.element.query.multiple.success": "Applied element(s) on %s: %s",
 	"commands.element.query.single.none": "%s has no applied %s element",
 	"commands.element.query.single.success": "%s has %s",
-	"commands.element.infuse.failed.incompatible": "%s's item cannot be infused with an element",
+	"commands.element.infuse.failed.incompatible": "%s's item cannot be infused with the %s element",
 	"commands.element.infuse.apply.success": "Applied elemental infusion %s (%s) to %s's item",
 	"commands.element.infuse.remove.none": "%s's item already has no elemental infusion!",
 	"commands.element.infuse.remove.success": "Removed elemental infusion from %s's item",
+	"commands.element.attune.failed.element": "The %s element cannot be used for elemental attunement!",
 	"commands.element.attune.apply.success": "Applied %s elemental attunement to %s's item",
 	"commands.element.attune.remove.none": "%s's item already has no elemental attunement!",
 	"commands.element.attune.remove.success": "Removed elemental attunement from %s's item",
@@ -102,6 +103,8 @@
 	"formats.seven-elements.elemental_application.gauge_unit": "%sU %s",
 	"formats.seven-elements.elemental_application.duration": "%sU %s/%ss",
 	"formats.seven-elements.elemental_application.duration.timer": "%sU %s (%ss left)",
+
+	"symbols.seven-elements.elemental_infusion.elemental_attunment": "✨",
 
 	"seven-elements.element.physical": "Physical",
 	"seven-elements.element.pyro": "Pyro",
@@ -134,13 +137,47 @@
 
 	"container.seven-elements.infusion_table": "Infusion Table",
 	"container.seven-elements.infusion_table.infuse": "Infuse",
+	"container.seven-elements.infusion_table.uninfuse": "Uninfuse",
 	"container.seven-elements.infusion_table.fail_by_gamerule": "A mysterious force is preventing you from interacting with the Infusion Table!",
 
 	"block.seven-elements.infusion_table": "Infusion Table",
 	
 	"item.seven-elements.infusion_table": "Infusion Table",
+	"item.seven-elements.elemental_rune": "Elemental Rune",
+	"item.seven-elements.elemental_attunement_smithing_template": "Elemental Attunement Smithing Template",
+	"item.seven-elements.pyro_attunement_smithing_template": "Pyro Elemental Attunement",
+	"item.seven-elements.hydro_attunement_smithing_template": "Hydro Elemental Attunement",
+	"item.seven-elements.anemo_attunement_smithing_template": "Anemo Elemental Attunement",
+	"item.seven-elements.electro_attunement_smithing_template": "Electro Elemental Attunement",
+	"item.seven-elements.dendro_attunement_smithing_template": "Dendro Elemental Attunement",
+	"item.seven-elements.cryo_attunement_smithing_template": "Cryo Elemental Attunement",
+	"item.seven-elements.geo_attunement_smithing_template": "Geo Elemental Attunement",
+	
+	"item.seven-elements.elemental_attunement_smithing_template.tip": "A blank smithing template capable of holding immense elemental power.\n\nPerhaps keeping it in your inventory and attuning yourself to the elements might yield something...",
 
+	"item.seven-elements.smithing_template.elemental_attunement.additions_slot_description": "Add Elemental Rune",
+	"item.seven-elements.smithing_template.elemental_attunement.applies_to": "Equipment",
+	"item.seven-elements.smithing_template.elemental_attunement.base_slot_description": "Add a piece of armor or a weapon",
+	"item.seven-elements.smithing_template.elemental_attunement.ingredients": "Elemental Rune",
+
+	"elemental_attunement.seven-elements.pyro": "Pyro Elemental Attunement",
+	"elemental_attunement.seven-elements.hydro": "Hydro Elemental Attunement",
+	"elemental_attunement.seven-elements.anemo": "Anemo Elemental Attunement",
+	"elemental_attunement.seven-elements.electro": "Electro Elemental Attunement",
+	"elemental_attunement.seven-elements.dendro": "Dendro Elemental Attunement",
+	"elemental_attunement.seven-elements.cryo": "Cryo Elemental Attunement",
+	"elemental_attunement.seven-elements.geo": "Geo Elemental Attunement",
+
+	"tag.item.seven-elements.attunable_items": "Attunable Items",
 	"tag.item.seven-elements.heavy_weapon": "Heavy Weapon",
+
+	"subtitles.seven-elements.elemental_reaction": "Elemental Reaction is triggered",
+	"subtitles.seven-elements.entity.dendro_core.explode": "Dendro Core explodes",
+	"subtitles.seven-elements.entity.dendro_core.hit": "Sprawling Shot hits",
+	"subtitles.seven-elements.entity.crystallize_shield.absorb": "Crystallize Shard is absorbed",
+	"subtitles.seven-elements.entity.crystallize_shield.hit": "Crystallize Shield hit",
+	"subtitles.seven-elements.entity.crystallize_shield.break": "Crystallize Shield breaks",
+	"subtitles.seven-elements.block.infusion_table.use": "Infusion Table used",
 
 	"gamerule.doElements": "(Seven Elements) Do elements",
 	"gamerule.levelMultiplier": "(Seven Elements) Level Multiplier",
@@ -156,8 +193,26 @@
 	"gamerule.infusionTable": "(Seven Elements) Enable Infusion Table",
 	"gamerule.infusionTable.description": "Whether the Infusion Table is enabled.",
 
-	"advancements.seven-elements.root.elemental_awakening": "Elemental Awakening",
-	"advancements.seven-elements.root.elemental_awakening.description": "Craft or place an Infusion Table",
-	"advancements.seven-elements.root.power_of_the_elements": "Power of the Elements!",
-	"advancements.seven-elements.root.power_of_the_elements.description": "Infuse an item with an element."
-} 
+	"advancements.seven-elements.root.title": "Path of the Traveler",
+	"advancements.seven-elements.root.description": "Travel the world, become a master over the Seven Elements and vanquish your foes in combat!",
+	"advancements.seven-elements.elemental_awakening.title": "Elemental Awakening",
+	"advancements.seven-elements.elemental_awakening.description": "Place an Infusion Table",
+	"advancements.seven-elements.power_of_the_elements.title": "Power of the Elements!",
+	"advancements.seven-elements.power_of_the_elements.description": "Infuse an item with an element",
+	"advancements.seven-elements.elements_reborn.title": "Elements Reborn",
+	"advancements.seven-elements.elements_reborn.description": "Obtain a blank Elemental Attunement Smithing Template.\n\nPerhaps there's a way to reactivate the residual elemental power within...",
+	"advancements.seven-elements.this_is_fine.title": "This is fine.",
+	"advancements.seven-elements.this_is_fine.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Pyro by staying in lava while in the Nether.",
+	"advancements.seven-elements.shipwreck_sailor_experience.title": "Shipwreck Sailor Experience",
+	"advancements.seven-elements.shipwreck_sailor_experience.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Hydro by drowning.",
+	"advancements.seven-elements.fly_like_a_feather.title": "Fly like a Feather",
+	"advancements.seven-elements.fly_like_a_feather.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Anemo by being in the air for a long... time.",
+	"advancements.seven-elements.stormy_execution.title": "Those who brave the Lightning's Glow...",
+	"advancements.seven-elements.stormy_execution.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Electro by being struck by lightning.",
+	"advancements.seven-elements.let_it_grow.title": "Let it Grow!",
+	"advancements.seven-elements.let_it_grow.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Dendro by interacting with nature.",
+	"advancements.seven-elements.freeze.title": "Freeze!",
+	"advancements.seven-elements.freeze.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Cryo by freezing.",
+	"advancements.seven-elements.the_wrath_of_the_rock.title": "The Wrath of the Rock",
+	"advancements.seven-elements.the_wrath_of_the_rock.description": "Infuse a blank Elemental Attunement Smithing Template with the power of Geo by suffocating in stone deep within the world."
+}

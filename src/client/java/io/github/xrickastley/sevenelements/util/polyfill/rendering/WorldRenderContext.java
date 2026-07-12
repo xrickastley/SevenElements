@@ -22,6 +22,7 @@ import com.google.common.base.Preconditions;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.client.render.WorldRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.client.world.ClientWorld;
 
 /**
@@ -55,9 +56,17 @@ public interface WorldRenderContext {
 	Camera camera();
 
 	/**
-	 * Convenient access to {WorldRenderer.world}.
+	 * Convenient access to {@link WorldRenderer#world}.
 	 *
 	 * @return world renderer's client world instance
 	 */
 	ClientWorld world();
+
+	/**
+	 * An empty matrix stack that always exists, as the {@code WorldRenderer} doesn't use one
+	 * anymore.
+	 *
+	 * @return unique {@code MatrixStack} instance.
+	 */
+	MatrixStack matrixStack();
 }

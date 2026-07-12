@@ -30,6 +30,7 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 		super(
 			new Settings("Electro-Charged", SevenElements.identifier("electro-charged"), TextHelper.reaction("reaction.seven-elements.electro-charged", "#d691fc"))
 				.setReactionCoefficient(0)
+				.setReactionMultiplier(2.0)
 				.setAuraElement(Element.ELECTRO, 5)
 				.setTriggeringElement(Element.HYDRO, 6)
 				.applyResultAsAura(true)
@@ -84,7 +85,7 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 		final List<LivingEntity> targets = ElementalReaction.getEntitiesInAoE(entity, 2.5, predicate);
 
 		for (final LivingEntity target : targets) {
-			final float damage = ElementalReaction.getReactionDamage(entity, 2.0);
+			final float damage = this.getReactionStrength(origin, world);
 			final ElementalDamageSource source = new ElementalDamageSource(
 				entity
 					.getDamageSources()
@@ -122,10 +123,10 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 		method = "Lio/github/xrickastley/sevenelements/component/ElementComponentImpl;tick()V",
 		at = @At("HEAD")
 	)
-	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity) {
+	public static void mixin$tick(@Local(field = "owner:Lnet/minecraft/entity/LivingEntity;") LivingEntity entity, @Local(self = true) ElementComponent component) {
 		if (!ElementalReactions.ELECTRO_CHARGED.isTriggerable(entity) || entity.getEntityWorld().isClient() || entity.isDead()) return;
 
-		ElementalReactions.ELECTRO_CHARGED.trigger(entity);
+		ElementalReactions.ELECTRO_CHARGED.trigger(entity, component.getElectroChargedOrigin());
 
 		ElementComponent.sync(entity);
 	}

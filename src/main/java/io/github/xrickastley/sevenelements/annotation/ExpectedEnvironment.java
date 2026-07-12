@@ -21,7 +21,7 @@ import net.fabricmc.api.EnvType;
  */
 @Documented
 @Retention(RetentionPolicy.CLASS)
-@Target({ElementType.TYPE})
+@Target({ ElementType.TYPE, ElementType.METHOD })
 public @interface ExpectedEnvironment {
 	/**
 	 * Returns the environment type that the annotated element works as intended in.

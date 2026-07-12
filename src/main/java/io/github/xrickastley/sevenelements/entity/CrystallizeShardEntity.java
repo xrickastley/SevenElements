@@ -7,15 +7,18 @@ import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.SevenElements;
+import io.github.xrickastley.sevenelements.annotation.ExpectedEnvironment;
 import io.github.xrickastley.sevenelements.component.ElementComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
+import io.github.xrickastley.sevenelements.element.reaction.ElementalReactions;
 import io.github.xrickastley.sevenelements.factory.SevenElementsSoundEvents;
 import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.MathHelper2;
 
+import net.fabricmc.api.EnvType;
 import net.fabricmc.fabric.api.networking.v1.PlayerLookup;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.entity.AnimationState;
@@ -39,20 +42,22 @@ import net.minecraft.world.World;
 // Should technically extend Entity, but extends LivingEntity instead to NOT deal with more Networking and Spawn Packets.
 public final class CrystallizeShardEntity extends SevenElementsEntity {
 	public final AnimationState idleAnimationState = new AnimationState();
+	private double shieldHealth;
 	private @Nullable Element element;
 	private @Nullable UUID owner;
 
 	CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, World world) {
-		this(entityType, world, null, null);
+		this(entityType, world, null, world instanceof final ServerWorld serverWorld ? ElementalReactions.PYRO_CRYSTALLIZE.getReactionStrength(null, serverWorld) : 1, null);
 	}
 
-	public CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, World world, Element element) {
-		this(entityType, world, element, null);
+	public CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, World world, Element element, double shieldHealth) {
+		this(entityType, world, element, shieldHealth, null);
 	}
 
-	public CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, World world, Element element, @Nullable LivingEntity owner) {
+	public CrystallizeShardEntity(EntityType<? extends LivingEntity> entityType, World world, Element element, double shieldHealth, @Nullable LivingEntity owner) {
 		super(entityType, world);
 
+		this.shieldHealth = shieldHealth;
 		this.element = this.getEntityWorld().isClient() ? null : JavaScriptUtil.nullishCoalesing(element, Element.GEO);
 		this.owner = ClassInstanceUtil.mapOrNull(owner, LivingEntity::getUuid);
 	}
@@ -77,6 +82,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 
 		view.put("Element", Element.CODEC, this.element);
 		view.putNullable("Owner", Uuids.CODEC, this.owner);
+		view.putDouble("ShieldHealth", this.shieldHealth);
 	}
 
 	@Override
@@ -85,6 +91,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 
 		this.element = view.read("Element", Element.CODEC).orElse(this.element);
 		this.owner = view.read("Owner", Uuids.CODEC).orElse(this.owner);
+		this.shieldHealth = view.getDouble("ShieldHealth", this.shieldHealth);
 	}
 
 	@Override
@@ -110,6 +117,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	 *
 	 * While the element is considered {@code null}, the Crystallize Shard is not rendered. <br> <br>
 	 */
+	@ExpectedEnvironment(EnvType.SERVER)
 	public @Nullable Element getElement() {
 		return element;
 	}
@@ -128,7 +136,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 	}
 
 	private void checkCrystallizeShield() {
-		if (this.getEntityWorld().isClient()) return;
+		if (this.getEntityWorld().isClient() || this.age < 10) return;
 
 		final List<LivingEntity> entities = ElementalReaction.getEntitiesInAoE(this, 1.0, e -> !(e instanceof SevenElementsEntity || e.getType().isIn(SevenElementsEntityTypeTags.IGNORED_TARGETS)));
 		final @Nullable LivingEntity owner = this.getEntityFromUUID(this.owner);
@@ -150,7 +158,7 @@ public final class CrystallizeShardEntity extends SevenElementsEntity {
 
 		final ElementComponent component = ElementComponent.KEY.get(target);
 
-		component.setCrystallizeShield(element, SevenElements.getLevelMultiplier(this));
+		component.setCrystallizeShield(element, this.shieldHealth);
 
 		this.getEntityWorld()
 			.playSound(null, this.getBlockPos(), SevenElementsSoundEvents.CRYSTALLIZE_SHIELD, SoundCategory.PLAYERS, 1.0f, 1.0f);

@@ -24,15 +24,17 @@ public abstract class PersistentProjectileEntityMixin extends ProjectileEntity {
 		method = "<init>(Lnet/minecraft/entity/EntityType;Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)V",
 		at = @At("CTOR_HEAD")
 	)
-	private void setElementalInfusion1(EntityType<?> type, LivingEntity owner, World world, ItemStack stack, ItemStack shotFrom, CallbackInfo ci) {
+	private void setElementalInfusion$1(EntityType<?> type, LivingEntity owner, World world, ItemStack stack, ItemStack shotFrom, CallbackInfo ci) {
 		this.sevenelements$setOriginStack(shotFrom);
+		this.sevenelements$setProjectileStack(stack);
 	}
 
 	@Inject(
 		method = "<init>(Lnet/minecraft/entity/EntityType;DDDLnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/item/ItemStack;)V",
 		at = @At("CTOR_HEAD")
 	)
-	private void setElementalInfusion2(EntityType<?> type, double x, double y, double z, World world, ItemStack stack, ItemStack weapon, CallbackInfo ci) {
-		this.sevenelements$setOriginStack(stack);
+	private void setElementalInfusion$2(EntityType<?> type, double x, double y, double z, World world, ItemStack stack, ItemStack weapon, CallbackInfo ci) {
+		this.sevenelements$setOriginStack(weapon);
+		this.sevenelements$setProjectileStack(stack);
 	}
 }
