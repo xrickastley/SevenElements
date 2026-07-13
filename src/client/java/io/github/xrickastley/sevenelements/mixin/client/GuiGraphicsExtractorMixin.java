@@ -20,7 +20,7 @@ import net.minecraft.client.renderer.state.gui.GuiRenderState;
 public class GuiGraphicsExtractorMixin implements ExtendedGuiGraphicsExtractor {
 	@Shadow
 	@Final
-   	public ScissorStack scissorStack;
+	public ScissorStack scissorStack;
 
 	@Shadow
    	@Final

@@ -261,7 +261,7 @@ public class ElementCommand {
 		final ElementHolder holder = component.getElementHolder(element);
 
 		if (!holder.hasElementalApplication())
-			return CommandUtils.sendError(context, Component.translatable("commands.element.failed.none", entity.getDisplayName(), element.getText(true)));
+			return CommandUtils.sendError(context, Component.translatable("commands.element.failed.none", entity.getDisplayName(), element.getText()));
 
 		holder.setElementalApplication(null);
 
@@ -282,7 +282,7 @@ public class ElementCommand {
 		final ElementHolder holder = component.getElementHolder(element);
 
 		if (!holder.hasElementalApplication())
-			return CommandUtils.sendError(context, Component.translatable("commands.element.failed.none", entity.getDisplayName(), element.getText(true)));
+			return CommandUtils.sendError(context, Component.translatable("commands.element.failed.none", entity.getDisplayName(), element.getText()));
 
 		final double reducedGauge = holder
 			.getElementalApplication()
@@ -319,7 +319,7 @@ public class ElementCommand {
 		final @Nullable ElementalApplication application = component.getElementHolder(element).getElementalApplication();
 
 		if (application == null)
-			return CommandUtils.sendError(context, Component.translatable("commands.element.query.single.none", entity.getDisplayName(), element.getText(true)));
+			return CommandUtils.sendError(context, Component.translatable("commands.element.query.single.none", entity.getDisplayName(), element.getText()));
 
 		return CommandUtils.sendFeedback(context, Component.translatable("commands.element.query.single.success", entity.getDisplayName(), ElementalApplications.getTimerText(application)), true);
 	}
@@ -355,12 +355,9 @@ public class ElementCommand {
 			.setTag(tag)
 			.setType(type);
 
-		ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder);
-
-		final Component elementText = ElementalApplication.Builder.getText(infusionBuilder);
-		final Component icdText = InternalCooldownContext.Builder.getText(icdBuilder);
-
-		return CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
+		return ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder)
+			? CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.apply.success", ElementalApplication.Builder.getText(infusionBuilder), InternalCooldownContext.Builder.getText(icdBuilder), entity.getDisplayName()), true)
+			: CommandUtils.sendError(context, Component.translatable("commands.element.infuse.failed.incompatible", entity.getDisplayName(), element.getText()));
 	}
 
 	private static int infuseDuration(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -395,28 +392,9 @@ public class ElementCommand {
 			.setTag(tag)
 			.setType(type);
 
-		ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder);
-
-		final Component elementText = ElementalApplication.Builder.getText(infusionBuilder);
-		final Component icdText = InternalCooldownContext.Builder.getText(icdBuilder);
-
-		return CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
-	}
-
-	private static int infuseRemove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
-		final Entity entity = EntityArgument.getEntity(context, "entity");
-
-		if (!(entity instanceof final LivingEntity livingEntity))
-			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
-
-		final ItemStack stack = livingEntity.getMainHandItem();
-
-		if (stack.isEmpty())
-			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.itemless", entity.getDisplayName()));
-
-		return ElementalInfusionComponent.removeInfusion(stack)
-			? CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.remove.success", entity.getDisplayName()), true)
-			: CommandUtils.sendError(context, Component.translatable("commands.element.infuse.remove.none", entity.getDisplayName()));
+		return ElementalInfusionComponent.applyInfusion(stack, infusionBuilder, icdBuilder)
+			? CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.apply.success", ElementalApplication.Builder.getText(infusionBuilder), InternalCooldownContext.Builder.getText(icdBuilder), entity.getDisplayName()), true)
+			: CommandUtils.sendError(context, Component.translatable("commands.element.infuse.failed.incompatible", entity.getDisplayName(), element.getText()));
 	}
 
 	private static int infuseRandom(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -440,12 +418,31 @@ public class ElementCommand {
 		return CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.apply.success", elementText, icdText, entity.getDisplayName()), true);
 	}
 
+	private static int infuseRemove(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+		final Entity entity = EntityArgument.getEntity(context, "entity");
+
+		if (!(entity instanceof final LivingEntity livingEntity))
+			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
+
+		final ItemStack stack = livingEntity.getMainHandItem();
+
+		if (stack.isEmpty())
+			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.itemless", entity.getDisplayName()));
+
+		return ElementalInfusionComponent.removeInfusion(stack)
+			? CommandUtils.sendFeedback(context, Component.translatable("commands.element.infuse.remove.success", entity.getDisplayName()), true)
+			: CommandUtils.sendError(context, Component.translatable("commands.element.infuse.remove.none", entity.getDisplayName()));
+	}
+
 	private static int attuneApply(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
 		final Element element = ElementArgumentType.getElement(context, "element");
 		final Entity entity = EntityArgument.getEntity(context, "entity");
 
 		if (!(entity instanceof final LivingEntity livingEntity))
 			return CommandUtils.sendError(context, Component.translatable("commands.enchant.failed.entity", entity.getDisplayName()));
+
+		if (!ElementalAttunementComponent.isValidForAttunement(element))
+			return CommandUtils.sendError(context, Component.translatable("commands.element.attune.failed.element", element.getText()));
 
 		final ItemStack stack = livingEntity.getMainHandItem();
 

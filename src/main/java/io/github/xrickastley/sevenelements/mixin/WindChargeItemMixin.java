@@ -3,17 +3,13 @@ package io.github.xrickastley.sevenelements.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
-
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.entity.projectile.hurtingprojectile.windcharge.WindCharge;
 import net.minecraft.world.item.ItemStack;
@@ -26,16 +22,10 @@ public class WindChargeItemMixin {
 		method = "lambda$use$0",
 		at = @At("RETURN")
 	)
-	private static WindCharge setElementalInfusion1(WindCharge original, @Local(argsOnly = true) Player user) {
-		final @Nullable ItemStack stack = JavaScriptUtil.nullishCoalesing(
-			user.getMainHandItem(),
-			user.getOffhandItem()
-		);
-
-		// Unable to resolve Wind Charge stack.
-		if (stack == null) return original;
-
+	private static WindCharge setElementalInfusion$1(WindCharge original, @Local(argsOnly = true) ItemStack stack) {
 		original.sevenelements$setOriginStack(stack);
+		original.sevenelements$setProjectileStack(stack);
+
 		return original;
 	}
 
@@ -48,5 +38,6 @@ public class WindChargeItemMixin {
 	)
 	private void setElementalInfusion2(Level world, Position pos, ItemStack stack, Direction direction, CallbackInfoReturnable<Projectile> cir, @Local WindCharge windCharge) {
 		windCharge.sevenelements$setOriginStack(stack);
+		windCharge.sevenelements$setProjectileStack(stack);
 	}
 }

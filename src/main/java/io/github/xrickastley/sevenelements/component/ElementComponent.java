@@ -28,7 +28,10 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 
-public interface ElementComponent extends AutoSyncedComponent, CommonTickingComponent {
+public sealed interface ElementComponent
+	extends AutoSyncedComponent, CommonTickingComponent
+	permits ElementComponentImpl
+{
 	public static final ComponentKey<ElementComponent> KEY = ComponentRegistry.getOrCreate(SevenElements.identifier("elements"), ElementComponent.class);
 
 	/**

@@ -34,6 +34,9 @@ public final class WorldTextRenderer {
 	}
 
 	public void tick(ClientLevel world) {
+		if (!world.tickRateManager().runsNormally())
+			return;
+
 		entries.forEach(Entry::tick);
 		entries.removeIf(Entry::shouldRemove);
 	}
@@ -156,7 +159,7 @@ public final class WorldTextRenderer {
 
 		@Override
 		protected void render(Camera camera, float tickDelta, PoseStack matrices) {
-			final MultiBufferSource.BufferSource immediate = SevenElementsRenderLayer.getWorldTextImmediate();
+			final MultiBufferSource.BufferSource immediate = SevenElementsRenderLayers.getWorldTextImmediate();
 
 			final float deltaTime = age + tickDelta;
 

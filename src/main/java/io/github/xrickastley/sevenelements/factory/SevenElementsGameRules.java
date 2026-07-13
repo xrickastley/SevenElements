@@ -57,5 +57,11 @@ public class SevenElementsGameRules {
 			.category(ELEMENTS_CATEGORY)
 			.buildAndRegister(SevenElements.identifier("infusion_table"));
 
+	public static final GameRule<Boolean> PYRO_DOES_FIRE_EFFECTS
+		 = GameRuleBuilder
+		 	.forBoolean(true)
+			.category(ELEMENTS_CATEGORY)
+			.buildAndRegister(SevenElements.identifier("pyro_does_fire_effects"));
+
 	public static void register() {}
 }

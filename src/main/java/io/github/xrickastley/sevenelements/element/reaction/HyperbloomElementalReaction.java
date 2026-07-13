@@ -13,6 +13,7 @@ public final class HyperbloomElementalReaction extends AbstractDendroCoreElement
 	HyperbloomElementalReaction() {
 		super(
 			new Settings("Hyperbloom", SevenElements.identifier("hyperbloom"), TextHelper.reaction("reaction.seven-elements.hyperbloom", Colors.ELECTRO))
+				.setReactionMultiplier(3.0)
 		);
 	}
 

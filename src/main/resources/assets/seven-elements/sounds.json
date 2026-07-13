@@ -5,7 +5,8 @@
 			{
 				"name": "seven-elements:reaction"
 			}
-		]
+		],
+		"subtitle": "subtitles.seven-elements.elemental_reaction"
 	},
 	"dendro_core_explosion": {
 		"category": "player",
@@ -13,7 +14,8 @@
 			{
 				"name": "seven-elements:dendro_core_explosion"
 			}
-		]
+		],
+		"subtitle": "subtitles.seven-elements.entity.dendro_core.explode"
 	},
 	"sprawling_shot_hit": {
 		"category": "player",
@@ -21,7 +23,8 @@
 			{
 				"name": "seven-elements:sprawling_shot_hit"
 			}
-		]
+		],
+		"subtitle": "subtitles.seven-elements.entity.dendro_core.hit"
 	},
 	"crystallize_shield": {
 		"category": "player",
@@ -29,7 +32,8 @@
 			{
 				"name": "seven-elements:crystallize_shield"
 			}
-		]
+		],
+		"subtitle": "subtitles.seven-elements.entity.crystallize_shield.absorb"
 	},
 	"crystallize_shield.hit": {
 		"category": "player",
@@ -37,7 +41,8 @@
 			{
 				"name": "seven-elements:crystallize_shield_hit"
 			}
-		]
+		],
+		"subtitle": "subtitles.seven-elements.entity.crystallize_shield.hit"
 	},
 	"crystallize_shield.break": {
 		"category": "player",
@@ -45,16 +50,25 @@
 			{
 				"name": "seven-elements:crystallize_shield_break"
 			}
-		]
+		],
+		"subtitle": "subtitles.seven-elements.entity.crystallize_shield.break"
 	},
-	"item_infusion": {
+	"item_infusion.apply": {
 		"category": "player",
 		"sounds": [
 			{
-				"name": "seven-elements:item_infusion"
+				"name": "seven-elements:item_infusion_apply"
 			}
 		],
-		"volume": 1.0,
-		"pitch": 1.0
+		"subtitle": "subtitles.seven-elements.block.infusion_table.use"
+	},
+	"item_infusion.remove": {
+		"category": "player",
+		"sounds": [
+			{
+				"name": "seven-elements:item_infusion_remove"
+			}
+		],
+		"subtitle": "subtitles.seven-elements.block.infusion_table.use"
 	}
 }

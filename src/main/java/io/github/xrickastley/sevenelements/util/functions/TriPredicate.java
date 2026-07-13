@@ -2,7 +2,7 @@ package io.github.xrickastley.sevenelements.util.functions;
 
 /**
  * Represents a predicate (boolean-valued function) of three arguments.
- * This is the three-arity specialization of {@link java.util.function.Predicate}.
+ * This is the three-arity specialization of {@link java.util.function.Predicate Predicate}.
  *
  * <p>This is a <a href="package-summary.html">functional interface</a>
  * whose functional method is {@link #test(Object, Object, Object)}.

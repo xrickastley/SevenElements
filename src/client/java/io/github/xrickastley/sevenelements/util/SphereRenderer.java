@@ -3,13 +3,13 @@ package io.github.xrickastley.sevenelements.util;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import java.util.function.Function;
 
-import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 
-import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayer;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayers;
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
 
@@ -17,11 +17,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public final class SphereRenderer {
-	private static final ByteBufferBuilder allocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayer.getSphere().bufferSize());
+	private static final ByteBufferBuilder allocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayers.getSphere().bufferSize());
+
 	private SphereRenderer() {}
 
 	/**
-	 * Render a sphere centered at (x,y,z) in world coordinates.
+	 * Render a sphere centered at (x, y, z) in world coordinates.
 	 *
 	 * @param matrices The current {@code MatrixStack}.
 	 * @param origin The origin point.
@@ -35,7 +36,7 @@ public final class SphereRenderer {
 	}
 
 	/**
-	 * Render a sphere centered at (x,y,z) in world coordinates.
+	 * Render a sphere centered at (x, y, z) in world coordinates.
 	 *
 	 * @param matrices The current {@code MatrixStack}.
 	 * @param origin The origin point.
@@ -45,6 +46,25 @@ public final class SphereRenderer {
 	 * @param colorFunc A function taking in a {@code Vec3d} and returns an ARGB int {@code 0xAARRGGBB}
 	 */
 	public static void render(PoseStack matrices, Vec3 origin, float radius, int latSteps, int lonSteps, Function<Vec3, Integer> colorFunc) {
+		final BufferBuilder buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.SPHERE);
+
+		SphereRenderer.render(buffer, matrices, origin, radius, latSteps, lonSteps, colorFunc);
+
+		SevenElementsRenderLayers.getSphere().draw(buffer.buildOrThrow());
+	}
+
+	/**
+	 * Render a sphere centered at (x, y, z) in world coordinates.
+	 *
+	 * @param consumer The vertex consumer to use for drawing the sphere.
+	 * @param matrices The current {@code MatrixStack}.
+	 * @param origin The origin point.
+	 * @param radius Sphere radius (in blocks)
+	 * @param latSteps Vertical subdivisions
+	 * @param lonSteps Horizontal subdivisions
+	 * @param colorFunc A function taking in a {@code Vec3d} and returns an ARGB int {@code 0xAARRGGBB}
+	 */
+	public static void render(VertexConsumer consumer, PoseStack matrices, Vec3 origin, float radius, int latSteps, int lonSteps, Function<Vec3, Integer> colorFunc) {
 		if (latSteps < 2) latSteps = 2;
 		if (lonSteps < 3) lonSteps = 3;
 
@@ -52,11 +72,28 @@ public final class SphereRenderer {
 		matrices.pushPose();
 		matrices.translate(origin.x, origin.y, origin.z);
 
-		// grab matrices used by VertexConsumer
-		Matrix4f modelMat = matrices.last().pose();
-		Matrix3f normalMat = matrices.last().normal();
+		render(consumer, matrices.last(), radius, latSteps, lonSteps, colorFunc);
 
-		final BufferBuilder buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.SPHERE);
+		matrices.popPose();
+	}
+
+	/**
+	 * Render a sphere.
+	 *
+	 * @param consumer The vertex consumer to use for drawing the sphere.
+	 * @param matrices The current {@code MatrixStack}.
+	 * @param origin The origin point.
+	 * @param radius Sphere radius (in blocks)
+	 * @param latSteps Vertical subdivisions
+	 * @param lonSteps Horizontal subdivisions
+	 * @param colorFunc A function taking in a {@code Vec3d} and returns an ARGB int {@code 0xAARRGGBB}
+	 */
+	public static void render(VertexConsumer consumer, PoseStack.Pose entry, float radius, int latSteps, int lonSteps, Function<Vec3, Integer> colorFunc) {
+		if (latSteps < 2) latSteps = 2;
+		if (lonSteps < 3) lonSteps = 3;
+
+		// grab matrices used by VertexConsumer
+		Matrix4f matrix = entry.pose();
 
 		for (int lat = 0; lat < latSteps; lat++) {
 			final double theta1 = Math.PI * lat / (double) latSteps;
@@ -71,19 +108,15 @@ public final class SphereRenderer {
 				final Vec3 v10 = spherical(radius, theta2, phi1);
 				final Vec3 v11 = spherical(radius, theta2, phi2);
 
-				vertex(buffer, modelMat, normalMat, v10, colorFunc.apply(SphereRenderer.relativeClamp(v10, radius)));
-				vertex(buffer, modelMat, normalMat, v00, colorFunc.apply(SphereRenderer.relativeClamp(v00, radius)));
-				vertex(buffer, modelMat, normalMat, v11, colorFunc.apply(SphereRenderer.relativeClamp(v11, radius)));
+				vertex(consumer, matrix, v10, colorFunc.apply(SphereRenderer.relativeClamp(v10, radius)));
+				vertex(consumer, matrix, v00, colorFunc.apply(SphereRenderer.relativeClamp(v00, radius)));
+				vertex(consumer, matrix, v11, colorFunc.apply(SphereRenderer.relativeClamp(v11, radius)));
 
-				vertex(buffer, modelMat, normalMat, v00, colorFunc.apply(SphereRenderer.relativeClamp(v00, radius)));
-				vertex(buffer, modelMat, normalMat, v11, colorFunc.apply(SphereRenderer.relativeClamp(v11, radius)));
-				vertex(buffer, modelMat, normalMat, v01, colorFunc.apply(SphereRenderer.relativeClamp(v01, radius)));
+				vertex(consumer, matrix, v00, colorFunc.apply(SphereRenderer.relativeClamp(v00, radius)));
+				vertex(consumer, matrix, v11, colorFunc.apply(SphereRenderer.relativeClamp(v11, radius)));
+				vertex(consumer, matrix, v01, colorFunc.apply(SphereRenderer.relativeClamp(v01, radius)));
 			}
 		}
-
-		SevenElementsRenderLayer.getSphere().draw(buffer.buildOrThrow());
-
-		matrices.popPose();
 	}
 
 	private static Vec3 spherical(double r, double theta, double phi) {
@@ -93,9 +126,9 @@ public final class SphereRenderer {
 		return new Vec3(x, y, z);
 	}
 
-	private static void vertex(BufferBuilder buffer, Matrix4f projMat, Matrix3f normalMat, Vec3 pos, int color) {
-		buffer
-			.addVertex(projMat, (float)pos.x, (float)pos.y, (float)pos.z)
+	private static void vertex(VertexConsumer consumer, Matrix4f matrices, Vec3 pos, int color) {
+		consumer
+			.addVertex(matrices, (float) pos.x, (float) pos.y, (float) pos.z)
 			.setColor(color);
 	}
 

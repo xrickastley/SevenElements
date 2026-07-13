@@ -32,7 +32,7 @@ import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.Item.TooltipContext;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipProvider;
@@ -48,13 +48,13 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 	).apply(instance, ElementalInfusionComponent::new));
 
 	@ApiStatus.Internal
-	public static Tuple<Element, Double> generateAndApplyInfusion(ItemStack stack, Level level) {
+	public static Tuple<Element, Double> generateAndApplyInfusion(ItemStack stack, Level world) {
 		final DataComponentMap components = stack.getComponents();
 
 		final Element element = components.has(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)
 			? components.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT).element()
-			: ELEMENTS.get(level.getRandom().nextInt(ELEMENTS.size()));
-		final double gaugeUnits = GAUGE_UNITS.get(level.getRandom().nextInt(GAUGE_UNITS.size()));
+			: ELEMENTS.get(world.getRandom().nextInt(ELEMENTS.size()));
+		final double gaugeUnits = GAUGE_UNITS.get(world.getRandom().nextInt(GAUGE_UNITS.size()));
 
 		ElementalInfusionComponent.applyInfusion(
 			stack,
@@ -74,7 +74,7 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 		try {
 			if (!source.isDirect() || !(target instanceof final LivingEntity livingTarget) || !(source.getEntity() instanceof final LivingEntity attacker)) return Optional.empty();
 
-			final @Nullable ElementalInfusionComponent component = attacker.getActiveItem().get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+			final @Nullable ElementalInfusionComponent component = attacker.getWeaponItem().get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 
 			if (component == null || !component.hasElementalInfusion()) return Optional.empty();
 
@@ -90,11 +90,18 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 		}
 	}
 
-	public static void applyInfusion(ItemStack stack, ElementalApplication.Builder applicationBuilder, InternalCooldownContext.Builder icdBuilder) {
+	public static boolean applyInfusion(ItemStack stack, ElementalApplication.Builder applicationBuilder, InternalCooldownContext.Builder icdBuilder) {
+		if (
+			stack.has(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)
+			&& stack.get(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT).element() != applicationBuilder.getElement()
+		) return false;
+
 		stack.set(
 			SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT,
 			new ElementalInfusionComponent(applicationBuilder, icdBuilder)
 		);
+
+		return true;
 	}
 
 	public static boolean removeInfusion(ItemStack stack) {
@@ -164,7 +171,7 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 	}
 
 	@Override
-	public void addToTooltip(TooltipContext context, Consumer<Component> textConsumer, TooltipFlag tooltipType, DataComponentGetter components) {
+	public void addToTooltip(Item.TooltipContext context, Consumer<Component> textConsumer, TooltipFlag type, DataComponentGetter components) {
 		final Builder icdContext = this.internalCooldown();
 
 		textConsumer.accept(

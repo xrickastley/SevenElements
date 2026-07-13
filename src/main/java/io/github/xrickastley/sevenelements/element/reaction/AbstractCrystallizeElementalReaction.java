@@ -6,6 +6,7 @@ import java.util.function.Predicate;
 
 import org.jetbrains.annotations.Nullable;
 
+import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalApplication;
 import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity;
 import io.github.xrickastley.sevenelements.entity.SevenElementsEntityTypes;
@@ -30,21 +31,30 @@ public abstract sealed class AbstractCrystallizeElementalReaction
 {
 	private static final Set<Block> AIR_BLOCKS = Set.of(Blocks.AIR, Blocks.CAVE_AIR, Blocks.VOID_AIR);
 
+	private final Element shieldElement;
+
 	AbstractCrystallizeElementalReaction(Settings settings) {
-		super(settings);
+		this(settings.setType(Type.SHIELD), settings.getAuraElement());
+	}
+
+	AbstractCrystallizeElementalReaction(Settings settings, Element shieldElement) {
+		super(
+			settings
+				.setReactionMultiplier(1.0)
+		);
+
+		this.shieldElement = shieldElement;
 	}
 
 	@Override
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
-		final Level world = entity.level();
+		if (!(entity.level() instanceof final ServerLevel world)) return;
 
-		if (!(world instanceof final ServerLevel serverWorld)) return;
-
-		final Vec3 spawnPos = this.clampToGround(entity.level(), this.toAbsolutePos(entity, new Vec3(0, 0, 1)));
-		final CrystallizeShardEntity crystallizeShard = new CrystallizeShardEntity(SevenElementsEntityTypes.CRYSTALLIZE_SHARD, serverWorld, this.getAuraElement(), origin);
+		final Vec3 spawnPos = this.clampToGround(world, this.toAbsolutePos(entity, new Vec3(0, 0, 1)));
+		final CrystallizeShardEntity crystallizeShard = new CrystallizeShardEntity(SevenElementsEntityTypes.CRYSTALLIZE_SHARD, world, this.shieldElement, this.getReactionStrength(origin, world), origin);
 
 		crystallizeShard.setPos(spawnPos);
-		serverWorld.tryAddFreshEntityWithPassengers(crystallizeShard);
+		world.tryAddFreshEntityWithPassengers(crystallizeShard);
 	}
 
 	// Taken from LookingPosArgument#toAbsolutePos

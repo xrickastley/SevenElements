@@ -12,6 +12,7 @@ import io.github.xrickastley.sevenelements.command.ElementArgumentType;
 import io.github.xrickastley.sevenelements.command.ElementCommand;
 import io.github.xrickastley.sevenelements.command.InternalCooldownTagType;
 import io.github.xrickastley.sevenelements.element.InternalCooldownType;
+import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.factory.SevenElementsFactories;
 import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
@@ -104,12 +105,20 @@ public class SevenElements implements ModInitializer {
 		return LoggerFactory.getLogger(MOD_ID + "/" + sublogger.getClass().getSimpleName());
 	}
 
+	/**
+	 * @deprecated Use {@link ElementalReaction#getLevelMultiplier()} instead.
+	 */
+	@Deprecated(forRemoval = true)
 	public static float getLevelMultiplier(Entity entity) {
 		return entity.level() instanceof final ServerLevel world
 			? SevenElements.getLevelMultiplier(world)
 			: 5.0f;
 	}
 
+	/**
+	 * @deprecated Use {@link ElementalReaction#getLevelMultiplier()} instead.
+	 */
+	@Deprecated(forRemoval = true)
 	public static float getLevelMultiplier(ServerLevel world) {
 		return world
 			.getGameRules()

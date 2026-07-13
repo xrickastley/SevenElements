@@ -26,7 +26,10 @@ public abstract sealed class AbstractShatterElementalReaction
 	permits GeoShatterElementalReaction, HeavyShatterElementalReaction
 {
 	AbstractShatterElementalReaction(Settings settings) {
-		super(settings);
+		super(
+			settings
+				.setReactionMultiplier(3.0)
+		);
 	}
 
 	@Override
@@ -48,7 +51,7 @@ public abstract sealed class AbstractShatterElementalReaction
 	protected void onReaction(LivingEntity entity, ElementalApplication auraElement, ElementalApplication triggeringElement, double reducedGauge, @Nullable LivingEntity origin) {
 		if (!(entity.level() instanceof final ServerLevel world)) return;
 
-		final float damage = ElementalReaction.getReactionDamage(entity, 3.0);
+		final float damage = this.getReactionStrength(origin, world);
 		final ElementalDamageSource source = new ElementalDamageSource(
 			entity
 				.damageSources()

@@ -26,6 +26,9 @@ repositories {
 	maven { 
 		url = "https://maven.terraformersmc.com/releases/"
 	}
+	maven {
+		url = 'https://jitpack.io'
+	}
 	exclusiveContent {
 		forRepository {
 			maven {

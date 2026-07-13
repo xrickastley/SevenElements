@@ -4,22 +4,15 @@
 	"key": {
 		"_": "minecraft:smooth_stone_slab",
 		"|": "minecraft:gold_block",
-		"P": "minecraft:fire_charge",
-		"H": "minecraft:water_bucket",
-		"A": "minecraft:wind_charge",
-		"E": "minecraft:lightning_rod",
-		"D": "#minecraft:leaves",
-		"C": "minecraft:blue_ice",
-		"G": "#minecraft:stone_crafting_materials"
+		"R": "seven-elements:elemental_rune"
 	},
 	"pattern": [
-		"AED",
-		"H|C",
-		"P_G"
+		"R",
+		"|",
+		"_"
 	],
 	"result": {
 		"count": 1,
 		"id": "seven-elements:infusion_table"
-	},
-	"show_notification": false
+	}
 }

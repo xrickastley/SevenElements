@@ -7,6 +7,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 
 public final class SevenElementsItemTags {
+	public static final TagKey<Item> ATTUNABLE_ITEMS = SevenElementsItemTags.of("attunable_items");
 	public static final TagKey<Item> HEAVY_WEAPON = SevenElementsItemTags.of("heavy_weapon");
 
 	private static TagKey<Item> of(String id) {

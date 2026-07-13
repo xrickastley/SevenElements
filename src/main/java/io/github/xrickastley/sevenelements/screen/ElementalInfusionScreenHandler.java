@@ -4,6 +4,7 @@ import io.github.xrickastley.sevenelements.advancement.criterion.SevenElementsCr
 import io.github.xrickastley.sevenelements.block.SevenElementsBlocks;
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
 import io.github.xrickastley.sevenelements.element.Element;
+import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import io.github.xrickastley.sevenelements.networking.FinishElementalInfusionS2CPayload;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
@@ -18,7 +19,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public final class ElementalInfusionScreenHandler extends AbstractContainerMenu {
-	private static final int REQUIRED_LEVEL = 10;
+	private static final int INFUSE_REQUIRED_LEVEL = 10;
+	private static final int UNINFUSE_REQUIRED_LEVEL = 2;
 
 	private final ContainerLevelAccess context;
 	private final ResultContainer output = new ResultContainer();
@@ -75,7 +77,17 @@ public final class ElementalInfusionScreenHandler extends AbstractContainerMenu 
 	}
 
 	public boolean canInfuse(Player player) {
-		return (player.experienceLevel >= REQUIRED_LEVEL || player.hasInfiniteMaterials()) && this.getResultSlot().hasItem();
+		return (player.experienceLevel >= INFUSE_REQUIRED_LEVEL || player.hasInfiniteMaterials())
+			&& this.getResultSlot().hasItem();
+	}
+
+	public boolean canUninfuse(Player player) {
+		return (player.experienceLevel >= UNINFUSE_REQUIRED_LEVEL || player.hasInfiniteMaterials())
+			&& this.getResultSlot().getItem().has(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
+	}
+
+	public boolean canPerformUninfuse() {
+		return this.getResultSlot().getItem().has(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
 	}
 
 	public boolean infuse(Player player) {
@@ -88,13 +100,33 @@ public final class ElementalInfusionScreenHandler extends AbstractContainerMenu 
 		final ItemStack stack = slot.getItem();
 		final Element infusedElement = ElementalInfusionComponent.generateAndApplyInfusion(stack, player.level()).getA();
 
-		if (!player.hasInfiniteMaterials()) serverPlayer.giveExperienceLevels(-REQUIRED_LEVEL);
+		if (!player.hasInfiniteMaterials()) serverPlayer.giveExperienceLevels(-INFUSE_REQUIRED_LEVEL);
 
 		slot.setByPlayer(stack);
 		slot.setChanged();
 
 		ServerPlayNetworking.send(serverPlayer, new FinishElementalInfusionS2CPayload(this));
 		SevenElementsCriteria.ELEMENTAL_INFUSION.trigger(serverPlayer, stack, infusedElement);
+
+		return true;
+	}
+
+	public boolean uninfuse(Player player) {
+		if (!this.canPerformUninfuse() || !(player instanceof final ServerPlayer serverPlayer)) return false;
+
+		final Slot slot = this.slots.get(0);
+
+		if (slot == null || !slot.hasItem()) return false;
+
+		final ItemStack stack = slot.getItem();
+		ElementalInfusionComponent.removeInfusion(stack);
+
+		if (!player.hasInfiniteMaterials()) serverPlayer.giveExperienceLevels(-UNINFUSE_REQUIRED_LEVEL);
+
+		slot.setByPlayer(stack);
+		slot.setChanged();
+
+		ServerPlayNetworking.send(serverPlayer, new FinishElementalInfusionS2CPayload(this));
 
 		return true;
 	}
@@ -106,9 +138,14 @@ public final class ElementalInfusionScreenHandler extends AbstractContainerMenu 
 
 	@Override
 	public boolean clickMenuButton(Player player, int id) {
-		if (!this.canInfuse(player)) return false;
-
-		return this.infuse(player);
+		switch (id) {
+			case 0:
+				return this.infuse(player);
+			case 1:
+				return this.uninfuse(player);
+			default:
+				return false;
+		}
 	}
 
 	@Override

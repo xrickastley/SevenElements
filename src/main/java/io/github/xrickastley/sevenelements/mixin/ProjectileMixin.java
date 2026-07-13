@@ -1,6 +1,7 @@
 package io.github.xrickastley.sevenelements.mixin;
 
 import java.util.Optional;
+import java.util.function.BiFunction;
 
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -10,66 +11,110 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.github.xrickastley.sevenelements.component.ElementalInfusionComponent;
+import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.ElementalDamageSource;
 import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
+import io.github.xrickastley.sevenelements.factory.SevenElementsGameRules;
 import io.github.xrickastley.sevenelements.interfaces.InfusableProjectile;
+import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
+import io.github.xrickastley.sevenelements.util.Functions;
+import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.TraceableEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 
 @Mixin(Projectile.class)
 public abstract class ProjectileMixin
-	extends Entity
+	extends EntityMixin
 	implements TraceableEntity, InfusableProjectile
 {
 	@Unique
-	private ElementalInfusionComponent sevenelements$infusionComponent;
-
-	public ProjectileMixin(EntityType<? extends Projectile> entityType, Level world) {
-		super(entityType, world);
-
-		throw new AssertionError();
-	}
-
+	private @Nullable ItemStack sevenelements$originStack;
 	@Unique
-	@Override
-	public void sevenelements$setOriginStack(@Nullable ItemStack originStack) {
-		if (originStack == null) return;
-
-		this.sevenelements$infusionComponent = originStack.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT);
-	}
-
-	@Unique
-	@Override
-	public Optional<ElementalDamageSource> sevenelements$attemptInfusion(DamageSource source, Entity target) {
-		return this.sevenelements$infusionComponent == null
-			? Optional.empty()
-			: this.sevenelements$infusionComponent.apply(source, target);
-	}
+	private @Nullable ItemStack sevenelements$projectileStack;
 
 	@Inject(
 		method = "addAdditionalSaveData",
 		at = @At("TAIL")
 	)
-	public void writeInfusionToNbt(ValueOutput view, CallbackInfo ci) {
-		if (this.sevenelements$infusionComponent == null) return;
-
-		view.store("seven-elements:elemental_infusion", ElementalInfusionComponent.CODEC, this.sevenelements$infusionComponent);
+	public void writeInfusionToData(ValueOutput view, CallbackInfo ci) {
+		view.storeNullable("seven-elements:origin_stack", ItemStack.CODEC, this.sevenelements$originStack);
+		view.storeNullable("seven-elements:projectile_stack", ItemStack.CODEC, this.sevenelements$projectileStack);
 	}
 
 	@Inject(
 		method = "readAdditionalSaveData",
 		at = @At("TAIL")
 	)
-	public void readInfusionFromNbt(ValueInput view, CallbackInfo ci) {
-		this.sevenelements$infusionComponent = view.read("seven-elements:elemental_infusion", ElementalInfusionComponent.CODEC)
-				.orElse(this.sevenelements$infusionComponent);
+	public void readStacksFromData(ValueInput view, CallbackInfo ci) {
+		this.sevenelements$originStack = view
+			.read("seven-elements:origin_stack", ItemStack.CODEC)
+			.orElse(this.sevenelements$originStack);
+
+		this.sevenelements$projectileStack = view
+			.read("seven-elements:projectile_stack", ItemStack.CODEC)
+			.orElse(this.sevenelements$projectileStack);
+	}
+
+	@Override
+	protected boolean sevenelements$modifyOnFire(boolean original) {
+		return original
+			|| (this.sevenelements$getElement() == Element.PYRO
+				&& this.level() instanceof final ServerLevel world
+				&& world.getGameRules().get(SevenElementsGameRules.PYRO_DOES_FIRE_EFFECTS)
+			);
+	}
+
+	@Unique
+	@Override
+	public void sevenelements$setOriginStack(@Nullable ItemStack originStack) {
+		this.sevenelements$originStack = ClassInstanceUtil.mapOrNull(originStack, ItemStack::copy);
+	}
+
+	@Unique
+	@Override
+	public void sevenelements$setProjectileStack(@Nullable ItemStack projectileStack) {
+		this.sevenelements$projectileStack = ClassInstanceUtil.mapOrNull(projectileStack, ItemStack::copy);
+	}
+
+	@Unique
+	@Override
+	public Optional<ElementalDamageSource> sevenelements$attemptInfusion(DamageSource source, Entity target) {
+		return Optional.ofNullable(
+			JavaScriptUtil.nullishCoalesingFn(
+				Functions.supplier(this.sevenelements$getInfusion(this.sevenelements$originStack), source, target),
+				Functions.supplier(this.sevenelements$getInfusion(this.sevenelements$projectileStack), source, target)
+			)
+		);
+	}
+
+	@Unique
+	private BiFunction<DamageSource, Entity, @Nullable ElementalDamageSource> sevenelements$getInfusion(ItemStack stack) {
+		return (source, target) -> Optional.ofNullable(stack)
+			.map(stack2 -> stack2.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT))
+			.flatMap(Functions.withArgument(ElementalInfusionComponent::apply, source, target))
+			.orElse(null);
+	}
+
+	@Unique
+	private @Nullable Element sevenelements$getElement() {
+		return JavaScriptUtil.nullishCoalesing(
+			this.sevenelements$getElement(this.sevenelements$originStack),
+			this.sevenelements$getElement(this.sevenelements$projectileStack)
+		);
+	}
+
+	@Unique
+	private @Nullable Element sevenelements$getElement(ItemStack stack) {
+		return Optional.ofNullable(stack)
+			.map(stack2 -> stack2.get(SevenElementsComponents.ELEMENTAL_INFUSION_COMPONENT))
+			.map(ElementalInfusionComponent::getElement)
+			.orElse(null);
 	}
 }

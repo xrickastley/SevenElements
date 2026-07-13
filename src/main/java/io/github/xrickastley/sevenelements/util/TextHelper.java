@@ -1,6 +1,9 @@
 package io.github.xrickastley.sevenelements.util;
 
+import java.util.List;
+
 import io.github.xrickastley.sevenelements.SevenElements;
+import io.github.xrickastley.sevenelements.SevenElementsSidedImpl;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.FontDescription;
@@ -83,5 +86,9 @@ public final class TextHelper {
 				.withObfuscated(false)
 				.withUnderlined(false)
 		);
+	}
+
+	public static List<Component> wrapLines(Component text, int width) {
+		return SevenElementsSidedImpl.getWrapLinesFunction().apply(text, width);
 	}
 }

@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "seven-elements",
-	"version": "${version}",
+	"version": "\u0024{version}",
 	"name": "Seven Elements",
 	"description": "A Minecraft mod that brings a faithful implementation of Genshin Impact's Elemental Combat system in Minecraft",
 	"authors": [
@@ -47,26 +47,44 @@
 	},
 	"custom": {
 		"loom:injected_interfaces": {
-			"net/minecraft/world/effect/MobEffect": [
-				"io/github/xrickastley/sevenelements/interfaces/EntityAwareEffect"
-			],
-			"net/minecraft/world/entity/LivingEntity": [
-				"io/github/xrickastley/sevenelements/interfaces/ILivingEntity"
+			"net/minecraft/world/BossEvent": [
+				"io/github/xrickastley/sevenelements/interfaces/IBossBar"
 			],
 			"net/minecraft/world/damagesource/DamageSource": [
 				"io/github/xrickastley/sevenelements/interfaces/IDamageSource"
 			],
-			"net/minecraft/world/BossEvent": [
-				"io/github/xrickastley/sevenelements/interfaces/IBossBar"
+			"net/minecraft/world/effect/MobEffect": [
+				"io/github/xrickastley/sevenelements/interfaces/EntityAwareEffect"
+			],
+			"net/minecraft/world/entity/Entity": [
+				"io/github/xrickastley/sevenelements/interfaces/IEntity"
+			],
+			"net/minecraft/world/entity/LivingEntity": [
+				"io/github/xrickastley/sevenelements/interfaces/ILivingEntity"
 			],
 			"net/minecraft/world/entity/projectile/Projectile": [
 				"io/github/xrickastley/sevenelements/interfaces/InfusableProjectile"
 			],
-			"net/minecraft/client/renderer/entity/state/EntityRenderState": [
-				"io/github/xrickastley/sevenelements/interfaces/EntityAwareRenderState"
+			"net/minecraft/world/item/ItemStack": [
+				"io/github/xrickastley/sevenelements/interfaces/IItemStack"
 			],
 			"net/minecraft/client/gui/GuiGraphicsExtractor": [
 				"io/github/xrickastley/sevenelements/interfaces/ExtendedGuiGraphicsExtractor"
+			],
+			"net/minecraft/client/renderer/SubmitNodeStorage\u0024ItemSubmit": [
+				"io/github/xrickastley/sevenelements/interfaces/ElementGlintState"
+			],
+			"net/minecraft/client/renderer/SubmitNodeStorage\u0024ModelPartSubmit": [
+				"io/github/xrickastley/sevenelements/interfaces/DataAttachmentAccess"
+			],
+			"net/minecraft/client/renderer/entity/state/LivingEntityRenderState": [
+				"io/github/xrickastley/sevenelements/interfaces/SevenElementsLivingEntityRenderState"
+			],
+			"net/minecraft/client/renderer/item/ItemStackRenderState\u0024FoilType": [
+				"io/github/xrickastley/sevenelements/interfaces/ElementGlintState"
+			],
+			"net/minecraft/client/renderer/item/ItemStackRenderState\u0024LayerRenderState": [
+				"io/github/xrickastley/sevenelements/interfaces/ElementGlintState"
 			]
 		},
 		"cardinal-components": [

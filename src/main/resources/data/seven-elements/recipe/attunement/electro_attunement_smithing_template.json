@@ -1,0 +1,18 @@
+{
+	"type": "minecraft:crafting_shaped",
+	"category": "misc",
+	"key": {
+		"R": "seven-elements:elemental_rune",
+		"B": "seven-elements:elemental_attunement_smithing_template",
+		"S": "seven-elements:electro_attunement_smithing_template"
+	},
+	"pattern": [
+		"S",
+		"B",
+		"R"
+	],
+	"result": {
+		"count": 2,
+		"id": "seven-elements:electro_attunement_smithing_template"
+	}
+}
