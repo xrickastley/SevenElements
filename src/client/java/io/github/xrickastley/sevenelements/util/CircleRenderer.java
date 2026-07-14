@@ -4,9 +4,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
-import org.apache.commons.lang3.function.TriConsumer;
 import org.joml.Matrix4f;
 
 import net.minecraft.client.MinecraftClient;
@@ -117,7 +115,7 @@ public class CircleRenderer {
 		final Vec3d origin = new Vec3d(x, y, 0)
 			.multiply(scaleFactor);
 
-		dataArray.forEach(CircleRenderer.args(Renderable::render, origin, posMatrix));
+		dataArray.forEach(Functions.withArgument(Renderable::render, origin, posMatrix));
 		dataArray.clear();
 	}
 
@@ -219,9 +217,5 @@ public class CircleRenderer {
 
 	private interface Renderable {
 		public void render(Vec3d origin, Matrix4f posMatrix);
-	}
-
-	private static <T, I, J> Consumer<T> args(TriConsumer<T, I, J> consumer, I i, J j) {
-		return t -> consumer.accept(t, i, j);
 	}
 }
