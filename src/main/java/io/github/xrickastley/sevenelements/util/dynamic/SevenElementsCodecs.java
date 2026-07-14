@@ -13,12 +13,13 @@ import org.joml.Vector4f;
 
 import io.github.xrickastley.sevenelements.particle.EntityEffectParticleEffect;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
+
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryOps;
 import net.minecraft.registry.RegistryOps.RegistryInfo;
 import net.minecraft.registry.RegistryOps.RegistryInfoGetter;
+import net.minecraft.registry.RegistryOps;
 import net.minecraft.util.Util;
 
 // Custom utilities + Ported some fields from Minecraft 1.21.5 to Minecraft 1.20.1
@@ -56,7 +57,7 @@ public class SevenElementsCodecs {
 		@SuppressWarnings("unchecked")
 		public <T> Optional<RegistryInfo<T>> getRegistryInfo(RegistryKey<? extends Registry<? extends T>> registryRef) {
 			return (Optional<RegistryInfo<T>>) cache.computeIfAbsent(
-				registryRef, 
+				registryRef,
 				ref -> Optional
 					.ofNullable((Registry<T>) Registries.REGISTRIES.get(ClassInstanceUtil.castOrNull(ref, RegistryKey.class)))
 					.map(registry -> new RegistryInfo<T>(registry.getEntryOwner(), registry.getReadOnlyWrapper(), registry.getLifecycle()))

@@ -141,10 +141,10 @@ public class SevenElementsRenderLayer extends RenderLayer {
 
 	private static final Function<Identifier, RenderLayer> DIRECT_ELEMENT_GLINT = Util.memoize(
 		texture -> RenderLayer.of(
-			"seven-elements:element_glint_direct", 
-			VertexFormats.POSITION_TEXTURE, 
-			VertexFormat.DrawMode.QUADS, 
-			256, 
+			"seven-elements:element_glint_direct",
+			VertexFormats.POSITION_TEXTURE,
+			VertexFormat.DrawMode.QUADS,
+			256,
 			RenderLayer.MultiPhaseParameters.builder()
 				.program(RenderPhase.DIRECT_GLINT_PROGRAM)
 				.texture(new RenderPhase.Texture(ItemRenderer.ITEM_ENCHANTMENT_GLINT, true, false))
@@ -159,10 +159,10 @@ public class SevenElementsRenderLayer extends RenderLayer {
 
 	private static final Function<Identifier, RenderLayer> STATIC_DIRECT_ELEMENT_GLINT = Util.memoize(
 		texture -> RenderLayer.of(
-			"seven-elements:element_glint_direct", 
-			VertexFormats.POSITION_TEXTURE, 
-			VertexFormat.DrawMode.QUADS, 
-			256, 
+			"seven-elements:element_glint_direct",
+			VertexFormats.POSITION_TEXTURE,
+			VertexFormat.DrawMode.QUADS,
+			256,
 			RenderLayer.MultiPhaseParameters.builder()
 				.program(RenderPhase.DIRECT_GLINT_PROGRAM)
 				.texture(new RenderPhase.Texture(ItemRenderer.ITEM_ENCHANTMENT_GLINT, true, false))

@@ -14,6 +14,7 @@ import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistryKeys;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.dynamic.SevenElementsCodecs;
+
 import net.minecraft.advancement.criterion.AbstractCriterion;
 import net.minecraft.advancement.criterion.AbstractCriterionConditions;
 import net.minecraft.predicate.entity.AdvancementEntityPredicateDeserializer;

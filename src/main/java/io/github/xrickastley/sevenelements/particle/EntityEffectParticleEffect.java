@@ -1,10 +1,11 @@
 package io.github.xrickastley.sevenelements.particle;
 
-import java.util.Locale;
-
 import com.mojang.serialization.MapCodec;
 
+import java.util.Locale;
+
 import io.github.xrickastley.sevenelements.util.dynamic.SevenElementsCodecs;
+
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
