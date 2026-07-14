@@ -192,7 +192,6 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 
 	@Override
 	public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-		this.renderBackground(context, mouseX, mouseY, delta);
 		super.render(context, mouseX, mouseY, delta);
 		this.drawMouseoverTooltip(context, mouseX, mouseY);
 	}
@@ -217,6 +216,7 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 			return this.checkMouseClickUninfused(mouseX, mouseY, button);
 	}
 
+	// this is like really bad naming but "uninfused" refers to the current item.
 	private boolean checkMouseClickUninfused(double mouseX, double mouseY, int button) {
 		if (!this.isInRectangle(mouseX, mouseY, 43, 128, 90, 19))
 			return false;
@@ -224,6 +224,7 @@ public class ElementalInfusionScreen extends HandledScreen<ElementalInfusionScre
 		return this.performInfusion();
 	}
 
+	// this is like really bad naming but "infused" refers to the current item.
 	private boolean checkMouseClickInfused(double mouseX, double mouseY, int button) {
 		if (this.isInRectangle(mouseX, mouseY, 16, 128, 67, 19))
 			return this.performInfusion();
