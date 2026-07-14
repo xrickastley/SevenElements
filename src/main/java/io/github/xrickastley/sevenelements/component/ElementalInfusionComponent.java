@@ -1,5 +1,6 @@
 package io.github.xrickastley.sevenelements.component;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
@@ -28,7 +29,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -48,7 +48,7 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 	).apply(instance, ElementalInfusionComponent::new));
 
 	@ApiStatus.Internal
-	public static Tuple<Element, Double> generateAndApplyInfusion(ItemStack stack, Level world) {
+	public static Pair<Element, Double> generateAndApplyInfusion(ItemStack stack, Level world) {
 		final DataComponentMap components = stack.getComponents();
 
 		final Element element = components.has(SevenElementsComponents.ELEMENTAL_ATTUNEMENT_COMPONENT)
@@ -67,7 +67,7 @@ public record ElementalInfusionComponent(@Nullable ElementalApplication.Builder 
 				.setType(InternalCooldownType.DEFAULT)
 		);
 
-		return new Tuple<>(element, gaugeUnits);
+		return new Pair<>(element, gaugeUnits);
 	}
 
 	public static Optional<ElementalDamageSource> applyToDamageSource(DamageSource source, Entity target) {

@@ -9,7 +9,6 @@ import io.github.xrickastley.sevenelements.networking.SevenElementsPacketsS2C;
 import io.github.xrickastley.sevenelements.networking.SyncBossBarEntityPayloadHandler;
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
 import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderers;
-import io.github.xrickastley.sevenelements.renderer.WorldTextRenderer;
 import io.github.xrickastley.sevenelements.renderer.entity.CrystallizeShardEntityRenderer;
 import io.github.xrickastley.sevenelements.renderer.entity.DendroCoreEntityRenderer;
 import io.github.xrickastley.sevenelements.renderer.entity.model.CrystallizeShardEntityModel;
@@ -20,6 +19,7 @@ import io.github.xrickastley.sevenelements.util.ClientConfig;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderEvents;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -34,7 +34,6 @@ public class SevenElementsClient implements ClientModInitializer {
 	public static final String MOD_ID = SevenElements.MOD_ID;
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static final WorldTextRenderer WORLD_TEXT_RENDERER = new WorldTextRenderer();
 	public static final SyncBossBarEntityPayloadHandler SYNC_BOSS_BAR_ENTITY_HANDLER = new SyncBossBarEntityPayloadHandler();
 
 	@Override
@@ -44,10 +43,7 @@ public class SevenElementsClient implements ClientModInitializer {
 		SevenElementsPacketsS2C.registerHandler(SevenElementsRenderers.CHARGE_AURA_EFFECT);
 		SevenElementsPacketsS2C.registerHandler(SevenElementsClient.SYNC_BOSS_BAR_ENTITY_HANDLER);
 
-		LevelRenderEvents.END_MAIN.register(SevenElementsClient.WORLD_TEXT_RENDERER::render);
-		ClientTickEvents.START_LEVEL_TICK.register(SevenElementsClient.WORLD_TEXT_RENDERER::tick);
-
-		LevelRenderEvents.END_EXTRACTION.register(SevenElementsRenderer::extractAll);
+		LevelExtractionEvents.END_EXTRACTION.register(SevenElementsRenderer::extractAll);
 		LevelRenderEvents.END_MAIN.register(SevenElementsRenderer::renderAll);
 		ClientTickEvents.START_LEVEL_TICK.register(SevenElementsRenderer::tickAll);
 

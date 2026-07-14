@@ -6,7 +6,7 @@ import java.util.function.Predicate;
 
 import io.github.xrickastley.sevenelements.SevenElements;
 
-import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.advancements.triggers.CriterionTrigger;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 

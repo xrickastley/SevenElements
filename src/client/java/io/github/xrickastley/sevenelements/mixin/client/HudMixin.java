@@ -23,15 +23,15 @@ import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.world.entity.player.Player;
 
-@Mixin(Gui.class)
-public class GuiMixin {
+@Mixin(Hud.class)
+public class HudMixin {
 	@Shadow
 	@Final
 	private Minecraft minecraft;
@@ -49,7 +49,7 @@ public class GuiMixin {
 		method = "extractPlayerHealth",
 		at = @At(
 			value = "INVOKE",
-			target = "Lnet/minecraft/client/gui/Gui;extractArmor(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/world/entity/player/Player;IIII)V",
+			target = "Lnet/minecraft/client/gui/Hud;extractArmor(Lnet/minecraft/client/gui/GuiGraphicsExtractor;Lnet/minecraft/world/entity/player/Player;IIII)V",
 			shift = At.Shift.AFTER
 		)
 	)
@@ -73,7 +73,7 @@ public class GuiMixin {
 			.map(Functions.compose(ElementalApplication::getElement, Element::getTexture))
 			.filter(existing::add);
 
-		if (component.getCrystallizeShield() != null && component.getCrystallizeShield().getB() > 0)
+		if (component.getCrystallizeShield() != null && component.getCrystallizeShield().getSecond() > 0)
 			appliedElements.add(SevenElements.identifier("textures/status_effect/defense.png"));
 
 		for (int i = 0; i < appliedElements.length(); i++) {

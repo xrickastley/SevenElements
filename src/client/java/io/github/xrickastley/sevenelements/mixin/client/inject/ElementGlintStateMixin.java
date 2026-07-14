@@ -9,10 +9,10 @@ import io.github.xrickastley.sevenelements.interfaces.ElementGlintState;
 import io.github.xrickastley.sevenelements.renderer.ElementGlintRenderer.GlintType;
 import io.github.xrickastley.sevenelements.renderer.ElementGlintRenderer;
 
-import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.feature.ItemFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 
-@Mixin({ ItemStackRenderState.FoilType.class, ItemStackRenderState.LayerRenderState.class, SubmitNodeStorage.ItemSubmit.class })
+@Mixin({ ItemStackRenderState.FoilType.class, ItemStackRenderState.LayerRenderState.class, ItemFeatureRenderer.Submit.class })
 public class ElementGlintStateMixin implements ElementGlintState {
 	@Unique
 	private Element sevenelements$element;

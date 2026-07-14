@@ -4,6 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.llamalad7.mixinextras.sugar.Share;
 import com.llamalad7.mixinextras.sugar.ref.LocalRef;
+import com.mojang.datafixers.util.Pair;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,6 @@ import io.github.xrickastley.sevenelements.util.Functions;
 import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -244,7 +244,7 @@ public abstract class LivingEntityMixin
 		if (doShatter) {
 			this.sevenelements$reactions.add(ElementalReactions.SHATTER);
 
-			component.setLastReaction(new Tuple<>(ElementalReactions.SHATTER, this.level().getGameTime()));
+			component.setLastReaction(new Pair<>(ElementalReactions.SHATTER, this.level().getGameTime()));
 
 			ElementalReactions.SHATTER.trigger(ClassInstanceUtil.cast(this), ClassInstanceUtil.castOrNull(source.getEntity(), LivingEntity.class));
 		}

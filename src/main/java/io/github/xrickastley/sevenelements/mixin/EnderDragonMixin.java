@@ -13,6 +13,7 @@ import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.Enemy;
@@ -25,7 +26,7 @@ public abstract class EnderDragonMixin
 	implements Enemy
 {
 	public EnderDragonMixin(EntityType<? extends EnderDragon> entityType, Level world) {
-		super(EntityType.ENDER_DRAGON, world);
+		super(EntityTypes.ENDER_DRAGON, world);
 
 		throw new AssertionError();
 	}

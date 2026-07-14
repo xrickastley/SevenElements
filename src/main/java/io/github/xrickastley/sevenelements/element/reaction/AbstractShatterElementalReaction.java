@@ -37,8 +37,8 @@ public abstract sealed class AbstractShatterElementalReaction
 		if (!isTriggerable(entity)) return false;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
-		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getA());
-		final ElementalApplication triggeringElement = component.getElementalApplication(this.triggeringElement.getA());
+		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getFirst());
+		final ElementalApplication triggeringElement = component.getElementalApplication(this.triggeringElement.getFirst());
 
 		final double reducedGauge = auraElement.reduceGauge(Double.MAX_VALUE);
 

@@ -6,7 +6,8 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 import io.github.xrickastley.sevenelements.element.Element;
-import io.github.xrickastley.sevenelements.renderer.genshin.ElementRenderer;
+import io.github.xrickastley.sevenelements.renderer.feature.ElementFeatureRenderer;
+import io.github.xrickastley.sevenelements.renderer.feature.ElementGaugeFeatureRenderer;
 
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.world.entity.LivingEntity;
@@ -46,11 +47,11 @@ public interface SevenElementsLivingEntityRenderState {
 		return Vec3.ZERO;
 	}
 
-	default List<ElementRenderer.ElementState> sevenelements$getElementStates() {
+	default List<ElementFeatureRenderer.ElementState> sevenelements$getElementStates() {
 		return Collections.emptyList();
 	}
 
-	default List<ElementRenderer.ElementGaugeState> sevenelements$getGaugeStates() {
+	default List<ElementGaugeFeatureRenderer.ElementGaugeState> sevenelements$getGaugeStates() {
 		return Collections.emptyList();
 	}
 

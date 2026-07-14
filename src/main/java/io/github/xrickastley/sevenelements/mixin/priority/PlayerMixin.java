@@ -20,7 +20,7 @@ import io.github.xrickastley.sevenelements.factory.SevenElementsComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -29,7 +29,7 @@ import net.minecraft.world.level.Level;
 @Mixin(value = Player.class, priority = Integer.MIN_VALUE)
 public abstract class PlayerMixin extends LivingEntity {
 	public PlayerMixin(final Level world, final BlockPos pos, final float yaw, final GameProfile gameProfile) {
-		super(EntityType.PLAYER, world);
+		super(EntityTypes.PLAYER, world);
 
 		throw new AssertionError();
 	}

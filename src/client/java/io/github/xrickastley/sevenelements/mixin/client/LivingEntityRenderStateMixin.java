@@ -1,5 +1,7 @@
 package io.github.xrickastley.sevenelements.mixin.client;
 
+import com.mojang.datafixers.util.Pair;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,13 +18,13 @@ import io.github.xrickastley.sevenelements.component.FrozenEffectComponent;
 import io.github.xrickastley.sevenelements.element.Element;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.interfaces.SevenElementsLivingEntityRenderState;
-import io.github.xrickastley.sevenelements.renderer.genshin.ElementRenderer;
+import io.github.xrickastley.sevenelements.renderer.feature.ElementFeatureRenderer;
+import io.github.xrickastley.sevenelements.renderer.feature.ElementGaugeFeatureRenderer;
 import io.github.xrickastley.sevenelements.util.Functions;
 import io.github.xrickastley.sevenelements.util.Util;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -33,8 +35,8 @@ public class LivingEntityRenderStateMixin implements SevenElementsLivingEntityRe
 	public boolean sevenelements$isClientPlayer;
 	public Vec3 sevenelements$boundingBoxLength;
 	public boolean sevenelements$isFrozen;
-	public @Nullable List<ElementRenderer.ElementState> sevenelements$elementStates;
-	public @Nullable List<ElementRenderer.ElementGaugeState> sevenelements$gaugeStates;
+	public @Nullable List<ElementFeatureRenderer.ElementState> sevenelements$elementStates;
+	public @Nullable List<ElementGaugeFeatureRenderer.ElementGaugeState> sevenelements$gaugeStates;
 	public @Nullable Element sevenelements$crystallizeShieldElement;
 
 	@Unique
@@ -77,7 +79,7 @@ public class LivingEntityRenderStateMixin implements SevenElementsLivingEntityRe
 
 	@Unique
 	@Override
-	public List<ElementRenderer.ElementState> sevenelements$getElementStates() {
+	public List<ElementFeatureRenderer.ElementState> sevenelements$getElementStates() {
 		return this.sevenelements$elementStates == null
 			? Collections.emptyList()
 			: Collections.unmodifiableList(this.sevenelements$elementStates);
@@ -85,7 +87,7 @@ public class LivingEntityRenderStateMixin implements SevenElementsLivingEntityRe
 
 	@Unique
 	@Override
-	public List<ElementRenderer.ElementGaugeState> sevenelements$getGaugeStates() {
+	public List<ElementGaugeFeatureRenderer.ElementGaugeState> sevenelements$getGaugeStates() {
 		return this.sevenelements$elementStates == null
 			? Collections.emptyList()
 			: Collections.unmodifiableList(this.sevenelements$gaugeStates);
@@ -102,7 +104,7 @@ public class LivingEntityRenderStateMixin implements SevenElementsLivingEntityRe
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 
 		this.sevenelements$crystallizeShieldElement = Optional.ofNullable(component.getCrystallizeShield())
-			.map(Tuple::getA)
+			.map(Pair::getFirst)
 			.orElse(null);
 
 
@@ -111,7 +113,7 @@ public class LivingEntityRenderStateMixin implements SevenElementsLivingEntityRe
 			.getAppliedElements()
 			.stream()
 			.sorted(Comparator.comparingInt(application -> application.getElement().getPriority()))
-			.map(Functions.withArgument(ElementRenderer::gaugeState, tickDelta))
+			.map(application -> new ElementGaugeFeatureRenderer.ElementGaugeState(application, tickDelta))
 			.toList();
 
 
@@ -119,12 +121,12 @@ public class LivingEntityRenderStateMixin implements SevenElementsLivingEntityRe
 		this.sevenelements$elementStates = new ArrayList<>();
 
 		if (component.hasValidLastReaction()) {
-			final ElementalReaction reaction = component.getLastReaction().getA();
-			final long reactionAt = component.getLastReaction().getB();
+			final ElementalReaction reaction = component.getLastReaction().getFirst();
+			final long reactionAt = component.getLastReaction().getSecond();
 
 			reaction
 				.getReactionDisplayOrder()
-				.forEach(element -> this.sevenelements$elementStates.add(new ElementRenderer.ElementState(element, 60.0, reactionAt, tickDelta)));
+				.forEach(element -> this.sevenelements$elementStates.add(new ElementFeatureRenderer.ElementState(element, 60.0, reactionAt, tickDelta)));
 		} else {
 			if (component.getAppliedElements().isEmpty()) return;
 
@@ -136,14 +138,14 @@ public class LivingEntityRenderStateMixin implements SevenElementsLivingEntityRe
 				component
 					.getAppliedElements()
 					.filter(application -> application.getElement().getPriority() == priority.get())
-					.map(Functions.withArgument(ElementRenderer::elementState, tickDelta))
+					.map(application -> new ElementFeatureRenderer.ElementState(application, tickDelta))
 			);
 		}
 
 		this.sevenelements$elementStates = this.sevenelements$elementStates
 			.stream()
-			.filter(Util.distinctKeyed(Functions.compose(ElementRenderer.ElementState::element, Element::getTexture)))
-			.filter(Functions.composePredicate(ElementRenderer.ElementState::element, Element::getTexture, Objects::nonNull))
+			.filter(Util.distinctKeyed(Functions.compose(ElementFeatureRenderer.ElementState::element, Element::getTexture)))
+			.filter(Functions.composePredicate(ElementFeatureRenderer.ElementState::element, Element::getTexture, Objects::nonNull))
 			.toList();
 	}
 

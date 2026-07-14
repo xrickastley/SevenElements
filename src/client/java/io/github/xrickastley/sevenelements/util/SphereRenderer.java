@@ -1,7 +1,5 @@
 package io.github.xrickastley.sevenelements.util;
 
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -9,49 +7,11 @@ import java.util.function.Function;
 
 import org.joml.Matrix4f;
 
-import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayers;
-import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderPipelines;
-import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderer;
-
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public final class SphereRenderer {
-	private static final ByteBufferBuilder allocator = SevenElementsRenderer.createAllocator(SevenElementsRenderLayers.getSphere().bufferSize());
-
 	private SphereRenderer() {}
-
-	/**
-	 * Render a sphere centered at (x, y, z) in world coordinates.
-	 *
-	 * @param matrices The current {@code MatrixStack}.
-	 * @param origin The origin point.
-	 * @param radius Sphere radius (in blocks)
-	 * @param latSteps Vertical subdivisions
-	 * @param lonSteps Horizontal subdivisions
-	 * @param color An ARGB int {@code 0xAARRGGBB}
-	 */
-	public static void render(PoseStack matrices, Vec3 origin, float radius, int latSteps, int lonSteps, int color) {
-		SphereRenderer.render(matrices, origin, radius, latSteps, lonSteps, pos -> color);
-	}
-
-	/**
-	 * Render a sphere centered at (x, y, z) in world coordinates.
-	 *
-	 * @param matrices The current {@code MatrixStack}.
-	 * @param origin The origin point.
-	 * @param radius Sphere radius (in blocks)
-	 * @param latSteps Vertical subdivisions
-	 * @param lonSteps Horizontal subdivisions
-	 * @param colorFunc A function taking in a {@code Vec3d} and returns an ARGB int {@code 0xAARRGGBB}
-	 */
-	public static void render(PoseStack matrices, Vec3 origin, float radius, int latSteps, int lonSteps, Function<Vec3, Integer> colorFunc) {
-		final BufferBuilder buffer = SevenElementsRenderer.createBuffer(allocator, SevenElementsRenderPipelines.SPHERE);
-
-		SphereRenderer.render(buffer, matrices, origin, radius, latSteps, lonSteps, colorFunc);
-
-		SevenElementsRenderLayers.getSphere().draw(buffer.buildOrThrow());
-	}
 
 	/**
 	 * Render a sphere centered at (x, y, z) in world coordinates.

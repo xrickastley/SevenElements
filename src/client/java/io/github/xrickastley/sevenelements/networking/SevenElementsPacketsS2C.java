@@ -3,13 +3,13 @@ package io.github.xrickastley.sevenelements.networking;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.github.xrickastley.sevenelements.SevenElementsClient;
 import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity.SyncCrystallizeShardTypeS2CPayload;
 import io.github.xrickastley.sevenelements.entity.CrystallizeShardEntity;
 import io.github.xrickastley.sevenelements.entity.DendroCoreEntity.SyncDendroCoreStateS2CPayload;
 import io.github.xrickastley.sevenelements.entity.DendroCoreEntity;
 import io.github.xrickastley.sevenelements.gui.screen.ingame.ElementalInfusionScreen;
+import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderers;
 import io.github.xrickastley.sevenelements.renderer.WorldTextRenderer.DamageText;
 import io.github.xrickastley.sevenelements.renderer.WorldTextRenderer.ReactionText;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
@@ -67,7 +67,7 @@ public class SevenElementsPacketsS2C {
 
 		if (reaction == null || reaction.getText() == null) return;
 
-		SevenElementsClient.WORLD_TEXT_RENDERER.addEntry(
+		SevenElementsRenderers.WORLD_TEXT.addEntry(
 			new ReactionText(pos.x, pos.y, pos.z, Colors.PHYSICAL, reaction.getText())
 		);
 	}
@@ -87,7 +87,7 @@ public class SevenElementsPacketsS2C {
 
 		if (amount == Float.MAX_VALUE) return;
 
-		SevenElementsClient.WORLD_TEXT_RENDERER.addEntry(
+		SevenElementsRenderers.WORLD_TEXT.addEntry(
 			new DamageText(pos.x, pos.y, pos.z, color, amount, payload.crit() ? config.rendering.text.critDMGScale : config.rendering.text.normalDMGScale)
 		);
 	}
@@ -121,7 +121,7 @@ public class SevenElementsPacketsS2C {
 	private static void onFinishElementalInfusion(FinishElementalInfusionS2CPayload payload, Context context) {
 		final Player playerEntity = context.player();
 		final AbstractContainerMenu screenHandler = playerEntity.containerMenu;
-		final Screen currentScreen = context.client().screen;
+		final Screen currentScreen = context.client().gui.screen();
 
 		if (screenHandler != null
 			&& screenHandler.containerId == payload.syncId()

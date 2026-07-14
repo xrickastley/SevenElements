@@ -1,5 +1,6 @@
 package io.github.xrickastley.sevenelements.element;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 
@@ -30,7 +31,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.util.RandomSource;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
@@ -144,7 +144,7 @@ public enum Element {
 
 	private final Identifier id;
 	private final ElementSettings settings;
-	private final List<Tuple<Element, Predicate<ElementalApplication>>> linkedElements;
+	private final List<Pair<Element, Predicate<ElementalApplication>>> linkedElements;
 
 	private static DataResult<Element> validate(String element) {
 		try {
@@ -162,9 +162,9 @@ public enum Element {
 		if (settings.linkedElement == null) return;
 
 		if (settings.reverseLinkedElement) {
-			this.linkedElements.add(new Tuple<>(settings.linkedElement, settings.linkDecayOnlyIf));
+			this.linkedElements.add(new Pair<>(settings.linkedElement, settings.linkDecayOnlyIf));
 		} else {
-			settings.linkedElement.linkedElements.add(new Tuple<>(this, settings.linkDecayOnlyIf));
+			settings.linkedElement.linkedElements.add(new Pair<>(this, settings.linkDecayOnlyIf));
 		}
 	}
 
@@ -241,12 +241,12 @@ public enum Element {
 
 		if (component == null) return;
 
-		for (final Tuple<Element, Predicate<ElementalApplication>> pair : application.getElement().linkedElements) {
-			if (!component.hasElementalApplication(pair.getA())) continue;
+		for (final Pair<Element, Predicate<ElementalApplication>> pair : application.getElement().linkedElements) {
+			if (!component.hasElementalApplication(pair.getFirst())) continue;
 
-			if (isGaugeDecay && !pair.getB().test(application)) continue;
+			if (isGaugeDecay && !pair.getSecond().test(application)) continue;
 
-			component.getElementalApplication(pair.getA()).currentGauge -= reduction;
+			component.getElementalApplication(pair.getFirst()).currentGauge -= reduction;
 		}
 
 		ElementComponent.sync(application.getEntity());

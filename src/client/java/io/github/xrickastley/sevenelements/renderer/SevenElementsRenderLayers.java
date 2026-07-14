@@ -1,13 +1,9 @@
 package io.github.xrickastley.sevenelements.renderer;
 
-import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-
-import java.util.SequencedMap;
 import java.util.function.Function;
 
 import org.joml.Matrix4f;
 
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.renderer.rendertype.LayeringTransform;
 import net.minecraft.client.renderer.rendertype.RenderSetup.OutlineProperty;
@@ -16,8 +12,6 @@ import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.TextureTransform;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
-
-import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 
 public class SevenElementsRenderLayers {
 	public static final TextureTransform STATIC_GLINT_TEXTURING = new TextureTransform(
@@ -150,14 +144,6 @@ public class SevenElementsRenderLayers {
 		)
 	);
 
-	private static final SequencedMap<RenderType, ByteBufferBuilder> WORLD_TEXT_SEQUENCED_MAP = Util.make(
-		new Object2ObjectLinkedOpenHashMap<>(), map -> {
-			map.put(SevenElementsRenderLayers.WORLD_TEXT, SevenElementsRenderer.createAllocator(786432));
-		}
-	);
-
-	private static final MultiBufferSource.BufferSource WORLD_TEXT_IMMEDIATE = MultiBufferSource.immediateWithBuffers(WORLD_TEXT_SEQUENCED_MAP, SevenElementsRenderer.createAllocator(1536));
-
 	public static RenderType getTriangles() {
 		return SevenElementsRenderLayers.TRIANGLES;
 	}
@@ -188,10 +174,6 @@ public class SevenElementsRenderLayers {
 
 	public static RenderType getCrystallizeShield() {
 		return SevenElementsRenderLayers.CRYSTALLIZE_SHIELD;
-	}
-
-	public static MultiBufferSource.BufferSource getWorldTextImmediate() {
-		return WORLD_TEXT_IMMEDIATE;
 	}
 
 	public static Function<Identifier, RenderType> getArmorEntityElementGlint() {

@@ -40,8 +40,8 @@
 	],
 	"depends": {
 		"fabricloader": ">=0.18.2",
-		"minecraft": "~26.1",
-		"java": ">=21",
+		"minecraft": "~26.2",
+		"java": ">=25",
 		"fabric-api": "*",
 		"cloth-config": "*"	
 	},
@@ -71,11 +71,11 @@
 			"net/minecraft/client/gui/GuiGraphicsExtractor": [
 				"io/github/xrickastley/sevenelements/interfaces/ExtendedGuiGraphicsExtractor"
 			],
-			"net/minecraft/client/renderer/SubmitNodeStorage\u0024ItemSubmit": [
-				"io/github/xrickastley/sevenelements/interfaces/ElementGlintState"
+			"net/minecraft/client/renderer/OrderedSubmitNodeCollector": [
+				"io/github/xrickastley/sevenelements/interfaces/SevenElementsOrderedSubmitNodeCollector"
 			],
-			"net/minecraft/client/renderer/SubmitNodeStorage\u0024ModelPartSubmit": [
-				"io/github/xrickastley/sevenelements/interfaces/DataAttachmentAccess"
+			"net/minecraft/client/renderer/feature/ItemFeatureRenderer\u0024Submit": [
+				"io/github/xrickastley/sevenelements/interfaces/ElementGlintState"
 			],
 			"net/minecraft/client/renderer/entity/state/LivingEntityRenderState": [
 				"io/github/xrickastley/sevenelements/interfaces/SevenElementsLivingEntityRenderState"

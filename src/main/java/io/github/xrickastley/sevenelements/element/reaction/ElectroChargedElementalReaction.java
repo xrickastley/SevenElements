@@ -42,8 +42,8 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 	public boolean isTriggerable(LivingEntity entity) {
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 
-		final ElementalApplication applicationAE = component.getElementalApplication(auraElement.getA());
-		final ElementalApplication applicationTE = component.getElementalApplication(triggeringElement.getA());
+		final ElementalApplication applicationAE = component.getElementalApplication(auraElement.getFirst());
+		final ElementalApplication applicationTE = component.getElementalApplication(triggeringElement.getFirst());
 
 		// We need both Elements to exist for Electro-Charged.
 		return applicationAE != null && !applicationAE.isEmpty()
@@ -57,8 +57,8 @@ public class ElectroChargedElementalReaction extends ElementalReaction {
 		if (!isTriggerable(entity) || entity.level().isClientSide()) return false;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
-		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getA());
-		final ElementalApplication triggeringElement = component.getElementalApplication(this.triggeringElement.getA());
+		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getFirst());
+		final ElementalApplication triggeringElement = component.getElementalApplication(this.triggeringElement.getFirst());
 
 		final double reducedGauge = auraElement.reduceGauge(0.4);
 		triggeringElement.reduceGauge(reducedGauge);

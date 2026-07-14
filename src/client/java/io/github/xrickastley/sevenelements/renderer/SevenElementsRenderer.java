@@ -1,6 +1,6 @@
 package io.github.xrickastley.sevenelements.renderer;
 
-import com.mojang.blaze3d.buffers.GpuBuffer;
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.buffers.GpuBufferSlice;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
 import com.mojang.blaze3d.pipeline.RenderTarget;
@@ -8,19 +8,20 @@ import com.mojang.blaze3d.systems.RenderPass;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.ByteBufferBuilder;
-import com.mojang.blaze3d.vertex.MeshData;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import com.mojang.math.Axis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.jetbrains.annotations.Nullable;
@@ -29,6 +30,7 @@ import org.joml.Vector3f;
 import org.joml.Vector4f;
 
 import io.github.xrickastley.sevenelements.mixin.client.BufferBuilderAccessor;
+import io.github.xrickastley.sevenelements.mixin.client.StagedVertexBufferAccessor;
 import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.fabricmc.fabric.api.client.rendering.v1.level.LevelExtractionContext;
@@ -36,11 +38,13 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.StagedVertexBuffer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.resources.Identifier;
 
 public abstract class SevenElementsRenderer<S> {
 	private static final List<ByteBufferBuilder> ALLOCATORS = new ArrayList<>();
+	private static final List<StagedVertexBuffer> STAGED_VERTEX_BUFFERS = new ArrayList<>();
 	private static final Map<Class<? extends SevenElementsRenderer<?>>, SevenElementsRenderer<?>> SINGLETON_MAP = new HashMap<>();
 
 	/**
@@ -59,7 +63,9 @@ public abstract class SevenElementsRenderer<S> {
 	protected static final int LEGACY_TRANSFORMS = 1 << 1;
 
 	private final int bitflags;
-	private final Map<RenderPipeline, Map<Integer, ByteBufferBuilder>> pipelineAllocators = new HashMap<>();
+	private final Map<RenderPipeline, Map<Integer, StagedVertexBuffer>> pipelineAllocators = new HashMap<>();
+	private final List<RenderStage<S>> renderStages = new ArrayList<>();
+	private final List<RenderDraw> renderDraws = new ArrayList<>();
 	protected final List<S> states = new ArrayList<>();
 
 	protected SevenElementsRenderer() {
@@ -104,6 +110,12 @@ public abstract class SevenElementsRenderer<S> {
 		this.states.addAll(states);
 	}
 
+	protected void registerRenderStage(RenderPipeline pipeline, int bindingIndex, int bufferSize, RenderStageFunction<S> renderFunction) {
+		this.renderStages.add(
+			new RenderStage<S>(this, pipeline, bindingIndex, bufferSize, renderFunction)
+		);
+	}
+
 	/**
 	 * This method is called after all render states have been extracted.
 	 *
@@ -127,10 +139,11 @@ public abstract class SevenElementsRenderer<S> {
 	 */
 	protected void beforeRender(LevelRenderContext context) {}
 
+	@SuppressWarnings("deprecation")
 	protected final void render(LevelRenderContext context) {
 		if (this.hasFlag(SevenElementsRenderer.LEGACY_TRANSFORMS)) {
 			final PoseStack matrices = context.poseStack();
-			final Camera camera = context.gameRenderer().getMainCamera();
+			final Camera camera = context.gameRenderer().mainCamera();
 
 			matrices.pushPose();
 			matrices.mulPose(Axis.XP.rotationDegrees(camera.xRot()));
@@ -139,6 +152,7 @@ public abstract class SevenElementsRenderer<S> {
 
 		this.beforeRender(context);
 
+		this.renderStages(context);
 		this.states.forEach(state -> this.render(context, state));
 
 		if (this.hasFlag(SevenElementsRenderer.CLEAR_RENDER_STATES))
@@ -151,51 +165,172 @@ public abstract class SevenElementsRenderer<S> {
 	}
 
 	/**
-	 * Gets a {@code BufferBuilder} for the provided {@code RenderPipeline}.
+	 * Gets a {@code VertexConsumer} for the provided {@code RenderPipeline}.
 	 *
-	 * <p>If there is none, this method automatically creates a {@code BufferAllocator} instance
-	 * for the returned {@code BufferBuilder}, which is automatically closed when the game is
+	 * <p>If there is none, this method automatically creates a {@code StagedVertexBuffer} instance
+	 * for the returned {@code VertexConsumer}, which is automatically closed when the game is
 	 * closed.
 	 *
-	 * <p>Do note that each instance of the {@code BufferBuilder} is backed by the same
-	 * {@code BufferAllocator} instance, which may cause rendering issues when two default buffer
+	 * <p>Do note that each instance of the {@code VertexConsumer} is backed by the same
+	 * {@code StagedVertexBuffer} instance, which may cause rendering issues when two default buffer
 	 * builder instances are written to.
 	 *
-	 * <p>If you need a {@code BufferBuilder} with a <i>unique</i> {@code BufferAllocator} instance
-	 * for the same {@code RenderPipeline}, use the second overload.
+	 * <p>If you need a {@code VertexConsumer} with a <i>unique</i> {@code StagedVertexBuffer} instance
+	 * for the same {@code RenderPipeline}, use the second overload and define a new vertex binding
+	 * inside the {@code RenderPipeline}.
 	 *
-	 * @param pipeline The {@code RenderPipeline} to get a {@code BufferBuilder} for.
-	 * @param bufferSize The size of the {@code BufferAllocator}, if none exists yet.
-	 * @return A {@code BufferBuilder} for the provided {@code RenderPipeline}.
+	 * @param pipeline The {@code RenderPipeline} to get a {@code VertexConsumer} for.
+	 * @param bufferSize The size of the {@code StagedVertexBuffer}, if none exists yet.
+	 * @return A {@code VertexConsumer} for the provided {@code RenderPipeline}.
 	 */
-	protected final BufferBuilder getBuffer(RenderPipeline pipeline, int bufferSize) {
-		return this.getBuffer(pipeline, 0, bufferSize);
+	@Deprecated
+	protected final VertexConsumer getVertexBuilder(RenderPipeline pipeline, int bufferSize) {
+		return this.getVertexBuilder(pipeline, 0, bufferSize);
 	}
 
 	/**
-	 * Gets a {@code BufferBuilder} with the provided {@code id} for the provided
+	 * Gets a {@code VertexConsumer} with the provided {@code bindingIndex} for the provided
 	 * {@code RenderPipeline}.
 	 *
-	 * <p>An {@code id} corresponds to a single, unique {@code BufferAllocator} instance, which can
-	 * be used for rendering with multiple {@code BufferBuilder} instances.
+	 * <p>A {@code bindingIndex} corresponds to a single, unique {@code StagedVertexBuffer}
+	 * instance for the corresponding vertex binding in the defined {@code RenderPipeline}.
 	 *
-	 * <p>If there is none, this method automatically creates a {@code BufferAllocator} instance
-	 * for the returned {@code BufferBuilder}, which is automatically closed when the game is
+	 * <p>If there is none, this method automatically creates a {@code StagedVertexBuffer} instance
+	 * for the returned {@code VertexConsumer}, which is automatically closed when the game is
 	 * closed.
 	 *
-	 * @param pipeline The {@code RenderPipeline} to get a {@code BufferBuilder} for.
-	 * @param id A unique integer id to refer to a single, unique {@code BufferAllocator} instance.
-	 * @param bufferSize The size of the {@code BufferAllocator}, if none exists yet.
-	 * @return A {@code BufferBuilder} using the provided {@code id} for the provided {@code RenderPipeline}.
+	 * <p>This method will also <b>create</b> a {@code StagedVertexBuffer.Draw} instance via
+	 * {@link StagedVertexBuffer#appendDraw} and get a single {@code VertexConsumer} from it.
+	 *
+	 * @param pipeline The {@code RenderPipeline} to get a {@code VertexConsumer} for.
+	 * @param bindingIndex A unique integer id to refer to a vertex binding in the defined {@code RenderPipeline} instance.
+	 * @param bufferSize The size of the {@code StagedVertexBuffer}, if none exists yet.
+	 * @return A {@code VertexConsumer} using the provided {@code bindingIndex} for the provided {@code RenderPipeline}.
 	 */
-	protected final BufferBuilder getBuffer(RenderPipeline pipeline, int id, int bufferSize) {
-		return new BufferBuilder(
-			this.pipelineAllocators
-				.computeIfAbsent(pipeline, p-> new HashMap<>())
-				.computeIfAbsent(id, i -> new ByteBufferBuilder(bufferSize)),
-			pipeline.getVertexFormatMode(),
-			pipeline.getVertexFormat()
-		);
+	@Deprecated
+	protected final VertexConsumer getVertexBuilder(RenderPipeline pipeline, int bindingIndex, int bufferSize) {
+		return this.getStagedVertexBuffer(pipeline, bindingIndex, bufferSize)
+			.getVertexBuilder(this.appendDraw(pipeline, bindingIndex, bufferSize));
+	}
+
+	/**
+	 * Gets a {@code VertexConsumer} for the provided {@code StagedVertexBuffer}.
+	 *
+	 * <p>This method will also <b>create</b> a {@code StagedVertexBuffer.Draw} instance via
+	 * {@link StagedVertexBuffer#appendDraw} and get a single {@code VertexConsumer} from it.
+	 *
+	 * <p>Additionally, the provided {@code StagedVertexBuffer} instance must be "registered" to
+	 * this renderer. Instances attached to the {@code RenderFunction} are typically registered.
+	 *
+	 * @param stagedBuffer The staged vertex buffer to get a vertex consumer from.
+	 * @return A vertex consumer instance from the staged buffer.
+	 */
+	protected final VertexConsumer getVertexBuilder(StagedVertexBuffer stagedBuffer) {
+		final RenderStage<S> stage = this.renderStages.stream().filter(s -> s.stagedBuffer == stagedBuffer).findFirst().orElse(null);
+
+		if (stage == null)
+			throw new IllegalArgumentException("The provided stagedBuffer is not part of a render stage!");
+
+		return stagedBuffer.getVertexBuilder(this.appendDraw(stage.pipeline, stage.bindingIndex, stage.bufferSize));
+	}
+
+	/**
+	 * Gets a {@code VertexConsumer} for the provided {@code StagedVertexBuffer} using the provided
+	 * {@code RenderType}.
+	 *
+	 * <p>This method will also <b>create</b> a {@code StagedVertexBuffer.Draw} instance via
+	 * {@link StagedVertexBuffer#appendDraw} and get a single {@code VertexConsumer} from it when
+	 * possible.
+	 *
+	 * <p>Additionally, the provided {@code StagedVertexBuffer} instance must be "registered" to
+	 * this renderer. Instances attached to the {@code RenderFunction} are typically registered.
+	 *
+	 * @param stagedBuffer The staged vertex buffer to get a vertex consumer from.
+	 * @param renderType The render type to use in creating the vertex consumer.
+	 * @return A vertex consumer instance from the staged buffer using the provided render type.
+	 */
+	protected final VertexConsumer getVertexBuilder(StagedVertexBuffer stagedBuffer, RenderType renderType) {
+		return this.getVertexBuilder(stagedBuffer, renderType, false);
+	}
+
+	/**
+	 * Gets a {@code VertexConsumer} for the provided {@code StagedVertexBuffer} using the provided
+	 * {@code RenderType}.
+	 *
+	 * <p>This method will also <b>create</b> a {@code StagedVertexBuffer.Draw} instance via
+	 * {@link StagedVertexBuffer#appendDraw} and get a single {@code VertexConsumer} from it when
+	 * possible.
+	 *
+	 * <p>Additionally, the provided {@code StagedVertexBuffer} instance must be "registered" to
+	 * this renderer. Instances attached to the {@code RenderFunction} are typically registered.
+	 *
+	 * @param stagedBuffer The staged vertex buffer to get a vertex consumer from.
+	 * @param renderType The render type to use in creating the vertex consumer.
+	 * @param force Whether to force a new vertex consumer to be created.
+	 * @return A vertex consumer instance from the staged buffer using the provided render type.
+	 */
+	protected final VertexConsumer getVertexBuilder(StagedVertexBuffer stagedBuffer, RenderType renderType, boolean force) {
+		final RenderStage<S> stage = this.renderStages.stream().filter(s -> s.stagedBuffer == stagedBuffer).findFirst().orElse(null);
+
+		if (stage == null)
+			throw new IllegalArgumentException("The provided stagedBuffer is not part of a render stage!");
+
+		StagedVertexBuffer.Draw draw;
+		if (!this.renderDraws.isEmpty() && this.renderDraws.getLast().type.equals(renderType) && !force) {
+			draw = this.renderDraws.getLast().draw();
+		} else {
+			final VertexSorting quadSorting = renderType.sortOnUpload()
+				? RenderSystem.getProjectionType().vertexSorting()
+				: null;
+
+			draw = stagedBuffer.appendDraw(renderType.format(), renderType.primitiveTopology(), quadSorting);
+
+			this.renderDraws.add(new RenderDraw(draw, renderType));
+		}
+
+		return stagedBuffer.getVertexBuilder(draw);
+	}
+
+	/**
+	 * Gets a {@code VertexConsumer} with the provided {@code id} for the provided
+	 * {@code RenderPipeline}.
+	 *
+	 * <p>A {@code bindingIndex} corresponds to a single, unique {@code StagedVertexBuffer}
+	 * instance for the corresponding vertex binding in the defined {@code RenderPipeline}.
+	 *
+	 * <p>If there is none, this method automatically creates a {@code StagedVertexBuffer} instance
+	 * for the returned {@code VertexConsumer}, which is automatically closed when the game is
+	 * closed.
+	 *
+	 * <p>This method will also <b>create</b> a {@code StagedVertexBuffer.Draw} instance via
+	 * {@link StagedVertexBuffer#appendDraw}.
+	 *
+	 * @param pipeline The {@code RenderPipeline} to get a {@code VertexConsumer} for.
+	 * @param bindingIndex A unique integer id to refer to a vertex binding in the defined {@code RenderPipeline} instance.
+	 * @param bufferSize The size of the {@code StagedVertexBuffer}, if none exists yet.
+	 * @return A {@code VertexConsumer} using the provided {@code bindingIndex} for the provided {@code RenderPipeline}.
+	 */
+	protected final StagedVertexBuffer.Draw appendDraw(RenderPipeline pipeline, int bindingIndex, int bufferSize) {
+		final PrimitiveTopology primitiveTopology = pipeline.getPrimitiveTopology();
+		final VertexFormat vertexFormat = Objects.requireNonNull(pipeline.getVertexFormatBinding(bindingIndex), "No vertex format binding with id: " + bindingIndex + " exists in the RenderPipeline: " + pipeline.toString() + "!");
+
+		return this
+			.getStagedVertexBuffer(pipeline, bindingIndex, bufferSize)
+			.appendDraw(vertexFormat, primitiveTopology, primitiveTopology == PrimitiveTopology.QUADS ? RenderSystem.getProjectionType().vertexSorting() : null);
+	}
+
+	protected final StagedVertexBuffer getStagedVertexBuffer(RenderPipeline pipeline, int bindingIndex, int bufferSize) {
+		return this.pipelineAllocators
+			.computeIfAbsent(pipeline, p-> new HashMap<>())
+			.computeIfAbsent(bindingIndex, i -> new StagedVertexBuffer(Functions.supplier(this.getClass().getSimpleName() + " Buffer / " + pipeline.toString()), bufferSize));
+	}
+
+	private void renderStages(LevelRenderContext context) {
+		for (final RenderStage<S> stage : this.renderStages) {
+			this.states.forEach(state -> stage.renderFunction.render(context, stage.stagedBuffer, state));
+
+			this.draw(stage.stagedBuffer, stage.pipeline);
+		}
 	}
 
 	/**
@@ -203,90 +338,91 @@ public abstract class SevenElementsRenderer<S> {
 	 *
 	 * @param context The current world rendering context.
 	 * @param state The render state to be rendered.
+	 * @deprecated Register a render stage via {@link SevenElementsRenderer#registerRenderStage()} instead!
 	 */
-	protected abstract void render(LevelRenderContext context, S state);
+	@Deprecated
+	protected void render(LevelRenderContext context, S state) {};
 
 	/**
-	 * Build and draws the provided {@code buffer} in the world using the provided
+	 * Build and draws the provided {@code stagedBuffer} in the world using the provided
 	 * {@code RenderPipeline}.
 	 *
-	 * @param buffer The {@code BufferBuilder} to build and draw.
+	 * @param stagedBuffer The {@code StagedVertexBuffer} to build and draw.
 	 * @param pipeline The {@code RenderPipeline} to use.
 	 */
-	protected final void draw(BufferBuilder buffer, RenderPipeline pipeline) {
-		this.draw(buffer, pipeline, Optional.empty());
+	protected final void draw(StagedVertexBuffer stagedBuffer, RenderPipeline pipeline) {
+		this.draw(stagedBuffer, pipeline, Optional.empty());
 	}
 
 	/**
-	 * Build and draws the provided {@code buffer} in the world using the provided
+	 * Build and draws the provided {@code stagedBuffer} in the world using the provided
 	 * {@code RenderPipeline}.
 	 *
 	 * <p>This also binds the provided {@code texture}, if existent, to {@code Sampler0}.
 	 *
-	 * @param buffer The {@code BufferBuilder} to build and draw.
+	 * @param buffer The {@code StagedVertexBuffer} to build and draw.
 	 * @param pipeline The {@code RenderPipeline} to use.
 	 * @param texture The texture to bind to {@code Sampler0}, if existent.
 	 */
-	protected final void draw(BufferBuilder buffer, RenderPipeline pipeline, Optional<Identifier> texture) {
-		final MeshData builtBuffer = buffer.buildOrThrow();
+	protected final void draw(StagedVertexBuffer stagedBuffer, RenderPipeline pipeline, Optional<Identifier> texture) {
+		if (!this.pipelineAllocators.get(pipeline).containsValue(stagedBuffer))
+			throw new IllegalArgumentException("The provided stagedBuffer does not exist in the provided RenderPipeline!");
+
+		final Map<StagedVertexBuffer.Draw, RenderType> drawTypeMap = this.renderDraws
+			.stream()
+			.collect(Collectors.toMap(RenderDraw::draw, RenderDraw::type));
+
+		stagedBuffer.upload();
+
+		((StagedVertexBufferAccessor) stagedBuffer)
+			.getDraws()
+			.forEach(draw -> {
+				final StagedVertexBuffer.ExecuteInfo info = stagedBuffer.getExecuteInfo(draw);
+
+				if (drawTypeMap.containsKey(draw))
+					drawTypeMap.get(draw).prepare().drawFromBuffer(info);
+				else
+					this.drawByPipeline(info, pipeline, texture);
+			});
+
+		stagedBuffer.endFrame();
+	}
+
+	private final void drawByPipeline(StagedVertexBuffer.ExecuteInfo info, RenderPipeline pipeline, Optional<Identifier> texture) {
 		final Minecraft client = Minecraft.getInstance();
 
-		try {
-			final GpuBuffer gpuBuffer = pipeline.getVertexFormat().uploadImmediateVertexBuffer(builtBuffer.vertexBuffer());
-			GpuBuffer gpuBuffer2;
-			VertexFormat.IndexType indexType;
-			if (builtBuffer.indexBuffer() == null) {
-				RenderSystem.AutoStorageIndexBuffer shapeIndexBuffer = RenderSystem.getSequentialBuffer(builtBuffer.drawState().mode());
-				gpuBuffer2 = shapeIndexBuffer.getBuffer(builtBuffer.drawState().indexCount());
-				indexType = shapeIndexBuffer.type();
-			} else {
-				gpuBuffer2 = pipeline.getVertexFormat().uploadImmediateIndexBuffer(builtBuffer.indexBuffer());
-				indexType = builtBuffer.drawState().indexType();
-			}
+		final RenderTarget framebuffer = client.gameRenderer.mainRenderTarget();
+		final GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
+			.writeTransform(
+				RenderSystem.getModelViewMatrixCopy(),
+				new Vector4f(1f, 1f, 1f, 1f),
+				new Vector3f(),
+				new Matrix4f()
+			);
 
-			final RenderTarget framebuffer = client.getMainRenderTarget();
-			final GpuBufferSlice dynamicTransforms = RenderSystem.getDynamicUniforms()
-				.writeTransform(
-					RenderSystem.getModelViewMatrix(),
-					new Vector4f(1f, 1f, 1f, 1f),
-					new Vector3f(),
-					new Matrix4f()
-				);
+		try (
+			RenderPass renderPass = RenderSystem.getDevice()
+				.createCommandEncoder()
+				.createRenderPass(
+					Functions.supplier("Draw for SevenElementsRenderer instance: " + this.getClass().getSimpleName() + " with RenderPipeline: " + pipeline.getLocation()), framebuffer.getColorTextureView(), Optional.empty(), framebuffer.getDepthTextureView(), OptionalDouble.empty()
+				)
+		) {
+			renderPass.setPipeline(pipeline);
 
-			try (
-				RenderPass renderPass = RenderSystem.getDevice()
-					.createCommandEncoder()
-					.createRenderPass(
-						Functions.supplier("Draw for SevenElementsRenderer instance: " + this.getClass().getSimpleName() + " with RenderPipeline: " + pipeline.getLocation()), framebuffer.getColorTextureView(), OptionalInt.empty(), framebuffer.getDepthTextureView(), OptionalDouble.empty()
-					)
-			) {
-				renderPass.setPipeline(pipeline);
+			RenderSystem.bindDefaultUniforms(renderPass);
+			renderPass.setUniform("DynamicTransforms", dynamicTransforms);
 
-				RenderSystem.bindDefaultUniforms(renderPass);
-				renderPass.setUniform("DynamicTransforms", dynamicTransforms);
-				renderPass.setVertexBuffer(0, gpuBuffer);
+			if (texture.isPresent())
+				renderPass.bindTexture("Sampler0", client.getTextureManager().getTexture(texture.get()).getTextureView(), null);
 
-				if (texture.isPresent())
-					renderPass.bindTexture("Sampler0", client.getTextureManager().getTexture(texture.get()).getTextureView(), null);
+			renderPass.setVertexBuffer(0, info.vertexBuffer().slice());
+			renderPass.setIndexBuffer(info.indexBuffer(), info.indexType());
 
-				renderPass.setIndexBuffer(gpuBuffer2, indexType);
-				renderPass.drawIndexed(0, 0, builtBuffer.drawState().indexCount(), 1);
-			}
-		} catch (Throwable renderError) {
-			if (builtBuffer != null) {
-				try {
-					builtBuffer.close();
-				} catch (Throwable bufferError) {
-					renderError.addSuppressed(bufferError);
-				}
-			}
-
-			throw renderError;
+			renderPass.drawIndexed(info.indexCount(), 1, info.firstIndex(), info.baseVertex(), 0);
 		}
-
-		if (builtBuffer != null)
-			builtBuffer.close();
 	}
+
+
 
 	/**
 	 * This method is called after each render state is rendered individually.
@@ -314,17 +450,9 @@ public abstract class SevenElementsRenderer<S> {
 	}
 
 	public static BufferBuilder createBuffer(final @Nullable BufferBuilder buffer, final ByteBufferBuilder allocator, final RenderPipeline pipeline) {
-		return buffer == null || !((BufferBuilderAccessor) buffer).isBuilding()
-			? new BufferBuilder(allocator, pipeline.getVertexFormatMode(), pipeline.getVertexFormat())
+		return buffer == null || !((BufferBuilderAccessor) buffer).sevenelements$isBuilding()
+			? new BufferBuilder(allocator, pipeline.getPrimitiveTopology(), pipeline.getVertexFormatBinding(0))
 			: buffer;
-	}
-
-	public static ByteBufferBuilder createAllocator(final Supplier<RenderType> layer) {
-		return SevenElementsRenderer.createAllocator(layer.get());
-	}
-
-	public static ByteBufferBuilder createAllocator(final RenderType layer) {
-		return SevenElementsRenderer.createAllocator(layer.bufferSize());
 	}
 
 	public static ByteBufferBuilder createAllocator(final int size) {
@@ -335,8 +463,17 @@ public abstract class SevenElementsRenderer<S> {
 		return allocator;
 	}
 
+	public static StagedVertexBuffer createStagedBuffer(final String label, final int size) {
+		final StagedVertexBuffer stagedBuffer = new StagedVertexBuffer(Functions.supplier(label), size);
+
+		SevenElementsRenderer.STAGED_VERTEX_BUFFERS.add(stagedBuffer);
+
+		return stagedBuffer;
+	}
+
 	public static void close() {
 		SevenElementsRenderer.ALLOCATORS.forEach(ByteBufferBuilder::close);
+		SevenElementsRenderer.STAGED_VERTEX_BUFFERS.forEach(StagedVertexBuffer::close);
 		SevenElementsRenderer.SINGLETON_MAP
 			.values()
 			.forEach(renderer ->
@@ -345,7 +482,7 @@ public abstract class SevenElementsRenderer<S> {
 					.forEach(allocators ->
 						allocators
 							.values()
-							.forEach(ByteBufferBuilder::close)
+							.forEach(StagedVertexBuffer::close)
 					)
 			);
 	}
@@ -370,4 +507,17 @@ public abstract class SevenElementsRenderer<S> {
 			.values()
 			.forEach(renderer -> renderer.tick(world));
 	}
+
+	@FunctionalInterface
+	protected static interface RenderStageFunction<S> {
+		void render(LevelRenderContext context, StagedVertexBuffer stagedBuffer, S state);
+	}
+
+	private static record RenderStage<S>(StagedVertexBuffer stagedBuffer, RenderPipeline pipeline, int bindingIndex, int bufferSize, RenderStageFunction<S> renderFunction) {
+		RenderStage(SevenElementsRenderer<S> renderer, RenderPipeline pipeline, int bindingIndex, int bufferSize, RenderStageFunction<S> renderFunction) {
+			this(renderer.getStagedVertexBuffer(pipeline, bindingIndex, bufferSize), pipeline, bindingIndex, bufferSize, renderFunction);
+		}
+	}
+
+	private static record RenderDraw(StagedVertexBuffer.Draw draw, RenderType type) {}
 }

@@ -101,7 +101,7 @@ public sealed class SevenElementsEntity
 	public void push(Entity entity) {}
 
 	@Override
-	public void knockback(double strength, double x, double z) {}
+	public void knockback(double power, double xd, double zd, DamageSource source, float damage, boolean comesFromEffect) {}
 
 	protected final @Nullable LivingEntity getEntityFromUUID(UUID uuid) {
 		return this.level() instanceof final ServerLevel world

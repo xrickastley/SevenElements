@@ -98,7 +98,7 @@ public final class ElementalInfusionScreenHandler extends AbstractContainerMenu 
 		if (slot == null || !slot.hasItem()) return false;
 
 		final ItemStack stack = slot.getItem();
-		final Element infusedElement = ElementalInfusionComponent.generateAndApplyInfusion(stack, player.level()).getA();
+		final Element infusedElement = ElementalInfusionComponent.generateAndApplyInfusion(stack, player.level()).getFirst();
 
 		if (!player.hasInfiniteMaterials()) serverPlayer.giveExperienceLevels(-INFUSE_REQUIRED_LEVEL);
 

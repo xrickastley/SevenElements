@@ -4,7 +4,7 @@ import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
+import com.mojang.datafixers.util.Pair;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -19,15 +19,15 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.github.xrickastley.sevenelements.component.FrozenEffectComponent;
-import io.github.xrickastley.sevenelements.renderer.SevenElementsRenderLayers;
-import io.github.xrickastley.sevenelements.renderer.genshin.ElementRenderer;
+import io.github.xrickastley.sevenelements.renderer.feature.ElementFeatureRenderer;
+import io.github.xrickastley.sevenelements.renderer.feature.ElementGaugeFeatureRenderer;
 import io.github.xrickastley.sevenelements.renderer.genshin.SpecialEffectsRenderer;
 import io.github.xrickastley.sevenelements.util.ClientConfig;
-import io.github.xrickastley.sevenelements.util.SphereRenderer;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.model.EntityModel;
+import net.minecraft.client.renderer.OrderedSubmitNodeCollector;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -35,7 +35,6 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.state.LivingEntityRenderState;
 import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.resources.Identifier;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.phys.Vec3;
@@ -70,8 +69,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 	}
 
 	@Unique
-	private void sevenelements$renderElements(final S entityState, final SubmitNodeCollector orderedRenderCommandQueue, final PoseStack matrixStack) {
-		final List<ElementRenderer.ElementState> elementStates = entityState.sevenelements$getElementStates();
+	private void sevenelements$renderElements(final S entityState, final OrderedSubmitNodeCollector orderedRenderCommandQueue, final PoseStack matrixStack) {
+		final List<ElementFeatureRenderer.ElementState> elementStates = entityState.sevenelements$getElementStates();
 
 		if (elementStates.isEmpty()) return;
 
@@ -93,52 +92,33 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
 		elementStates
 			.stream()
-			.map(state -> new Tuple<>(state, (float) coords.next().z()))
-			.forEachOrdered(statePair -> ElementRenderer.renderElement(entityState, statePair.getA(), orderedRenderCommandQueue, matrixStack, entityRenderDispatcher.camera, statePair.getB()));
+			.map(state -> new Pair<>(state, (float) coords.next().z()))
+			.forEachOrdered(statePair -> orderedRenderCommandQueue.sevenelements$submitElement(matrixStack, statePair.getFirst(), entityRenderDispatcher.camera, statePair.getSecond(), (float) entityState.sevenelements$getBoundingBoxLength().y()));
 	}
 
 	@Unique
-	private void sevenelements$renderElementalGauges(final S entityState, final SubmitNodeCollector orderedRenderCommandQueue, final PoseStack matrixStack) {
+	private void sevenelements$renderElementalGauges(final S entityState, final OrderedSubmitNodeCollector orderedRenderCommandQueue, final PoseStack matrixStack) {
 		final ClientConfig config = ClientConfig.get();
-		final List<ElementRenderer.ElementGaugeState> gaugeStates = entityState.sevenelements$getGaugeStates();
+		final List<ElementGaugeFeatureRenderer.ElementGaugeState> gaugeStates = entityState.sevenelements$getGaugeStates();
 
 		if (!config.developer.displayElementalGauges || gaugeStates.isEmpty()) return;
 
 		final int elementCount = gaugeStates.size();
-		final Iterator<ElementRenderer.ElementGaugeState> stateIterator = gaugeStates.iterator();
+		final Iterator<ElementGaugeFeatureRenderer.ElementGaugeState> stateIterator = gaugeStates.iterator();
 
 		Stream
 			.iterate(0.0f, n -> (n / 1.25f) < elementCount, n -> n + 1.25f)
-			.map(yOffset -> new Tuple<>(stateIterator.next(), yOffset))
-			.forEachOrdered(statePair -> ElementRenderer.renderElementalGauge(entityState, statePair.getA(), orderedRenderCommandQueue, matrixStack, entityRenderDispatcher.camera, statePair.getB() - 0.5f));
+			.map(yOffset -> new Pair<>(stateIterator.next(), yOffset))
+			.forEachOrdered(statePair -> orderedRenderCommandQueue.sevenelements$submitElementalGauge(matrixStack, statePair.getFirst(), entityRenderDispatcher.camera, (float) entityState.sevenelements$getBoundingBoxLength().x(), (float) entityState.sevenelements$getBoundingBoxLength().y() + statePair.getSecond() - 0.5f));
 	}
 
 	@Unique
-	private void sevenelements$renderCrystallizeShield(final S state, final SubmitNodeCollector orderedRenderCommandQueue, final PoseStack matrixStack) {
-		final ClientConfig config = ClientConfig.get();
-
+	private void sevenelements$renderCrystallizeShield(final S state, final OrderedSubmitNodeCollector orderedRenderCommandQueue, final PoseStack matrixStack) {
 		if (!SpecialEffectsRenderer.shouldRender(state) || state.sevenelements$getCrystallizeShieldElement() == null) return;
 
 		final double lengthY = state.sevenelements$getBoundingBoxLength().y();
 
-		matrixStack.pushPose();
-		matrixStack.mulPose(Axis.YN.rotationDegrees(entityRenderDispatcher.camera.yRot()));
-		matrixStack.translate(0, lengthY * 0.6, 0);
-
-		orderedRenderCommandQueue.submitCustomGeometry(
-			matrixStack,
-			SevenElementsRenderLayers.getCrystallizeShield(),
-			(entry, consumer) -> SphereRenderer.render(
-				consumer,
-				entry,
-				(float) (lengthY / 2 * 1.25),
-				config.rendering.elements.sphereResolution,
-				config.rendering.elements.sphereResolution * 2,
-				pos -> state.sevenelements$getCrystallizeShieldElement().getDamageColor().multiply(1, 1, 1, 0.75 * Math.pow(pos.x, 4)).asARGB()
-			)
-		);
-
-		matrixStack.popPose();
+		orderedRenderCommandQueue.sevenelements$submitCrystallizeShield(matrixStack, state.sevenelements$getCrystallizeShieldElement(), entityRenderDispatcher.camera, (float) lengthY);
 	}
 
 	@Unique

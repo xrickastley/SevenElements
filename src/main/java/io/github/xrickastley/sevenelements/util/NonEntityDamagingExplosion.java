@@ -19,7 +19,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.profiling.Profiler;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -320,14 +320,14 @@ public class NonEntityDamagingExplosion implements Explosion {
 		if (this.destructionType != BlockInteraction.TRIGGER_BLOCK) {
 			return false;
 		} else {
-			return this.entity != null && this.entity.getType() == EntityType.BREEZE_WIND_CHARGE ? this.world.getGameRules().get(GameRules.MOB_GRIEFING) : true;
+			return this.entity != null && this.entity.getType() == EntityTypes.BREEZE_WIND_CHARGE ? this.world.getGameRules().get(GameRules.MOB_GRIEFING) : true;
 		}
 	}
 
 	public boolean shouldAffectBlocklikeEntities() {
 		boolean bl = this.world.getGameRules().get(GameRules.MOB_GRIEFING);
 		boolean bl2 = this.entity == null || !this.entity.isInWater();
-		boolean bl3 = this.entity == null || this.entity.getType() != EntityType.BREEZE_WIND_CHARGE && this.entity.getType() != EntityType.WIND_CHARGE;
+		boolean bl3 = this.entity == null || this.entity.getType() != EntityTypes.BREEZE_WIND_CHARGE && this.entity.getType() != EntityTypes.WIND_CHARGE;
 		if (bl) {
 			return bl2 && bl3;
 		} else {

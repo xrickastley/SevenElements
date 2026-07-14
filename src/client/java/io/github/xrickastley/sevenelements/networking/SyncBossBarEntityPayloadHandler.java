@@ -27,7 +27,7 @@ public class SyncBossBarEntityPayloadHandler implements PayloadHandler<SyncBossB
 	@Override
 	public void receive(SyncBossBarEntityS2CPayload packet, Context context) {
 		final Minecraft client = Minecraft.getInstance();
-		final Map<UUID, LerpingBossEvent> bossBarMap = ((BossHealthOverlayAccessor) client.gui.getBossOverlay())
+		final Map<UUID, LerpingBossEvent> bossBarMap = ((BossHealthOverlayAccessor) client.gui.hud.getBossOverlay())
 			.getEvents();
 
 		final @Nullable LerpingBossEvent bossBar = bossBarMap.get(packet.uuid());

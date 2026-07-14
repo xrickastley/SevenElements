@@ -1,15 +1,12 @@
 package io.github.xrickastley.sevenelements.renderer;
 
+import com.mojang.blaze3d.PrimitiveTopology;
 import com.mojang.blaze3d.pipeline.BlendFunction;
 import com.mojang.blaze3d.pipeline.ColorTargetState;
 import com.mojang.blaze3d.pipeline.DepthStencilState;
 import com.mojang.blaze3d.pipeline.RenderPipeline;
-import com.mojang.blaze3d.platform.CompareOp;
-import com.mojang.blaze3d.platform.DestFactor;
-import com.mojang.blaze3d.platform.SourceFactor;
+import com.mojang.blaze3d.platform.BlendFactor;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormat.Mode;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 import java.util.Optional;
 
@@ -19,7 +16,8 @@ import net.minecraft.client.renderer.RenderPipelines;
 
 public class SevenElementsRenderPipelines {
 	private static final RenderPipeline.Snippet TRIANGLES_SNIPPET = RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
-		.withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.TRIANGLES)
+		.withPrimitiveTopology(PrimitiveTopology.TRIANGLES)
+		.withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
 		.buildSnippet();
 
 	public static final RenderPipeline TRIANGLES = RenderPipelines.register(
@@ -31,7 +29,9 @@ public class SevenElementsRenderPipelines {
 	public static final RenderPipeline QUADS = RenderPipelines.register(
 		RenderPipeline.builder(RenderPipelines.DEBUG_FILLED_SNIPPET)
 			.withLocation(SevenElements.identifier("pipeline/quads"))
-			.withVertexFormat(DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.QUADS)
+			.withPrimitiveTopology(PrimitiveTopology.QUADS)
+			.withVertexBinding(0, DefaultVertexFormat.POSITION_COLOR)
+			.withDepthStencilState(DepthStencilState.DEFAULT)
 			.build()
 	);
 
@@ -44,26 +44,30 @@ public class SevenElementsRenderPipelines {
 	);
 
 	public static final RenderPipeline CIRCLE = RenderPipelines.register(
-		RenderPipeline.builder(RenderPipelines.GUI_SNIPPET)
+		RenderPipeline.builder(SevenElementsRenderPipelines.TRIANGLES_SNIPPET)
 			.withLocation(SevenElements.identifier("pipeline/circle"))
-			.withFragmentShader(SevenElements.identifier("circle"))
+			.withPrimitiveTopology(PrimitiveTopology.TRIANGLE_FAN)
 			.build()
 	);
 
 	public static final RenderPipeline ELEMENTS = RenderPipelines.register(
 		RenderPipeline.builder(RenderPipelines.GUI_TEXTURED_SNIPPET)
 			.withLocation(SevenElements.identifier("pipeline/elements"))
-			.withVertexFormat(DefaultVertexFormat.POSITION_TEX_COLOR, Mode.QUADS)
+			.withPrimitiveTopology(PrimitiveTopology.QUADS)
+			.withVertexBinding(0, DefaultVertexFormat.POSITION_TEX_COLOR)
 			.withColorTargetState(new ColorTargetState(BlendFunction.TRANSLUCENT))
-			.withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, true))
+			.withDepthStencilState(DepthStencilState.DEFAULT)
 			.withCull(true)
 			.build()
 	);
 
 	public static final RenderPipeline WORLD_TEXT = RenderPipelines.register(
-		RenderPipeline.builder(RenderPipelines.ENTITY_SNIPPET)
-			.withLocation(SevenElements.identifier("pipeline/world_text"))
-			.withVertexFormat(DefaultVertexFormat.POSITION_TEX, Mode.QUADS)
+		RenderPipeline.builder(RenderPipelines.TEXT_SNIPPET)
+			.withLocation("pipeline/world_text")
+			.withVertexShader("core/text")
+			.withFragmentShader("core/text")
+			.withShaderDefine("IS_GRAYSCALE")
+			.withShaderDefine("IS_SEE_THROUGH")
 			.withDepthStencilState(Optional.empty())
 			.withCull(false)
 			.build()
@@ -81,10 +85,8 @@ public class SevenElementsRenderPipelines {
 		RenderPipeline.builder(SevenElementsRenderPipelines.TRIANGLES_SNIPPET)
 			.withLocation(SevenElements.identifier("pipeline/sphere"))
 			.withCull(false)
-			.withColorTargetState(
-				new ColorTargetState(new BlendFunction(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA, SourceFactor.ONE, DestFactor.ZERO))
-			)
-			.withDepthStencilState(new DepthStencilState(CompareOp.LESS_THAN_OR_EQUAL, false))
+			.withColorTargetState(new ColorTargetState(new BlendFunction(BlendFactor.SRC_ALPHA, BlendFactor.ONE_MINUS_SRC_ALPHA, BlendFactor.ONE, BlendFactor.ZERO)))
+			.withDepthStencilState(Optional.empty())
 			.build()
 	);
 }

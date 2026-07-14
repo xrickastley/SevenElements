@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.resources.Identifier;
 
@@ -21,10 +20,10 @@ public final class AbstractDataAttachments {
 	}
 
 	@ApiStatus.Internal
-	public static @Nullable AbstractDataAttachments.ReadView getAttachmentsReadView(Object object) {
+	public static AbstractDataAttachments.ReadView getAttachmentsReadView(Object object) {
 		return Optional.ofNullable(AbstractDataAttachments.DATA_ATTACHMENTS.remove(object))
-			.map(partAttachment -> partAttachment.new ReadView())
-			.orElse(null);
+			.orElse(new AbstractDataAttachments())
+			.new ReadView();
 	}
 
 	public void addAttachment(Identifier id, Object value) {

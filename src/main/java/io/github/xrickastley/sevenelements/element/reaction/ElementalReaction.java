@@ -1,5 +1,7 @@
 package io.github.xrickastley.sevenelements.element.reaction;
 
+import com.mojang.datafixers.util.Pair;
+
 import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -32,7 +34,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
@@ -47,8 +48,8 @@ public abstract class ElementalReaction {
 	protected final Type type;
 	protected final double reactionCoefficient;
 	protected final double reactionMultiplier;
-	protected final Tuple<Element, Integer> auraElement;
-	protected final Tuple<Element, Integer> triggeringElement;
+	protected final Pair<Element, Integer> auraElement;
+	protected final Pair<Element, Integer> triggeringElement;
 	protected final boolean reversable;
 	protected final boolean applyResultAsAura;
 	protected final boolean endsReactionTrigger;
@@ -73,7 +74,7 @@ public abstract class ElementalReaction {
 		this.preventsReactionsAfter = settings.preventsReactionsAfter;
 
 		final Stream<Element> reactionDisplayOrder = settings.reactionDisplayOrder.isEmpty()
-			? Stream.of(ClassInstanceUtil.mapOrNull(settings.auraElement, Tuple::getA), ClassInstanceUtil.mapOrNull(settings.triggeringElement, Tuple::getA))
+			? Stream.of(ClassInstanceUtil.mapOrNull(settings.auraElement, Pair::getFirst), ClassInstanceUtil.mapOrNull(settings.triggeringElement, Pair::getFirst))
 			: settings.reactionDisplayOrder.stream();
 
 		this.reactionDisplayOrder = reactionDisplayOrder
@@ -121,7 +122,7 @@ public abstract class ElementalReaction {
 	}
 
 	public boolean hasElement(Element element) {
-		return element == this.auraElement.getA() || element == this.triggeringElement.getA();
+		return element == this.auraElement.getFirst() || element == this.triggeringElement.getFirst();
 	}
 
 	public boolean hasAnyElement(Collection<Element> elements) {
@@ -133,23 +134,23 @@ public abstract class ElementalReaction {
 	}
 
 	public final Element getAuraElement() {
-		return auraElement.getA();
+		return auraElement.getFirst();
 	}
 
 	public final Element getTriggeringElement() {
-		return triggeringElement.getA();
+		return triggeringElement.getFirst();
 	}
 
 	public int getAuraElementPriority() {
-		return auraElement.getB();
+		return auraElement.getSecond();
 	}
 
 	public int getTriggeringElementPriority() {
-		return triggeringElement.getB();
+		return triggeringElement.getSecond();
 	}
 
 	public int getHighestElementPriority() {
-		return Math.min(this.auraElement.getA().getPriority(), this.triggeringElement.getA().getPriority());
+		return Math.min(this.auraElement.getFirst().getPriority(), this.triggeringElement.getFirst().getPriority());
 	}
 
 	public @Nullable Component getText() {
@@ -209,10 +210,10 @@ public abstract class ElementalReaction {
 	 * @return The priority of this Elemental Reaction.
 	 */
 	public int getPriority(Element triggeringElement) {
-		return triggeringElement.equals(this.triggeringElement.getA())
-			? this.triggeringElement.getB()
-			: triggeringElement.equals(this.auraElement.getA()) && this.reversable
-				? this.auraElement.getB()
+		return triggeringElement.equals(this.triggeringElement.getFirst())
+			? this.triggeringElement.getSecond()
+			: triggeringElement.equals(this.auraElement.getFirst()) && this.reversable
+				? this.auraElement.getSecond()
 				: Integer.MAX_VALUE;
 	}
 
@@ -237,8 +238,8 @@ public abstract class ElementalReaction {
 	public boolean isTriggerable(LivingEntity entity) {
 		final ElementComponent component = ElementComponent.KEY.get(entity);
 
-		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getA());
-		final ElementalApplication trigElement = component.getElementalApplication(this.triggeringElement.getA());
+		final ElementalApplication auraElement = component.getElementalApplication(this.auraElement.getFirst());
+		final ElementalApplication trigElement = component.getElementalApplication(this.triggeringElement.getFirst());
 
 		return reversable
 			// Any of the elements can be an Aura element.
@@ -255,8 +256,8 @@ public abstract class ElementalReaction {
 		if (!this.isTriggerable(entity)) return false;
 
 		final ElementComponent component = ElementComponent.KEY.get(entity);
-		ElementalApplication applicationAE = component.getElementalApplication(auraElement.getA());
-		ElementalApplication applicationTE = component.getElementalApplication(triggeringElement.getA());
+		ElementalApplication applicationAE = component.getElementalApplication(auraElement.getFirst());
+		ElementalApplication applicationTE = component.getElementalApplication(triggeringElement.getFirst());
 
 		if (applicationTE.isAuraElement() && !applicationAE.isAuraElement()) {
 			ElementalApplication a = applicationTE;
@@ -332,8 +333,8 @@ public abstract class ElementalReaction {
 		private Type type = Type.TRANSFORMATIVE;
 		private double reactionCoefficient = 1.0;
 		private double reactionMultiplier = 1.0;
-		private Tuple<Element, Integer> auraElement;
-		private Tuple<Element, Integer> triggeringElement;
+		private Pair<Element, Integer> auraElement;
+		private Pair<Element, Integer> triggeringElement;
 		private boolean reversable = false;
 		private boolean applyResultAsAura = false;
 		private boolean endsReactionTrigger = false;
@@ -410,7 +411,7 @@ public abstract class ElementalReaction {
 		 * triggering element.
 		 */
 		public Settings setAuraElement(Element element, int priority) {
-			this.auraElement = new Tuple<>(element, priority);
+			this.auraElement = new Pair<>(element, priority);
 
 			return this;
 		}
@@ -434,7 +435,7 @@ public abstract class ElementalReaction {
 		 * @param priority The priority of this reaction triggering when {@code triggeringElement} is the triggering element.
 		 */
 		public Settings setTriggeringElement(Element element, int priority) {
-			this.triggeringElement = new Tuple<>(element, priority);
+			this.triggeringElement = new Pair<>(element, priority);
 
 			return this;
 		}
@@ -451,7 +452,7 @@ public abstract class ElementalReaction {
 		public Settings setReactionDisplayOrder(Element... elementOrder) {
 			this.reactionDisplayOrder = List.of(elementOrder);
 
-			final Set<Element> onlyElements = Set.of(this.auraElement.getA(), this.triggeringElement.getA());
+			final Set<Element> onlyElements = Set.of(this.auraElement.getFirst(), this.triggeringElement.getFirst());
 			final List<Element> invalidElements = this.reactionDisplayOrder
 				.stream()
 				.filter(Predicate.not(onlyElements::contains))
@@ -549,11 +550,11 @@ public abstract class ElementalReaction {
 		}
 
 		public Element getAuraElement() {
-			return auraElement.getA();
+			return auraElement.getFirst();
 		}
 
 		public Element getTriggeringElement() {
-			return triggeringElement.getA();
+			return triggeringElement.getFirst();
 		}
 	}
 

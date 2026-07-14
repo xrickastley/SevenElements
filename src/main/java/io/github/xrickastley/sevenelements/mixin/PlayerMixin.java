@@ -24,7 +24,7 @@ import io.github.xrickastley.sevenelements.interfaces.IPlayerEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 
@@ -34,7 +34,7 @@ public abstract class PlayerMixin
 	implements IPlayerEntity
 {
 	public PlayerMixin(Level world, BlockPos pos, float yaw, GameProfile gameProfile) {
-		super(EntityType.PLAYER, world);
+		super(EntityTypes.PLAYER, world);
 		throw new AssertionError();
 	}
 

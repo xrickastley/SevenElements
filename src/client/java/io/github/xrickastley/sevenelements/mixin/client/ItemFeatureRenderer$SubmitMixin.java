@@ -11,13 +11,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import io.github.xrickastley.sevenelements.interfaces.ElementGlintState;
 
-import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.feature.ItemFeatureRenderer;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.world.item.ItemDisplayContext;
 
-@Mixin(SubmitNodeStorage.ItemSubmit.class)
-public class SubmitNodeStorage$ItemSubmitMixin implements ElementGlintState {
+@Mixin(ItemFeatureRenderer.Submit.class)
+public class ItemFeatureRenderer$SubmitMixin implements ElementGlintState {
 	@Inject(
 		method = "<init>",
 		at = @At("TAIL")

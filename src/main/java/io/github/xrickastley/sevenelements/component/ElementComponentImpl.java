@@ -1,5 +1,6 @@
 package io.github.xrickastley.sevenelements.component;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 
 import java.util.ArrayList;
@@ -40,7 +41,6 @@ import io.github.xrickastley.sevenelements.registry.SevenElementsEntityTypeTags;
 import io.github.xrickastley.sevenelements.registry.SevenElementsRegistries;
 import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
-import io.github.xrickastley.sevenelements.util.ImmutablePair;
 import io.github.xrickastley.sevenelements.util.JavaScriptUtil;
 import io.github.xrickastley.sevenelements.util.ViewHelper;
 
@@ -49,7 +49,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.EntityType;
@@ -71,7 +70,7 @@ public final class ElementComponentImpl implements ElementComponent {
 	private final Map<Element, ElementHolder> elementHolders = new ConcurrentHashMap<>();
 	private final Map<Identifier, Integer> mechanicPityHolder = new ConcurrentHashMap<>();
 	private final FreezeDecayHandler freezeDecayHandler;
-	private Tuple<ElementalReaction, Long> lastReaction = new Tuple<>(null, -1L);
+	private Pair<ElementalReaction, Long> lastReaction = new Pair<>(null, -1L);
 	private long electroChargedCooldown = -1;
 	private @Nullable LivingEntity electroChargedOrigin = null;
 	private long burningCooldown = -1;
@@ -143,10 +142,10 @@ public final class ElementComponentImpl implements ElementComponent {
 	}
 
 	@Override
-	public @Nullable Tuple<Element, Double> getCrystallizeShield() {
+	public @Nullable Pair<Element, Double> getCrystallizeShield() {
 		return this.crystallizeShield == null
 			? null
-			: new Tuple<>(this.crystallizeShield.element, this.crystallizeShield.amount);
+			: new Pair<>(this.crystallizeShield.element, this.crystallizeShield.amount);
 	}
 
 	@Override
@@ -186,12 +185,12 @@ public final class ElementComponentImpl implements ElementComponent {
 	}
 
 	@Override
-	public Tuple<ElementalReaction, Long> getLastReaction() {
-		return ImmutablePair.of(this.lastReaction);
+	public Pair<ElementalReaction, Long> getLastReaction() {
+		return this.lastReaction;
 	}
 
 	@ApiStatus.Internal
-	public void setLastReaction(Tuple<ElementalReaction, Long> lastReaction) {
+	public void setLastReaction(Pair<ElementalReaction, Long> lastReaction) {
 		this.lastReaction = lastReaction;
 	}
 
@@ -260,11 +259,11 @@ public final class ElementComponentImpl implements ElementComponent {
 		final ValueOutput freezeDecayHandler = view.child("FreezeDecay");
 		this.freezeDecayHandler.writeData(freezeDecayHandler);
 
-		if (this.lastReaction.getA() != null) {
+		if (this.lastReaction.getFirst() != null) {
 			final ValueOutput lastReaction = view.child("LastReaction");
 
-			lastReaction.putString("Id", this.lastReaction.getA().getId().toString());
-			lastReaction.putLong("Time", this.lastReaction.getB());
+			lastReaction.putString("Id", this.lastReaction.getFirst().getId().toString());
+			lastReaction.putLong("Time", this.lastReaction.getSecond());
 		}
 
 		if (this.crystallizeShield != null && !this.crystallizeShield.isEmpty())
@@ -288,7 +287,7 @@ public final class ElementComponentImpl implements ElementComponent {
 		this.burningCooldown = view.getLongOr("BurningCooldown", this.burningCooldown);
 
 		view.child("LastReaction").ifPresent(lastReaction -> {
-			this.lastReaction = new Tuple<>(
+			this.lastReaction = new Pair<>(
 				SevenElementsRegistries.ELEMENTAL_REACTION.getValue(ViewHelper.get(lastReaction, "Id", Identifier.CODEC)),
 				ViewHelper.get(lastReaction, "Time", Codec.LONG)
 			);
@@ -325,8 +324,8 @@ public final class ElementComponentImpl implements ElementComponent {
 
 			mechanicPityHolders.forEach(pityHolder -> {
 				this.mechanicPityHolder.put(
-					ViewHelper.get(view, "id", Identifier.CODEC),
-					ViewHelper.get(view, "value", Codec.INT)
+					ViewHelper.get(pityHolder, "id", Identifier.CODEC),
+					ViewHelper.get(pityHolder, "value", Codec.INT)
 				);
 			});
 		});
@@ -533,7 +532,7 @@ public final class ElementComponentImpl implements ElementComponent {
 
 		final Optional<ElementalReaction> firstReaction = triggeredReactions.stream().findFirst();
 
-		firstReaction.ifPresent(elementalReaction -> this.lastReaction = new Tuple<>(elementalReaction, this.owner.level().getGameTime()));
+		firstReaction.ifPresent(elementalReaction -> this.lastReaction = new Pair<>(elementalReaction, this.owner.level().getGameTime()));
 
 		final boolean cantBeAura = !context.getElement().canBeAura();
 		final boolean hasTriggeredReactions = !triggeredReactions.isEmpty();

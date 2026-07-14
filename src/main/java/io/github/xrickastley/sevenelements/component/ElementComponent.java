@@ -1,5 +1,7 @@
 package io.github.xrickastley.sevenelements.component;
 
+import com.mojang.datafixers.util.Pair;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +25,6 @@ import io.github.xrickastley.sevenelements.element.reaction.ElementalReaction;
 import io.github.xrickastley.sevenelements.util.Array;
 import io.github.xrickastley.sevenelements.util.ClassInstanceUtil;
 
-import net.minecraft.util.Tuple;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -69,14 +70,14 @@ public sealed interface ElementComponent
 
 	public ElementHolder getElementHolder(Element element);
 
-	public Tuple<ElementalReaction, Long> getLastReaction();
+	public Pair<ElementalReaction, Long> getLastReaction();
 
 	default boolean hasLastReaction() {
-		return this.getLastReaction().getA() != null;
+		return this.getLastReaction().getFirst() != null;
 	}
 
 	default boolean hasValidLastReaction() {
-		return this.hasLastReaction() && this.getLastReaction().getB() + 10 >= this.getOwner().level().getGameTime();
+		return this.hasLastReaction() && this.getLastReaction().getSecond() + 10 >= this.getOwner().level().getGameTime();
 	}
 
 	public boolean isElectroChargedOnCD();
@@ -136,7 +137,7 @@ public sealed interface ElementComponent
 	/**
 	 * Gets the current Crystallize Shield of this entity.
 	 */
-	public @Nullable Tuple<Element, Double> getCrystallizeShield();
+	public @Nullable Pair<Element, Double> getCrystallizeShield();
 
 	/**
 	 * Reduces the Crystallize shield and returns the effective amount of DMG reduced.

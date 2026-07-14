@@ -2,8 +2,8 @@ package io.github.xrickastley.sevenelements.renderer.genshin;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -12,7 +12,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -44,6 +43,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.level.LevelRenderContext;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.StagedVertexBuffer;
 import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.util.Mth;
@@ -53,7 +53,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class ChargeEffectRenderer
+public final class ChargeEffectRenderer
 	extends SevenElementsRenderer<ChargeEffectState>
 	implements PayloadHandler<ShowElectroChargeS2CPayload>
 {
@@ -68,6 +68,8 @@ public class ChargeEffectRenderer
 
 	public ChargeEffectRenderer() {
 		super(SevenElementsRenderer.CLEAR_RENDER_STATES);
+
+		this.registerRenderStage(SevenElementsRenderPipelines.CHARGE_LINE, 0, RenderType.SMALL_BUFFER_SIZE, this::render);
 	}
 
 	@Override
@@ -118,20 +120,19 @@ public class ChargeEffectRenderer
 		super.beforeRender(context);
 
 		final PoseStack matrices = context.poseStack();
-		final Camera camera = context.gameRenderer().getMainCamera();
+		final Camera camera = context.gameRenderer().mainCamera();
 		final Vec3 camPos = camera.position();
 
 		matrices.pushPose();
 		matrices.translate(-camPos.x, -camPos.y, -camPos.z);
 	}
 
-	@Override
-	protected void render(LevelRenderContext context, ChargeEffectState state) {
+	private void render(LevelRenderContext context, StagedVertexBuffer buffer, ChargeEffectState state) {
 		final PoseStack matrices = context.poseStack();
 		final Matrix4f posMat = matrices.last().pose();
 		final PoseStack.Pose entry = matrices.last();
 
-		final BufferBuilder lineBuffer = this.getBuffer(SevenElementsRenderPipelines.CHARGE_LINE, RenderType.SMALL_BUFFER_SIZE);
+		final VertexConsumer lineBuffer = this.getVertexBuilder(buffer);
 
 		for (int i = 1; i < state.positions.size(); i++) {
 			final Vec3 start = state.positions.get(i - 1);
@@ -158,8 +159,6 @@ public class ChargeEffectRenderer
 				.setNormal(entry, (float) normal.x, (float) normal.y, (float) normal.z)
 				.setLineWidth(2.0f);
 		}
-
-		this.draw(lineBuffer, SevenElementsRenderPipelines.CHARGE_LINE, Optional.empty());
 	}
 
 	@Override

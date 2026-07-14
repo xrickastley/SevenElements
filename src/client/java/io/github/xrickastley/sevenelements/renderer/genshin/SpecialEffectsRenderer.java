@@ -14,7 +14,7 @@ public final class SpecialEffectsRenderer {
 		final Minecraft client = Minecraft.getInstance();
 
 		return entity.isAlive()
-			&& (entity != client.player || client.gameRenderer.getMainCamera().isDetached());
+			&& (entity != client.player || client.gameRenderer.mainCamera().isDetached());
 	}
 
 	/**
@@ -26,6 +26,6 @@ public final class SpecialEffectsRenderer {
 		final Minecraft client = Minecraft.getInstance();
 
 		return !state.sevenelements$isDead()
-			&& (!state.sevenelements$isClientPlayer() || client.gameRenderer.getMainCamera().isDetached());
+			&& (!state.sevenelements$isClientPlayer() || client.gameRenderer.mainCamera().isDetached());
 	}
 }
