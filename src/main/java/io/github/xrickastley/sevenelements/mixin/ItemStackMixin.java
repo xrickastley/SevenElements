@@ -74,7 +74,7 @@ public abstract class ItemStackMixin implements ComponentHolder, IItemStack {
 		final String symbols = this.getComponents()
 			.stream()
 			.<ElementModifyingComponent>mapMulti((component2, mapper) ->
-				ClassInstanceUtil.ifInstanceOf(component2.value(), ElementModifyingComponent.class, mapper::accept)
+				ClassInstanceUtil.ifInstanceOf(component2.value(), ElementModifyingComponent.class, mapper)
 			)
 			.filter(Functions.withArgument(ElementModifyingComponent::shouldModify, component))
 			.map(emc -> " " + emc.getSymbol().getString())
