@@ -67,9 +67,9 @@ Since Modrinth's maven has no support for transitive dependencies, you will need
 
 ### MixinExtras
 
-Seven Elements relies on a later version of MixinExtras, which Fabric has not added until Minecraft 1.21.9.
+Seven Elements relies on a later version of MixinExtras, which Fabric has not added until later versions of Fabric Loader.
 
-For developing on lower Minecraft versions, simply add its Maven coordinates to your `dependencies` block.
+For developing on lower Minecraft versions, or when you get errors such as `MIXINEXTRAS:EXPRESSION is not a valid injection point specifier`, simply add its Maven coordinates to your `dependencies` block.
 
 ```groovy
 dependencies {
