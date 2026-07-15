@@ -28,4 +28,6 @@ public interface SmithingTemplateItemAccessor {
 	public static Identifier getEmptySlotAxeTexture() { throw new AssertionError(); }
 	@Accessor("EMPTY_SLOT_SWORD")
 	public static Identifier getEmptySlotSwordTexture() { throw new AssertionError(); }
+	@Accessor("EMPTY_SLOT_SPEAR")
+	public static Identifier getEmptySlotSpearTexture() { throw new AssertionError(); }
 }
