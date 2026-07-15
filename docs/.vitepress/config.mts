@@ -12,7 +12,7 @@ import LinkFlattener from "./src/wiki/plugin/LinkFlattener";
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
-const linkFlattener = new LinkFlattener(path.resolve(filename, "../../"), ["**/*"], ["developer", "guide", "wiki/misc/Commands"]);
+const linkFlattener = new LinkFlattener(path.resolve(filename, "../../"), ["**/*"], ["developer", "guide", "wiki/groups/Commands"]);
 const slugify = (str: string) => str.replace(/\s+/gm, "_");
 
 // https://vitepress.dev/reference/site-config
