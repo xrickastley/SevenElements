@@ -28,7 +28,7 @@
 	--vp-home-hero-image-filter: none;
 	--vp-home-hero-name-color: #000000;
 
-	--minecraft-font: "Mojangles", "GNU Unifont", sans-serif;
+	--minecraft-font: "Mojangles", "GNU Unifont";
 }
 
 :root.dark {
