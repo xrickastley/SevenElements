@@ -10,6 +10,7 @@ import io.github.xrickastley.sevenelements.util.Functions;
 
 import net.minecraft.advancements.predicates.ContextAwarePredicate;
 import net.minecraft.advancements.predicates.ItemPredicate;
+import net.minecraft.advancements.predicates.entity.EntityPredicate;
 import net.minecraft.advancements.triggers.SimpleCriterionTrigger;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +26,7 @@ public class ElementalInfusionCriterion extends SimpleCriterionTrigger<Elemental
 
 	public record Conditions(Optional<ContextAwarePredicate> player, Optional<ItemPredicate> item, Optional<Element> element) implements SimpleCriterionTrigger.SimpleInstance {
 		public static final Codec<ElementalInfusionCriterion.Conditions> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			ContextAwarePredicate.CODEC.optionalFieldOf("player").forGetter(Conditions::player),
+			EntityPredicate.ADVANCEMENT_CODEC.optionalFieldOf("player").forGetter(Conditions::player),
 			ItemPredicate.CODEC.optionalFieldOf("item").forGetter(Conditions::item),
 			Element.CODEC.optionalFieldOf("element").forGetter(Conditions::element)
 		).apply(instance, Conditions::new));
