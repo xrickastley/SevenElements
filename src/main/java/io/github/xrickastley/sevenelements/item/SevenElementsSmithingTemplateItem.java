@@ -35,6 +35,7 @@ public class SevenElementsSmithingTemplateItem extends SmithingTemplateItem {
 	private static final Identifier EMPTY_ARMOR_SLOT_BOOTS_TEXTURE = SmithingTemplateItemAccessor.getEmptyArmorSlotBootsTexture();
 	private static final Identifier EMPTY_SLOT_AXE_TEXTURE = SmithingTemplateItemAccessor.getEmptySlotAxeTexture();
 	private static final Identifier EMPTY_SLOT_SWORD_TEXTURE = SmithingTemplateItemAccessor.getEmptySlotSwordTexture();
+	private static final Identifier EMPTY_SLOT_SPEAR_TEXTURE = SmithingTemplateItemAccessor.getEmptySlotSpearTexture();
 	private static final Identifier EMPTY_SLOT_TRIDENT_TEXTURE = SevenElements.identifier("container/slot/trident");
 	private static final Identifier EMPTY_SLOT_MACE_TEXTURE = SevenElements.identifier("container/slot/mace");
 	private static final Identifier EMPTY_SLOT_RUNE_TEXTURE = SevenElements.identifier("container/slot/rune");
@@ -90,7 +91,8 @@ public class SevenElementsSmithingTemplateItem extends SmithingTemplateItem {
 			EMPTY_ARMOR_SLOT_LEGGINGS_TEXTURE,
 			EMPTY_SLOT_MACE_TEXTURE,
 			EMPTY_ARMOR_SLOT_BOOTS_TEXTURE,
-			EMPTY_SLOT_TRIDENT_TEXTURE
+			EMPTY_SLOT_TRIDENT_TEXTURE,
+			EMPTY_SLOT_SPEAR_TEXTURE
 		);
 	}
 
