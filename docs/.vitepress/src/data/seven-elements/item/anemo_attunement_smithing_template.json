@@ -1,11 +1,11 @@
 {
-	"name": "Smithing Template",
+	"name": "Anemo Elemental Attunement",
 	"link": "Anemo_Attunement_Smithing_Template",
 	"icon": "seven-elements:textures/item/anemo_attunement_smithing_template.png",
 	"inventory_icon": "seven-elements:textures/item/anemo_attunement_smithing_template.png",
 	"rarity": "RARE",
 	"lore": [
-		"§7Anemo Elemental Attunement",
+		"§7Smithing Template",
 		"",
 		"§7Applies to:",
 		"§9&nbsp;Equipment",

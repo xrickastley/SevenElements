@@ -1,11 +1,11 @@
 {
-	"name": "Smithing Template",
+	"name": "Electro Elemental Attunement",
 	"link": "Electro_Attunement_Smithing_Template",
 	"icon": "seven-elements:textures/item/electro_attunement_smithing_template.png",
 	"inventory_icon": "seven-elements:textures/item/electro_attunement_smithing_template.png",
 	"rarity": "RARE",
 	"lore": [
-		"§7Electro Elemental Attunement",
+		"§7Smithing Template",
 		"",
 		"§7Applies to:",
 		"§9&nbsp;Equipment",
