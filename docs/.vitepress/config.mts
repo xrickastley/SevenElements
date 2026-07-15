@@ -1,6 +1,7 @@
 
 import { fileURLToPath } from "url";
 import { HeadConfig, defineConfig } from "vitepress";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 import markdownItContainer from "markdown-it-container";
 import path from "path";
 
@@ -174,6 +175,7 @@ export default defineConfig({
 			}
 		},
 		plugins: [
+			nodePolyfills({ include: ["crypto", "stream", "vm"] }),
 			slugifyMarkdown(slugify),
 			flattenPages(linkFlattener)
 		]

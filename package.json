@@ -16,6 +16,7 @@
     "@types/picomatch": "^4.0.3",
     "@types/sprintf-js": "^1.1.4",
     "markdown-it-mathjax3": "^4.3.2",
+    "vite-plugin-node-polyfills": "^0.28.0",
     "vitepress": "^2.0.0-alpha.12",
     "vue": "^3.5.21"
   },
