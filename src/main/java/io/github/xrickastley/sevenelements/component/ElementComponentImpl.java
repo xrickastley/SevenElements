@@ -325,8 +325,8 @@ public final class ElementComponentImpl implements ElementComponent {
 
 			mechanicPityHolders.forEach(pityHolder -> {
 				this.mechanicPityHolder.put(
-					ViewHelper.get(view, "id", Identifier.CODEC),
-					ViewHelper.get(view, "value", Codec.INT)
+					ViewHelper.get(pityHolder, "id", Identifier.CODEC),
+					ViewHelper.get(pityHolder, "value", Codec.INT)
 				);
 			});
 		});
