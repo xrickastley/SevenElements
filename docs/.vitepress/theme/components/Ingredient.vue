@@ -44,6 +44,7 @@ const count = props?.count;
 onMounted(() => {
 	// avoids the "jittering" when switching
 	items.forEach(item => new Image().src = item.getInventoryIcon());
+	itemSwitcher = createItemSwitcher();
 })
 
 const hover = ref(false);
@@ -53,7 +54,7 @@ const y = ref(0);
 const itemIndex = ref(0);
 const item = computed(() => items[itemIndex.value]);
 
-let itemSwitcher = createItemSwitcher();
+let itemSwitcher;
 
 function onMouseEnter() {
 	hover.value = true;
