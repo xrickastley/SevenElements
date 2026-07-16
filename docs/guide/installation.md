@@ -8,6 +8,10 @@ When adding the mod on Fabric, simply grab the mod from <a href="https://modrint
 
 ## On Forge (via Sinytra Connector)
 
+::: warning
+This will only work for versions of Seven Elements below v1.1, as Sinytra Connector will fail injection for versions after.
+:::
+
 Here, we explain how to get Seven Elements on Forge via Sinytra Connector, which only works for the 1.20.1-LTS version. Sinytra Connector is the only way (as of now) to run Seven Elements on Forge. **Any other versions** of Seven Elements will **not** run on Forge and are not planned to be ported.
 
 ### Downloading the mod
