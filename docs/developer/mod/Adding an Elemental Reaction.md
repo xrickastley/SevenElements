@@ -114,7 +114,7 @@ There may be instances where you don't want to add another Transformative Elemen
 
 For custom [Amplifying Elemental Reactions](../../guide/elements/Elemental%20Reactions.md#amplifying-reactions), simply extend `AmplifyingElementalReaction`.
 
-This one requires an `amplifier` argument with the `ElementalReaction.Settings` argument.
+To specify how strong the reaction would be, you can specify your amplifier through `ElementalReaction.Settings#setReactionMultiplier()`.
 
 Additionally, a blank implementation has been provided for `ElementalReaction#onReaction`, so you don't need to override it in your own custom reaction. However, if your reaction needs it, you may override it.
 
@@ -124,9 +124,9 @@ public final class ThunderstrikeElementalReaction extends AmplifyingElementalRea
 		super(
 			new ElementalReaction.Settings("Thunderstrike", Identifier.of("tutorial", "thunderstrike"), TextHelper.reaction("reaction.your-mod.thunderstrike", "#eab4d4"))
 				.setReactionCoefficient(2)
+				.setReactionMultiplier(2.0)
 				.setAuraElement(Element.PYRO)
 				.setTriggeringElement(Element.ELECTRO, 2),
-			2.0
 		);
 	}
 }
@@ -136,7 +136,7 @@ public final class ThunderstrikeElementalReaction extends AmplifyingElementalRea
 
 For custom [Additive Elemental Reactions](../../guide/elements/Elemental%20Reactions.md#additive-reactions), simply extend `AdditiveElementalReaction`.
 
-This one requires an `amplifier` argument with the `ElementalReaction.Settings` argument.
+To specify how strong the reaction would be, you can specify your amplifier through `ElementalReaction.Settings#setReactionMultiplier()`.
 
 Like [Amplifying Elemental Reactions](#amplifying-elemental-reactions), a blank implementation has been provided for `ElementalReaction#onReaction`, so you don't need to override it in your own custom reaction. However, if your reaction needs it, you may override it.
 
@@ -146,9 +146,9 @@ public final class HydrolyzeElementalReaction extends AdditiveElementalReaction 
 		super(
 			new ElementalReaction.Settings("Hydrolyze", Identifier.of("tutorial", "hydrolyze"), TextHelper.reaction("reaction.your-mod.hydrolyze", "#acc4ff"))
 				.setReactionCoefficient(2)
+				.setReactionMultiplier(1.10)
 				.setAuraElement(Element.HYDRO)
 				.setTriggeringElement(Element.ELECTRO, 4),
-			1.10
 		);
 	}
 }
