@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.jetbrains.annotations.Nullable;
@@ -145,7 +144,6 @@ public class LivingEntityRenderStateMixin implements SevenElementsLivingEntityRe
 		this.sevenelements$elementStates = this.sevenelements$elementStates
 			.stream()
 			.filter(Util.distinctKeyed(Functions.compose(ElementFeatureRenderer.ElementState::element, Element::getTexture)))
-			.filter(Functions.composePredicate(ElementFeatureRenderer.ElementState::element, Element::getTexture, Objects::nonNull))
 			.toList();
 	}
 
