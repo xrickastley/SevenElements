@@ -1,5 +1,6 @@
 package io.github.xrickastley.sevenelements.util;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -54,6 +55,12 @@ public final class Util {
 	 * <p>Imitates {@link Stream#distinct()}, except with a mapping argument. The predicate
 	 * returns {@code true} if the mapped element is distinct with the {@code Predicate} instance
 	 * created by this method, {@code false} otherwise.
+	 * 
+	 * <p>Unlike {@link Stream#distinct()}, the predicate will additonally filter out elements that
+	 * map to {@code null}.
+	 * 
+	 * <p>This is a <b>stateful</b> predicate. As such, correctness and ordering are not guaranteed
+	 * in parallel stream pipelines.
 	 *
 	 * @param <T> The type of the input.
 	 * @param <K> The type of the result after mapping the input.
@@ -63,6 +70,8 @@ public final class Util {
 	public static <T, K> Predicate<T> distinctKeyed(Function<T, ? extends K> keyMapper) {
 		final Set<K> seen = ConcurrentHashMap.newKeySet();
 
-		return t -> seen.add(keyMapper.apply(t));
+		return t -> Optional.ofNullable(keyMapper.apply(t))
+			.map(seen::add)
+			.orElse(false);
 	}
 }
