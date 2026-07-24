@@ -385,6 +385,8 @@ public abstract class SevenElementsRenderer<S> {
 					this.drawByPipeline(info, pipeline, texture);
 			});
 
+		this.renderDraws.clear();
+
 		stagedBuffer.endFrame();
 	}
 
