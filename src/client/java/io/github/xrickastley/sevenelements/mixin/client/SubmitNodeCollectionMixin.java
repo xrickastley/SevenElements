@@ -116,14 +116,14 @@ public class SubmitNodeCollectionMixin implements SevenElementsSubmitNodeCollect
 
 	@Unique
 	@Override
-	public void sevenelements$submitElementalGauge(PoseStack stack, ElementGaugeState gaugeState, Camera camera, float xOffset, float yOffset) {
+	public void sevenelements$submitElementalGauge(PoseStack stack, ElementGaugeState gaugeState, Camera camera, float xOffset, float yOffset, float gaugeYOffset) {
 		stack.pushPose();
 		stack.translate(0f, yOffset * 1.15, 0f);
 		stack.mulPose(new Matrix4f().rotation(camera.rotation()));
 		stack.scale(ElementGaugeFeatureRenderer.GAUGE_SCALE, ElementGaugeFeatureRenderer.GAUGE_SCALE * 0.5f, ElementGaugeFeatureRenderer.GAUGE_SCALE);
 
 		this.sevenelements$elementGauges.submit(
-			new ElementGaugeFeatureRenderer.Submit(stack.last().copy(), gaugeState, xOffset, yOffset)
+			new ElementGaugeFeatureRenderer.Submit(stack.last().copy(), gaugeState, xOffset, gaugeYOffset)
 		);
 
 		stack.popPose();

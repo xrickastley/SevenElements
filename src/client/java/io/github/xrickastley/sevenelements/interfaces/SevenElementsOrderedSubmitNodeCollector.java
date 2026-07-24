@@ -11,7 +11,7 @@ import net.minecraft.client.Camera;
 public interface SevenElementsOrderedSubmitNodeCollector {
 	default void sevenelements$submitElement(PoseStack stack, ElementState elementState, Camera camera, float xOffset, float yOffset) {}
 
-	default void sevenelements$submitElementalGauge(PoseStack stack, ElementGaugeState gaugeState, Camera camera, float xOffset, float yOffset) {}
+	default void sevenelements$submitElementalGauge(PoseStack stack, ElementGaugeState gaugeState, Camera camera, float xOffset, float yOffset, float gaugeYOffset) {}
 
 	default void sevenelements$submitCrystallizeShield(PoseStack stack, Element shieldElement, Camera camera, float yLength) {}
 }

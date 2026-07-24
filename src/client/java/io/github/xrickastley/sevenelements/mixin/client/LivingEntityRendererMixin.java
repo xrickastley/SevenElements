@@ -108,8 +108,8 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, S extend
 
 		Stream
 			.iterate(0.0f, n -> (n / 1.25f) < elementCount, n -> n + 1.25f)
-			.map(yOffset -> new Pair<>(stateIterator.next(), yOffset))
-			.forEachOrdered(statePair -> orderedRenderCommandQueue.sevenelements$submitElementalGauge(matrixStack, statePair.getFirst(), entityRenderDispatcher.camera, (float) entityState.sevenelements$getBoundingBoxLength().x(), (float) entityState.sevenelements$getBoundingBoxLength().y() + statePair.getSecond() - 0.5f));
+			.map(yOffset -> new Pair<>(stateIterator.next(), yOffset - 0.5f))
+			.forEachOrdered(statePair -> orderedRenderCommandQueue.sevenelements$submitElementalGauge(matrixStack, statePair.getFirst(), entityRenderDispatcher.camera, (float) entityState.sevenelements$getBoundingBoxLength().x(), (float) entityState.sevenelements$getBoundingBoxLength().y(), statePair.getSecond() - 0.5f));
 	}
 
 	@Unique

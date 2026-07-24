@@ -23,8 +23,8 @@ public abstract class SubmitNodeStorageMixin implements SubmitNodeCollector {
 
 	@Unique
 	@Override
-	public void sevenelements$submitElementalGauge(PoseStack stack, ElementGaugeState gaugeState, Camera camera, float xOffset, float yOffset) {
-		this.order(0).sevenelements$submitElementalGauge(stack, gaugeState, camera, xOffset, yOffset);
+	public void sevenelements$submitElementalGauge(PoseStack stack, ElementGaugeState gaugeState, Camera camera, float xOffset, float yOffset, float gaugeYOffset) {
+		this.order(0).sevenelements$submitElementalGauge(stack, gaugeState, camera, xOffset, yOffset, gaugeYOffset);
 	}
 
 	@Unique
