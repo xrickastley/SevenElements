@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import io.github.xrickastley.sevenelements.SevenElements;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
@@ -30,6 +31,7 @@ public abstract class WitherBossMixin extends Monster {
 		at = @At("TAIL")
 	)
 	public void setBossBarEntity(EntityType<? extends WitherBoss> entityType, Level world, CallbackInfo ci) {
-		this.bossEvent.sevenelements$setEntity(this);
+		if (!world.isClientSide())
+			this.bossEvent.sevenelements$setEntity(this);
 	}
 }
